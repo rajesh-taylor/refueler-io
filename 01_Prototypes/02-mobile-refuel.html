@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REFUEL · Costco Mode · Mobile · REFUEL Theme</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#00e664;--green-hi:#00ff70;--green-dim:#00994d;
+  --amber:#f7931a;--costco-red:#E32A36;--costco-blue:#0060A9;
+  --font-d:'Syne',sans-serif;--font-b:'DM Sans',sans-serif;
+  --font-m:'DM Mono',monospace;--font-t:'Bebas Neue',sans-serif;
+}
+[data-theme="dark"]{
+  --bg:#080b0a;--surface:rgba(12,20,14,0.9);--surface2:rgba(255,255,255,0.05);
+  --txt:#fff;--txt2:rgba(255,255,255,0.7);--txt3:rgba(255,255,255,0.42);--txt4:rgba(255,255,255,0.2);
+  --border:rgba(255,255,255,0.08);--border-g:rgba(0,230,100,0.22);
+  --topbar:rgba(8,11,10,0.96);--phone-frame:#1e1e1e;--phone-screen:#000;
+  --grid:rgba(0,230,100,0.025);--panel:rgba(8,11,10,0.55);
+}
+[data-theme="light"]{
+  --bg:#eef2f0;--surface:rgba(255,255,255,0.92);--surface2:rgba(0,0,0,0.04);
+  --txt:#0a140c;--txt2:rgba(10,20,12,0.72);--txt3:rgba(10,20,12,0.44);--txt4:rgba(10,20,12,0.22);
+  --border:rgba(0,0,0,0.09);--border-g:rgba(0,180,80,0.28);
+  --topbar:rgba(238,242,240,0.96);--phone-frame:#c8cdd4;--phone-screen:#0a0a0a;
+  --grid:rgba(0,150,70,0.04);--panel:rgba(255,255,255,0.65);
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--txt);font-family:var(--font-b);display:flex;flex-direction:column;transition:background .3s,color .3s}
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:56px 56px;animation:gs 90s linear infinite}
+@keyframes gs{0%{background-position:0 0}100%{background-position:56px 56px}}
+
+.layout{position:relative;z-index:2;display:grid;grid-template-columns:300px 1fr 280px;grid-template-rows:52px 1fr 68px;height:100vh}
+
+/* TOPBAR */
+.topbar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:0.5px solid var(--border);background:var(--topbar);backdrop-filter:blur(20px)}
+.tb-logo{font-family:var(--font-d);font-size:19px;font-weight:800;letter-spacing:.12em;color:var(--txt)}
+.tb-logo em{font-style:normal;color:var(--green)}
+.tb-pill{font-family:var(--font-m);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--green);background:rgba(0,230,100,0.08);border:0.5px solid var(--border-g);border-radius:20px;padding:3px 10px}
+.tb-brand{display:flex;align-items:center;gap:10px}
+.tb-center{display:flex;align-items:center;gap:16px}
+.tb-steps{display:flex;gap:5px;align-items:center}
+.tb-step{width:7px;height:7px;border-radius:50%;background:var(--surface2);border:0.5px solid var(--border);transition:all .3s;cursor:pointer}
+.tb-step.active{background:var(--green);box-shadow:0 0 8px var(--green)}
+.tb-step.done{background:var(--green-dim)}
+.tb-sname{font-family:var(--font-m);font-size:10px;color:var(--txt3);letter-spacing:.1em}
+.tb-sname span{color:var(--green)}
+.tb-controls{display:flex;align-items:center;gap:7px}
+.theme-toggle{display:flex;background:var(--surface2);border:0.5px solid var(--border);border-radius:20px;overflow:hidden}
+.th-btn{font-size:12px;padding:4px 8px;cursor:pointer;background:transparent;border:none;color:var(--txt3);transition:all .2s;line-height:1}
+.th-btn.on{background:var(--green);color:#000}
+.locale-grp{display:flex;background:var(--surface2);border:0.5px solid var(--border);border-radius:20px;overflow:hidden}
+.lc-btn{font-family:var(--font-m);font-size:9px;padding:4px 10px;cursor:pointer;background:transparent;border:none;color:var(--txt3);transition:all .2s}
+.lc-btn.on{background:var(--surface);color:var(--txt)}
+.tb-clock{font-family:var(--font-m);font-size:11px;color:var(--txt4)}
+
+/* LEFT */
+.left-panel{border-right:0.5px solid var(--border);display:flex;flex-direction:column;background:var(--panel);overflow:hidden}
+.panel-tabs{display:flex;border-bottom:0.5px solid var(--border)}
+.ptab{flex:1;padding:10px 6px;font-family:var(--font-m);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt3);text-align:center;cursor:pointer;border-bottom:1.5px solid transparent;transition:all .2s}
+.ptab.on{color:var(--green);border-bottom-color:var(--green)}
+.ptab-body{display:none;flex:1;padding:12px;overflow:auto;flex-direction:column;gap:8px}
+.ptab-body.on{display:flex}
+.ctx-card{background:var(--surface);border:0.5px solid var(--border);border-radius:10px;padding:11px 13px;opacity:.35;transform:translateX(-6px);transition:all .4s cubic-bezier(.34,1.56,.64,1)}
+.ctx-card.active{opacity:1;transform:translateX(0);border-color:var(--border-g)}
+.ctx-card.done{opacity:.65;transform:translateX(0)}
+.ctx-icon{font-size:15px;margin-bottom:7px}
+.ctx-title{font-family:var(--font-d);font-size:12px;font-weight:600;color:var(--txt);margin-bottom:3px}
+.ctx-body{font-size:11px;color:var(--txt3);line-height:1.6}
+.ctx-body strong{color:var(--green);font-weight:500}
+.ctx-meta{margin-top:5px;font-family:var(--font-m);font-size:9px;color:var(--txt4)}
+/* Rewards tab */
+.rw-card{background:var(--surface);border:0.5px solid var(--border);border-radius:10px;padding:11px 13px}
+.rw-head{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.rw-icon{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px}
+.rw-icon.red{background:rgba(227,42,54,0.12);color:var(--costco-red)}
+.rw-icon.blue{background:rgba(0,96,169,0.12);color:var(--costco-blue)}
+.rw-icon.grn{background:rgba(0,230,100,0.1);color:var(--green)}
+.rw-ttl{font-family:var(--font-d);font-size:12px;font-weight:600;color:var(--txt)}
+.rw-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:0.5px solid var(--border)}
+.rw-row:last-child{border:none}
+.rw-lbl{font-family:var(--font-m);font-size:9px;color:var(--txt3)}
+.rw-val{font-family:var(--font-t);font-size:13px;letter-spacing:.04em}
+.rw-val.g{color:var(--green)}.rw-val.b{color:var(--costco-blue)}.rw-val.a{color:var(--amber)}
+.mode-list{display:flex;flex-direction:column;gap:4px;margin-top:8px}
+.mode-opt{display:flex;align-items:center;justify-content:space-between;padding:6px 9px;border-radius:8px;border:0.5px solid var(--border);cursor:pointer;transition:all .2s;background:var(--surface2)}
+.mode-opt.sel{border-color:var(--green);background:rgba(0,230,100,0.05)}
+.mode-lbl{font-family:var(--font-m);font-size:9.5px;color:var(--txt2)}
+.mode-dot{width:12px;height:12px;border-radius:50%;border:1.5px solid var(--border)}
+.mode-opt.sel .mode-dot{border-color:var(--green);background:var(--green)}
+/* sats tab */
+.s-exp{font-size:11px;color:var(--txt3);line-height:1.65}
+.s-exp strong{color:var(--txt);font-weight:500}
+.s-card{border-radius:10px;padding:10px 12px;margin-top:6px}
+.s-card.amber{background:rgba(247,147,26,0.07);border:0.5px solid rgba(247,147,26,0.22)}
+.s-card.green{background:rgba(0,230,100,0.06);border:0.5px solid rgba(0,230,100,0.2)}
+.s-lbl{font-family:var(--font-m);font-size:8px;letter-spacing:.14em;text-transform:uppercase;opacity:.75;margin-bottom:5px}
+.s-lbl.a{color:var(--amber)}.s-lbl.g{color:var(--green)}
+.s-val{font-family:var(--font-t);font-size:20px;letter-spacing:.04em}
+.s-val.a{color:var(--amber)}.s-val.g{color:var(--green)}
+.s-sub{font-family:var(--font-m);font-size:8.5px;margin-top:2px}
+.s-sub.a{color:rgba(247,147,26,0.45)}.s-sub.g{color:rgba(0,230,100,0.45)}
+
+/* CENTER */
+.center-panel{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px;position:relative}
+.halo{position:absolute;width:380px;height:380px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,230,100,0.06) 0%,transparent 70%);pointer-events:none}
+.stage-lbl{font-family:var(--font-m);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--txt4);text-align:center}
+
+/* PHONE FRAME */
+.phone{width:270px;position:relative}
+.phone-frame{background:var(--phone-frame);border-radius:40px;padding:8px;border:0.5px solid rgba(255,255,255,0.1);box-shadow:0 0 0 1px rgba(0,0,0,0.5),0 28px 70px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.07)}
+/* Side buttons */
+.phone-frame::before{content:'';position:absolute;right:-4px;top:120px;width:4px;height:60px;background:var(--phone-frame);border-radius:0 3px 3px 0;border:0.5px solid rgba(255,255,255,0.06)}
+.phone-frame::after{content:'';position:absolute;left:-4px;top:100px;width:4px;height:36px;background:var(--phone-frame);border-radius:3px 0 0 3px;border:0.5px solid rgba(255,255,255,0.06)}
+.phone-screen{background:var(--phone-screen);border-radius:32px;overflow:hidden;width:100%;height:480px;position:relative}
+/* dynamic island */
+.dyn-island{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:90px;height:26px;background:#000;border-radius:20px;z-index:10;display:flex;align-items:center;justify-content:center;gap:5px}
+.di-cam{width:8px;height:8px;border-radius:50%;background:#1a1a1a;border:1px solid #333}
+.di-dot{width:4px;height:4px;border-radius:50%;background:var(--green);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* PHONE SCREENS */
+.ps{position:absolute;inset:0;opacity:0;transition:opacity .4s,transform .4s;transform:translateX(20px);pointer-events:none;overflow-y:auto;padding-top:46px}
+.ps.active{opacity:1;transform:translateX(0);pointer-events:auto}
+.ps::-webkit-scrollbar{width:2px}
+.ps::-webkit-scrollbar-thumb{background:rgba(0,230,100,0.2);border-radius:2px}
+
+/* ── SCREEN 0: ARRIVAL ── */
+.ps-0{background:linear-gradient(180deg,#060d08,#030606)}
+.p-statusbar{display:flex;justify-content:space-between;align-items:center;padding:0 20px;height:46px;position:absolute;top:0;left:0;right:0;z-index:5}
+.p-sb-time{font-family:var(--font-m);font-size:13px;color:rgba(255,255,255,0.9);font-weight:500}
+.p-sb-right{display:flex;align-items:center;gap:6px}
+.p-hero-saving{margin:16px 18px 10px;background:rgba(0,230,100,0.09);border:0.5px solid rgba(0,230,100,0.22);border-radius:16px;padding:18px;text-align:center}
+.phs-label{font-family:var(--font-m);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--green);opacity:.8;margin-bottom:6px}
+.phs-val{font-family:var(--font-t);font-size:52px;color:var(--green);letter-spacing:.02em;line-height:1;text-shadow:0 0 24px rgba(0,230,100,0.5)}
+.phs-sub{font-size:12px;color:rgba(0,230,100,0.55);margin-top:4px}
+.phs-sats{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:3px 10px;background:rgba(247,147,26,0.08);border:0.5px solid rgba(247,147,26,0.2);border-radius:20px;font-family:var(--font-m);font-size:10px;color:var(--amber)}
+.p-costco-row{display:flex;align-items:center;gap:10px;margin:0 18px 10px;padding:10px 14px;background:rgba(227,42,54,0.08);border:0.5px solid rgba(227,42,54,0.2);border-radius:12px}
+.p-c-badge{width:28px;height:28px;border-radius:50%;background:var(--costco-red);display:flex;align-items:center;justify-content:center;font-family:var(--font-t);font-size:16px;color:#fff;flex-shrink:0}
+.p-c-info{flex:1}
+.p-c-name{font-family:var(--font-d);font-size:13px;font-weight:700;color:var(--txt)}
+.p-c-member{font-family:var(--font-m);font-size:9px;color:var(--txt3);letter-spacing:.06em}
+.p-greeting{font-family:var(--font-d);font-size:22px;font-weight:700;color:var(--txt);margin:0 18px 12px}
+.p-greeting span{color:var(--green)}
+.p-pump-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:0 18px 10px}
+.p-pump{border-radius:10px;padding:10px 6px;text-align:center;border:0.5px solid var(--border);background:var(--surface2);cursor:pointer;transition:all .2s}
+.p-pump.free{border-color:rgba(0,230,100,0.28);background:rgba(0,230,100,0.07)}
+.p-pump.free:hover{border-color:var(--green);background:rgba(0,230,100,0.12)}
+.p-pump.busy{opacity:.5;cursor:default}
+.pp-num{font-family:var(--font-t);font-size:18px;letter-spacing:.04em}
+.pp-num.g{color:var(--green)}.pp-num.r{color:#ff4444}
+.pp-lbl{font-family:var(--font-m);font-size:8px;color:var(--txt4);letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+
+/* ── SCREEN 1: PAYMENT ── */
+.ps-1{background:linear-gradient(180deg,#050c07,#030605)}
+.p-section-lbl{font-family:var(--font-m);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt4);margin:14px 18px 8px}
+.p-nfc-area{display:flex;flex-direction:column;align-items:center;gap:10px;margin:0 18px 12px;padding:18px;background:rgba(0,230,100,0.06);border:0.5px solid rgba(0,230,100,0.2);border-radius:16px}
+.p-nfc-ring{width:70px;height:70px;border-radius:50%;border:2px solid var(--green);display:flex;align-items:center;justify-content:center;animation:nfcPulse 2s ease-in-out infinite}
+@keyframes nfcPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,230,100,0.4)}50%{box-shadow:0 0 0 14px rgba(0,230,100,0)}}
+.p-nfc-icon{font-size:30px;color:var(--green)}
+.p-nfc-txt{font-family:var(--font-t);font-size:18px;color:var(--txt);letter-spacing:.04em;text-align:center}
+.p-nfc-sub{font-family:var(--font-m);font-size:10px;color:var(--txt3);text-align:center}
+.p-selected-pump{display:flex;align-items:center;justify-content:space-between;margin:0 18px 10px;padding:12px 14px;background:rgba(0,230,100,0.09);border:0.5px solid rgba(0,230,100,0.25);border-radius:12px}
+.psp-lbl{font-family:var(--font-m);font-size:10px;color:var(--green);letter-spacing:.08em;text-transform:uppercase}
+.psp-val{font-family:var(--font-t);font-size:26px;color:var(--green);letter-spacing:.04em}
+.p-detail-rows{margin:0 18px;border:0.5px solid var(--border);border-radius:12px;overflow:hidden}
+.p-dr{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:0.5px solid var(--border)}
+.p-dr:last-child{border-bottom:none}
+.p-dr-lbl{font-family:var(--font-m);font-size:10px;color:var(--txt3)}
+.p-dr-val{font-family:var(--font-m);font-size:11px;font-weight:500;color:var(--txt)}
+.p-dr-val.g{color:var(--green)}.p-dr-val.b{color:#4da8ff}
+
+/* ── SCREEN 2: FUELLING ── */
+.ps-2{background:#000}
+.p-fiat-hero{margin:10px 18px 8px;background:rgba(0,230,100,0.08);border:0.5px solid rgba(0,230,100,0.22);border-radius:16px;padding:16px;text-align:center}
+.pfh-lbl{font-family:var(--font-m);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--green);opacity:.75;margin-bottom:5px}
+.pfh-val{font-family:var(--font-t);font-size:56px;color:var(--green);letter-spacing:.02em;line-height:1;text-shadow:0 0 28px rgba(0,230,100,0.5)}
+.pfh-sub{font-size:12px;color:rgba(0,230,100,0.5);margin-top:4px}
+.pfh-sats{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:4px 12px;background:rgba(247,147,26,0.08);border:0.5px solid rgba(247,147,26,0.2);border-radius:20px;font-family:var(--font-m);font-size:10px;color:var(--amber);transition:opacity .3s}
+.p-progress{margin:0 18px 8px}
+.p-prog-row{display:flex;justify-content:space-between;margin-bottom:5px;font-family:var(--font-m);font-size:9px;color:var(--txt3)}
+.p-prog-track{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden}
+.p-prog-fill{height:100%;background:linear-gradient(90deg,var(--green-dim),var(--green));border-radius:2px;width:0%;transition:width .5s ease;box-shadow:0 0 6px var(--green)}
+.p-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 18px 8px}
+.p-stat{background:var(--surface2);border:0.5px solid var(--border);border-radius:10px;padding:10px 12px}
+.p-stat-lbl{font-family:var(--font-m);font-size:9px;color:var(--txt4);letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px}
+.p-stat-val{font-family:var(--font-t);font-size:20px;color:var(--txt);letter-spacing:.04em}
+.p-stat-val.g{color:var(--green)}
+.p-toggle-row{display:flex;align-items:center;justify-content:space-between;margin:0 18px 8px;padding:8px 12px;background:var(--surface2);border:0.5px solid var(--border);border-radius:10px}
+.p-toggle-lbl{font-family:var(--font-m);font-size:10px;color:var(--txt3)}
+.tog-sw{width:36px;height:18px;border-radius:9px;background:rgba(255,255,255,0.1);border:0.5px solid var(--border);position:relative;cursor:pointer;transition:background .2s}
+.tog-sw.on{background:var(--amber)}
+.tog-knob{position:absolute;top:3px;left:3px;width:12px;height:12px;border-radius:50%;background:#fff;transition:transform .2s}
+.tog-sw.on .tog-knob{transform:translateX(18px)}
+
+/* ── SCREEN 3: COMPLETE ── */
+.ps-3{background:#000}
+.p-complete-header{display:flex;flex-direction:column;align-items:center;gap:8px;margin:16px 18px 12px}
+.p-check-ring{width:60px;height:60px;border-radius:50%;border:2.5px solid var(--green);display:flex;align-items:center;justify-content:center;animation:cPulse 1.5s ease-out forwards}
+@keyframes cPulse{0%{box-shadow:0 0 0 0 rgba(0,230,100,0.6)}50%{box-shadow:0 0 0 20px rgba(0,230,100,0)}100%{box-shadow:0 0 0 0 rgba(0,230,100,0)}}
+.p-check{font-size:26px;color:var(--green)}
+.p-done-txt{font-family:var(--font-t);font-size:22px;color:var(--green);letter-spacing:.06em;text-shadow:0 0 16px rgba(0,230,100,0.5)}
+.p-saving-big{margin:0 18px 8px;background:rgba(0,230,100,0.08);border:0.5px solid rgba(0,230,100,0.25);border-radius:14px;padding:14px;text-align:center}
+.psb-lbl{font-family:var(--font-m);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--green);opacity:.75;margin-bottom:4px}
+.psb-val{font-family:var(--font-t);font-size:44px;color:var(--green);letter-spacing:.02em;text-shadow:0 0 20px rgba(0,230,100,0.5)}
+.psb-sub{font-size:11px;color:rgba(0,230,100,0.5);margin-top:3px}
+.p-receipt{margin:0 18px 10px;border:0.5px solid var(--border);border-radius:12px;overflow:hidden}
+.p-receipt-head{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:0.5px solid var(--border);background:var(--surface2)}
+.p-rh-icon{width:24px;height:24px;border-radius:6px;background:rgba(227,42,54,0.1);border:0.5px solid rgba(227,42,54,0.25);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--costco-red)}
+.p-rh-name{font-family:var(--font-d);font-size:12px;font-weight:700;color:var(--txt)}
+.p-rh-date{font-family:var(--font-m);font-size:9px;color:var(--txt4)}
+.p-rr{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:0.5px solid var(--border)}
+.p-rr:last-child{border:none}
+.p-rr-lbl{font-family:var(--font-m);font-size:10px;color:var(--txt3)}
+.p-rr-val{font-family:var(--font-t);font-size:14px;letter-spacing:.04em;color:var(--txt)}
+.p-rr-val.g{color:var(--green)}.p-rr-val.a{color:var(--amber)}.p-rr-val.b{color:#4da8ff}
+.p-ytd{margin:0 18px 16px;background:rgba(0,96,169,0.08);border:0.5px solid rgba(0,96,169,0.2);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center}
+.p-ytd-left{} .p-ytd-lbl{font-family:var(--font-m);font-size:9px;color:rgba(0,150,220,0.6);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.p-ytd-val{font-family:var(--font-t);font-size:20px;color:var(--txt);letter-spacing:.04em}
+.p-ytd-badge{font-family:var(--font-m);font-size:9px;color:var(--green);background:rgba(0,230,100,0.1);border:0.5px solid rgba(0,230,100,0.2);border-radius:20px;padding:3px 10px}
+
+/* RIGHT */
+.right-panel{border-left:0.5px solid var(--border);display:flex;flex-direction:column;background:var(--panel);overflow:hidden}
+.rp-sec{padding:13px 15px;border-bottom:0.5px solid var(--border)}
+.rp-lbl{font-family:var(--font-m);font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--green);opacity:.7;margin-bottom:9px}
+.lc-sp{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.lc-h{font-family:var(--font-m);font-size:9px;color:var(--txt4);letter-spacing:.08em;text-transform:uppercase;padding-bottom:4px;border-bottom:0.5px solid var(--border);margin-bottom:3px}
+.lc-it{display:flex;justify-content:space-between;padding:3px 7px;background:var(--surface2);border:0.5px solid var(--border);border-radius:5px}
+.lc-k{font-family:var(--font-m);font-size:9px;color:var(--txt3)}.lc-v{font-family:var(--font-m);font-size:9.5px;color:var(--txt)}.lc-v.g{color:var(--green)}
+.m-list{display:flex;flex-direction:column;gap:5px}
+.m-it{display:flex;justify-content:space-between;align-items:center;padding:6px 9px;background:var(--surface2);border:0.5px solid var(--border);border-radius:7px;transition:border-color .3s}
+.m-it.hi{border-color:var(--border-g)}.mi-l{font-family:var(--font-m);font-size:9px;color:var(--txt3)}.mi-v{font-family:var(--font-t);font-size:14px;letter-spacing:.04em}.mi-v.g{color:var(--green)}.mi-v.a{color:var(--amber)}.mi-v.b{color:var(--costco-blue)}
+.narrative{flex:1;padding:13px 15px;overflow:auto}
+.nb-q{font-family:var(--font-d);font-size:12px;font-weight:700;color:var(--green);margin-bottom:5px;line-height:1.4}
+.nb-p{font-size:11px;color:var(--txt3);line-height:1.7;font-weight:300}.nb-p+.nb-p{margin-top:6px}
+.nb-hi{color:var(--txt);font-weight:500}
+
+/* BOTTOM */
+.bottom-bar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-top:0.5px solid var(--border);background:var(--topbar);backdrop-filter:blur(20px)}
+.bb-nav{display:flex;gap:6px}.nav-btn{font-family:var(--font-m);font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:7px 16px;border-radius:20px;cursor:pointer;border:0.5px solid var(--border);color:var(--txt3);background:transparent;transition:all .2s}
+.nav-btn:hover:not(:disabled){color:var(--txt);border-color:var(--txt4)}.nav-btn.primary{background:var(--green);color:#000;border-color:var(--green);font-weight:600}.nav-btn.primary:hover{background:var(--green-hi)}.nav-btn:disabled{opacity:.3;cursor:not-allowed}
+.bb-mid{display:flex;flex-direction:column;align-items:center;gap:3px}.bb-n{font-family:var(--font-m);font-size:9px;color:var(--txt4);letter-spacing:.1em}.bb-pips{display:flex;gap:4px}.pip{width:18px;height:3px;border-radius:2px;background:var(--surface2);transition:background .3s}.pip.done{background:var(--green-dim)}.pip.active{background:var(--green)}
+.bb-right{display:flex;align-items:center;gap:8px}.bb-hint{font-family:var(--font-m);font-size:9px;color:var(--txt4);text-align:right}
+.live-badge{display:flex;align-items:center;gap:4px;font-family:var(--font-m);font-size:9px;color:var(--green)}.l-dot{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);animation:blink 2s infinite}
+.ptab-body::-webkit-scrollbar,.narrative::-webkit-scrollbar{width:3px}.ptab-body::-webkit-scrollbar-thumb,.narrative::-webkit-scrollbar-thumb{background:rgba(0,230,100,0.2);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="tb-brand"><div class="tb-logo">RE<em>F</em>UEL</div><div class="tb-pill">Costco Mode · Mobile</div></div>
+  <div class="tb-center"><div class="tb-steps" id="stepDots"></div><div class="tb-sname">— <span id="stepName">Arrival</span></div></div>
+  <div class="tb-controls">
+    <div class="theme-toggle"><button class="th-btn on" id="btn-dark" onclick="setTheme('dark')">🌙</button><button class="th-btn" id="btn-light" onclick="setTheme('light')">☀️</button></div>
+    <div class="locale-grp"><button class="lc-btn on" id="btn-uk" onclick="setLocale('uk')">🇬🇧 UK</button><button class="lc-btn" id="btn-us" onclick="setLocale('us')">🇺🇸 US</button></div>
+    <div class="tb-clock" id="clock">09:41</div>
+  </div>
+</header>
+
+<!-- LEFT -->
+<aside class="left-panel">
+  <div class="panel-tabs">
+    <div class="ptab on" onclick="setTab('journey',this)">Journey</div>
+    <div class="ptab" onclick="setTab('rewards',this)">Rewards</div>
+    <div class="ptab" onclick="setTab('sats',this)">Sats ⚡</div>
+  </div>
+  <div class="ptab-body on" id="tab-journey"></div>
+  <div class="ptab-body" id="tab-rewards">
+    <div class="rw-card"><div class="rw-head"><div class="rw-icon red">C</div><div class="rw-ttl">Executive Rewards</div></div>
+      <div class="rw-row"><div class="rw-lbl">Cashback rate</div><div class="rw-val b">3%</div></div>
+      <div class="rw-row"><div class="rw-lbl">This fill-up</div><div class="rw-val g" id="rc-fillup">—</div></div>
+      <div class="rw-row"><div class="rw-lbl">YTD savings</div><div class="rw-val b" id="rc-ytd">—</div></div>
+      <div class="rw-row"><div class="rw-lbl">vs. local</div><div class="rw-val g" id="rc-vs">—</div></div>
+    </div>
+    <div class="rw-card" style="margin-top:4px"><div class="rw-head"><div class="rw-icon grn">⚙</div><div class="rw-ttl">Reward Mode</div></div>
+      <div class="mode-list">
+        <div class="mode-opt sel" onclick="selMode(this,'fiat')"><span class="mode-lbl">Fiat cashback (default)</span><div class="mode-dot"></div></div>
+        <div class="mode-opt" onclick="selMode(this,'points')"><span class="mode-lbl">Costco points</span><div class="mode-dot"></div></div>
+        <div class="mode-opt" onclick="selMode(this,'sats')"><span class="mode-lbl">⚡ Satoshis (opt-in)</span><div class="mode-dot"></div></div>
+        <div class="mode-opt" onclick="selMode(this,'both')"><span class="mode-lbl">Fiat + Sats combo</span><div class="mode-dot"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="ptab-body" id="tab-sats">
+    <p class="s-exp"><strong>Sats are opt-in.</strong> Most Costco members will never see this screen. The fiat saving is always the hero metric.</p>
+    <div class="s-card amber"><div class="s-lbl a">⚡ Sats This Fill-Up</div><div class="s-val a" id="sats-t-val">—</div><div class="s-sub a">Fountain LDK · Lightning</div></div>
+    <div class="s-card green" style="margin-top:6px"><div class="s-lbl g">Podcast Funded</div><div class="s-val g" id="sats-t-stream">—</div><div class="s-sub g">at 5 sats/min · V4V</div></div>
+    <p class="s-exp" style="margin-top:8px;font-size:10px;color:var(--txt4)">Pitch note: keep sats in Settings → Rewards. Surface only when the member actively opts in. Prevents confusion during Costco exec demos.</p>
+  </div>
+</aside>
+
+<!-- CENTER: PHONE -->
+<main class="center-panel">
+  <div class="halo"></div>
+  <div class="stage-lbl">iPHONE · MOBILE VIEW</div>
+  <div class="phone">
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <div class="dyn-island"><div class="di-cam"></div><div class="di-dot"></div></div>
+
+        <!-- SCREEN 0: ARRIVAL -->
+        <div class="ps ps-0 active" id="ps-0">
+          <div class="p-statusbar"><div class="p-sb-time">9:41</div><div class="p-sb-right"><span style="font-family:var(--font-m);font-size:10px;color:rgba(255,255,255,0.6)">📶 78%</span></div></div>
+          <div class="p-costco-row">
+            <div class="p-c-badge">C</div>
+            <div class="p-c-info">
+              <div class="p-c-name" id="loc-name0">Costco Watford</div>
+              <div class="p-c-member" id="member-sub0">Executive · #4821-0037</div>
+            </div>
+          </div>
+          <div class="p-greeting">Good morning,<br><span>Sarah.</span></div>
+          <div class="p-hero-saving">
+            <div class="phs-label">SAVING VS LOCAL STATION</div>
+            <div class="phs-val" id="ws0-saving">6.2p<span style="font-size:24px">/L</span></div>
+            <div class="phs-sub" id="ws0-savingsub">vs. Shell Watford · est. £3.11/fill</div>
+            <div class="phs-sats" id="sats-arrival-badge" style="display:none">⚡ +3,782 sats this fill-up</div>
+          </div>
+          <div class="p-section-lbl">CHOOSE A FREE PUMP</div>
+          <div class="p-pump-grid">
+            <div class="p-pump free" onclick="pickPump(1)"><div class="pp-num g">01</div><div class="pp-lbl">Free</div></div>
+            <div class="p-pump busy"><div class="pp-num r">02</div><div class="pp-lbl">Busy</div></div>
+            <div class="p-pump free" onclick="pickPump(3)"><div class="pp-num g">03</div><div class="pp-lbl">Free</div></div>
+            <div class="p-pump busy"><div class="pp-num r">04</div><div class="pp-lbl">Busy</div></div>
+            <div class="p-pump free" onclick="pickPump(5)"><div class="pp-num g">05</div><div class="pp-lbl">Free</div></div>
+            <div class="p-pump busy"><div class="pp-num r">06</div><div class="pp-lbl">Busy</div></div>
+            <div class="p-pump free" onclick="pickPump(7)"><div class="pp-num g">07</div><div class="pp-lbl">Free</div></div>
+            <div class="p-pump busy"><div class="pp-num r">08</div><div class="pp-lbl">Busy</div></div>
+          </div>
+        </div>
+
+        <!-- SCREEN 1: PAYMENT -->
+        <div class="ps ps-1" id="ps-1">
+          <div class="p-statusbar"><div class="p-sb-time">9:43</div><div class="p-sb-right"></div></div>
+          <div class="p-selected-pump"><div class="psp-lbl" id="pump-lbl-p1">PUMP SELECTED</div><div class="psp-val" id="pump-num-p1">05</div></div>
+          <div class="p-nfc-area">
+            <div class="p-nfc-ring"><div class="p-nfc-icon">⊛</div></div>
+            <div class="p-nfc-txt">HOLD PHONE TO PUMP</div>
+            <div class="p-nfc-sub">Apple Pay · NFC · Contactless</div>
+          </div>
+          <div class="p-section-lbl">PAYMENT DETAILS</div>
+          <div class="p-detail-rows">
+            <div class="p-dr"><div class="p-dr-lbl">Member</div><div class="p-dr-val" id="pay-member">4821 0037 2</div></div>
+            <div class="p-dr"><div class="p-dr-lbl">Auth limit</div><div class="p-dr-val" id="pay-auth">£150</div></div>
+            <div class="p-dr"><div class="p-dr-lbl">Cashback rate</div><div class="p-dr-val g">3% Executive</div></div>
+            <div class="p-dr"><div class="p-dr-lbl">Receipt</div><div class="p-dr-val b">Digital · auto-filed</div></div>
+            <div class="p-dr"><div class="p-dr-lbl">Reward mode</div><div class="p-dr-val g" id="pay-mode">Fiat cashback</div></div>
+            <div class="p-dr"><div class="p-dr-lbl">⚡ Sats</div><div class="p-dr-val" style="color:rgba(255,255,255,0.3)">Off · settings</div></div>
+          </div>
+        </div>
+
+        <!-- SCREEN 2: FUELLING -->
+        <div class="ps ps-2" id="ps-2">
+          <div class="p-statusbar"><div class="p-sb-time">9:44</div><div class="p-sb-right"><span style="font-family:var(--font-m);font-size:9px;color:var(--green);animation:blink 1.5s infinite">● LIVE</span></div></div>
+          <div class="p-fiat-hero">
+            <div class="pfh-lbl">SAVING SO FAR</div>
+            <div class="pfh-val" id="fiat-live">£0.00</div>
+            <div class="pfh-sub" id="fiat-live-sub">vs. Shell Watford</div>
+            <div class="pfh-sats" id="sats-fuel-badge" style="opacity:0">⚡ <span id="sats-live-txt">0 sats</span></div>
+          </div>
+          <div class="p-progress">
+            <div class="p-prog-row"><span id="fuel-lbl-p">Fuelling…</span><span id="fuel-pct-p">0%</span></div>
+            <div class="p-prog-track"><div class="p-prog-fill" id="fuelBarP"></div></div>
+          </div>
+          <div class="p-stats-grid">
+            <div class="p-stat"><div class="p-stat-lbl" id="vol-lbl-p">Volume</div><div class="p-stat-val g" id="vol-val-p">0.0 L</div></div>
+            <div class="p-stat"><div class="p-stat-lbl">Total cost</div><div class="p-stat-val" id="cost-val-p">£0.00</div></div>
+            <div class="p-stat"><div class="p-stat-lbl" id="cb-lbl-p">Cashback</div><div class="p-stat-val g" id="cb-val-p">£0.00</div></div>
+            <div class="p-stat"><div class="p-stat-lbl" id="pp-lbl-p">Per litre</div><div class="p-stat-val" id="pp-val-p">148.9p</div></div>
+          </div>
+          <div class="p-toggle-row">
+            <span class="p-toggle-lbl">Show ⚡ Satoshis</span>
+            <div class="tog-sw" id="satsTog" onclick="togSats()"><div class="tog-knob"></div></div>
+          </div>
+        </div>
+
+        <!-- SCREEN 3: COMPLETE -->
+        <div class="ps ps-3" id="ps-3">
+          <div class="p-statusbar"><div class="p-sb-time">9:51</div><div class="p-sb-right"></div></div>
+          <div class="p-complete-header">
+            <div class="p-check-ring"><div class="p-check">✓</div></div>
+            <div class="p-done-txt">REFUEL COMPLETE</div>
+          </div>
+          <div class="p-saving-big">
+            <div class="psb-lbl">TOTAL SAVING</div>
+            <div class="psb-val" id="final-saving-p">—</div>
+            <div class="psb-sub" id="final-saving-sub-p">vs. Shell Watford</div>
+          </div>
+          <div class="p-receipt">
+            <div class="p-receipt-head"><div class="p-rh-icon">C</div><div><div class="p-rh-name" id="receipt-name">Costco Watford</div><div class="p-rh-date" id="receipt-date-p">9 May 2026 · 09:51</div></div></div>
+            <div class="p-rr"><div class="p-rr-lbl" id="rr-vol-lbl-p">Volume</div><div class="p-rr-val" id="rr-vol-p">50.2 L</div></div>
+            <div class="p-rr"><div class="p-rr-lbl" id="rr-price-lbl-p">Price/L</div><div class="p-rr-val" id="rr-price-p">148.9p</div></div>
+            <div class="p-rr"><div class="p-rr-lbl">Total paid</div><div class="p-rr-val" id="rr-total-p">£74.75</div></div>
+            <div class="p-rr"><div class="p-rr-lbl" id="rr-cb-lbl-p">Cashback (3%)</div><div class="p-rr-val g" id="rr-cb-p">+ £2.24</div></div>
+            <div class="p-rr" id="rr-sats-row-p" style="display:none"><div class="p-rr-lbl">⚡ Sats earned</div><div class="p-rr-val a" id="rr-sats-p">—</div></div>
+            <div class="p-rr" id="rr-pts-row-p" style="display:none"><div class="p-rr-lbl">Costco points</div><div class="p-rr-val b" id="rr-pts-p">—</div></div>
+          </div>
+          <div class="p-ytd">
+            <div class="p-ytd-left"><div class="p-ytd-lbl" id="ytd-lbl-p">Savings YTD</div><div class="p-ytd-val" id="ytd-val-p">£1,284</div></div>
+            <div class="p-ytd-badge" id="ytd-badge-p">Executive 2% reward</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!-- Home bar -->
+    <div style="height:16px;background:var(--phone-frame);border-radius:0 0 32px 32px;display:flex;align-items:center;justify-content:center"><div style="width:40px;height:4px;background:rgba(255,255,255,0.2);border-radius:2px"></div></div>
+  </div>
+  <div class="stage-lbl" id="stageLabel">Step 1 of 4 · Member Arrival</div>
+</main>
+
+<!-- RIGHT -->
+<aside class="right-panel">
+  <div class="rp-sec"><div class="rp-lbl">Localisation</div>
+    <div class="lc-sp">
+      <div><div class="lc-h">🇬🇧 UK</div><div class="lc-it"><span class="lc-k">Price</span><span class="lc-v">148.9p/L</span></div><div class="lc-it"><span class="lc-k">Unit</span><span class="lc-v">Litres</span></div><div class="lc-it"><span class="lc-k">Save</span><span class="lc-v g">6.2p/L</span></div></div>
+      <div><div class="lc-h">🇺🇸 US</div><div class="lc-it"><span class="lc-k">Price</span><span class="lc-v">$3.89/gal</span></div><div class="lc-it"><span class="lc-k">Unit</span><span class="lc-v">Gallons</span></div><div class="lc-it"><span class="lc-k">Save</span><span class="lc-v g">$0.42</span></div></div>
+    </div>
+  </div>
+  <div class="rp-sec"><div class="rp-lbl">Session Metrics</div>
+    <div class="m-list">
+      <div class="m-it hi"><div class="mi-l">Queue saved</div><div class="mi-v g">8 min</div></div>
+      <div class="m-it"><div class="mi-l">Fiat saving</div><div class="mi-v g" id="mv-fiat">—</div></div>
+      <div class="m-it"><div class="mi-l">Sats earned</div><div class="mi-v a" id="mv-sats">opt-in</div></div>
+      <div class="m-it"><div class="mi-l">Podcast funded</div><div class="mi-v a" id="mv-stream">—</div></div>
+    </div>
+  </div>
+  <div class="narrative"><div class="nb-q" id="nb-q">Mobile-first UX principles</div><div id="nb-body"></div></div>
+</aside>
+
+<!-- BOTTOM -->
+<footer class="bottom-bar">
+  <div class="bb-nav"><button class="nav-btn" id="prevBtn" onclick="prevStep()" disabled>← Prev</button><button class="nav-btn primary" id="nextBtn" onclick="nextStep()">Next →</button></div>
+  <div class="bb-mid"><div class="bb-n" id="bb-n">Member Arrival</div><div class="bb-pips" id="bbPips"></div></div>
+  <div class="bb-right"><div class="bb-hint" id="bb-hint">Tap a green pump to select</div><div class="live-badge"><div class="l-dot"></div>PROTOTYPE</div></div>
+</footer>
+</div>
+
+<script>
+const BTC_GBP=59232.99,BTC_USD=74180,SATS=100_000_000;
+let locale='uk',step=0,fuelTimer=null,fuelPct=0,satsModeOn=false,rewardMode='fiat',selectedPump=5;
+const L={
+  uk:{cur:'£',savingPerL:0.062,savingDisp:'6.2p/L',savingVs:'vs. Shell Watford',estFill:'est. £3.11/fill',
+    vol:50.2,volUnit:'L',cost:74.75,cashback:2.24,cashbackFmt:'+ £2.24',
+    priceDisp:'148.9p',pricePerUnit:'148.9p',name:'Costco Watford',
+    auth:'£150',ytd:'£1,284',ytdBadge:'Executive 2% reward',
+    rDate:'9 May 2026 · 09:51',rVol:'50.2 L',rPrice:'148.9p',rTotal:'£74.75',
+    volLbl:'Volume',cbLbl:'Cashback',ppLbl:'Per litre',
+    memberSub:'Executive · #4821-0037',payMember:'4821 0037 2',ytdLbl:'Savings YTD',
+    vsLabel:'6.2p/L cheaper',rcYtd:'£1,284',btc:BTC_GBP},
+  us:{cur:'$',savingPerL:0.42/3.785,savingDisp:'$0.42/gal',savingVs:'vs. Chevron Issaquah',estFill:'est. $5.58/tank',
+    vol:13.3,volUnit:'gal',cost:51.74,cashback:1.55,cashbackFmt:'+ $1.55',
+    priceDisp:'$3.89',pricePerUnit:'$3.89/gal',name:'Costco Issaquah WA',
+    auth:'$200',ytd:'$1,640',ytdBadge:'Executive 2% reward',
+    rDate:'May 9, 2026 · 9:51 AM',rVol:'13.3 gal',rPrice:'$3.89',rTotal:'$51.74',
+    volLbl:'Gallons',cbLbl:'Cashback',ppLbl:'Per gallon',
+    memberSub:'Executive · #7293-8841',payMember:'7293 8841 5',ytdLbl:'Savings YTD',
+    vsLabel:'$0.42/gal cheaper',rcYtd:'$1,640',btc:BTC_USD}
+};
+const STEPS=[
+  {name:'Arrival',label:'Step 1 of 4 · Member Arrival',hint:'Tap a free pump to select',
+   q:'Full-screen mobile fiat-first UX',
+   p:['The mobile home screen leads with the <span class="nb-hi">saving per litre vs. the nearest non-Costco station</span>. No Bitcoin jargon. No complex UI. Just a number that justifies the membership fee.',
+      'Pump selection is a <span class="nb-hi">live grid</span> — members choose whichever pump they\'ve driven to. Red = occupied, green = available. Removes the pre-assignment problem entirely.',
+      'The sats badge is hidden by default. It appears as a secondary pill only if the member has enabled sats mode in Settings → Rewards.']},
+  {name:'Payment',label:'Step 2 of 4 · NFC Payment',hint:'Hold phone to pump to pay',
+   q:'Mobile NFC — one action',
+   p:['The payment screen shows the <span class="nb-hi">selected pump number prominently</span>, with NFC ring animation. The member holds their phone to the pump terminal.',
+      'All detail fields (auth limit, reward mode, receipt preference) are displayed for transparency but require <span class="nb-hi">zero interaction</span> — the payment completes in one physical action.',
+      'The reward mode row shows "Fiat cashback" by default. If the member has opted into sats, this reads "⚡ Satoshis" — never forced, always the member\'s explicit choice.']},
+  {name:'Fuelling',label:'Step 3 of 4 · Live Fuelling',hint:'Sats toggle off by default',
+   q:'Live saving counter — the emotional core',
+   p:['The fiat saving counter is the full-screen hero on mobile. As litres flow, the <span class="nb-hi">pound saving grows in real time</span> — directly comparable to what the driver would have spent locally.',
+      'The sats badge fades in below the hero if the toggle is switched on. It\'s additive — never replacing the fiat display. <span class="nb-hi">Fiat is always primary.</span>',
+      'The toggle is persistent across sessions once set. First-time users see it off with a tooltip explaining the sats opt-in.']},
+  {name:'Complete',label:'Step 4 of 4 · Done',hint:'Receipt auto-filed · no action needed',
+   q:'The completion screen — membership ROI',
+   p:['The total saving vs. local station is the <span class="nb-hi">headline metric</span>. The cashback figure appears in the receipt below — it\'s the administrative detail, not the emotional hook.',
+      'Costco Points and Sats rows only appear in the receipt if those modes are selected. <span class="nb-hi">Fiat-only members see a clean, simple receipt</span> with zero crypto friction.',
+      'The YTD savings badge at the bottom is the membership renewal argument — delivered passively, every fill-up, without requiring any marketing communication.']}
+];
+function g(id){return document.getElementById(id)}
+function t(id,v){const e=g(id);if(e)e.textContent=v}
+function setTheme(th){document.documentElement.setAttribute('data-theme',th);g('btn-dark').classList.toggle('on',th==='dark');g('btn-light').classList.toggle('on',th==='light')}
+function setLocale(l){locale=l;g('btn-uk').classList.toggle('on',l==='uk');g('btn-us').classList.toggle('on',l==='us');stopFuel();fuelPct=0;applyLocale();renderStep(step)}
+function setTab(n,el){document.querySelectorAll('.ptab').forEach(e=>e.classList.remove('on'));document.querySelectorAll('.ptab-body').forEach(e=>e.classList.remove('on'));el.classList.add('on');g('tab-'+n).classList.add('on')}
+function selMode(el,mode){rewardMode=mode;document.querySelectorAll('.mode-opt').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');t('pay-mode',mode==='fiat'?'Fiat cashback':mode==='points'?'Costco Points':mode==='sats'?'⚡ Satoshis':'Fiat + Sats');g('rr-sats-row-p').style.display=(mode==='sats'||mode==='both')?'flex':'none';g('rr-pts-row-p').style.display=(mode==='points'||mode==='both')?'flex':'none'}
+function pickPump(n){selectedPump=n;document.querySelectorAll('.p-pump.free').forEach(p=>{p.style.opacity='0.4';p.style.borderColor='';p.style.background=''});event.target.closest('.p-pump').style.opacity='1';event.target.closest('.p-pump').style.borderColor='var(--green)';event.target.closest('.p-pump').style.background='rgba(0,230,100,0.15)';t('pump-num-p1',String(n).padStart(2,'0'))}
+function togSats(){satsModeOn=!satsModeOn;const sw=g('satsTog');sw.classList.toggle('on',satsModeOn);g('sats-fuel-badge').style.opacity=satsModeOn?'1':'0'}
+function applyLocale(){
+  const loc=L[locale];
+  const sats=Math.round(loc.cashback*(SATS/loc.btc));
+  const sm=sats/5,sh=Math.floor(sm/60),smm=Math.round(sm%60);
+  const streamStr=sh>0?`${sh}h ${smm}m`:`${Math.round(sm)}m`;
+  t('loc-name0',loc.name);t('member-sub0',loc.memberSub);
+  t('ws0-saving',loc.savingDisp.replace('/L','/<tspan style="font-size:24px">L</tspan>'));
+  g('ws0-saving').textContent=loc.savingDisp;
+  t('ws0-savingsub',loc.estFill);
+  t('pay-member',loc.payMember);t('pay-auth',loc.auth);
+  t('vol-lbl-p',loc.volLbl);t('cb-lbl-p',loc.cbLbl);t('pp-lbl-p',loc.ppLbl);
+  t('pp-val-p',loc.pricePerUnit);t('fiat-live-sub',loc.savingVs);
+  const totalSaving=(loc.savingPerL*loc.vol).toFixed(2);
+  t('final-saving-p',loc.cur+totalSaving);
+  t('final-saving-sub-p',loc.savingVs);
+  t('receipt-name',loc.name);t('receipt-date-p',loc.rDate);
+  t('rr-vol-p',loc.rVol);t('rr-price-p',loc.rPrice);t('rr-total-p',loc.rTotal);
+  t('rr-cb-p',loc.cashbackFmt);t('rr-sats-p',sats.toLocaleString()+' sats');
+  t('rr-pts-p',Math.round(loc.cashback*2)+' pts');
+  t('rr-vol-lbl-p',loc.volLbl);t('rr-price-lbl-p',loc.ppLbl);
+  t('ytd-lbl-p',loc.ytdLbl);t('ytd-val-p',loc.ytd);t('ytd-badge-p',loc.ytdBadge);
+  t('rc-fillup',loc.cashbackFmt);t('rc-ytd',loc.rcYtd);t('rc-vs',loc.vsLabel);
+  t('sats-t-val',sats.toLocaleString()+' sats');t('sats-t-stream',streamStr);
+  t('mv-fiat',loc.cashbackFmt);t('mv-sats',sats.toLocaleString()+' sats');t('mv-stream',streamStr);
+}
+let liveSaving=0;
+function startFuel(){
+  if(fuelTimer)return;fuelPct=0;liveSaving=0;
+  const loc=L[locale];
+  const totalSats=Math.round(loc.cashback*(SATS/loc.btc));
+  const totalSaving=loc.savingPerL*loc.vol;
+  fuelTimer=setInterval(()=>{
+    fuelPct=Math.min(100,fuelPct+1.4);
+    const vol=(fuelPct/100*loc.vol).toFixed(1);
+    const cost=(fuelPct/100*loc.cost).toFixed(2);
+    const cb=(fuelPct/100*loc.cashback).toFixed(2);
+    const saving=(fuelPct/100*totalSaving).toFixed(2);
+    const sats=Math.round(fuelPct/100*totalSats);
+    liveSaving=parseFloat(saving);
+    t('fiat-live',loc.cur+saving);t('vol-val-p',vol+' '+loc.volUnit);
+    t('cost-val-p',loc.cur+cost);t('cb-val-p',loc.cur+cb);
+    t('sats-live-txt',sats.toLocaleString()+' sats');t('mv-fiat',loc.cur+saving);t('mv-sats',sats.toLocaleString()+' sats');
+    g('fuelBarP').style.width=fuelPct+'%';t('fuel-pct-p',Math.round(fuelPct)+'%');
+    if(fuelPct>=100){clearInterval(fuelTimer);fuelTimer=null}
+  },80);
+}
+function stopFuel(){if(fuelTimer){clearInterval(fuelTimer);fuelTimer=null}}
+function renderStep(n){
+  const s=STEPS[n];
+  document.querySelectorAll('.ps').forEach((e,i)=>e.classList.toggle('active',i===n));
+  t('stepName',s.name);t('stageLabel',s.label);t('bb-n',s.name);t('bb-hint',s.hint);
+  t('nb-q',s.q);g('nb-body').innerHTML=s.p.map(p=>`<p class="nb-p">${p}</p>`).join('');
+  const dots=g('stepDots'),pips=g('bbPips');dots.innerHTML='';pips.innerHTML='';
+  STEPS.forEach((_,i)=>{
+    const d=document.createElement('div');d.className='tb-step'+(i<n?' done':i===n?' active':'');d.onclick=()=>goStep(i);d.title=STEPS[i].name;dots.appendChild(d);
+    const p=document.createElement('div');p.className='pip'+(i<n?' done':i===n?' active':'');pips.appendChild(p);
+  });
+  const jt=g('tab-journey');jt.innerHTML='';
+  const journeyCards=[[{icon:'📱',title:'Fiat-First Home',body:'Saving per litre shown <strong>full-screen</strong> on arrival. No crypto visible until opted in.',meta:'Metric: p/L vs local'},{icon:'⛽',title:'Live Pump Grid',body:'Any free pump selectable. <strong>No pre-assignment</strong> — realistic forecourt model.',meta:'Pump data: Costco API'}],
+    [{icon:'⊛',title:'NFC One-Tap',body:'Phone to pump = auth + pay + REFUEL session. <strong>Three systems, one action.</strong>',meta:'Protocol: Apple Pay + NFC'},{icon:'📋',title:'Transparent Detail',body:'All payment fields visible <strong>without any action required</strong>. Progressive disclosure.',meta:'UX: read-only confirmation'}],
+    [{icon:'💷',title:'Live Saving Hero',body:'Fiat saving is the <strong>full-screen number</strong>. Sats are a secondary opt-in badge.',meta:'Hero: fiat · secondary: sats'},{icon:'🔀',title:'Sats Toggle',body:'Switch shows ⚡ badge when on. <strong>Off by default</strong> for all new members.',meta:'Default: off · persistent'}],
+    [{icon:'✅',title:'Clean Receipt',body:'Fiat receipt by default. Sats and points rows <strong>only if that mode selected</strong>.',meta:'Mode-aware: contextual'},{icon:'📊',title:'YTD Badge',body:'Annual saving total reinforces <strong>membership ROI</strong> passively every session.',meta:'Renewal driver'}]
+  ][n];
+  journeyCards.forEach((card,i)=>{
+    const pCards=[[{icon:'📍',title:'Geofence',body:'<strong>400m radius</strong> triggers notification',meta:'BLE + GPS'},{icon:'💷',title:'Fiat hero',body:'<strong>Saving vs local</strong> is headline',meta:'p/L or $/gal'}],[{icon:'⛽',title:'Pump grid',body:'<strong>Live availability</strong> from API',meta:'Forecourt data'},{icon:'🔐',title:'NFC',body:'<strong>One tap</strong> — pay + auth',meta:'Apple Pay + NFC'}],[{icon:'📊',title:'Counter',body:'<strong>Saving grows</strong> in real time',meta:'Fiat hero display'},{icon:'⚡',title:'Sats (opt-in)',body:'<strong>Toggle</strong> off by default',meta:'Secondary badge'}],[{icon:'✅',title:'Done',body:'<strong>Total saving</strong> headline',meta:'Membership ROI'},{icon:'📋',title:'Receipt',body:'<strong>Mode-aware</strong> rows',meta:'Contextual display'}]][n];
+    pCards.forEach((c,ci)=>{
+      const div=document.createElement('div');div.className='ctx-card active';
+      div.innerHTML=`<div class="ctx-icon">${c.icon}</div><div class="ctx-title">${c.title}</div><div class="ctx-body">${c.body}</div><div class="ctx-meta">${c.meta}</div>`;jt.appendChild(div);
+    });
+  });
+  g('prevBtn').disabled=n===0;g('nextBtn').disabled=n===STEPS.length-1;g('nextBtn').textContent=n===STEPS.length-1?'Done ✓':'Next →';
+  if(n===2)setTimeout(startFuel,400);else stopFuel();
+  applyLocale();
+}
+function nextStep(){if(step<STEPS.length-1){step++;renderStep(step)}}
+function prevStep(){if(step>0){step--;renderStep(step)}}
+function goStep(n){step=n;renderStep(n)}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();nextStep()}if(e.key==='ArrowLeft'){e.preventDefault();prevStep()}if(e.key>='1'&&e.key<='4')goStep(parseInt(e.key)-1)});
+setInterval(()=>{const n=new Date();g('clock').textContent=n.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})},1000);
+applyLocale();renderStep(0);
+</script>
+</body>
+</html>

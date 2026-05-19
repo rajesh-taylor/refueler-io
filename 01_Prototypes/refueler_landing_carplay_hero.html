@@ -1,0 +1,527 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+
+/* ── PAGE ── */
+.page{background:#080b10;font-family:'DM Sans',sans-serif;padding:40px 32px 48px;border-radius:16px;overflow:hidden;position:relative}
+
+/* subtle grid bg */
+.page::before{content:'';position:absolute;inset:0;opacity:.025;background-image:linear-gradient(rgba(255,255,255,.6) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.6) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+
+/* ── NAV ── */
+.topnav{display:flex;justify-content:space-between;align-items:center;margin-bottom:48px;position:relative;z-index:2}
+.logo{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:#fff;letter-spacing:.04em}
+.logo span{color:#f06c00}
+.nav-pills{display:flex;gap:20px}
+.nav-pill{font-size:11px;font-weight:500;color:rgba(255,255,255,.35);letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:color .2s}
+.nav-pill:hover{color:rgba(255,255,255,.7)}
+.nav-cta{font-size:11px;font-weight:600;color:#f06c00;border:0.5px solid rgba(240,108,0,.4);border-radius:20px;padding:6px 16px;cursor:pointer;letter-spacing:.06em;text-transform:uppercase}
+
+/* ── HERO HEADLINE ── */
+.hero-head{text-align:center;margin-bottom:40px;position:relative;z-index:2}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(240,108,0,.1);border:0.5px solid rgba(240,108,0,.25);border-radius:20px;padding:5px 14px;margin-bottom:18px}
+.eyebrow-dot{width:6px;height:6px;border-radius:50%;background:#f06c00;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.eyebrow-txt{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#f06c00}
+.h1{font-family:'Syne',sans-serif;font-size:46px;font-weight:800;color:#fff;line-height:1.0;margin-bottom:10px}
+.h1 .acc{color:#f06c00}
+.h1-sub{font-size:15px;color:rgba(255,255,255,.4);font-weight:300;max-width:480px;margin:0 auto;line-height:1.7}
+
+/* ── DEVICE STAGE ── */
+.device-stage{position:relative;z-index:2;margin-bottom:40px}
+
+/* CARPLAY — wide landscape pill */
+.carplay-outer{background:#0d111a;border-radius:20px;border:1.5px solid rgba(255,255,255,.08);padding:3px;margin-bottom:28px;box-shadow:0 0 0 1px rgba(255,255,255,.03)}
+.carplay-bar{background:#060810;border-radius:16px 16px 0 0;height:22px;display:flex;align-items:center;padding:0 14px;gap:6px;border-bottom:0.5px solid rgba(255,255,255,.06)}
+.carplay-btn{width:8px;height:8px;border-radius:50%}
+.carplay-screen{background:#0a0d16;border-radius:0 0 16px 16px;padding:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;min-height:160px}
+
+.cp-widget{background:#0f1520;border-radius:12px;border:0.5px solid rgba(255,255,255,.07);padding:14px;position:relative;overflow:hidden}
+.cp-label{font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:8px}
+.cp-big{font-size:28px;font-weight:700;color:#fff;font-family:'Syne',sans-serif;line-height:1}
+.cp-unit{font-size:11px;color:rgba(255,255,255,.35);margin-top:3px}
+.cp-delta{font-size:11px;font-weight:600;margin-top:6px}
+.cp-delta.dn{color:#22c55e}.cp-delta.up{color:#ef4444}
+
+/* carplay route widget */
+.cp-route-bar{height:4px;background:#1a2030;border-radius:2px;margin-top:10px;overflow:hidden}
+.cp-route-fill{height:100%;background:#f06c00;border-radius:2px;width:62%}
+.cp-station-row{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.cp-stn-name{font-size:11px;color:rgba(255,255,255,.6);font-weight:500}
+.cp-stn-price{font-size:13px;font-weight:700;color:#22c55e}
+
+/* carplay sats widget */
+.cp-sats-ring{display:flex;align-items:center;gap:10px;margin-top:6px}
+.cp-btc-icon{width:32px;height:32px;border-radius:50%;background:rgba(240,108,0,.15);border:1px solid rgba(240,108,0,.3);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#f06c00;font-family:'Syne',sans-serif}
+.cp-sats-val{font-size:18px;font-weight:700;color:#f06c00;font-family:'Syne',sans-serif}
+.cp-sats-lbl{font-size:10px;color:rgba(255,255,255,.3)}
+
+/* carplay status strip */
+.cp-status{display:flex;align-items:center;justify-content:space-between;padding:6px 14px;background:rgba(255,255,255,.02);border-radius:0 0 14px 14px;border-top:0.5px solid rgba(255,255,255,.05)}
+.cp-status-item{display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(255,255,255,.3)}
+.cp-status-item i{font-size:12px;color:rgba(255,255,255,.25)}
+.cp-status-dot{width:5px;height:5px;border-radius:50%;background:#22c55e}
+
+/* ── BOTTOM ROW: Watch + Mobile ── */
+.device-row{display:grid;grid-template-columns:220px 1fr;gap:24px;align-items:start}
+
+/* WATCH */
+.watch-outer{display:flex;flex-direction:column;align-items:center;gap:12px}
+.watch-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.25)}
+.watch-band-t{width:44px;height:16px;background:#1a1a1a;border-radius:4px 4px 0 0;margin:0 auto;border:0.5px solid #2a2a2a}
+.watch-band-b{width:44px;height:16px;background:#1a1a1a;border-radius:0 0 4px 4px;margin:0 auto;border:0.5px solid #2a2a2a}
+
+/* MOBILE */
+.mobile-outer{background:#0d111a;border-radius:28px;border:1.5px solid rgba(255,255,255,.1);padding:4px;max-width:220px;margin:0 auto}
+.mobile-notch-bar{height:28px;background:#060810;border-radius:22px 22px 0 0;display:flex;align-items:center;justify-content:center}
+.mobile-notch{width:60px;height:8px;background:#0d111a;border-radius:4px}
+.mobile-screen{background:#080c14;padding:14px 12px;border-radius:0;min-height:320px}
+.mobile-screen-bottom{height:24px;background:#060810;border-radius:0 0 22px 22px;display:flex;align-items:center;justify-content:center}
+.mobile-home-ind{width:40px;height:4px;background:rgba(255,255,255,.2);border-radius:2px}
+
+.mob-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.mob-app-name{font-size:12px;font-weight:700;color:#fff;font-family:'Syne',sans-serif}
+.mob-app-name span{color:#f06c00}
+.mob-live{font-size:9px;color:#22c55e;display:flex;align-items:center;gap:4px}
+.mob-live-dot{width:5px;height:5px;border-radius:50%;background:#22c55e}
+
+.mob-price-card{background:#0f1520;border-radius:10px;border:0.5px solid rgba(255,255,255,.07);padding:12px;margin-bottom:10px}
+.mob-price-lbl{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:4px}
+.mob-price-big{font-size:28px;font-weight:700;color:#22c55e;font-family:'Syne',sans-serif;line-height:1}
+.mob-price-sub{font-size:10px;color:rgba(255,255,255,.3);margin-top:2px}
+.mob-sentiment{display:flex;gap:4px;margin-top:8px}
+.mob-sent-bar{flex:1;height:3px;border-radius:2px}
+
+.mob-reward-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.mob-rw{background:#0f1520;border-radius:8px;border:0.5px solid rgba(255,255,255,.06);padding:10px}
+.mob-rw.active{border-color:rgba(240,108,0,.4)}
+.mob-rw-icon{font-size:16px;margin-bottom:4px}
+.mob-rw-name{font-size:10px;font-weight:600;color:#fff}
+.mob-rw-val{font-size:12px;font-weight:700;margin-top:2px}
+
+.mob-stations{background:#0f1520;border-radius:8px;border:0.5px solid rgba(255,255,255,.06);padding:10px}
+.mob-stn-item{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:0.5px solid rgba(255,255,255,.05)}
+.mob-stn-item:last-child{border-bottom:none}
+.mob-stn-left{display:flex;align-items:center;gap:6px}
+.mob-stn-dot{width:7px;height:7px;border-radius:50%}
+.mob-stn-name{font-size:10px;color:rgba(255,255,255,.6)}
+.mob-stn-dist{font-size:9px;color:rgba(255,255,255,.3);margin-top:1px}
+.mob-stn-price{font-size:11px;font-weight:700}
+
+/* ── WHO + ONBOARD ── */
+.onboard-col{display:flex;flex-direction:column;gap:16px}
+.ob-section-lbl{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.25);margin-bottom:8px}
+
+.who-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.who-card{background:#0d1520;border:0.5px solid rgba(255,255,255,.08);border-radius:10px;padding:14px;cursor:pointer;transition:all .2s}
+.who-card.sel,.who-card:hover{border-color:#f06c00;background:rgba(240,108,0,.07)}
+.who-icon{margin-bottom:8px}
+.who-icon i{font-size:20px;color:#f06c00}
+.who-title{font-size:12px;font-weight:600;color:#fff;margin-bottom:3px}
+.who-sub{font-size:11px;color:rgba(255,255,255,.35)}
+
+.reward-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.rw{background:#0d1520;border:0.5px solid rgba(255,255,255,.08);border-radius:10px;padding:13px;cursor:pointer;transition:all .2s}
+.rw.fiat-default{border-color:rgba(240,108,0,.35);background:rgba(240,108,0,.06)}
+.rw.btc{border-color:rgba(240,108,0,.15)}
+.rw:hover{border-color:rgba(240,108,0,.5)}
+.rw-tag{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}
+.rw-tag.fiat{color:rgba(240,108,0,.8)}
+.rw-tag.btc-tag{color:#f06c00}
+.rw-name{font-size:13px;font-weight:600;color:#fff;margin-bottom:3px}
+.rw-desc{font-size:11px;color:rgba(255,255,255,.35);line-height:1.45}
+
+.perms-row{display:flex;gap:7px;flex-wrap:wrap}
+.perm{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.04);border:0.5px solid rgba(255,255,255,.09);border-radius:20px;padding:5px 11px}
+.perm i{font-size:13px;color:#f06c00}
+.perm span{font-size:11px;color:rgba(255,255,255,.5)}
+
+/* ── SCREEN LABELS ── */
+.screen-row{display:grid;grid-template-columns:1fr 220px 220px;gap:12px;margin-bottom:8px}
+.screen-lbl-box{display:flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(255,255,255,.03);border-radius:8px;border:0.5px solid rgba(255,255,255,.06)}
+.slbl-num{font-size:10px;font-weight:700;color:#f06c00;font-family:'Syne',sans-serif;min-width:16px}
+.slbl-text{font-size:11px;color:rgba(255,255,255,.45);font-weight:400}
+
+/* ── BOTTOM STRIP ── */
+.bottom-strip{display:flex;justify-content:center;gap:32px;padding-top:32px;border-top:0.5px solid rgba(255,255,255,.06);position:relative;z-index:2}
+.bs-item{display:flex;align-items:center;gap:8px}
+.bs-icon{width:28px;height:28px;border-radius:7px;background:rgba(240,108,0,.1);border:0.5px solid rgba(240,108,0,.2);display:flex;align-items:center;justify-content:center}
+.bs-icon i{font-size:15px;color:#f06c00}
+.bs-text{font-size:11px;color:rgba(255,255,255,.4);font-weight:300}
+.bs-text strong{color:rgba(255,255,255,.7);font-weight:500;display:block;font-size:12px;margin-bottom:1px}
+</style>
+
+<div class="page">
+
+  <!-- NAV -->
+  <div class="topnav">
+    <div class="logo">re<span>fueler</span></div>
+    <div class="nav-pills">
+      <div class="nav-pill">How it works</div>
+      <div class="nav-pill">Rewards</div>
+      <div class="nav-pill">Devices</div>
+    </div>
+    <div class="nav-cta">Get started</div>
+  </div>
+
+  <!-- HEADLINE -->
+  <div class="hero-head">
+    <div class="eyebrow"><div class="eyebrow-dot"></div><div class="eyebrow-txt">Chronograph Intelligence</div></div>
+    <div class="h1">The <span class="acc">smart</span> way<br>to save on fuel.</div>
+    <div class="h1-sub">Route-aware pricing on your dashboard, wrist, and phone — every fill-up earns real rewards.</div>
+  </div>
+
+  <!-- SCREEN LABELS ROW -->
+  <div class="screen-row" style="position:relative;z-index:2">
+    <div class="screen-lbl-box">
+      <span class="slbl-num">01</span>
+      <span class="slbl-text">CarPlay — live dashboard, nearest station, price sentiment</span>
+    </div>
+    <div class="screen-lbl-box">
+      <span class="slbl-num">02</span>
+      <span class="slbl-text">Apple Watch — luxury chronograph complication dial</span>
+    </div>
+    <div class="screen-lbl-box">
+      <span class="slbl-num">03</span>
+      <span class="slbl-text">iPhone — full savings & rewards view</span>
+    </div>
+  </div>
+
+  <!-- DEVICE STAGE -->
+  <div class="device-stage">
+
+    <!-- ① CARPLAY WIDE -->
+    <div class="carplay-outer">
+      <div class="carplay-bar">
+        <div class="carplay-btn" style="background:#ef4444;opacity:.6"></div>
+        <div class="carplay-btn" style="background:#fbbf24;opacity:.6"></div>
+        <div class="carplay-btn" style="background:#22c55e;opacity:.6"></div>
+        <div style="flex:1;text-align:center;font-size:10px;color:rgba(255,255,255,.2);letter-spacing:.08em;font-family:'DM Sans',sans-serif;font-weight:500">REFUELER · CARPLAY</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.2);font-family:'DM Sans',sans-serif">9:41</div>
+      </div>
+      <div class="carplay-screen">
+
+        <!-- Widget 1: Live price -->
+        <div class="cp-widget">
+          <div class="cp-label">Nearest station · 0.4 mi</div>
+          <div class="cp-big">148<span style="font-size:16px;color:rgba(255,255,255,.5)">.9p</span></div>
+          <div class="cp-unit">per litre · unleaded</div>
+          <div class="cp-delta dn">▼ 2.1p from yesterday</div>
+          <div class="cp-route-bar" style="margin-top:12px"><div class="cp-route-fill"></div></div>
+          <div class="cp-station-row">
+            <span class="cp-stn-name">Shell Vauxhall Rd</span>
+            <span class="cp-stn-price">148.9p</span>
+          </div>
+          <div class="cp-station-row" style="margin-top:4px">
+            <span class="cp-stn-name" style="color:rgba(255,255,255,.35)">BP London Rd · 1.2mi</span>
+            <span class="cp-stn-price" style="color:rgba(255,255,255,.4)">152.1p</span>
+          </div>
+        </div>
+
+        <!-- Widget 2: Sentiment arc + route savings -->
+        <div class="cp-widget">
+          <div class="cp-label">Price sentiment</div>
+          <svg width="100%" height="88" viewBox="0 0 180 88" role="img" aria-label="Price sentiment arc showing falling prices">
+            <!-- Sentiment arc -->
+            <path d="M 20 75 A 70 70 0 0 1 160 75" fill="none" stroke="#1a2030" stroke-width="12" stroke-linecap="round"/>
+            <path d="M 20 75 A 70 70 0 0 1 90 12" fill="none" stroke="#22c55e" stroke-width="12" stroke-linecap="round" opacity=".9"/>
+            <path d="M 90 12 A 70 70 0 0 1 136 30" fill="none" stroke="#1a2030" stroke-width="12" stroke-linecap="round"/>
+            <!-- Needle -->
+            <line x1="90" y1="75" x2="52" y2="26" stroke="#f06c00" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="90" cy="75" r="5" fill="#f06c00"/>
+            <circle cx="90" cy="75" r="2.5" fill="#080b10"/>
+            <text x="90" y="55" text-anchor="middle" fill="#22c55e" font-family="DM Sans,sans-serif" font-size="13" font-weight="700">FALLING</text>
+            <text x="22" y="82" text-anchor="middle" fill="rgba(255,255,255,.25)" font-family="DM Sans,sans-serif" font-size="9">LOW</text>
+            <text x="158" y="82" text-anchor="middle" fill="rgba(255,255,255,.25)" font-family="DM Sans,sans-serif" font-size="9">HIGH</text>
+          </svg>
+          <div style="display:flex;justify-content:space-between;margin-top:4px">
+            <span style="font-size:10px;color:rgba(255,255,255,.3)">7-day trend</span>
+            <span style="font-size:10px;font-weight:600;color:#22c55e">Good time to fill up</span>
+          </div>
+        </div>
+
+        <!-- Widget 3: Satoshi / Lightning rewards -->
+        <div class="cp-widget">
+          <div class="cp-label">Lightning rewards</div>
+          <div class="cp-sats-ring">
+            <div class="cp-btc-icon">&#9889;</div>
+            <div>
+              <div class="cp-sats-val">1,240</div>
+              <div class="cp-sats-lbl">sats earned this month</div>
+            </div>
+          </div>
+          <div style="margin-top:14px;border-top:0.5px solid rgba(255,255,255,.06);padding-top:12px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+              <span style="font-size:10px;color:rgba(255,255,255,.35)">This fill-up</span>
+              <span style="font-size:11px;font-weight:600;color:#f06c00">+ 48 sats</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+              <span style="font-size:10px;color:rgba(255,255,255,.35)">Cashback</span>
+              <span style="font-size:11px;font-weight:600;color:rgba(255,255,255,.5)">£0.83</span>
+            </div>
+            <div style="display:flex;justify-content:space-between">
+              <span style="font-size:10px;color:rgba(255,255,255,.35)">Route saved</span>
+              <span style="font-size:11px;font-weight:600;color:#22c55e">£1.40</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- Status bar -->
+      <div class="cp-status">
+        <div class="cp-status-item"><div class="cp-status-dot"></div>Live prices · updated 30s ago</div>
+        <div class="cp-status-item"><i class="ti ti-map-pin" aria-hidden="true"></i>Location verified</div>
+        <div class="cp-status-item"><i class="ti ti-wifi" aria-hidden="true"></i>Connected</div>
+      </div>
+    </div>
+
+    <!-- ② WATCH + ③ MOBILE ROW -->
+    <div class="device-row">
+
+      <!-- WATCH COL -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0">
+        <div class="watch-band-t"></div>
+        <div style="background:#141820;border-radius:18px;border:1.5px solid rgba(255,255,255,.1);padding:6px;box-shadow:0 0 0 1px rgba(255,255,255,.03)">
+          <svg width="148" height="148" viewBox="0 0 148 148" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Refueler luxury chronograph Apple Watch face with orange lightning and price sentiment arc">
+            <!-- Steel bezel outer -->
+            <circle cx="74" cy="74" r="72" fill="#252830" stroke="#464c5c" stroke-width="0.8"/>
+            <!-- Bezel brushing lines -->
+            <g stroke="#525866" stroke-width="0.6" opacity=".5">
+              <line x1="74" y1="4" x2="74" y2="11"/><line x1="74" y1="137" x2="74" y2="144"/>
+              <line x1="4" y1="74" x2="11" y2="74"/><line x1="137" y1="74" x2="144" y2="74"/>
+              <line x1="25.9" y1="14" x2="29.5" y2="20.2"/><line x1="118.5" y1="127.8" x2="122.1" y2="134"/>
+              <line x1="14" y1="25.9" x2="20.2" y2="29.5"/><line x1="127.8" y1="118.5" x2="134" y2="122.1"/>
+              <line x1="14" y1="122.1" x2="20.2" y2="118.5"/><line x1="127.8" y1="29.5" x2="134" y2="25.9"/>
+              <line x1="25.9" y1="134" x2="29.5" y2="127.8"/><line x1="118.5" y1="20.2" x2="122.1" y2="14"/>
+            </g>
+            <!-- Inner bezel ridge -->
+            <circle cx="74" cy="74" r="66" fill="none" stroke="#363b48" stroke-width="0.6"/>
+            <!-- Watch face -->
+            <circle cx="74" cy="74" r="64" fill="#090d14"/>
+            <!-- Subtle crosshair -->
+            <line x1="74" y1="14" x2="74" y2="134" stroke="#131820" stroke-width="0.4"/>
+            <line x1="14" y1="74" x2="134" y2="74" stroke="#131820" stroke-width="0.4"/>
+
+            <!-- PRICE SENTIMENT ARC — outer ring -->
+            <path d="M 35.5 38.2 A 50 50 0 0 1 74 24" fill="none" stroke="#22c55e" stroke-width="5" stroke-linecap="round" opacity=".9"/>
+            <path d="M 124 74 A 50 50 0 0 1 89.5 111.5" fill="none" stroke="#ef4444" stroke-width="5" stroke-linecap="round" opacity=".85"/>
+            <path d="M 74 24 A 50 50 0 0 1 124 74" fill="none" stroke="#1c2535" stroke-width="5" stroke-linecap="round"/>
+            <path d="M 89.5 111.5 A 50 50 0 0 1 35.5 38.2" fill="none" stroke="#1c2535" stroke-width="5" stroke-linecap="round"/>
+
+            <!-- Sub-dial 12: Lightning / Satoshi — ORANGE -->
+            <circle cx="74" cy="44" r="14" fill="#0d1018" stroke="#f06c00" stroke-width="1.2"/>
+            <path d="M 65.8 37.6 A 10 10 0 0 1 85 44" fill="none" stroke="#f06c00" stroke-width="2.5" stroke-linecap="round" opacity=".85"/>
+            <text x="74" y="44" text-anchor="middle" fill="#f06c00" font-family="DM Sans,sans-serif" font-size="9" font-weight="700">&#9889;</text>
+            <text x="74" y="53" text-anchor="middle" fill="rgba(255,255,255,.4)" font-family="DM Sans,sans-serif" font-size="5.5">SATS</text>
+
+            <!-- Sub-dial 9: Price sentiment indicator -->
+            <circle cx="46" cy="74" r="12" fill="#0d1018" stroke="#22c55e" stroke-width="0.8"/>
+            <text x="46" y="71" text-anchor="middle" fill="#22c55e" font-family="DM Sans,sans-serif" font-size="8" font-weight="700">▼</text>
+            <text x="46" y="80" text-anchor="middle" fill="rgba(255,255,255,.35)" font-family="DM Sans,sans-serif" font-size="5">p/L</text>
+
+            <!-- Sub-dial 3: Route savings -->
+            <circle cx="102" cy="74" r="12" fill="#0d1018" stroke="#f06c00" stroke-width="0.8" opacity=".6"/>
+            <text x="102" y="71" text-anchor="middle" fill="#f06c00" font-family="DM Sans,sans-serif" font-size="7" font-weight="600">mi</text>
+            <text x="102" y="80" text-anchor="middle" fill="rgba(255,255,255,.35)" font-family="DM Sans,sans-serif" font-size="5">ROUTE</text>
+
+            <!-- Central display -->
+            <circle cx="74" cy="82" r="16" fill="#0c1020" stroke="#1e2535" stroke-width="0.8"/>
+            <text x="74" y="78" text-anchor="middle" fill="#22c55e" font-family="DM Sans,sans-serif" font-size="10" font-weight="700">148.9</text>
+            <text x="74" y="86" text-anchor="middle" fill="rgba(255,255,255,.35)" font-family="DM Sans,sans-serif" font-size="5.5">p/litre</text>
+
+            <!-- Hour hand (heavy, luminous) -->
+            <line x1="74" y1="74" x2="74" y2="34" stroke="#d8dde8" stroke-width="2.5" stroke-linecap="round"/>
+            <!-- Minute hand -->
+            <line x1="74" y1="74" x2="106" y2="52" stroke="#a8b0c0" stroke-width="1.8" stroke-linecap="round"/>
+            <!-- Lightning seconds hand (orange) -->
+            <line x1="74" y1="84" x2="74" y2="28" stroke="#f06c00" stroke-width="0.8" stroke-linecap="round" opacity=".9"/>
+            <!-- Crown jewel -->
+            <circle cx="74" cy="74" r="3" fill="#f06c00"/>
+            <circle cx="74" cy="74" r="1.4" fill="#fff" opacity=".5"/>
+
+            <!-- Brand -->
+            <text x="74" y="107" text-anchor="middle" fill="rgba(255,255,255,.15)" font-family="DM Sans,sans-serif" font-size="5.5" letter-spacing="2">REFUELER</text>
+          </svg>
+        </div>
+        <div class="watch-band-b"></div>
+        <div style="margin-top:8px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.2);text-align:center">Apple Watch · Resident mode</div>
+        <div style="margin-top:6px;display:flex;flex-direction:column;gap:4px;width:100%">
+          <div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:0.5px solid rgba(255,255,255,.05)">
+            <div style="width:6px;height:6px;border-radius:50%;background:#22c55e"></div>
+            <span style="font-size:10px;color:rgba(255,255,255,.4)">Green arc — prices falling</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:0.5px solid rgba(255,255,255,.05)">
+            <div style="width:6px;height:6px;border-radius:50%;background:#ef4444"></div>
+            <span style="font-size:10px;color:rgba(255,255,255,.4)">Red arc — prices rising</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:4px 0">
+            <div style="width:6px;height:6px;border-radius:50%;background:#f06c00"></div>
+            <span style="font-size:10px;color:rgba(255,255,255,.4)">Orange — Lightning sats</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT SIDE: Mobile + Onboarding -->
+      <div style="display:grid;grid-template-columns:220px 1fr;gap:24px;align-items:start">
+
+        <!-- MOBILE -->
+        <div>
+          <div class="mobile-outer">
+            <div class="mobile-notch-bar"><div class="mobile-notch"></div></div>
+            <div class="mobile-screen">
+              <div class="mob-head">
+                <div class="mob-app-name">re<span>fueler</span></div>
+                <div class="mob-live"><div class="mob-live-dot"></div>Live</div>
+              </div>
+              <!-- Price card -->
+              <div class="mob-price-card">
+                <div class="mob-price-lbl">Best price near you</div>
+                <div class="mob-price-big">148.9<span style="font-size:14px;color:rgba(255,255,255,.4)">p</span></div>
+                <div class="mob-price-sub">Shell Vauxhall Rd · 0.4 mi</div>
+                <div class="mob-sentiment" style="margin-top:10px">
+                  <div class="mob-sent-bar" style="background:#22c55e;flex:2.5"></div>
+                  <div class="mob-sent-bar" style="background:#1a2535;flex:1"></div>
+                  <div class="mob-sent-bar" style="background:#ef4444;flex:0.8"></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-top:4px">
+                  <span style="font-size:9px;color:#22c55e">Falling</span>
+                  <span style="font-size:9px;color:rgba(255,255,255,.25)">Neutral</span>
+                  <span style="font-size:9px;color:#ef4444">Rising</span>
+                </div>
+              </div>
+              <!-- Rewards row -->
+              <div class="mob-reward-row">
+                <div class="mob-rw">
+                  <div style="font-size:14px;color:rgba(255,255,255,.4);margin-bottom:4px"><i class="ti ti-cash" aria-hidden="true"></i></div>
+                  <div class="mob-rw-name">Cashback</div>
+                  <div class="mob-rw-val" style="color:rgba(255,255,255,.7)">£0.83</div>
+                </div>
+                <div class="mob-rw active">
+                  <div style="font-size:14px;color:#f06c00;margin-bottom:4px">&#9889;</div>
+                  <div class="mob-rw-name">Lightning</div>
+                  <div class="mob-rw-val" style="color:#f06c00">+48 sats</div>
+                </div>
+              </div>
+              <!-- Stations -->
+              <div class="mob-stations">
+                <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.25);margin-bottom:8px">Nearby stations</div>
+                <div class="mob-stn-item">
+                  <div class="mob-stn-left">
+                    <div class="mob-stn-dot" style="background:#22c55e"></div>
+                    <div>
+                      <div class="mob-stn-name">Shell Vauxhall</div>
+                      <div class="mob-stn-dist">0.4 mi</div>
+                    </div>
+                  </div>
+                  <div class="mob-stn-price" style="color:#22c55e">148.9p</div>
+                </div>
+                <div class="mob-stn-item">
+                  <div class="mob-stn-left">
+                    <div class="mob-stn-dot" style="background:rgba(255,255,255,.2)"></div>
+                    <div>
+                      <div class="mob-stn-name">BP London Rd</div>
+                      <div class="mob-stn-dist">1.2 mi</div>
+                    </div>
+                  </div>
+                  <div class="mob-stn-price" style="color:rgba(255,255,255,.5)">152.1p</div>
+                </div>
+                <div class="mob-stn-item">
+                  <div class="mob-stn-left">
+                    <div class="mob-stn-dot" style="background:rgba(255,255,255,.12)"></div>
+                    <div>
+                      <div class="mob-stn-name">Esso High St</div>
+                      <div class="mob-stn-dist">1.8 mi</div>
+                    </div>
+                  </div>
+                  <div class="mob-stn-price" style="color:rgba(255,255,255,.35)">153.4p</div>
+                </div>
+              </div>
+            </div>
+            <div class="mobile-screen-bottom"><div class="mobile-home-ind"></div></div>
+          </div>
+          <div style="margin-top:8px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.2);text-align:center">iPhone · savings view</div>
+        </div>
+
+        <!-- ONBOARDING FLOW -->
+        <div class="onboard-col">
+          <div>
+            <div class="ob-section-lbl">Who are you?</div>
+            <div class="who-row">
+              <div class="who-card sel" onclick="ts(this,'who-card')">
+                <div class="who-icon"><i class="ti ti-home" aria-hidden="true"></i></div>
+                <div class="who-title">Local Resident</div>
+                <div class="who-sub">Daily commuter savings</div>
+              </div>
+              <div class="who-card" onclick="ts(this,'who-card')">
+                <div class="who-icon"><i class="ti ti-car" aria-hidden="true"></i></div>
+                <div class="who-title">Traveler / Rental</div>
+                <div class="who-sub">Route-based alerts</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="ob-section-lbl">Choose your reward</div>
+            <div class="reward-row">
+              <div class="rw fiat-default" onclick="ts(this,'rw')">
+                <div class="rw-tag fiat">★ Default</div>
+                <div class="rw-name">Standard Savings</div>
+                <div class="rw-desc">Cashback · loyalty points · vouchers</div>
+              </div>
+              <div class="rw btc" onclick="ts(this,'rw')">
+                <div class="rw-tag btc-tag">&#9889; Optional</div>
+                <div class="rw-name">Lightning Wallet</div>
+                <div class="rw-desc">Earn Satoshis on every fill-up</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="ob-section-lbl">Permissions & connections</div>
+            <div class="perms-row">
+              <div class="perm"><i class="ti ti-map-pin" aria-hidden="true"></i><span>Location</span></div>
+              <div class="perm"><i class="ti ti-watch" aria-hidden="true"></i><span>Apple Watch</span></div>
+              <div class="perm"><i class="ti ti-car" aria-hidden="true"></i><span>CarPlay</span></div>
+              <div class="perm"><i class="ti ti-building-bank" aria-hidden="true"></i><span>Bank link</span></div>
+              <div class="perm"><i class="ti ti-tag" aria-hidden="true"></i><span>Loyalty card</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM FEATURE STRIP -->
+  <div class="bottom-strip">
+    <div class="bs-item">
+      <div class="bs-icon"><i class="ti ti-car" aria-hidden="true"></i></div>
+      <div class="bs-text"><strong>CarPlay native</strong>Dashboard-ready alerts</div>
+    </div>
+    <div class="bs-item">
+      <div class="bs-icon"><i class="ti ti-watch" aria-hidden="true"></i></div>
+      <div class="bs-text"><strong>Chronograph dial</strong>Luxury complication face</div>
+    </div>
+    <div class="bs-item">
+      <div class="bs-icon" style="font-size:14px;font-weight:700;color:#f06c00;font-family:'Syne',sans-serif">&#9889;</div>
+      <div class="bs-text"><strong>Lightning wallet</strong>Satoshis on every fill-up</div>
+    </div>
+    <div class="bs-item">
+      <div class="bs-icon"><i class="ti ti-route" aria-hidden="true"></i></div>
+      <div class="bs-text"><strong>Route intelligence</strong>Cheapest station on your way</div>
+    </div>
+    <div class="bs-item">
+      <div class="bs-icon"><i class="ti ti-building-bank" aria-hidden="true"></i></div>
+      <div class="bs-text"><strong>Auto-verify</strong>Bank or receipt scan</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function ts(el,cls){
+  const p=el.closest('.page');
+  p.querySelectorAll('.'+cls).forEach(e=>e.classList.remove('sel','fiat-default'));
+  el.classList.add('sel');
+}
+</script>

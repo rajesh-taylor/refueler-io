@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>REFUELER — Your order is on its way</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --c-ms-green:   #006B3C;
+    --c-btc-orange: #F7931A;
+    --c-white:      #FFFFFF;
+    --c-black:      #0A0A0A;
+    --c-text-inv:   rgba(255,255,255,0.88);
+    --c-text-dim:   rgba(255,255,255,0.50);
+    --c-surface:    rgba(0,0,0,0.22);
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+    --colour: var(--c-ms-green);     /* runtime override */
+    --colour-alt: var(--c-btc-orange); /* for hybrid alternation */
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: var(--sans);
+  }
+
+  /* ── ROOT SCREEN ── */
+  #locate-screen {
+    width: 100vw;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: var(--colour);
+    transition: background 0.35s ease;
+  }
+
+  /* ── FLASH OVERLAY ── */
+  #flash-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: var(--colour);
+    opacity: 0;
+    z-index: 5;
+    transition: opacity 0.08s ease;
+  }
+
+  /* ── COLOUR ZONE (top 75%) ── */
+  #colour-zone {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Big status text */
+  .locate-headline {
+    font-family: var(--mono);
+    font-size: clamp(13px, 3.5vw, 17px);
+    font-weight: 700;
+    letter-spacing: 0.20em;
+    text-transform: uppercase;
+    color: var(--c-text-inv);
+    text-align: center;
+    margin-bottom: 8px;
+    opacity: 0.72;
+  }
+
+  .locate-signal {
+    font-family: var(--mono);
+    font-size: clamp(56px, 20vw, 108px);
+    font-weight: 700;
+    color: var(--c-white);
+    text-align: center;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+    text-shadow: 0 4px 32px rgba(0,0,0,0.25);
+    user-select: none;
+  }
+
+  .locate-order-id {
+    font-family: var(--mono);
+    font-size: clamp(11px, 2.8vw, 14px);
+    color: var(--c-text-dim);
+    letter-spacing: 0.18em;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  /* Runner proximity indicator */
+  #proximity-bar {
+    margin-top: 28px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0.60;
+  }
+  .proximity-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,0.90);
+    animation: prox-pulse 1.8s ease-in-out infinite;
+  }
+  .proximity-dot:nth-child(2) { animation-delay: 0.3s; opacity: 0.7; }
+  .proximity-dot:nth-child(3) { animation-delay: 0.6s; opacity: 0.4; }
+  @keyframes prox-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(0.6); opacity: 0.3; }
+  }
+  .proximity-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--c-text-dim);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  /* ── BOTTOM ZONE (25%) ── */
+  #bottom-zone {
+    height: 28vh;
+    min-height: 200px;
+    max-height: 280px;
+    background: rgba(0,0,0,0.28);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-top: 1px solid rgba(255,255,255,0.14);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 20px 12px;
+    gap: 10px;
+    position: relative;
+    z-index: 3;
+  }
+
+  /* QR code container */
+  #qr-container {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    width: 100%;
+  }
+
+  #qr-canvas-wrap {
+    flex-shrink: 0;
+    width: 108px; height: 108px;
+    background: #fff;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    position: relative;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.30);
+  }
+  #qr-canvas { width: 96px; height: 96px; display: block; }
+
+  .qr-label {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 0.10em;
+    color: rgba(255,255,255,0.45);
+    text-transform: uppercase;
+    text-align: center;
+    margin-top: 4px;
+  }
+
+  /* Order summary */
+  #order-summary {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .order-vendor {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+  }
+  .order-item {
+    font-size: 13px;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.3;
+  }
+  .order-meta {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.08em;
+    margin-top: 2px;
+  }
+  .sats-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(247,147,26,0.22);
+    border: 1px solid rgba(247,147,26,0.40);
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: #F7931A;
+    letter-spacing: 0.08em;
+    margin-top: 4px;
+    width: fit-content;
+  }
+
+  /* Bottom bar — crowd mode + NFC status */
+  #bottom-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  #crowd-btn {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.10em;
+    color: rgba(255,255,255,0.65);
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  #crowd-btn:active { background: rgba(255,255,255,0.15); }
+  #crowd-btn.active {
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(255,255,255,0.35);
+    color: #fff;
+  }
+
+  #nfc-status {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.10em;
+    color: rgba(255,255,255,0.40);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .nfc-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: rgba(255,255,255,0.35);
+  }
+  .nfc-dot.listening {
+    background: #22C55E;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; } 50% { opacity: 0.35; }
+  }
+
+  /* Low battery overlay message */
+  #low-battery-msg {
+    display: none;
+    position: absolute;
+    bottom: 30vh;
+    left: 0; right: 0;
+    text-align: center;
+    padding: 0 24px;
+    z-index: 6;
+  }
+  #low-battery-msg.show { display: block; }
+  .low-battery-text {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.10em;
+    color: rgba(255,255,255,0.80);
+    background: rgba(0,0,0,0.35);
+    border-radius: 8px;
+    padding: 10px 16px;
+    display: inline-block;
+    line-height: 1.5;
+  }
+
+  /* ── CONFIRMED STATE ── */
+  #confirm-screen {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--colour);
+    text-align: center;
+    padding: 40px 28px;
+    gap: 20px;
+    animation: confirm-in 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  #confirm-screen.show { display: flex; }
+  @keyframes confirm-in {
+    from { transform: scale(0.90); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .confirm-tick {
+    font-size: 72px;
+    line-height: 1;
+    animation: tick-bounce 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.2s both;
+  }
+  @keyframes tick-bounce {
+    from { transform: scale(0) rotate(-15deg); opacity: 0; }
+    to { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+  .confirm-headline {
+    font-family: var(--mono);
+    font-size: clamp(20px, 5vw, 30px);
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.06em;
+    line-height: 1.2;
+  }
+  .confirm-sub {
+    font-size: 16px;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.5;
+  }
+  .confirm-sats {
+    background: rgba(0,0,0,0.22);
+    border: 1px solid rgba(247,147,26,0.50);
+    border-radius: 12px;
+    padding: 14px 28px;
+    font-family: var(--mono);
+    font-size: clamp(22px, 6vw, 32px);
+    color: #F7931A;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+  .confirm-dismiss {
+    margin-top: 16px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: rgba(255,255,255,0.45);
+    cursor: pointer;
+    text-transform: uppercase;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    border: none;
+    background: none;
+    color: rgba(255,255,255,0.45);
+  }
+
+  /* ── HYBRID ANIMATION ── */
+  @keyframes hybrid-cycle {
+    0%, 49%  { background: var(--c-ms-green); }
+    50%, 100% { background: var(--c-btc-orange); }
+  }
+  .hybrid-bg {
+    animation: hybrid-cycle 2s step-start infinite;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── LOCATE SCREEN ── -->
+<div id="locate-screen">
+  <div id="flash-layer"></div>
+
+  <!-- Top colour zone -->
+  <div id="colour-zone">
+    <div class="locate-headline">Your order is on its way</div>
+    <div class="locate-signal" id="signal-icon">⚡</div>
+    <div class="locate-order-id" id="order-id-display">ORDER #RF-0001 · BAY 1A</div>
+    <div id="proximity-bar">
+      <div class="proximity-dot"></div>
+      <div class="proximity-dot"></div>
+      <div class="proximity-dot"></div>
+      <span class="proximity-label">Runner nearby — show this screen</span>
+    </div>
+  </div>
+
+  <!-- Low battery message -->
+  <div id="low-battery-msg">
+    <div class="low-battery-text">🔋 Low battery — wave your screen at the delivery person, they're nearby</div>
+  </div>
+
+  <!-- Bottom info zone -->
+  <div id="bottom-zone">
+    <div id="qr-container">
+      <div>
+        <div id="qr-canvas-wrap">
+          <canvas id="qr-canvas" width="96" height="96"></canvas>
+        </div>
+        <div class="qr-label">QR fallback</div>
+      </div>
+      <div id="order-summary">
+        <div class="order-vendor" id="summary-vendor">M&S Café</div>
+        <div class="order-item" id="summary-item">Flat White · Bay 1A · <span id="summary-session">S4F2A</span></div>
+        <div class="order-meta" id="summary-time">Ordered 14:32 · Est. arrival 14:37</div>
+        <div class="sats-badge" id="sats-reward-badge">⚡ +45 sats on delivery</div>
+      </div>
+    </div>
+    <div id="bottom-bar">
+      <button id="crowd-btn" onclick="toggleCrowdMode()">👥 I'm in a crowd</button>
+      <div id="nfc-status">
+        <div class="nfc-dot" id="nfc-dot"></div>
+        <span id="nfc-label">NFC STANDBY</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CONFIRMED SCREEN ── -->
+<div id="confirm-screen">
+  <div class="confirm-tick" id="confirm-tick">✓</div>
+  <div class="confirm-headline" id="confirm-headline">Order delivered!</div>
+  <div class="confirm-sub" id="confirm-sub">Your M&S Café order has arrived ☕</div>
+  <div class="confirm-sats" id="confirm-sats" style="display:none">⚡ +45 sats stacked</div>
+  <button class="confirm-dismiss" onclick="dismissConfirm()">DISMISS</button>
+</div>
+
+<script>
+// ── CONFIG ─────────────────────────────────────────────────────────────────
+// In production: pass these via URL params or Supabase lookup
+const CONFIG = (() => {
+  const p = new URLSearchParams(window.location.search);
+  return {
+    orderId:    p.get('order_id')    || 'RF-0001',
+    sessionId:  p.get('session_id') || 'S4F2A',
+    bayLabel:   p.get('bay')        || 'Bay 1A',
+    vendor:     p.get('vendor')     || 'M&S Café',
+    item:       p.get('item')       || 'Flat White',
+    // payment_preference: 'fiat' | 'sats' | 'hybrid'
+    payPref:    p.get('pay_pref')   || 'sats',
+    rewardSats: parseInt(p.get('reward_sats') || '45'),
+    orderTime:  p.get('order_time') || (() => {
+      const now = new Date();
+      return now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0');
+    })(),
+    estArrival: p.get('est_arrival') || null,
+  };
+})();
+
+// ── COLOUR LOGIC ───────────────────────────────────────────────────────────
+const MS_GREEN   = '#006B3C';
+const BTC_ORANGE = '#F7931A';
+
+function applyColourMode() {
+  const screen = document.getElementById('locate-screen');
+  const icon   = document.getElementById('signal-icon');
+
+  if (CONFIG.payPref === 'sats') {
+    screen.style.setProperty('--colour', BTC_ORANGE);
+    document.documentElement.style.setProperty('--colour', BTC_ORANGE);
+    icon.textContent = '⚡';
+  } else if (CONFIG.payPref === 'fiat') {
+    screen.style.setProperty('--colour', MS_GREEN);
+    document.documentElement.style.setProperty('--colour', MS_GREEN);
+    icon.textContent = '☕';
+  } else {
+    // Hybrid — alternating every 2s
+    screen.classList.add('hybrid-bg');
+    icon.textContent = '⚡';
+  }
+}
+
+// ── ORDER DISPLAY ──────────────────────────────────────────────────────────
+function populateOrderDisplay() {
+  document.getElementById('order-id-display').textContent =
+    `ORDER #${CONFIG.orderId} · ${CONFIG.bayLabel}`;
+  document.getElementById('summary-vendor').textContent  = CONFIG.vendor;
+  document.getElementById('summary-item').innerHTML =
+    `${CONFIG.item} · ${CONFIG.bayLabel} · <span id="summary-session">${CONFIG.sessionId}</span>`;
+
+  const arrTime = CONFIG.estArrival || (() => {
+    const d = new Date();
+    d.setMinutes(d.getMinutes() + 5);
+    return d.getHours() + ':' + String(d.getMinutes()).padStart(2,'0');
+  })();
+  document.getElementById('summary-time').textContent =
+    `Ordered ${CONFIG.orderTime} · Est. arrival ${arrTime}`;
+
+  // Sats badge visibility
+  const satsBadge = document.getElementById('sats-reward-badge');
+  if (CONFIG.payPref === 'fiat') {
+    satsBadge.style.display = 'none';
+  } else {
+    satsBadge.textContent = `⚡ +${CONFIG.rewardSats} sats on delivery`;
+  }
+}
+
+// ── QR CODE (minimal inline renderer, no external lib needed) ──────────────
+// Simple QR-like checkerboard placeholder — replace with qrcode.js in prod
+function renderQR() {
+  const canvas = document.getElementById('qr-canvas');
+  const ctx = canvas.getContext('2d');
+  const size = 96;
+  const payload = JSON.stringify({
+    order_id: CONFIG.orderId,
+    session_id: CONFIG.sessionId,
+    bay: CONFIG.bayLabel,
+    ts: new Date().toISOString()
+  });
+
+  // Use a seeded pattern from the payload length for a visual placeholder
+  // In production: use qrcode-generator or qr.js library
+  const seed = payload.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  const modules = 21; // QR version 1
+  const cell = Math.floor(size / modules);
+
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, size, size);
+
+  // Draw finder patterns + data modules (simplified visual)
+  function drawFinder(x, y) {
+    ctx.fillStyle = '#000';
+    ctx.fillRect(x, y, 7*cell, 7*cell);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(x+cell, y+cell, 5*cell, 5*cell);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(x+2*cell, y+2*cell, 3*cell, 3*cell);
+  }
+  drawFinder(0, 0);
+  drawFinder((modules-7)*cell, 0);
+  drawFinder(0, (modules-7)*cell);
+
+  // Data modules from seed
+  let r = seed;
+  for (let row = 0; row < modules; row++) {
+    for (let col = 0; col < modules; col++) {
+      const inFinder = (row < 8 && col < 8) || (row < 8 && col >= modules-8) || (row >= modules-8 && col < 8);
+      if (!inFinder) {
+        r = (r * 1664525 + 1013904223) >>> 0;
+        if (r % 2 === 0) {
+          ctx.fillStyle = '#000';
+          ctx.fillRect(col*cell, row*cell, cell, cell);
+        }
+      }
+    }
+  }
+
+  // Note: in production replace this with a proper QR lib that encodes real data
+}
+
+// ── FLASH LOGIC ────────────────────────────────────────────────────────────
+let _flashActive = false;
+let _flashInterval = null;
+let _crowdMode = false;
+let _lowBattery = false;
+
+function startFlash() {
+  if (_flashActive || _crowdMode || _lowBattery) return;
+  _flashActive = true;
+  const layer = document.getElementById('flash-layer');
+
+  let count = 0;
+  const cycle = () => {
+    if (count >= 3) { // 3 cycles then stop
+      layer.style.opacity = '0';
+      _flashActive = false;
+      return;
+    }
+    // Flash on
+    layer.style.opacity = '0.9';
+    layer.style.transition = 'opacity 0.08s ease';
+    setTimeout(() => {
+      // Flash off
+      layer.style.opacity = '0';
+      layer.style.transition = 'opacity 0.5s ease';
+      count++;
+      setTimeout(cycle, 500); // 0.5s off
+    }, 1500); // 1.5s on
+  };
+  cycle();
+}
+
+function suppressFlash() {
+  _flashActive = false;
+  document.getElementById('flash-layer').style.opacity = '0';
+  if (_flashInterval) { clearInterval(_flashInterval); _flashInterval = null; }
+}
+
+// ── BATTERY LOGIC ──────────────────────────────────────────────────────────
+async function checkBattery() {
+  if (!navigator.getBattery) return;
+  try {
+    const battery = await navigator.getBattery();
+    const handleLevel = () => {
+      if (battery.level < 0.10) {
+        _lowBattery = true;
+        suppressFlash();
+        document.getElementById('low-battery-msg').classList.add('show');
+      } else {
+        _lowBattery = false;
+        document.getElementById('low-battery-msg').classList.remove('show');
+      }
+    };
+    handleLevel();
+    battery.addEventListener('levelchange', handleLevel);
+  } catch(e) {
+    console.log('Battery API not available:', e);
+  }
+}
+
+// ── CROWD MODE ─────────────────────────────────────────────────────────────
+function toggleCrowdMode() {
+  _crowdMode = !_crowdMode;
+  const btn = document.getElementById('crowd-btn');
+  if (_crowdMode) {
+    btn.classList.add('active');
+    btn.textContent = '✓ Crowd mode on';
+    suppressFlash();
+  } else {
+    btn.classList.remove('active');
+    btn.textContent = '👥 I\'m in a crowd';
+    if (!_lowBattery) startFlash();
+  }
+}
+
+// ── NFC HANDOVER ───────────────────────────────────────────────────────────
+let _nfcReader = null;
+
+async function initNFC() {
+  if (!('NDEFReader' in window)) {
+    setNFCStatus('NOT AVAILABLE', false);
+    return;
+  }
+  try {
+    _nfcReader = new NDEFReader();
+    await _nfcReader.scan();
+    setNFCStatus('LISTENING', true);
+
+    _nfcReader.onreading = (event) => {
+      // Parse NFC message from runner device
+      let payload = {};
+      for (const record of event.message.records) {
+        if (record.recordType === 'text') {
+          try {
+            const decoder = new TextDecoder();
+            payload = JSON.parse(decoder.decode(record.data));
+          } catch(e) { /* non-JSON record, ignore */ }
+        }
+      }
+      // Validate order_id matches if present
+      if (!payload.order_id || payload.order_id === CONFIG.orderId) {
+        confirmDelivery('nfc', payload);
+      }
+    };
+
+    _nfcReader.onreadingerror = () => {
+      setNFCStatus('READ ERR', false);
+    };
+  } catch(e) {
+    setNFCStatus('DENIED', false);
+    console.warn('NFC init failed:', e);
+  }
+}
+
+function setNFCStatus(label, active) {
+  document.getElementById('nfc-label').textContent = label;
+  document.getElementById('nfc-dot').className = 'nfc-dot' + (active ? ' listening' : '');
+}
+
+// ── DELIVERY CONFIRMATION ──────────────────────────────────────────────────
+async function confirmDelivery(method, payload) {
+  // Stop flash, NFC listening
+  suppressFlash();
+  if (_nfcReader) { try { _nfcReader.stop?.(); } catch(e) {} }
+
+  // Update Supabase (if credentials available)
+  await reportDelivery(method, payload);
+
+  // Show confirm screen
+  showConfirmScreen();
+}
+
+async function reportDelivery(method, payload) {
+  // In production: POST to Supabase orders table
+  // Triggers sats reward issuance via Edge Function
+  console.log('[REFUELER] Delivery confirmed via', method, payload);
+}
+
+function showConfirmScreen() {
+  const isSats = CONFIG.payPref !== 'fiat';
+  const screen = document.getElementById('confirm-screen');
+  const colour = (CONFIG.payPref === 'sats') ? BTC_ORANGE : MS_GREEN;
+
+  screen.style.setProperty('--colour', colour);
+  screen.style.background = colour;
+
+  if (isSats) {
+    document.getElementById('confirm-headline').textContent = 'Order delivered!';
+    document.getElementById('confirm-sub').textContent = `Your ${CONFIG.vendor} order has arrived + you stacked ${CONFIG.rewardSats} sats ⚡`;
+    const satsEl = document.getElementById('confirm-sats');
+    satsEl.style.display = 'block';
+    satsEl.textContent = `⚡ +${CONFIG.rewardSats} sats stacked`;
+  } else {
+    document.getElementById('confirm-tick').textContent = '✓';
+    document.getElementById('confirm-headline').textContent = 'Order delivered!';
+    document.getElementById('confirm-sub').textContent = `Your ${CONFIG.vendor} order has arrived! ☕`;
+    document.getElementById('confirm-sats').style.display = 'none';
+  }
+
+  screen.classList.add('show');
+}
+
+function dismissConfirm() {
+  document.getElementById('confirm-screen').classList.remove('show');
+}
+
+// ── SCREEN BRIGHTNESS (best-effort) ────────────────────────────────────────
+function requestHighBrightness() {
+  // NoSleep / WakeLock API to prevent screen dim
+  if ('wakeLock' in navigator) {
+    navigator.wakeLock.request('screen').catch(e => console.log('WakeLock:', e));
+  }
+  // screen.orientation.lock — only works in PWA / fullscreen context
+  try {
+    screen.orientation.lock('portrait').catch(() => {});
+  } catch(e) {}
+}
+
+// ── DEV: simulate NFC tap (remove in production) ───────────────────────────
+// Tap signal icon 3× rapidly to trigger confirm for testing
+let _tapCount = 0;
+let _tapTimer = null;
+document.getElementById('signal-icon').addEventListener('click', () => {
+  _tapCount++;
+  if (_tapTimer) clearTimeout(_tapTimer);
+  _tapTimer = setTimeout(() => { _tapCount = 0; }, 800);
+  if (_tapCount >= 3) {
+    _tapCount = 0;
+    confirmDelivery('qr_dev', { order_id: CONFIG.orderId, runner_id: 'DEV', ts: new Date().toISOString() });
+  }
+});
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  applyColourMode();
+  populateOrderDisplay();
+  renderQR();
+  requestHighBrightness();
+  checkBattery();
+
+  // Start flash after short delay (gives screen time to render)
+  setTimeout(() => {
+    if (!_lowBattery && !_crowdMode) startFlash();
+  }, 600);
+
+  // Init NFC (async, non-blocking)
+  initNFC();
+});
+</script>
+</body>
+</html>

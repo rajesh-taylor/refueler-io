@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REFUELER — Command Centre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  /* ─── DESIGN TOKENS ─── */
+  :root {
+    --c-bg:       #F5F4F0;
+    --c-surface:  #FFFFFF;
+    --c-border:   rgba(0,0,0,0.10);
+    --c-border-m: rgba(0,0,0,0.18);
+    --c-text-1:   #1A1A1A;
+    --c-text-2:   #6B6B6B;
+    --c-text-3:   #9E9E9E;
+    --c-accent:   #1A1A1A;
+    --c-green:    #1C7C4A;
+    --c-green-bg: #EBF7F0;
+    --c-green-dim:#8FC9A8;
+    --c-amber:    #B85C00;
+    --c-amber-bg: #FEF3E6;
+    --c-red:      #C0392B;
+    --c-console:  #0F1117;
+    --c-console-t:#C8FFD4;
+    --c-console-dim:#4A5568;
+    --c-dial-track: rgba(0,0,0,0.08);
+    --c-dial-fill:  #1C7C4A;
+    --sidebar-w: 380px;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  /* ─── SESSION 6a: RAIL ─── */
+  .rail-station-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 0; border-bottom: 1px solid var(--c-border); font-size: 12px;
+  }
+  .rail-station-row:last-child { border-bottom: none; }
+  .rail-crs {
+    font-family: var(--mono); font-size: 10px; font-weight: 700;
+    letter-spacing: 0.08em; color: var(--c-text-3); width: 32px; flex-shrink: 0;
+  }
+  .rail-station-name { flex: 1; color: var(--c-text-1); }
+  .rail-lead { font-family: var(--mono); font-size: 11px; color: var(--c-text-2); white-space: nowrap; }
+  .rail-status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--c-text-3); flex-shrink: 0; }
+  .rail-status-dot.active   { background: var(--c-green); box-shadow: 0 0 5px var(--c-green); }
+  .rail-status-dot.terminus { background: #F7931A; box-shadow: 0 0 5px #F7931A; }
+  .darwin-status-bar {
+    display: flex; align-items: center; gap: 8px; margin-top: 10px;
+    padding: 8px 10px; border-radius: 6px;
+    background: var(--c-green-bg); border: 1px solid rgba(28,124,74,0.2);
+  }
+  .darwin-status-bar.disconnected { background: var(--c-amber-bg); border-color: rgba(184,92,0,0.2); }
+  .darwin-status-text { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; color: var(--c-green); }
+  .darwin-status-bar.disconnected .darwin-status-text { color: var(--c-amber); }
+  .console-tag.rail { color: #7DD3FC; }
+  .console-msg.rail { color: #BAE6FD; }
+
+  [data-theme="dark"] {
+    --c-bg:       #0F1117;
+    --c-surface:  #181C23;
+    --c-border:   rgba(255,255,255,0.08);
+    --c-border-m: rgba(255,255,255,0.15);
+    --c-text-1:   #E8E6DF;
+    --c-text-2:   #8A8A8A;
+    --c-text-3:   #555;
+    --c-accent:   #E8E6DF;
+    --c-green:    #3DCA7A;
+    --c-green-bg: #0D2B1A;
+    --c-green-dim:#2A6644;
+    --c-amber:    #E8A23A;
+    --c-amber-bg: #2B1D08;
+    --c-red:      #E05050;
+    --c-console:  #080B10;
+    --c-console-t:#C8FFD4;
+    --c-console-dim:#3A4A5A;
+    --c-dial-track: rgba(255,255,255,0.07);
+    --c-dial-fill:  #3DCA7A;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--c-bg);
+    color: var(--c-text-1);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* ─── TOP NAV ─── */
+  .topnav {
+    height: 44px;
+    border-bottom: 1px solid var(--c-border);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 16px;
+    background: var(--c-surface);
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  .nav-wordmark {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    color: var(--c-text-1);
+    text-transform: uppercase;
+  }
+  .nav-sep { width: 1px; height: 16px; background: var(--c-border-m); }
+  .nav-session {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--c-text-3);
+    letter-spacing: 0.06em;
+  }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+  .theme-toggle {
+    background: none; border: 1px solid var(--c-border-m);
+    border-radius: 6px; padding: 4px 10px;
+    font-family: var(--mono); font-size: 10px;
+    color: var(--c-text-2); cursor: pointer;
+    letter-spacing: 0.08em; transition: all 0.2s;
+  }
+  .theme-toggle:hover { border-color: var(--c-border-m); background: var(--c-bg); }
+  .status-pill {
+    display: flex; align-items: center; gap: 6px;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-family: var(--mono);
+    letter-spacing: 0.06em;
+    background: var(--c-green-bg); color: var(--c-green);
+    border: 1px solid rgba(28,124,74,0.2);
+  }
+  .status-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--c-green);
+    animation: pulse-dot 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.75); }
+  }
+
+  /* ─── LAYOUT ─── */
+  .workspace {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: var(--sidebar-w);
+    flex-shrink: 0;
+    border-right: 1px solid var(--c-border);
+    background: var(--c-surface);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 24px 20px;
+    gap: 20px;
+  }
+
+  .card {
+    border: 1px solid var(--c-border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    background: var(--c-bg);
+  }
+
+  .card-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--c-text-3);
+    margin-bottom: 10px;
+  }
+
+  /* Site Identity Card */
+  .site-name {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--c-text-1);
+    line-height: 1.4;
+    margin-bottom: 4px;
+  }
+  .site-coords {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--c-text-3);
+    letter-spacing: 0.04em;
+  }
+
+  .partner-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--c-border);
+  }
+  .partner-badge {
+    font-size: 11px;
+    font-family: var(--mono);
+    letter-spacing: 0.06em;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: var(--c-green-bg);
+    color: var(--c-green);
+    border: 1px solid rgba(28,124,74,0.15);
+  }
+  .partner-label { font-size: 12px; color: var(--c-text-2); }
+  .brand-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 5px;
+    font-size: 9px;
+    font-weight: 700;
+    font-family: var(--mono);
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.10);
+  }
+
+  /* Verify Dial */
+  .dial-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 0 8px;
+  }
+  .dial-svg { display: block; }
+  .dial-status-text {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--c-text-3);
+    text-align: center;
+  }
+  .dial-status-text.verified { color: var(--c-green); }
+  .verify-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1.5px solid var(--c-border-m);
+    background: none;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--c-text-1);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .verify-btn:hover { background: var(--c-bg); border-color: var(--c-green); color: var(--c-green); }
+  .verify-btn.verified {
+    border-color: var(--c-green);
+    background: var(--c-green-bg);
+    color: var(--c-green);
+  }
+
+  /* Partner Card */
+  .route-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--c-border);
+    gap: 8px;
+  }
+  .route-row:last-child { border-bottom: none; }
+  .route-name { font-size: 13px; color: var(--c-text-1); }
+  .route-time {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--c-text-1);
+  }
+  .route-time.live {
+    color: var(--c-green);
+  }
+  .route-time.no-data { color: var(--c-text-3); font-size: 11px; }
+  .route-sub { font-size: 11px; color: var(--c-text-3); }
+
+  .crossing-flag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: var(--c-amber-bg);
+    border: 1px solid rgba(184,92,0,0.15);
+  }
+  .crossing-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--c-amber); flex-shrink: 0; }
+  .crossing-text { font-size: 11px; color: var(--c-amber); font-family: var(--mono); letter-spacing: 0.04em; }
+
+  /* Supabase config card */
+  .config-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--c-border-m);
+    border-radius: 6px;
+    background: var(--c-surface);
+    color: var(--c-text-1);
+    font-family: var(--mono);
+    font-size: 11px;
+    margin-top: 6px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .config-input:focus { border-color: var(--c-green); }
+  .config-label { font-size: 11px; color: var(--c-text-2); margin-top: 10px; }
+  .config-btn {
+    margin-top: 12px;
+    width: 100%;
+    padding: 9px;
+    border-radius: 6px;
+    border: 1px solid var(--c-border-m);
+    background: none;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--c-text-2);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .config-btn:hover { border-color: var(--c-green); color: var(--c-green); background: var(--c-green-bg); }
+
+  /* Import zone */
+  .import-zone {
+    border: 1.5px dashed var(--c-border-m);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .import-zone:hover { border-color: var(--c-green); background: var(--c-green-bg); }
+  .import-zone-text { font-size: 12px; color: var(--c-text-3); font-family: var(--mono); }
+  .import-zone.drag-over { border-color: var(--c-green); background: var(--c-green-bg); }
+  #json-file-input { display: none; }
+
+  /* ─── MAIN VIEWPORT ─── */
+  .viewport {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Telemetry Console */
+  .console {
+    flex: 1;
+    background: var(--c-console);
+    overflow-y: auto;
+    padding: 20px 24px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.8;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    transition: background 0.3s;
+  }
+  /* Paper mode: console matches light surface */
+  :root:not([data-theme="dark"]) .console {
+    background: #F5F4F0;
+  }
+  :root:not([data-theme="dark"]) .console-time { color: #999; }
+  :root:not([data-theme="dark"]) .console-msg { color: #2a2a2a; }
+  :root:not([data-theme="dark"]) .tag-sys { color: #555; }
+  :root:not([data-theme="dark"]) .tag-ok { color: #006B3C; }
+  :root:not([data-theme="dark"]) .tag-warn { color: #B85C00; }
+  :root:not([data-theme="dark"]) .tag-err { color: #B91C1C; }
+  :root:not([data-theme="dark"]) .tag-info { color: #1a4a7a; }
+  .console-line {
+    display: flex;
+    gap: 12px;
+    opacity: 0;
+    animation: fade-in 0.3s forwards;
+  }
+  @keyframes fade-in {
+    to { opacity: 1; }
+  }
+  .console-ts { color: var(--c-console-dim); flex-shrink: 0; }
+  .console-tag {
+    flex-shrink: 0;
+    padding: 0 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+  }
+  .console-tag.sys { color: #5ABCFF; }
+  .console-tag.ok  { color: var(--c-console-t); }
+  .console-tag.warn { color: #F9CB42; }
+  .console-tag.err  { color: #FF6B6B; }
+  .console-tag.info { color: var(--c-console-dim); }
+  .console-msg { color: var(--c-console-t); flex: 1; letter-spacing: 0.03em; }
+  .console-msg.dim { color: var(--c-console-dim); }
+  .console-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 14px;
+    background: var(--c-console-t);
+    vertical-align: middle;
+    margin-left: 4px;
+    animation: blink 1.1s steps(1) infinite;
+  }
+  @keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+
+  /* Stats bar at bottom of console */
+  .stats-bar {
+    display: flex;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    background: var(--c-console);
+    flex-shrink: 0;
+    transition: background 0.3s;
+  }
+  /* Paper mode: stats bar matches light surface */
+  :root:not([data-theme="dark"]) .stats-bar {
+    background: #F5F4F0;
+    border-top: 1px solid #E0DDD6;
+  }
+  :root:not([data-theme="dark"]) .stat-tile-label { color: #888; }
+  :root:not([data-theme="dark"]) .stat-tile-value { color: #1a1a1a; }
+  :root:not([data-theme="dark"]) .stat-tile-sub   { color: #999; }
+  :root:not([data-theme="dark"]) .stat-tile { border-right-color: #E0DDD6; }
+  .stat-tile {
+    flex: 1;
+    padding: 14px 16px;
+    border-right: 1px solid rgba(255,255,255,0.06);
+  }
+  .stat-tile:last-child { border-right: none; }
+  .stat-tile-label { font-family: var(--mono); font-size: 10px; color: var(--c-console-dim); letter-spacing: 0.1em; text-transform: uppercase; }
+  .stat-tile-value { font-family: var(--mono); font-size: 22px; font-weight: 500; color: var(--c-console-t); margin-top: 4px; }
+  .stat-tile-sub { font-family: var(--mono); font-size: 10px; color: var(--c-console-dim); margin-top: 2px; }
+
+  /* Geofence visualiser strip */
+  .geo-strip {
+    height: 48px;
+    background: var(--c-surface);
+    border-bottom: 1px solid var(--c-border);
+    border-top: 1px solid var(--c-border);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 20px;
+    flex-shrink: 0;
+  }
+  .geo-label { font-family: var(--mono); font-size: 10px; color: var(--c-text-3); letter-spacing: 0.1em; text-transform: uppercase; flex-shrink: 0; }
+  .geo-rings { display: flex; align-items: center; gap: 12px; flex: 1; }
+  .geo-ring-item { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 10px; color: var(--c-text-2); }
+  .geo-ring-swatch { width: 10px; height: 10px; border-radius: 50%; border: 2px solid; }
+  .geo-ring-swatch.outer { border-color: var(--c-green); background: transparent; }
+  .geo-ring-swatch.inner { border-color: var(--c-amber); background: transparent; }
+  .geo-coords { font-family: var(--mono); font-size: 10px; color: var(--c-text-3); margin-left: auto; }
+
+  /* Mapbox placeholder (until key provided) */
+  .map-placeholder {
+    height: 260px;
+    background: var(--c-surface);
+    border-bottom: 1px solid var(--c-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .map-placeholder-text { font-family: var(--mono); font-size: 11px; color: var(--c-text-3); letter-spacing: 0.08em; }
+  .map-placeholder-coords { font-family: var(--mono); font-size: 12px; color: var(--c-green); }
+  #map { width: 100%; height: 260px; flex-shrink: 0; display: none; }
+
+  /* Scrollbar */
+  .console::-webkit-scrollbar { width: 4px; }
+  .console::-webkit-scrollbar-track { background: transparent; }
+  .console::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--c-border-m); border-radius: 2px; }
+
+  /* Import toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 100;
+    pointer-events: none;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.ok { background: var(--c-green-bg); color: var(--c-green); border: 1px solid rgba(28,124,74,0.2); }
+  .toast.err { background: #FEF0F0; color: var(--c-red); border: 1px solid rgba(192,57,43,0.2); }
+
+  /* ─── AUTH MODAL ─── */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .modal-backdrop.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border-m);
+    border-radius: 12px;
+    padding: 28px 28px 24px;
+    width: 360px;
+    max-width: calc(100vw - 40px);
+    transform: translateY(12px);
+    transition: transform 0.25s;
+  }
+  .modal-backdrop.open .modal { transform: translateY(0); }
+  .modal-title {
+    font-family: var(--mono); font-size: 13px; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--c-text-1); margin-bottom: 6px;
+  }
+  .modal-sub {
+    font-size: 12px; color: var(--c-text-2); margin-bottom: 20px; line-height: 1.5;
+  }
+  .modal-input {
+    width: 100%; padding: 10px 12px;
+    border: 1px solid var(--c-border-m); border-radius: 7px;
+    background: var(--c-bg); color: var(--c-text-1);
+    font-family: var(--mono); font-size: 13px;
+    outline: none; transition: border-color 0.2s;
+    margin-bottom: 12px;
+  }
+  .modal-input:focus { border-color: var(--c-green); }
+  .modal-btn-row { display: flex; gap: 8px; margin-top: 4px; }
+  .modal-btn {
+    flex: 1; padding: 11px;
+    border-radius: 7px; border: 1px solid var(--c-border-m);
+    background: none; font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--c-text-2); cursor: pointer; transition: all 0.2s;
+  }
+  .modal-btn.primary {
+    background: var(--c-green); color: #fff;
+    border-color: var(--c-green);
+  }
+  .modal-btn.primary:hover { opacity: 0.85; }
+  .modal-btn:hover { border-color: var(--c-border-m); background: var(--c-bg); }
+  .modal-sent {
+    text-align: center; padding: 16px 0 8px;
+    font-family: var(--mono); font-size: 12px;
+    color: var(--c-green); letter-spacing: 0.06em; display: none;
+  }
+  .modal-sent.show { display: block; }
+
+  /* ─── REVENUE TILES (admin-only, Session 5) ─── */
+  .stat-tile.revenue {
+    cursor: pointer;
+    transition: background 0.2s;
+    position: relative;
+    border-left: 1px solid rgba(247,147,26,0.18);
+  }
+  .stat-tile.revenue:hover { background: rgba(247,147,26,0.06); }
+  .stat-tile.revenue .stat-tile-label { color: #F7931A; opacity: 0.85; }
+  .stat-tile.revenue .stat-tile-value { color: #F7931A; }
+  .stat-tile.revenue .stat-tile-sub   { color: rgba(247,147,26,0.50); }
+  .stat-tile-lock {
+    position: absolute;
+    top: 9px; right: 11px;
+    font-size: 9px;
+    opacity: 0.30;
+  }
+  /* Revenue console breakdown block */
+  .console-revenue-block {
+    margin: 6px 0 10px;
+    border-left: 2px solid rgba(247,147,26,0.35);
+    padding-left: 14px;
+  }
+  .console-revenue-row {
+    display: flex;
+    gap: 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: rgba(247,147,26,0.75);
+    line-height: 1.95;
+    letter-spacing: 0.02em;
+  }
+  .console-revenue-row.rev-total {
+    color: #F7931A;
+    font-weight: 500;
+    border-top: 1px solid rgba(247,147,26,0.18);
+    margin-top: 4px;
+    padding-top: 4px;
+  }
+  .console-revenue-ts {
+    color: rgba(247,147,26,0.40);
+    flex-shrink: 0;
+    min-width: 64px;
+  }
+
+  /* ─── NAV AUTH SLOT ─── */
+  .nav-auth-btn {
+    background: none; border: 1px solid var(--c-border-m);
+    border-radius: 6px; padding: 4px 10px;
+    font-family: var(--mono); font-size: 10px;
+    color: var(--c-text-2); cursor: pointer;
+    letter-spacing: 0.08em; transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .nav-auth-btn:hover { border-color: var(--c-green); color: var(--c-green); }
+  .nav-auth-chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 3px 10px 3px 6px;
+    border: 1px solid var(--c-border-m); border-radius: 6px;
+    cursor: pointer; transition: border-color 0.2s;
+  }
+  .nav-auth-chip:hover { border-color: var(--c-red); }
+  .nav-auth-name { font-family: var(--mono); font-size: 10px; color: var(--c-text-1); letter-spacing: 0.06em; }
+  .nav-auth-logout { font-family: var(--mono); font-size: 9px; color: var(--c-text-3); }
+</style>
+</head>
+<body>
+
+<!-- ─── TOP NAV ─── -->
+<nav class="topnav">
+  <span class="nav-wordmark">REFUELER.IO</span>
+  <div class="nav-sep"></div>
+  <span class="nav-session" id="nav-session-id">CMD — SESSION 5</span>
+  <div class="nav-right">
+    <div class="status-pill" id="status-pill">
+      <div class="status-dot"></div>
+      <span id="status-text">STANDBY</span>
+    </div>
+    <!-- Auth slot -->
+    <div id="nav-auth-slot">
+      <button class="nav-auth-btn" onclick="openAuthModal()">⬡ SIGN IN</button>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()">PAPER / CARBON</button>
+  </div>
+</nav>
+
+<!-- ─── WORKSPACE ─── -->
+<div class="workspace">
+
+  <!-- ─── SIDEBAR ─── -->
+  <aside class="sidebar">
+
+    <!-- Site Identity -->
+    <div class="card">
+      <div class="card-label">Active Site</div>
+      <div style="display:flex;align-items:flex-start;gap:10px;">
+        <span class="brand-chip" style="background:#E82127;color:#fff;margin-top:2px;">T</span>
+        <div class="site-name">Lakeside — Tesla Superchargers<br>Car Park G</div>
+      </div>
+      <div class="site-coords" style="margin-top:6px;">51.489452°N, 0.286680°E · RM20 2ZP</div>
+      <div class="partner-row">
+        <span class="partner-badge">PRIMARY PARTNER</span>
+        <span class="brand-chip" style="background:#006B3C;color:#FFD700;letter-spacing:0.01em;">M&S</span>
+        <span class="partner-label">M&S Café, Level 2</span>
+      </div>
+    </div>
+
+    <!-- Verify Dial -->
+    <div class="card">
+      <div class="card-label">Session Verification</div>
+      <div class="dial-wrap">
+        <svg class="dial-svg" width="140" height="140" viewBox="0 0 140 140">
+          <!-- Track -->
+          <circle cx="70" cy="70" r="54"
+            fill="none"
+            stroke="var(--c-dial-track)"
+            stroke-width="6"
+            stroke-dasharray="339.3"
+            stroke-dashoffset="0"
+            stroke-linecap="round"/>
+          <!-- Fill arc -->
+          <circle cx="70" cy="70" r="54"
+            id="dial-arc"
+            fill="none"
+            stroke="var(--c-dial-fill)"
+            stroke-width="6"
+            stroke-dasharray="339.3"
+            stroke-dashoffset="339.3"
+            stroke-linecap="round"
+            stroke-dasharray="339.3 0"
+            transform="rotate(-90 70 70)"
+            style="transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)"/>
+          <!-- Dashed overlay (pre-verify) -->
+          <circle cx="70" cy="70" r="54"
+            id="dial-dashed"
+            fill="none"
+            stroke="var(--c-text-3)"
+            stroke-width="1"
+            stroke-dasharray="4 8"
+            transform="rotate(-90 70 70)"
+            style="transition: opacity 0.6s"/>
+          <!-- Centre text -->
+          <text id="dial-pct" x="70" y="66" text-anchor="middle"
+            font-family="'IBM Plex Mono', monospace"
+            font-size="18" font-weight="500"
+            fill="var(--c-text-1)">—</text>
+          <text x="70" y="82" text-anchor="middle"
+            font-family="'IBM Plex Mono', monospace"
+            font-size="9" letter-spacing="0.1em"
+            fill="var(--c-text-3)">ETA MIN</text>
+        </svg>
+        <div class="dial-status-text" id="dial-status">AWAITING VERIFICATION</div>
+      </div>
+      <button class="verify-btn" id="verify-btn" onclick="verifySession()">
+        ▶ VERIFY SESSION
+      </button>
+    </div>
+
+    <!-- Partner Card — Walk Times -->
+    <div class="card">
+      <div class="card-label">M&S Café — ETA Audit Mode</div>
+
+      <div class="route-row">
+        <div>
+          <div class="route-name">Bay 1A → M&S Café</div>
+          <div class="route-sub">Nearest bay, off-peak crossing</div>
+        </div>
+        <div class="route-time" id="rt-1a-mas">2:32</div>
+      </div>
+
+      <div class="route-row">
+        <div>
+          <div class="route-name">Bay 4D → M&S Café</div>
+          <div class="route-sub">Furthest bay, off-peak crossing</div>
+        </div>
+        <div class="route-time" id="rt-4d-mas">3:12</div>
+      </div>
+
+      <div class="route-row">
+        <div>
+          <div class="route-name">M&S Café → Bay 4D</div>
+          <div class="route-sub">Return run</div>
+        </div>
+        <div class="route-time" id="rt-mas-4d">3:12</div>
+      </div>
+
+      <div class="route-row">
+        <div>
+          <div class="route-name">M&S Café → Bus Station (far)</div>
+          <div class="route-sub">Furthest bay</div>
+        </div>
+        <div class="route-time">3:10</div>
+      </div>
+
+      <div class="route-row" style="border-bottom:none; padding-bottom:0;">
+        <div>
+          <div class="route-name" style="font-weight:500;">Total ETA range</div>
+          <div class="route-sub">Join queue → drink at bay</div>
+        </div>
+        <div>
+          <div class="route-time" style="text-align:right;">2:47–4:42</div>
+          <div class="route-sub" style="text-align:right;">best–worst case</div>
+        </div>
+      </div>
+
+      <div class="crossing-flag">
+        <div class="crossing-dot"></div>
+        <div class="crossing-text">CROSSING VAR: +0:15 off-peak → +1:30 peak</div>
+      </div>
+
+      <!-- Live Supabase stats -->
+      <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--c-border);">
+        <div class="card-label" style="margin-bottom:6px;">Live from Supabase · walk_stats</div>
+        <div class="route-row" style="border:none;padding:4px 0;">
+          <div class="route-name" style="font-size:12px;">Bay → M&S (WALK_TESLA_TO_MAS)</div>
+          <div class="route-time live" id="live-to-mas">—</div>
+        </div>
+        <div class="route-row" style="border:none;padding:4px 0;">
+          <div class="route-name" style="font-size:12px;">M&S → Bay (WALK_MAS_TO_TESLA)</div>
+          <div class="route-time live" id="live-to-bay">—</div>
+        </div>
+        <div class="route-row" style="border:none;padding:4px 0;border-bottom:none;">
+          <div class="route-name" style="font-size:12px;">Bay → Costa L2 (WALK_TESLA_TO_COSTA_L2)</div>
+          <div class="route-time live" id="live-to-costa">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Partners Card — all brands -->
+    <div class="card">
+      <div class="card-label">Partners</div>
+      <!-- M&S — active -->
+      <div class="partner-row" style="margin-top:0;padding-top:0;border-top:none;">
+        <span class="brand-chip" style="background:#006B3C;color:#FFD700;letter-spacing:0.01em;">M&S</span>
+        <div style="flex:1;">
+          <div class="route-name" style="font-size:12px;">M&S Café, Level 2</div>
+          <div class="route-sub">Primary · Walk 2:32–3:12</div>
+        </div>
+        <span class="partner-badge">ACTIVE</span>
+      </div>
+      <!-- Black Sheep — pending -->
+      <div class="partner-row" style="opacity:0.45;">
+        <span class="brand-chip" style="background:#1A1A1A;color:#FFFFFF;">BS</span>
+        <div style="flex:1;">
+          <div class="route-name" style="font-size:12px;">Black Sheep Coffee, Level 1</div>
+          <div class="route-sub">Next to Café Nero · est. ~4:00</div>
+        </div>
+        <span class="partner-badge" style="background:var(--c-bg);color:var(--c-text-3);border-color:var(--c-border-m);">PENDING</span>
+      </div>
+    </div>
+
+    <!-- Session 6a: Rail Network Card -->
+    <div class="card" id="rail-card">
+      <div class="card-label">C2C Rail Network — Darwin</div>
+
+      <!-- Darwin bridge status -->
+      <div class="darwin-status-bar disconnected" id="darwin-status-bar">
+        <div class="status-dot" style="background:var(--c-amber);animation:none;"></div>
+        <div class="darwin-status-text" id="darwin-status-text">BRIDGE DISCONNECTED — awaiting first event</div>
+      </div>
+
+      <!-- Station list -->
+      <div style="margin-top:12px;">
+        <div class="rail-station-row">
+          <div class="rail-status-dot terminus"></div>
+          <div class="rail-crs">FST</div>
+          <div class="rail-station-name">London Fenchurch St</div>
+          <div class="rail-lead" style="color:#F7931A;">TERMINUS</div>
+        </div>
+        <div class="rail-station-row">
+          <div class="rail-status-dot" id="dot-LIM"></div>
+          <div class="rail-crs">LIM</div>
+          <div class="rail-station-name">Limehouse</div>
+          <div class="rail-lead">4 min</div>
+        </div>
+        <div class="rail-station-row">
+          <div class="rail-status-dot" id="dot-WHA"></div>
+          <div class="rail-crs">WHA</div>
+          <div class="rail-station-name">West Ham</div>
+          <div class="rail-lead">8 min</div>
+        </div>
+        <div class="rail-station-row">
+          <div class="rail-status-dot" id="dot-UPM"></div>
+          <div class="rail-crs">UPM</div>
+          <div class="rail-station-name">Upminster</div>
+          <div class="rail-lead">22 min</div>
+        </div>
+        <div class="rail-station-row">
+          <div class="rail-status-dot" id="dot-PFL"></div>
+          <div class="rail-crs">PFL</div>
+          <div class="rail-station-name">Purfleet</div>
+          <div class="rail-lead">32 min</div>
+        </div>
+        <div class="rail-station-row">
+          <div class="rail-status-dot" id="dot-GRY"></div>
+          <div class="rail-crs">GRY</div>
+          <div class="rail-station-name">Grays</div>
+          <div class="rail-lead">38 min</div>
+        </div>
+        <div class="rail-station-row">
+          <div class="rail-status-dot" id="dot-SOC"></div>
+          <div class="rail-crs">SOC</div>
+          <div class="rail-station-name">Southend Central</div>
+          <div class="rail-lead">65 min</div>
+        </div>
+      </div>
+
+      <!-- Last event summary -->
+      <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--c-border);">
+        <div class="card-label" style="margin-bottom:4px;">Last Darwin event</div>
+        <div id="rail-last-event" style="font-family:var(--mono);font-size:10px;color:var(--c-text-3);line-height:1.7;">
+          No events yet — connect bridge to begin
+        </div>
+      </div>
+    </div>
+
+    <!-- Supabase Config -->
+    <div class="card">
+      <div class="card-label">Supabase Connection</div>
+      <div class="config-label">Project URL</div>
+      <input class="config-input" type="text" id="sb-url"
+        placeholder="https://xxxx.supabase.co"
+        value="https://tihgvdokeofnjxjkenmm.supabase.co">
+      <div class="config-label">Anon Public Key</div>
+      <input class="config-input" type="password" id="sb-key"
+        placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp..."
+        value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpaGd2ZG9rZW9mbmp4amtlbm1tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTY2NDksImV4cCI6MjA5NDE5MjY0OX0.cRb94WeIP8yRfWd9s2XKmq2nqm1ov-sK1df6u8LNUbo">
+      <button class="config-btn" onclick="connectSupabase()">⬡ CONNECT SUPABASE</button>
+    </div>
+
+    <!-- JSON Import -->
+    <div class="card">
+      <div class="card-label">Field Log Import</div>
+      <div class="import-zone" id="import-zone"
+        onclick="document.getElementById('json-file-input').click()"
+        ondragover="event.preventDefault();this.classList.add('drag-over')"
+        ondragleave="this.classList.remove('drag-over')"
+        ondrop="handleDrop(event)">
+        <div class="import-zone-text">DROP SESSION JSON<br>or tap to browse</div>
+      </div>
+      <input type="file" id="json-file-input" accept=".json" onchange="handleFileSelect(event)">
+    </div>
+
+  </aside>
+
+  <!-- ─── MAIN VIEWPORT ─── -->
+  <main class="viewport">
+
+    <!-- Geofence strip -->
+    <div class="geo-strip">
+      <div class="geo-label">Geofence</div>
+      <div class="geo-rings">
+        <div class="geo-ring-item">
+          <div class="geo-ring-swatch outer"></div>
+          <span>15m cluster</span>
+        </div>
+        <div class="geo-ring-item">
+          <div class="geo-ring-swatch inner"></div>
+          <span>5m single bay</span>
+        </div>
+      </div>
+      <div class="geo-coords">51.489452N · 0.286680E · zoom 17</div>
+    </div>
+
+    <!-- Map placeholder (shown until Mapbox token provided) -->
+    <div class="map-placeholder" id="map-placeholder">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--c-text-3)" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+      </svg>
+      <div class="map-placeholder-text">MAP LOADING…</div>
+      <div class="map-placeholder-coords">flyTo: 51.489452°N, 0.286680°E · zoom 17</div>
+    </div>
+    <div id="map"></div>
+
+    <!-- Telemetry Console -->
+    <div class="console" id="console">
+      <!-- Lines injected by boot sequence -->
+    </div>
+
+    <!-- Stats bar -->
+    <div class="stats-bar">
+      <div class="stat-tile">
+        <div class="stat-tile-label">Best-case ETA</div>
+        <div class="stat-tile-value" id="stat-eta">4:22</div>
+        <div class="stat-tile-sub">Queue+Walk · Bay 1A</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-tile-label">Active Bays</div>
+        <div class="stat-tile-value" id="stat-bays">16</div>
+        <div class="stat-tile-sub">V3 CCS · May 2026</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-tile-label">Sessions logged</div>
+        <div class="stat-tile-value" id="stat-sessions">—</div>
+        <div class="stat-tile-sub">From Supabase</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-tile-label">Walk samples</div>
+        <div class="stat-tile-value" id="stat-walks">—</div>
+        <div class="stat-tile-sub">WALK_TESLA_TO_MAS</div>
+      </div>
+      <!-- Revenue tiles — hidden until admin authenticated -->
+      <div class="stat-tile revenue" id="tile-sats" style="display:none"
+           onclick="toggleRevenueBreakdown()" title="Tap to expand per-session breakdown">
+        <div class="stat-tile-lock" id="lock-sats">⚡</div>
+        <div class="stat-tile-label">⚡ SATS EARNED</div>
+        <div class="stat-tile-value" id="stat-sats">—</div>
+        <div class="stat-tile-sub" id="stat-sats-sub">Loading…</div>
+      </div>
+      <div class="stat-tile revenue" id="tile-gbp" style="display:none"
+           onclick="toggleRevenueBreakdown()" title="Tap to expand per-session breakdown">
+        <div class="stat-tile-lock" id="lock-gbp">£</div>
+        <div class="stat-tile-label">£ GBP EARNED</div>
+        <div class="stat-tile-value" id="stat-gbp">—</div>
+        <div class="stat-tile-sub" id="stat-gbp-sub">At settlement rate</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────
+let theme = 'dark';
+let verified = false;
+let sbUrl = '';
+let sbKey = '';
+
+// ─── THEME ───────────────────────────────────────────────
+function toggleTheme() {
+  theme = theme === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : '');
+  logLine('sys', 'THEME_SWITCH → ' + (theme === 'dark' ? 'CARBON' : 'PAPER'), 'sys');
+  if (window._refuelerMap) {
+    window._refuelerMap.setStyle(theme === 'dark'
+      ? 'mapbox://styles/mapbox/dark-v11'
+      : 'mapbox://styles/mapbox/light-v11');
+  }
+}
+
+// ─── BOOT SEQUENCE ───────────────────────────────────────
+const BOOT = [
+  { tag: 'sys', msg: 'ACCESSING_LDK_KEY_VAULT...',       delay: 0 },
+  { tag: 'sys', msg: 'GEOFENCE_SYNC_COMPLETE',           delay: 400 },
+  { tag: 'sys', msg: 'STANDBY_FOR_VERIFICATION',         delay: 800 },
+  { tag: 'info', msg: 'Site: Lakeside — Tesla Superchargers, Car Park G', delay: 1400 },
+  { tag: 'info', msg: 'Primary partner: M&S Café, Level 2', delay: 1700 },
+  { tag: 'info', msg: 'Geofence centre: 51.489452°N, 0.286680°E', delay: 2000 },
+  { tag: 'info', msg: 'Outer radius: 15m  Inner radius: 5m', delay: 2200 },
+  { tag: 'ok',  msg: 'Field Log App schema: sessions · log_entries · walk_stats · orders', delay: 2600 },
+  { tag: 'sys', msg: 'Supabase credentials pre-loaded — connecting...', delay: 3000 },
+  { tag: 'info', msg: 'Zebra crossing ETA variable: +0:15 off-peak, +1:30 peak', delay: 3400 },
+  { tag: 'info', msg: 'Session 5: payment layer · locate screen · rewards logic', delay: 3700 },
+  { tag: 'info', msg: 'Session 6a: Darwin C2C bridge · partner tablet · predictive ordering', delay: 3850 },
+  { tag: 'sys', msg: 'Command Centre ready. Sign in to unlock revenue counters.', delay: 3900 },
+];
+
+function pad(n) { return String(n).padStart(2,'0'); }
+
+function nowTs() {
+  const d = new Date();
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+function logLine(tag, msg, type) {
+  const con = document.getElementById('console');
+  const line = document.createElement('div');
+  line.className = 'console-line';
+  line.style.animationDelay = '0ms';
+
+  const tagTypes = { sys:'sys', ok:'ok', warn:'warn', err:'err', info:'info' };
+  const tagType = tagTypes[type || tag] || 'info';
+  const msgClass = (type === 'info' || tag === 'info') ? 'console-msg dim' : 'console-msg';
+
+  line.innerHTML = `
+    <span class="console-ts">${nowTs()}</span>
+    <span class="console-tag ${tagType}">[${tag.toUpperCase()}]</span>
+    <span class="${msgClass}">${msg}</span>
+  `;
+  con.appendChild(line);
+  con.scrollTop = con.scrollHeight;
+}
+
+function runBoot() {
+  BOOT.forEach(({ tag, msg, delay }) => {
+    setTimeout(() => {
+      logLine(tag, msg, tag);
+      // Add cursor after last line
+      if (delay === 3900) {
+        const con = document.getElementById('console');
+        const last = con.lastElementChild;
+        last.querySelector('.console-msg').innerHTML += '<span class="console-cursor"></span>';
+      }
+    }, delay);
+  });
+}
+
+// ─── VERIFY SESSION ──────────────────────────────────────
+function verifySession() {
+  if (verified) return;
+  logLine('sys', 'INITIATING_VERIFICATION_SEQUENCE...', 'sys');
+
+  const arc = document.getElementById('dial-arc');
+  const dashed = document.getElementById('dial-dashed');
+  const pct = document.getElementById('dial-pct');
+  const statusEl = document.getElementById('dial-status');
+  const btn = document.getElementById('verify-btn');
+  const statusPill = document.getElementById('status-pill');
+  const statusText = document.getElementById('status-text');
+
+  let progress = 0;
+  const total = 339.3;
+
+  const interval = setInterval(() => {
+    progress += 2.8;
+    if (progress >= 100) {
+      progress = 100;
+      clearInterval(interval);
+
+      // Verified state
+      arc.style.strokeDashoffset = 0;
+      dashed.style.opacity = '0';
+      pct.textContent = '4:22';
+      statusEl.textContent = 'SESSION VERIFIED';
+      statusEl.classList.add('verified');
+      btn.textContent = '✓ VERIFIED';
+      btn.classList.add('verified');
+      verified = true;
+
+      statusText.textContent = 'LIVE';
+      statusPill.style.background = 'var(--c-green-bg)';
+
+      logLine('ok', 'SESSION_VERIFIED · Best-case ETA locked: 4:22 (Bay 1A, off-peak)', 'ok');
+      logLine('ok', 'INVESTOR_STAT · "Coffee arrives in under 4:22 from join-queue to bay"', 'ok');
+      logLine('info', 'Queue 0:20 + Production 1:30 + Walk 2:32 = 4:22 total', 'info');
+
+      // Fetch Supabase if connected
+      if (sbUrl && sbKey) fetchSupabaseStats();
+    } else {
+      const offset = total - (total * progress / 100);
+      arc.style.strokeDashoffset = offset;
+      pct.textContent = Math.round(progress) + '%';
+    }
+  }, 20);
+}
+
+// ─── SUPABASE ────────────────────────────────────────────
+async function connectSupabase() {
+  sbUrl = SB_URL;
+  sbKey = SB_KEY;
+  // Also sync the visible input fields
+  document.getElementById('sb-url').value = sbUrl;
+
+  logLine('sys', 'SUPABASE_CONNECT → ' + sbUrl, 'sys');
+
+  try {
+    const res = await fetch(`${sbUrl}/rest/v1/sessions?select=count`, {
+      headers: { 'apikey': sbKey, 'Authorization': 'Bearer ' + sbKey, 'Prefer': 'count=exact' }
+    });
+
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+    const count = res.headers.get('content-range') || '?';
+    logLine('ok', 'SUPABASE_CONNECTED · sessions table online · rows: ' + count, 'ok');
+    showToast('Connected to Supabase', 'ok');
+
+    await fetchSupabaseStats();
+    startRailPolling();
+  } catch (e) {
+    logLine('err', 'SUPABASE_ERROR: ' + e.message, 'err');
+    showToast('Connection failed: ' + e.message, 'err');
+  }
+}
+
+async function fetchSupabaseStats() {
+  if (!sbUrl || !sbKey) return;
+
+  try {
+    // Sessions count
+    const sRes = await fetch(`${sbUrl}/rest/v1/sessions?select=session_id`, {
+      headers: { 'apikey': sbKey, 'Authorization': 'Bearer ' + sbKey, 'Prefer': 'count=exact' }
+    });
+    const sCount = sRes.headers.get('content-range');
+    if (sCount) {
+      document.getElementById('stat-sessions').textContent = sCount.split('/')[1] || '—';
+    }
+
+    // Walk stats
+    const wRes = await fetch(`${sbUrl}/rest/v1/walk_stats?select=log_key,avg_duration_ms,sample_count`, {
+      headers: { 'apikey': sbKey, 'Authorization': 'Bearer ' + sbKey }
+    });
+    const stats = await wRes.json();
+
+    if (Array.isArray(stats)) {
+      stats.forEach(row => {
+        const fmt = msToFmt(row.avg_duration_ms);
+
+        if (row.log_key === 'WALK_TESLA_TO_MAS') {
+          document.getElementById('live-to-mas').textContent = fmt + ' avg (' + row.sample_count + ' runs)';
+          document.getElementById('stat-walks').textContent = row.sample_count;
+          logLine('ok', 'walk_stats WALK_TESLA_TO_MAS · avg ' + fmt + ' · n=' + row.sample_count, 'ok');
+        }
+        if (row.log_key === 'WALK_MAS_TO_TESLA') {
+          document.getElementById('live-to-bay').textContent = fmt + ' avg (' + row.sample_count + ' runs)';
+          logLine('ok', 'walk_stats WALK_MAS_TO_TESLA · avg ' + fmt + ' · n=' + row.sample_count, 'ok');
+        }
+        if (row.log_key === 'WALK_TESLA_TO_COSTA_L2') {
+          document.getElementById('live-to-costa').textContent = fmt + ' avg (' + row.sample_count + ' runs)';
+        }
+      });
+    }
+  } catch(e) {
+    logLine('err', 'STATS_FETCH_ERROR: ' + e.message, 'err');
+  }
+}
+
+function msToFmt(ms) {
+  if (!ms) return '—';
+  const s = Math.round(ms / 1000);
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}:${String(sec).padStart(2,'0')}`;
+}
+
+// ─── SESSION 5: REVENUE COUNTERS (admin only) ─────────────
+let _revenueExpanded = false;
+
+function showRevenueTiles() {
+  document.getElementById('tile-sats').style.display = '';
+  document.getElementById('tile-gbp').style.display  = '';
+  logLine('sys', 'REVENUE_TILES_UNLOCKED · admin session confirmed', 'sys');
+}
+
+async function loadRevenueTotals() {
+  const client = getSbClient();
+  if (!client || !_currentUser) return;
+
+  try {
+    // Query revenue_totals view (RLS: auth users only)
+    const res = await fetch(`${SB_URL}/rest/v1/revenue_totals?select=*`, {
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + (await getSbClient().auth.getSession()).data.session?.access_token,
+        'Accept': 'application/json'
+      }
+    });
+
+    if (!res.ok) {
+      // View may not exist yet — show tiles with zero values rather than failing silently
+      logLine('warn', 'REVENUE_VIEW_NOT_FOUND · run refueler_schema_session5.sql first', 'warn');
+      document.getElementById('stat-sats').textContent     = '0';
+      document.getElementById('stat-sats-sub').textContent = '0 orders settled';
+      document.getElementById('stat-gbp').textContent      = '£0.00';
+      document.getElementById('stat-gbp-sub').textContent  = 'No orders yet';
+      showRevenueTiles();
+      return;
+    }
+
+    const rows = await res.json();
+    const data = Array.isArray(rows) ? rows[0] : rows;
+
+    const sats   = parseInt(data?.total_commission_sats ?? 0);
+    const gbp    = parseFloat(data?.total_commission_gbp  ?? 0).toFixed(2);
+    const orders = parseInt(data?.total_orders ?? 0);
+
+    document.getElementById('stat-sats').textContent     = sats.toLocaleString();
+    document.getElementById('stat-sats-sub').textContent = `${orders} order${orders !== 1 ? 's' : ''} settled`;
+    document.getElementById('stat-gbp').textContent      = '£' + gbp;
+    document.getElementById('stat-gbp-sub').textContent  = `${orders} order${orders !== 1 ? 's' : ''}`;
+
+    logLine('ok', `REVENUE_LOADED · ${sats.toLocaleString()} sats · £${gbp} · ${orders} orders`, 'ok');
+    showRevenueTiles();
+  } catch(e) {
+    logLine('warn', 'REVENUE_LOAD_EXCEPTION: ' + e.message, 'warn');
+    // Still show tiles even if the view query fails — table may be empty
+    document.getElementById('stat-sats').textContent     = '—';
+    document.getElementById('stat-sats-sub').textContent = 'No data';
+    document.getElementById('stat-gbp').textContent      = '—';
+    document.getElementById('stat-gbp-sub').textContent  = 'No data';
+    showRevenueTiles();
+  }
+}
+
+async function toggleRevenueBreakdown() {
+  _revenueExpanded = !_revenueExpanded;
+
+  // Remove any existing breakdown block
+  document.querySelectorAll('.console-revenue-block').forEach(el => el.remove());
+  if (!_revenueExpanded) return;
+
+  const client = getSbClient();
+  if (!client || !_currentUser) {
+    logLine('warn', 'REVENUE_BREAKDOWN: sign in required', 'warn');
+    return;
+  }
+
+  logLine('sys', 'REVENUE_BREAKDOWN · fetching per-session data…', 'sys');
+
+  try {
+    const tokenRes = await getSbClient().auth.getSession();
+    const accessToken = tokenRes.data.session?.access_token;
+
+    const res = await fetch(`${SB_URL}/rest/v1/revenue_by_session?select=*&limit=20&order=session_date.desc`, {
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + accessToken,
+        'Accept': 'application/json'
+      }
+    });
+
+    const rows = res.ok ? await res.json() : [];
+
+    const con = document.getElementById('console');
+    const block = document.createElement('div');
+    block.className = 'console-revenue-block';
+
+    if (!rows || rows.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'console-revenue-row';
+      empty.innerHTML = `<span class="console-revenue-ts">[REVENUE]</span><span>No settled orders yet — complete a handover to see data here</span>`;
+      block.appendChild(empty);
+    } else {
+      let totalSats = 0, totalGbp = 0, totalOrders = 0;
+
+      rows.forEach(row => {
+        const date    = row.session_date   ? row.session_date.slice(0,10) : '—';
+        const sid     = row.session_id     || '—';
+        const site    = row.site_name      || 'Lakeside';
+        const orders  = parseInt(row.order_count || 0);
+        const sats    = parseInt(row.total_commission_sats || 0);
+        const gbp     = parseFloat(row.total_commission_gbp || 0).toFixed(2);
+
+        totalSats   += sats;
+        totalGbp    += parseFloat(gbp);
+        totalOrders += orders;
+
+        const rowEl = document.createElement('div');
+        rowEl.className = 'console-revenue-row';
+        rowEl.innerHTML = `
+          <span class="console-revenue-ts">[REVENUE]</span>
+          <span>${date} · ${sid} · ${site} · ${orders} order${orders!==1?'s':''} · ${sats.toLocaleString()} sats · £${gbp}</span>`;
+        block.appendChild(rowEl);
+      });
+
+      const totalRow = document.createElement('div');
+      totalRow.className = 'console-revenue-row rev-total';
+      totalRow.innerHTML = `
+        <span class="console-revenue-ts">[TOTAL]  </span>
+        <span>Running total: ${totalSats.toLocaleString()} sats · £${totalGbp.toFixed(2)} · ${totalOrders} orders</span>`;
+      block.appendChild(totalRow);
+    }
+
+    con.appendChild(block);
+    block.scrollIntoView({ behavior: 'smooth', block: 'end' });
+
+  } catch(e) {
+    logLine('err', 'REVENUE_BREAKDOWN_ERROR: ' + e.message, 'err');
+    _revenueExpanded = false;
+  }
+}
+
+// ─── JSON IMPORT ─────────────────────────────────────────
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('import-zone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) importJSON(file);
+}
+
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) importJSON(file);
+}
+
+async function importJSON(file) {
+  logLine('sys', 'IMPORT_START · ' + file.name, 'sys');
+
+  let data;
+  try {
+    const text = await file.text();
+    data = JSON.parse(text);
+  } catch(e) {
+    logLine('err', 'PARSE_ERROR: invalid JSON', 'err');
+    showToast('Invalid JSON file', 'err');
+    return;
+  }
+
+  if (!sbUrl || !sbKey) {
+    logLine('warn', 'IMPORT_HALTED: Supabase not connected. Connect first.', 'warn');
+    showToast('Connect Supabase first', 'err');
+    return;
+  }
+
+  try {
+    // Import session row
+    if (data.session) {
+      const sRes = await fetch(`${sbUrl}/rest/v1/sessions`, {
+        method: 'POST',
+        headers: {
+          'apikey': sbKey,
+          'Authorization': 'Bearer ' + sbKey,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal,resolution=merge-duplicates'
+        },
+        body: JSON.stringify(data.session)
+      });
+      logLine(sRes.ok ? 'ok' : 'err', 'SESSION_ROW · HTTP ' + sRes.status, sRes.ok ? 'ok' : 'err');
+    }
+
+    // Import log entries (batch)
+    if (data.entries && data.entries.length) {
+      const eRes = await fetch(`${sbUrl}/rest/v1/log_entries`, {
+        method: 'POST',
+        headers: {
+          'apikey': sbKey,
+          'Authorization': 'Bearer ' + sbKey,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal,resolution=ignore-duplicates'
+        },
+        body: JSON.stringify(data.entries)
+      });
+      logLine(eRes.ok ? 'ok' : 'err',
+        `LOG_ENTRIES · ${data.entries.length} rows · HTTP ${eRes.status}`, eRes.ok ? 'ok' : 'err');
+    }
+
+    showToast('Import complete · ' + (data.entries?.length || 0) + ' entries', 'ok');
+    await fetchSupabaseStats();
+  } catch(e) {
+    logLine('err', 'IMPORT_ERROR: ' + e.message, 'err');
+    showToast('Import error: ' + e.message, 'err');
+  }
+}
+
+// ─── TOAST ───────────────────────────────────────────────
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ─── MAPBOX (optional) ───────────────────────────────────
+// To activate: add your Mapbox token below and uncomment this block
+const MAPBOX_TOKEN = 'pk.eyJ1IjoicmFqZXNodGF5bG9yIiwiYSI6ImNtcDM3cXZhZjA2anYycHNnNWRsZDQ2MHAifQ.ZSJ06D0jSp-YwwN-IqPtTg';
+const CENTER = [0.286680, 51.489452];
+
+function initMap() {
+  if (!MAPBOX_TOKEN || MAPBOX_TOKEN === 'YOUR_MAPBOX_TOKEN_HERE') return;
+  const script = document.createElement('script');
+  script.src = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js';
+  script.onload = () => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css';
+    document.head.appendChild(link);
+
+    document.getElementById('map-placeholder').style.display = 'none';
+    document.getElementById('map').style.display = 'block';
+
+    mapboxgl.accessToken = MAPBOX_TOKEN;
+    window._refuelerMap = new mapboxgl.Map({
+      container: 'map',
+      style: theme === 'dark'
+        ? 'mapbox://styles/mapbox/dark-v11'
+        : 'mapbox://styles/mapbox/light-v11',
+      center: CENTER,
+      zoom: 17
+    });
+
+    const m = window._refuelerMap;
+    m.on('load', () => {
+      // Outer geofence ring — 15m cluster
+      m.addSource('geofence-outer', {
+        type: 'geojson',
+        data: createCircle(CENTER, 15)
+      });
+      m.addLayer({
+        id: 'geofence-outer-fill',
+        type: 'fill',
+        source: 'geofence-outer',
+        paint: { 'fill-color': '#1C7C4A', 'fill-opacity': 0.25 }
+      });
+      m.addLayer({
+        id: 'geofence-outer-line',
+        type: 'line',
+        source: 'geofence-outer',
+        paint: { 'line-color': '#22C55E', 'line-width': 2.5, 'line-opacity': 1 }
+      });
+
+      // Inner ring — 5m single bay
+      m.addSource('geofence-inner', {
+        type: 'geojson',
+        data: createCircle(CENTER, 5)
+      });
+      m.addLayer({
+        id: 'geofence-inner-line',
+        type: 'line',
+        source: 'geofence-inner',
+        paint: { 'line-color': '#F59E0B', 'line-width': 2, 'line-dasharray': [3, 2] }
+      });
+
+      // Bay marker
+      new mapboxgl.Marker({ color: '#E82127' })
+        .setLngLat(CENTER)
+        .setPopup(new mapboxgl.Popup().setText('Tesla Superchargers · 16 V3 bays · Car Park G'))
+        .addTo(m);
+
+      // M&S Café marker
+      const msEl = document.createElement('div');
+      msEl.style.cssText = 'width:28px;height:28px;border-radius:5px;background:#006B3C;color:#FFD700;font-family:monospace;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,0.2);cursor:pointer;';
+      msEl.textContent = 'M&S';
+      new mapboxgl.Marker({ element: msEl })
+        .setLngLat([0.283615, 51.488777])
+        .setPopup(new mapboxgl.Popup({ offset: 18 }).setText('M&S Café · Level 2 · Primary Partner · Walk 2:32–3:12'))
+        .addTo(m);
+
+      // ── Session 6a: C2C Station markers ──────────────────────────────────
+      const C2C_STATIONS = [
+        { crs: 'FST', name: 'Fenchurch St',  lng: -0.078308, lat: 51.511811, terminus: true },
+        { crs: 'LIM', name: 'Limehouse',     lng: -0.038550, lat: 51.511985, trigger: true },
+        { crs: 'WHA', name: 'West Ham',      lng:  0.005200, lat: 51.528700, trigger: true },
+        { crs: 'UPM', name: 'Upminster',     lng:  0.250900, lat: 51.557200, trigger: true },
+        { crs: 'PFL', name: 'Purfleet',      lng:  0.237500, lat: 51.477900, trigger: true, vendor: true },
+        { crs: 'GRY', name: 'Grays',         lng:  0.325700, lat: 51.476800, trigger: true, vendor: true },
+      ];
+
+      C2C_STATIONS.forEach(s => {
+        const el = document.createElement('div');
+        const bg = s.terminus ? '#F7931A' : s.vendor ? '#1C7C4A' : '#2a2a2a';
+        const fg = s.terminus ? '#000' : '#fff';
+        el.style.cssText = `width:26px;height:26px;border-radius:4px;background:${bg};color:${fg};font-family:monospace;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,0.25);cursor:pointer;letter-spacing:0.03em;`;
+        el.textContent = s.crs;
+        const popupText = s.terminus
+          ? `${s.name} · C2C Terminus · Refueler partners: Costa, Pret`
+          : `${s.name} · C2C trigger station · ${s.vendor ? 'Vendor present' : 'No vendor yet'} · Lead: see Rail card`;
+        new mapboxgl.Marker({ element: el })
+          .setLngLat([s.lng, s.lat])
+          .setPopup(new mapboxgl.Popup({ offset: 16 }).setText(popupText))
+          .addTo(m);
+      });
+
+      m.flyTo({ center: CENTER, zoom: 17, duration: 2000 });
+      logLine('ok', 'MAPBOX_INIT · flyTo 51.489452°N, 0.286680°E · zoom 17', 'ok');
+    });
+  };
+  document.head.appendChild(script);
+}
+
+function createCircle(center, radiusMeters) {
+  const points = 64;
+  const coords = [];
+  const earthRadius = 6371000;
+  const lat = center[1] * Math.PI / 180;
+  const lng = center[0] * Math.PI / 180;
+  const d = radiusMeters / earthRadius;
+  for (let i = 0; i <= points; i++) {
+    const bearing = (i * 360 / points) * Math.PI / 180;
+    const pLat = Math.asin(Math.sin(lat)*Math.cos(d) + Math.cos(lat)*Math.sin(d)*Math.cos(bearing));
+    const pLng = lng + Math.atan2(Math.sin(bearing)*Math.sin(d)*Math.cos(lat), Math.cos(d)-Math.sin(lat)*Math.sin(pLat));
+    coords.push([pLng * 180/Math.PI, pLat * 180/Math.PI]);
+  }
+  return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [coords] } };
+}
+
+initMap();
+
+// ─── SESSION 6a: RAIL — Darwin telemetry ─────────────────
+
+const RAIL_POLL_INTERVAL = 15000; // poll rail_movement_log every 15s
+let _railLastSeenId = null;
+let _darwinConnected = false;
+
+// Station dot colours — pulse on recent departure event
+const TRIGGER_CRS = ['LIM', 'WHA', 'UPM', 'PFL', 'GRY', 'SOC'];
+
+function setDarwinConnected(connected) {
+  if (_darwinConnected === connected) return;
+  _darwinConnected = connected;
+  const bar  = document.getElementById('darwin-status-bar');
+  const text = document.getElementById('darwin-status-text');
+  if (connected) {
+    bar.classList.remove('disconnected');
+    text.textContent = 'BRIDGE CONNECTED · receiving C2C MOVEMENT events';
+    logLine('ok', 'DARWIN_BRIDGE · connected · C2C operator HJ active', 'ok');
+  } else {
+    bar.classList.add('disconnected');
+    text.textContent = 'BRIDGE DISCONNECTED — check Railway.app dashboard';
+  }
+}
+
+function pulseCrsDot(crs) {
+  const dot = document.getElementById('dot-' + crs);
+  if (!dot) return;
+  dot.classList.add('active');
+  // Fade back after 8 seconds
+  setTimeout(() => dot.classList.remove('active'), 8000);
+}
+
+function renderRailLastEvent(row) {
+  const ts   = row.actual_ts
+    ? new Date(row.actual_ts).toLocaleTimeString('en-GB', { hour12: false })
+    : new Date(row.created_at).toLocaleTimeString('en-GB', { hour12: false });
+  const delay = row.delay_mins ? `+${row.delay_mins}m` : 'on time';
+  const notif = row.notification_fired ? '⚡ notif sent' : 'no notif';
+  const suppressed = row.suppressed ? ' · suppressed' : '';
+  document.getElementById('rail-last-event').innerHTML =
+    `${ts} · ${row.crs_code || '?'}→FST · ${delay} · ${notif}${suppressed}<br>` +
+    `train ${(row.train_uid || '—').slice(-8)} · ${row.event_type}`;
+}
+
+async function pollRailMovementLog() {
+  if (!sbUrl || !sbKey) return;
+
+  try {
+    const res = await fetch(
+      `${sbUrl}/rest/v1/rail_movement_log?select=*&order=created_at.desc&limit=10`,
+      { headers: { 'apikey': sbKey, 'Authorization': 'Bearer ' + sbKey } }
+    );
+    if (!res.ok) return;
+
+    const rows = await res.json();
+    if (!rows || rows.length === 0) return;
+
+    // Mark Darwin as connected the moment we see any rows
+    setDarwinConnected(true);
+
+    // Find new rows since last poll
+    const newRows = _railLastSeenId
+      ? rows.filter(r => r.id !== _railLastSeenId && new Date(r.created_at) > _lastPollTime)
+      : [rows[0]]; // first poll — just show latest
+
+    _railLastSeenId  = rows[0].id;
+    _lastPollTime    = new Date();
+
+    // Log new events to console and pulse dots
+    newRows.forEach(row => {
+      if (!row.suppressed) {
+        pulseCrsDot(row.crs_code);
+        const delay = row.delay_mins ? ` +${row.delay_mins}m delay` : ' on time';
+        const notif = row.notification_fired ? ' · notif fired' : '';
+        logLine('rail',
+          `DARWIN · ${row.event_type} ${row.crs_code}→FST · train ${(row.train_uid||'').slice(-8)}${delay}${notif}`,
+          'ok');
+      } else {
+        logLine('rail',
+          `DARWIN · SUPPRESSED ${row.crs_code} · reason: ${row.suppress_reason || 'unknown'}`,
+          'warn');
+      }
+    });
+
+    // Always update the last event summary
+    renderRailLastEvent(rows[0]);
+
+  } catch (e) {
+    // Silent fail — Darwin log is optional telemetry
+  }
+}
+
+let _lastPollTime = new Date(0);
+
+// Start polling after Supabase connects
+function startRailPolling() {
+  pollRailMovementLog();
+  setInterval(pollRailMovementLog, RAIL_POLL_INTERVAL);
+}
+
+// Update BOOT sequence to mention Session 6a
+// (appended after the original BOOT array runs)
+setTimeout(() => {
+  logLine('info', 'Session 6a: Darwin bridge · partner tablet · predictive ordering', 'info');
+  logLine('info', 'C2C trigger stations: LIM WHA UPM PFL GRY SOC → FST', 'info');
+}, 4500);
+
+// ─── SUPABASE CLIENT (for auth) ───────────────────────────
+const SB_URL = 'https://tihgvdokeofnjxjkenmm.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpaGd2ZG9rZW9mbmp4amtlbm1tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTY2NDksImV4cCI6MjA5NDE5MjY0OX0.cRb94WeIP8yRfWd9s2XKmq2nqm1ov-sK1df6u8LNUbo';
+let _sbClient = null;
+let _currentUser = null;
+
+function getSbClient() {
+  if (_sbClient) return _sbClient;
+  try {
+    _sbClient = supabase.createClient(SB_URL, SB_KEY);
+  } catch(e) {
+    console.error('Supabase client init failed:', e);
+    return null;
+  }
+  return _sbClient;
+}
+
+// ─── AUTH MODAL ───────────────────────────────────────────
+function openAuthModal() {
+  document.getElementById('auth-modal').classList.add('open');
+  setTimeout(() => document.getElementById('auth-email').focus(), 200);
+}
+function closeAuthModal() {
+  document.getElementById('auth-modal').classList.remove('open');
+  document.getElementById('auth-sent').classList.remove('show');
+  document.getElementById('auth-email').value = '';
+}
+
+async function sendMagicLink() {
+  const email = document.getElementById('auth-email').value.trim();
+  if (!email || !email.includes('@')) {
+    showToast('Enter a valid email', 'err'); return;
+  }
+  const client = getSbClient();
+  if (!client) { showToast('Supabase client failed to load — check console', 'err'); return; }
+
+  const btn = document.getElementById('auth-send-btn');
+  btn.textContent = 'SENDING...'; btn.disabled = true;
+
+  const redirectTo = window.location.origin + window.location.pathname;
+
+  try {
+    const { error } = await client.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: redirectTo }
+    });
+
+    btn.textContent = 'SEND LINK'; btn.disabled = false;
+
+    if (error) {
+      logLine('err', 'AUTH_ERROR: ' + error.message, 'err');
+      showToast('Error: ' + error.message, 'err');
+      document.getElementById('auth-sent').textContent = '✗ ' + error.message;
+      document.getElementById('auth-sent').style.color = 'var(--c-red)';
+      document.getElementById('auth-sent').classList.add('show');
+    } else {
+      document.getElementById('auth-sent').textContent = '✓ Magic link sent — check your inbox';
+      document.getElementById('auth-sent').style.color = 'var(--c-green)';
+      document.getElementById('auth-sent').classList.add('show');
+      logLine('ok', 'MAGIC_LINK_SENT → ' + email, 'ok');
+      setTimeout(closeAuthModal, 3500);
+    }
+  } catch(e) {
+    btn.textContent = 'SEND LINK'; btn.disabled = false;
+    showToast('Network error: ' + e.message, 'err');
+    logLine('err', 'AUTH_NETWORK_ERROR: ' + e.message, 'err');
+  }
+}
+
+function renderAuthNav(user) {
+  const slot = document.getElementById('nav-auth-slot');
+  if (user) {
+    const name = user.user_metadata?.display_name || user.email.split('@')[0];
+    slot.innerHTML = `
+      <div class="nav-auth-chip" onclick="signOut()" title="Click to sign out">
+        <span class="brand-chip" style="background:#006B3C;color:#FFD700;font-size:8px;width:22px;height:22px;">M&S</span>
+        <span class="nav-auth-name">${name.toUpperCase()}</span>
+        <span class="nav-auth-logout">SIGN OUT</span>
+      </div>`;
+  } else {
+    slot.innerHTML = `<button class="nav-auth-btn" onclick="openAuthModal()">⬡ SIGN IN</button>`;
+  }
+}
+
+async function signOut() {
+  const client = getSbClient();
+  if (client) await client.auth.signOut();
+  _currentUser = null;
+  renderAuthNav(null);
+  logLine('sys', 'AUTH_SIGNOUT', 'sys');
+  showToast('Signed out', 'ok');
+}
+
+async function initAuth() {
+  const client = getSbClient();
+  if (!client) return;
+
+  // Listen for auth state changes (catches magic link redirect)
+  client.auth.onAuthStateChange((event, session) => {
+    _currentUser = session?.user || null;
+    renderAuthNav(_currentUser);
+    // Load revenue tiles on sign-in OR on session restore (INITIAL_SESSION) — single call
+    if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+      if (_currentUser) {
+        if (event === 'SIGNED_IN') {
+          logLine('ok', 'AUTH_SIGNED_IN · ' + (_currentUser?.email || ''), 'ok');
+          showToast('Signed in as ' + (_currentUser?.email || ''), 'ok');
+        }
+        loadRevenueTotals(); // called exactly once per auth event
+      }
+    }
+  });
+
+  // Check existing session on load — revenue tiles restored via onAuthStateChange
+  // (do NOT call loadRevenueTotals() here — onAuthStateChange fires INITIAL_SESSION
+  //  which will call it once; a second call here caused the double-fire bug)
+  const { data: { session } } = await client.auth.getSession();
+  if (session?.user) {
+    _currentUser = session.user;
+    renderAuthNav(_currentUser);
+    logLine('ok', 'AUTH_SESSION_RESTORED · ' + _currentUser.email, 'ok');
+    // Revenue tiles loaded by onAuthStateChange INITIAL_SESSION event above — not here
+  }
+}
+
+// ─── INIT ────────────────────────────────────────────────
+let _bootConnected = false;
+window.addEventListener('DOMContentLoaded', () => {
+  document.documentElement.setAttribute('data-theme', 'dark');
+  runBoot();
+  // Auto-connect Supabase after boot (credentials hardcoded)
+  setTimeout(() => {
+    if (!_bootConnected) {
+      _bootConnected = true;
+      connectSupabase().then(() => initAuth());
+    }
+  }, 4200);
+});
+</script>
+
+<!-- ─── AUTH MODAL HTML ─── -->
+<div class="modal-backdrop" id="auth-modal" onclick="if(event.target===this)closeAuthModal()">
+  <div class="modal">
+    <div class="modal-title">Partner Sign In</div>
+    <div class="modal-sub">Enter your email — we'll send a magic link. No password needed.</div>
+    <input class="modal-input" type="email" id="auth-email"
+      placeholder="you@example.com"
+      onkeydown="if(event.key==='Enter')sendMagicLink()">
+    <div class="modal-sent" id="auth-sent">
+      ✓ Magic link sent — check your inbox
+    </div>
+    <div class="modal-btn-row">
+      <button class="modal-btn" onclick="closeAuthModal()">CANCEL</button>
+      <button class="modal-btn primary" id="auth-send-btn" onclick="sendMagicLink()">SEND LINK</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>REFUELER — Watch</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --c-bg:       #0A0A0A;
+    --c-surface:  #141414;
+    --c-border:   rgba(255,255,255,0.08);
+    --c-text-1:   #F0F0F0;
+    --c-text-2:   #999;
+    --c-text-3:   #555;
+    --c-green:    #22C55E;
+    --c-amber:    #F59E0B;
+    --c-red:      #EF4444;
+    --c-tesla:    #E82127;
+    --mono:       'IBM Plex Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--c-bg);
+    color: var(--c-text-1);
+    font-family: var(--mono);
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ─── VIEW SWITCHER ─── */
+  .view-toggle {
+    display: flex;
+    padding: 10px 16px 0;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .view-btn {
+    flex: 1;
+    padding: 7px;
+    border-radius: 6px;
+    border: 1px solid var(--c-border);
+    background: none;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--c-text-3);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .view-btn.active {
+    border-color: var(--c-green);
+    color: var(--c-green);
+    background: rgba(34,197,94,0.06);
+  }
+
+  /* ─── MOBILE VIEW ─── */
+  #mobile-view {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    gap: 0;
+  }
+
+  .site-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px 5px 6px;
+    border: 1px solid var(--c-border);
+    border-radius: 20px;
+    margin-bottom: 32px;
+  }
+  .brand-chip {
+    width: 28px; height: 28px;
+    border-radius: 5px;
+    font-size: 9px; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,0.15);
+    letter-spacing: 0.01em;
+    flex-shrink: 0;
+  }
+  .site-chip-label {
+    font-size: 11px; color: var(--c-text-2); letter-spacing: 0.06em;
+  }
+
+  /* Big countdown ring */
+  .ring-wrap {
+    position: relative;
+    width: 240px; height: 240px;
+    margin-bottom: 28px;
+    flex-shrink: 0;
+  }
+  .ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .ring-track { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 8; }
+  .ring-fill  { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke 0.4s; }
+  .ring-centre {
+    position: absolute;
+    inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 4px;
+  }
+  #countdown-display {
+    font-size: 52px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--c-text-1);
+    transition: color 0.4s;
+    line-height: 1;
+  }
+  #countdown-display.amber { color: var(--c-amber); }
+  #countdown-display.red   { color: var(--c-red); }
+
+  .ring-label {
+    font-size: 10px; letter-spacing: 0.14em;
+    color: var(--c-text-3); text-transform: uppercase;
+  }
+
+  /* Status message */
+  #status-msg {
+    font-size: 15px;
+    color: var(--c-text-2);
+    text-align: center;
+    letter-spacing: 0.02em;
+    line-height: 1.4;
+    min-height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 20px;
+    transition: color 0.4s;
+    margin-bottom: 28px;
+  }
+  #status-msg.urgent { color: var(--c-red); font-weight: 600; font-size: 17px; }
+  #status-msg.ok { color: var(--c-green); }
+  #status-msg.warn { color: var(--c-amber); }
+  #status-msg.paused { color: var(--c-text-3); }
+
+  /* Haptic milestone row */
+  .milestone-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .milestone {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 4px; width: 56px;
+  }
+  .milestone-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--c-text-3);
+    transition: background 0.3s, transform 0.2s;
+    flex-shrink: 0;
+  }
+  .milestone-dot.fired { transform: scale(1.4); }
+  .milestone-dot.m-white  { background: #fff; }
+  .milestone-dot.m-amber  { background: var(--c-amber); }
+  .milestone-dot.m-red    { background: var(--c-red); }
+  .milestone-time { font-size: 9px; color: var(--c-text-3); letter-spacing: 0.08em; }
+
+  /* Action buttons */
+  .btn-row { display: flex; gap: 10px; width: 100%; max-width: 280px; }
+  .action-btn {
+    flex: 1; padding: 14px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--c-border);
+    background: var(--c-surface);
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--c-text-2); cursor: pointer;
+    transition: all 0.2s;
+  }
+  .action-btn.primary {
+    background: var(--c-green);
+    border-color: var(--c-green);
+    color: #000; font-weight: 600;
+  }
+  .action-btn.primary:hover { opacity: 0.85; }
+  .action-btn.danger {
+    border-color: rgba(239,68,68,0.3);
+    color: var(--c-red);
+  }
+  .action-btn:disabled { opacity: 0.4; cursor: default; }
+
+  /* Battery notice */
+  #battery-notice {
+    display: none;
+    margin-top: 14px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.2);
+    font-size: 11px; color: var(--c-red);
+    letter-spacing: 0.06em; text-align: center;
+  }
+
+  /* Signal lost overlay */
+  #signal-overlay {
+    display: none;
+    margin-top: 12px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    background: rgba(245,158,11,0.08);
+    border: 1px solid rgba(245,158,11,0.2);
+    font-size: 11px; color: var(--c-amber);
+    letter-spacing: 0.06em; text-align: center;
+  }
+
+  /* Full-screen alert */
+  #full-alert {
+    display: none;
+    position: fixed; inset: 0; z-index: 300;
+    background: var(--c-red);
+    flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 16px;
+    animation: alert-pulse 0.8s ease-in-out infinite alternate;
+  }
+  #full-alert.show { display: flex; }
+  @keyframes alert-pulse {
+    from { background: #B91C1C; }
+    to   { background: #EF4444; }
+  }
+  .alert-title {
+    font-size: 48px; font-weight: 700;
+    letter-spacing: -0.02em; color: #fff;
+    text-align: center; line-height: 1;
+  }
+  .alert-sub { font-size: 18px; color: rgba(255,255,255,0.8); letter-spacing: 0.06em; }
+  .alert-dismiss {
+    margin-top: 20px; padding: 16px 40px;
+    border-radius: 12px; border: 2px solid rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.15);
+    font-family: var(--mono); font-size: 13px;
+    letter-spacing: 0.1em; color: #fff; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .alert-dismiss:hover { background: rgba(255,255,255,0.25); }
+
+  /* ─── WATCH VIEW ─── */
+  #watch-view {
+    display: none;
+    flex: 1;
+    align-items: center; justify-content: center;
+    flex-direction: column;
+    padding: 20px;
+  }
+  .watch-face {
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    border: 3px solid var(--c-border);
+    background: #0D0D0D;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 6px;
+    position: relative;
+    flex-shrink: 0;
+  }
+  #watch-time {
+    font-size: 42px; font-weight: 600;
+    letter-spacing: -0.03em; color: var(--c-text-1);
+    line-height: 1; transition: color 0.4s;
+  }
+  #watch-time.amber { color: var(--c-amber); }
+  #watch-time.red   { color: var(--c-red); }
+  #watch-sub { font-size: 10px; color: var(--c-text-3); letter-spacing: 0.1em; text-align: center; padding: 0 20px; }
+  .watch-haptic-ring {
+    position: absolute; inset: -10px;
+    border-radius: 50%; border: 2px solid transparent;
+    transition: border-color 0.3s, opacity 0.3s;
+    pointer-events: none;
+  }
+  .watch-haptic-ring.flash { animation: ring-flash 0.4s ease-out; }
+  @keyframes ring-flash {
+    0%   { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.1); }
+  }
+  .watch-note { margin-top: 20px; font-size: 11px; color: var(--c-text-3); letter-spacing: 0.06em; text-align: center; }
+</style>
+</head>
+<body>
+
+<!-- View switcher -->
+<div class="view-toggle">
+  <button class="view-btn active" id="btn-mobile" onclick="switchView('mobile')">MOBILE</button>
+  <button class="view-btn"        id="btn-watch"  onclick="switchView('watch')">WATCH</button>
+</div>
+
+<!-- ─── MOBILE VIEW ─── -->
+<div id="mobile-view">
+
+  <div class="site-chip">
+    <span class="brand-chip" style="background:#E82127;color:#fff;">T</span>
+    <span class="site-chip-label">LAKESIDE · CAR PARK G</span>
+  </div>
+
+  <!-- Ring countdown -->
+  <div class="ring-wrap">
+    <svg class="ring-svg" viewBox="0 0 240 240">
+      <circle class="ring-track" cx="120" cy="120" r="108"/>
+      <circle class="ring-fill" id="ring-fill" cx="120" cy="120" r="108"
+        stroke="#22C55E"
+        stroke-dasharray="678.6"
+        stroke-dashoffset="0"/>
+    </svg>
+    <div class="ring-centre">
+      <div id="countdown-display">3:00</div>
+      <div class="ring-label" id="ring-label">READY</div>
+    </div>
+  </div>
+
+  <!-- Status message -->
+  <div id="status-msg" class="ok">Tap START when you leave the bay</div>
+
+  <!-- Haptic milestones -->
+  <div class="milestone-row">
+    <div class="milestone">
+      <div class="milestone-dot" id="ms-120" data-time="120"></div>
+      <div class="milestone-time">2:00</div>
+    </div>
+    <div class="milestone">
+      <div class="milestone-dot" id="ms-60" data-time="60"></div>
+      <div class="milestone-time">1:00</div>
+    </div>
+    <div class="milestone">
+      <div class="milestone-dot" id="ms-30" data-time="30"></div>
+      <div class="milestone-time">0:30</div>
+    </div>
+    <div class="milestone">
+      <div class="milestone-dot" id="ms-0" data-time="0"></div>
+      <div class="milestone-time">0:00</div>
+    </div>
+  </div>
+
+  <!-- Buttons -->
+  <div class="btn-row">
+    <button class="action-btn primary" id="main-btn" onclick="mainAction()">START</button>
+    <button class="action-btn danger"  id="reset-btn" onclick="resetTimer()" disabled>RESET</button>
+  </div>
+
+  <div id="battery-notice">⚡ LOW BATTERY — HAPTICS OFF</div>
+  <div id="signal-overlay">⚠ SIGNAL LOST — TIMER PAUSED</div>
+
+</div><!-- /mobile-view -->
+
+<!-- ─── WATCH VIEW ─── -->
+<div id="watch-view">
+  <div class="watch-face">
+    <div id="watch-time">3:00</div>
+    <div id="watch-sub">TAP TO START</div>
+    <div class="watch-haptic-ring" id="haptic-ring"></div>
+  </div>
+  <div class="watch-note">Haptics fire at 2:00 · 1:00 · 0:30 · 0:00</div>
+</div>
+
+<!-- ─── FULL SCREEN ALERT ─── -->
+<div id="full-alert">
+  <div class="alert-title">TIME'S UP</div>
+  <div class="alert-sub">HEAD BACK TO BAY NOW</div>
+  <button class="alert-dismiss" onclick="dismissAlert()">DISMISS</button>
+</div>
+
+<script>
+// ─── STATE ────────────────────────────────────────────────
+const TOTAL_SECS = 180;  // 3:00
+let secsLeft    = TOTAL_SECS;
+let running     = false;
+let paused      = false;
+let intervalId  = null;
+let lowBattery  = false;
+let firedMs     = new Set(); // which milestones have fired
+let currentView = 'mobile';
+
+const RING_CIRC = 2 * Math.PI * 108; // ≈ 678.6
+
+// Milestone config: { secs, haptic, colour, ringColour }
+const MILESTONES = [
+  { secs: 120, hapticType: 'single', dotClass: 'm-white', ringColour: '#ffffff', dotId: 'ms-120' },
+  { secs:  60, hapticType: 'double', dotClass: 'm-amber', ringColour: '#F59E0B', dotId: 'ms-60'  },
+  { secs:  30, hapticType: 'triple', dotClass: 'm-red',   ringColour: '#EF4444', dotId: 'ms-30'  },
+  { secs:   0, hapticType: 'alert',  dotClass: 'm-red',   ringColour: '#EF4444', dotId: 'ms-0'   },
+];
+
+// ─── VIEW SWITCH ─────────────────────────────────────────
+function switchView(v) {
+  currentView = v;
+  document.getElementById('mobile-view').style.display = v === 'mobile' ? 'flex' : 'none';
+  document.getElementById('watch-view').style.display  = v === 'watch'  ? 'flex' : 'none';
+  document.getElementById('btn-mobile').classList.toggle('active', v === 'mobile');
+  document.getElementById('btn-watch').classList.toggle('active', v === 'watch');
+}
+
+// ─── TIMER CORE ───────────────────────────────────────────
+function mainAction() {
+  if (!running) {
+    startTimer();
+  } else if (!paused) {
+    pauseTimer();
+  } else {
+    resumeTimer();
+  }
+}
+
+function startTimer() {
+  running = true; paused = false;
+  firedMs = new Set();
+  resetDots();
+  secsLeft = TOTAL_SECS;
+  document.getElementById('main-btn').textContent = 'PAUSE';
+  document.getElementById('reset-btn').disabled = false;
+  setStatus('You have ' + fmtSecs(secsLeft) + ' of shopping left', 'ok');
+  setRingLabel('SHOPPING');
+  intervalId = setInterval(tick, 1000);
+}
+
+function pauseTimer() {
+  paused = true;
+  clearInterval(intervalId);
+  document.getElementById('main-btn').textContent = 'RESUME';
+  setStatus('Paused at ' + fmtSecs(secsLeft), 'paused');
+  setRingLabel('PAUSED');
+}
+
+function resumeTimer() {
+  paused = false;
+  document.getElementById('main-btn').textContent = 'PAUSE';
+  setStatus(secsLeft > 60
+    ? fmtSecs(secsLeft) + ' of shopping left'
+    : secsLeft + ' secs — head back now', secsLeft <= 30 ? 'urgent' : secsLeft <= 60 ? 'warn' : 'ok');
+  setRingLabel('SHOPPING');
+  intervalId = setInterval(tick, 1000);
+}
+
+function resetTimer() {
+  clearInterval(intervalId);
+  running = false; paused = false;
+  secsLeft = TOTAL_SECS;
+  firedMs = new Set();
+  resetDots();
+  updateDisplay();
+  document.getElementById('main-btn').textContent = 'START';
+  document.getElementById('reset-btn').disabled = true;
+  setStatus('Tap START when you leave the bay', 'ok');
+  setRingLabel('READY');
+  document.getElementById('signal-overlay').style.display = 'none';
+}
+
+function tick() {
+  secsLeft--;
+  updateDisplay();
+  checkMilestones();
+
+  if (secsLeft > 60) {
+    const mins = Math.floor(secsLeft / 60);
+    const secs = secsLeft % 60;
+    setStatus(`${mins} min${mins>1?'s':''} ${secs} sec${secs!==1?'s':''} of shopping left`, 'ok');
+  } else if (secsLeft > 0) {
+    setStatus(secsLeft + ' secs — head back now', secsLeft <= 30 ? 'urgent' : 'warn');
+  }
+
+  if (secsLeft <= 0) {
+    clearInterval(intervalId);
+    running = false;
+    triggerFullAlert();
+  }
+}
+
+// ─── DISPLAY ─────────────────────────────────────────────
+function updateDisplay() {
+  const fmt = fmtSecs(secsLeft);
+  document.getElementById('countdown-display').textContent = fmt;
+  document.getElementById('watch-time').textContent = fmt;
+
+  // Colour
+  const colClass = secsLeft <= 30 ? 'red' : secsLeft <= 60 ? 'amber' : '';
+  const cdEl = document.getElementById('countdown-display');
+  const wtEl = document.getElementById('watch-time');
+  cdEl.className = colClass;
+  wtEl.className = colClass;
+
+  // Ring fill
+  const pct = secsLeft / TOTAL_SECS;
+  const offset = RING_CIRC * (1 - pct);
+  const ringEl = document.getElementById('ring-fill');
+  ringEl.style.strokeDashoffset = offset;
+  ringEl.style.stroke = secsLeft <= 30 ? '#EF4444' : secsLeft <= 60 ? '#F59E0B' : '#22C55E';
+}
+
+function fmtSecs(s) {
+  const m = Math.floor(s / 60);
+  const sec = Math.max(0, s % 60);
+  return `${m}:${String(sec).padStart(2,'0')}`;
+}
+
+function setStatus(msg, type) {
+  const el = document.getElementById('status-msg');
+  el.textContent = msg;
+  el.className = type || '';
+}
+
+function setRingLabel(txt) {
+  document.getElementById('ring-label').textContent = txt;
+  document.getElementById('watch-sub').textContent = txt;
+}
+
+// ─── MILESTONES & HAPTICS ─────────────────────────────────
+function checkMilestones() {
+  MILESTONES.forEach(m => {
+    if (secsLeft === m.secs && !firedMs.has(m.secs)) {
+      firedMs.add(m.secs);
+      fireMilestone(m);
+    }
+  });
+}
+
+function fireMilestone(m) {
+  // Dot
+  const dot = document.getElementById(m.dotId);
+  dot.className = 'milestone-dot fired ' + m.dotClass;
+
+  // Haptics (unless low battery)
+  if (!lowBattery) {
+    triggerHaptic(m.hapticType);
+  }
+
+  // Watch ring flash
+  const ring = document.getElementById('haptic-ring');
+  ring.style.borderColor = m.ringColour;
+  ring.classList.add('flash');
+  setTimeout(() => { ring.classList.remove('flash'); ring.style.borderColor='transparent'; }, 500);
+}
+
+function triggerHaptic(type) {
+  if (!navigator.vibrate) return;
+  const patterns = {
+    single: [80],
+    double: [80, 80, 80],
+    triple: [80, 80, 80, 80, 80],
+    alert:  [200, 100, 200, 100, 400]
+  };
+  navigator.vibrate(patterns[type] || [80]);
+}
+
+function resetDots() {
+  MILESTONES.forEach(m => {
+    const dot = document.getElementById(m.dotId);
+    dot.className = 'milestone-dot';
+  });
+}
+
+// ─── FULL ALERT ───────────────────────────────────────────
+function triggerFullAlert() {
+  document.getElementById('full-alert').classList.add('show');
+  if (!lowBattery) navigator.vibrate?.([300, 100, 300, 100, 500, 100, 500]);
+  setStatus('Time\'s up — head back to bay!', 'urgent');
+  setRingLabel('RETURN');
+}
+
+function dismissAlert() {
+  document.getElementById('full-alert').classList.remove('show');
+  resetTimer();
+}
+
+// ─── BATTERY AWARENESS ────────────────────────────────────
+async function checkBattery() {
+  if (!navigator.getBattery) return;
+  try {
+    const b = await navigator.getBattery();
+    const update = () => {
+      lowBattery = b.level < 0.10 && !b.charging;
+      document.getElementById('battery-notice').style.display = lowBattery ? 'block' : 'none';
+    };
+    update();
+    b.addEventListener('levelchange', update);
+    b.addEventListener('chargingchange', update);
+  } catch(e) { /* battery API not available */ }
+}
+
+// ─── GEOFENCE SIMULATION ──────────────────────────────────
+// Real implementation: watch navigator.geolocation and compare
+// distance to CENTRE (51.489452°N, 0.286680°E) against 15m radius.
+// Here we expose the trigger function for manual test via console.
+const GEO_CENTRE = { lat: 51.489452, lng: 0.286680 };
+const GEO_RADIUS_M = 15;
+let lastInsideGeofence = true; // assume starting inside
+
+function haversineM(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function startGPS() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.watchPosition(
+    pos => {
+      const dist = haversineM(pos.coords.latitude, pos.coords.longitude, GEO_CENTRE.lat, GEO_CENTRE.lng);
+      const inside = dist <= GEO_RADIUS_M;
+
+      document.getElementById('signal-overlay').style.display = 'none';
+
+      if (lastInsideGeofence && !inside) {
+        // GEOFENCE EXIT — auto-start countdown
+        if (!running) startTimer();
+      } else if (!lastInsideGeofence && inside) {
+        // GEOFENCE RE-ENTRY — cancel countdown
+        if (running) {
+          clearInterval(intervalId);
+          running = false; paused = false;
+          secsLeft = TOTAL_SECS;
+          updateDisplay();
+          document.getElementById('main-btn').textContent = 'START';
+          document.getElementById('reset-btn').disabled = true;
+          setStatus('Back at bay — timer reset', 'ok');
+          setRingLabel('READY');
+          resetDots();
+        }
+      }
+      lastInsideGeofence = inside;
+    },
+    err => {
+      // GPS dropout — pause if running
+      if (running && !paused) {
+        pauseTimer();
+        document.getElementById('signal-overlay').style.display = 'block';
+        setStatus('Signal lost — timer paused', 'paused');
+      }
+    },
+    { enableHighAccuracy: true, maximumAge: 3000, timeout: 8000 }
+  );
+}
+
+// ─── INIT ────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  updateDisplay();
+  checkBattery();
+  startGPS();
+  // Default: mobile view
+  switchView('mobile');
+});
+</script>
+</body>
+</html>
