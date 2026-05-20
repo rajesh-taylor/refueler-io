@@ -1,0 +1,38 @@
+# Dependencies — never commit these
+node_modules/
+timer/node_modules/
+darwin_bridge/node_modules/
+
+# Expo build outputs
+timer/.expo/
+timer/dist/
+timer/build/
+
+# Environment variables — NEVER commit secrets
+.env
+.env.local
+.env.production
+*.env
+
+# Supabase local dev
+supabase/.branches/
+supabase/.temp/
+
+# macOS system files
+.DS_Store
+**/.DS_Store
+Thumbs.db
+
+# Editor folders
+.vscode/
+*.swp
+
+# Log files
+*.log
+npm-debug.log*
+
+# Large binary files — keep out of Git
+*.mov
+*.mp4
+*.dmg
+
