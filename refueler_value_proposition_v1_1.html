@@ -1,0 +1,129 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.page{background:var(--color-background-primary);padding:2rem 1.75rem 2.5rem;font-family:var(--font-sans);color:var(--color-text-primary)}
+.masthead{display:flex;align-items:baseline;justify-content:space-between;padding-bottom:1rem;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.75rem}
+.wordmark{font-size:13px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase}
+.wordmark em{color:#D4690A;font-style:normal}
+.doc-meta{font-size:11px;font-family:var(--font-mono);color:var(--color-text-secondary);text-align:right;line-height:1.6}
+.hero-line{font-size:22px;font-weight:500;letter-spacing:-0.025em;line-height:1.25;margin-bottom:0.4rem}
+.hero-sub{font-size:13px;color:var(--color-text-secondary);line-height:1.6;margin-bottom:2rem;max-width:520px}
+.audience-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;background:var(--color-border-tertiary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:1.75rem}
+.audience-card{background:var(--color-background-primary);padding:1.25rem 1.25rem 1.5rem}
+.aud-label{font-size:10px;font-family:var(--font-mono);font-weight:500;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.75rem;display:flex;align-items:center;gap:6px}
+.aud-label i{font-size:14px}
+.user-lbl{color:#D4690A}
+.merchant-lbl{color:#1E8A4A}
+.investor-lbl{color:var(--color-text-info)}
+.aud-headline{font-size:15px;font-weight:500;line-height:1.3;margin-bottom:0.6rem;letter-spacing:-0.015em}
+.aud-body{font-size:12px;line-height:1.65;color:var(--color-text-secondary);margin-bottom:1rem}
+.proof-points{list-style:none;display:flex;flex-direction:column;gap:5px}
+.proof-points li{font-size:11px;line-height:1.5;color:var(--color-text-secondary);display:flex;align-items:baseline;gap:6px}
+.proof-points li::before{content:'—';color:var(--color-border-secondary);flex-shrink:0;font-size:10px}
+.proof-points li strong{color:var(--color-text-primary);font-weight:500}
+.proof-points li.highlight strong{color:#D4690A}
+.bottom-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:1.25rem}
+.stat-block{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.875rem 1rem}
+.stat-value{font-size:20px;font-weight:500;letter-spacing:-0.02em;font-family:var(--font-mono);margin-bottom:2px}
+.stat-label{font-size:11px;color:var(--color-text-secondary);line-height:1.4}
+.privacy-bar{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:0.75rem 1rem;display:flex;align-items:center;gap:10px;margin-bottom:1.25rem}
+.privacy-bar i{font-size:16px;color:#D4690A;flex-shrink:0}
+.privacy-text{font-size:12px;color:var(--color-text-secondary);line-height:1.5;font-style:italic}
+.privacy-text strong{color:var(--color-text-primary);font-weight:500;font-style:normal}
+.footer-meta{display:flex;justify-content:space-between;align-items:center;padding-top:1rem;border-top:0.5px solid var(--color-border-tertiary)}
+.footer-tag{font-size:10px;font-family:var(--font-mono);color:var(--color-text-secondary)}
+.status-pill{font-size:10px;font-family:var(--font-mono);padding:3px 8px;border-radius:999px;border:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary)}
+.lyn-line{font-size:11px;font-family:var(--font-serif);color:var(--color-text-secondary);font-style:italic;text-align:center;padding:0.875rem 1rem;letter-spacing:0.01em}
+.lyn-line span{color:var(--color-text-primary)}
+</style>
+
+<h2 class="sr-only">Refueler value proposition one-pager v1.1 — three audiences: user, merchant, investor</h2>
+
+<div class="page">
+
+  <div class="masthead">
+    <div class="wordmark">RE<em>FUELER</em></div>
+    <div class="doc-meta">Value proposition · v1.1<br>May 2026 · Pre-TestFlight</div>
+  </div>
+
+  <div class="hero-line">The platform that knows you're coming.</div>
+  <div class="hero-sub">Order ahead on the train. Collect at the platform. Earn real Bitcoin with every purchase — no card, no queue, no waiting. Built for London commuters. Powered by Lightning.</div>
+
+  <div class="audience-grid">
+
+    <div class="audience-card">
+      <div class="aud-label user-lbl"><i class="ti ti-train" aria-hidden="true"></i>For the commuter</div>
+      <div class="aud-headline">Your flat white is ready when you arrive.</div>
+      <div class="aud-body">Refueler detects your train is moving and asks if you want your usual. By the time you reach Fenchurch Street, it's waiting. No app-opening, no queue, no wasted minutes at the counter.</div>
+      <ul class="proof-points">
+        <li><strong>Under 2 minutes</strong> at the counter — vs. 8–12 in a queue</li>
+        <li><strong>Every purchase earns sats.</strong> Real Bitcoin. Not points.</li>
+        <li><strong>Your location never leaves your phone.</strong> The app works it out locally.</li>
+        <li><strong>New to Bitcoin?</strong> Start with loyalty stamps. Switch to sats when ready.</li>
+        <li><strong>Someone else collecting?</strong> Share a link. No account needed.</li>
+      </ul>
+    </div>
+
+    <div class="audience-card">
+      <div class="aud-label merchant-lbl"><i class="ti ti-building-store" aria-hidden="true"></i>For the merchant</div>
+      <div class="aud-headline">More orders. Faster throughput. A new kind of customer.</div>
+      <div class="aud-body">Refueler sends confirmed, pre-paid orders directly to your Command Centre tablet. Staff prepare on time. The customer arrives, collects, and leaves. Your queue moves faster. And you gain access to a customer your loyalty card never reached.</div>
+      <ul class="proof-points">
+        <li><strong>Pre-paid orders only.</strong> No no-shows, no cancellations.</li>
+        <li><strong>Loyalty cost co-funded</strong> via sats subsidy — not your margin.</li>
+        <li><strong>Command Centre</strong> is a clean tablet UI. Minimal training required.</li>
+        <li><strong>No consumer data passes through you.</strong> GDPR liability stays with us.</li>
+        <li><strong>Walk-in and walk-past</strong> orders captured — not just pre-orders.</li>
+        <li class="highlight"><strong>New foot flow: Bitcoin stackers.</strong> A high-spending, loyalty-averse demographic concentrated in the City of London — and they tip in sats.</li>
+      </ul>
+    </div>
+
+    <div class="audience-card">
+      <div class="aud-label investor-lbl"><i class="ti ti-chart-line" aria-hidden="true"></i>For the investor</div>
+      <div class="aud-headline">A new payment rail hiding inside a coffee app.</div>
+      <div class="aud-body">Refueler is a Bitcoin Lightning payments platform dressed as a commuter convenience product. The addressable market is every daily-spend transaction in London's transport corridors — starting with 60,000+ daily C2C passengers and expanding across EV networks, stadium concessions, and travel booking.</div>
+      <ul class="proof-points">
+        <li><strong>Dual revenue:</strong> transaction fee per order + SaaS per venue</li>
+        <li><strong>Moat:</strong> on-device geofence UX is not replicable by ad-tech loyalty apps</li>
+        <li><strong>Privacy architecture</strong> as competitive differentiator — zero location data</li>
+        <li><strong>Bitcoin-native rewards</strong> = no interchange, no points liability</li>
+        <li><strong>London fintech context:</strong> adjacent to Monzo, Revolut — but on a parallel rail</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="bottom-row">
+    <div class="stat-block">
+      <div class="stat-value">60k+</div>
+      <div class="stat-label">Daily C2C passengers<br>Fenchurch Street corridor</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-value">&lt;2 min</div>
+      <div class="stat-label">Target time at counter<br>vs. 8–12 min queue†</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-value">2-track</div>
+      <div class="stat-label">Sats + loyalty rewards<br>Non-bitcoiner on-ramp</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-value">0 bytes</div>
+      <div class="stat-label">Location data transmitted<br>On-device only. Architectural.</div>
+    </div>
+  </div>
+
+  <div class="privacy-bar">
+    <i class="ti ti-shield-lock" aria-hidden="true"></i>
+    <div class="privacy-text"><strong>"Refueler knows your train is moving. Your phone works it out locally. We never see where you are."</strong> — geofence runs entirely on-device. Zero location data transmitted. This is architecture, not policy.</div>
+  </div>
+
+  <div class="lyn-line">
+    <span>Nothing stops this train.</span> — The fiscal deficit isn't going anywhere. Neither is Bitcoin. We just made it useful at 7:43am on a Tuesday.
+  </div>
+
+  <div class="footer-meta">
+    <div class="footer-tag">refueler.io · privacy@refueler.io · Built in London · †field data pending</div>
+    <div class="status-pill">Pre-TestFlight · May 2026</div>
+  </div>
+
+</div>

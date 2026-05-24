@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy · Refueler</title>
+  <meta name="robots" content="noindex" />
+  <meta name="description" content="Refueler Privacy Policy — how we handle your data, your rights, and our GDPR commitments." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Reset & Base ─────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --paper:      #F5F0E8;
+      --ink:        #1A1A1A;
+      --ink-mid:    #5A5650;
+      --ink-light:  #8A8478;
+      --hairline:   #C8C2B8;
+      --card:       #EDE8DF;
+      --orange:     #F5820A;
+      --font:       'DM Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--font);
+      font-weight: 300;
+      font-size: 17px;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Top Rail ──────────────────────────────────── */
+    .top-rail {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 52px;
+      background: var(--paper);
+      border-bottom: 1px solid var(--hairline);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+    }
+
+    .wordmark {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-decoration: none;
+      color: var(--ink);
+    }
+
+    .rail-meta {
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--ink-light);
+    }
+
+    /* ─── Hero ──────────────────────────────────────── */
+    .hero {
+      padding: 80px 40px 64px;
+      max-width: 900px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 300;
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      margin-bottom: 20px;
+    }
+
+    .hero-sub {
+      font-size: 19px;
+      font-weight: 300;
+      color: var(--ink-mid);
+      max-width: 620px;
+      line-height: 1.6;
+    }
+
+    /* ─── Anchor Nav ────────────────────────────────── */
+    .anchor-nav {
+      padding: 0 40px 56px;
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    .anchor-nav p {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+      margin-bottom: 14px;
+    }
+
+    .anchor-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 0;
+      list-style: none;
+    }
+
+    .anchor-list li::after {
+      content: '·';
+      margin: 0 12px;
+      color: var(--hairline);
+    }
+    .anchor-list li:last-child::after { content: ''; }
+
+    .anchor-list a {
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--orange);
+      text-decoration: none;
+    }
+    .anchor-list a:hover { text-decoration: underline; }
+
+    /* ─── Main Layout ───────────────────────────────── */
+    main {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    /* ─── Section Panel ─────────────────────────────── */
+    .policy-section {
+      display: grid;
+      grid-template-columns: 28% 72%;
+      gap: 0 48px;
+      padding: 52px 0;
+      border-top: 1px solid var(--hairline);
+    }
+
+    .section-label {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+      padding-top: 4px;
+      line-height: 1.4;
+    }
+
+    .section-label a {
+      color: var(--ink-light);
+      text-decoration: none;
+    }
+
+    .section-body h2 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--ink);
+      line-height: 1.3;
+    }
+
+    .section-body p {
+      margin-bottom: 16px;
+      color: var(--ink);
+    }
+
+    .section-body p:last-child { margin-bottom: 0; }
+
+    .section-body ul {
+      list-style: none;
+      margin-bottom: 16px;
+    }
+
+    .section-body ul li {
+      padding: 4px 0 4px 18px;
+      position: relative;
+    }
+
+    .section-body ul li::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      color: var(--hairline);
+    }
+
+    .section-body a {
+      color: var(--orange);
+      text-decoration: none;
+    }
+    .section-body a:hover { text-decoration: underline; }
+
+    /* ─── Inset Card ────────────────────────────────── */
+    .inset-card {
+      background: var(--card);
+      border-radius: 4px;
+      padding: 36px 40px;
+      margin: 24px 0;
+    }
+
+    .inset-card p {
+      font-size: 16px;
+      font-style: italic;
+      color: var(--ink-mid);
+      margin-bottom: 0;
+    }
+
+    /* ─── Data Table ────────────────────────────────── */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 24px 0;
+      font-size: 15px;
+    }
+
+    .data-table th {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+      text-align: left;
+      padding: 10px 14px 10px 0;
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    .data-table td {
+      padding: 13px 14px 13px 0;
+      border-bottom: 1px solid var(--hairline);
+      vertical-align: top;
+      color: var(--ink);
+      line-height: 1.55;
+      font-size: 15px;
+    }
+
+    .data-table tr:last-child td { border-bottom: none; }
+
+    .data-table td strong,
+    .data-table th:last-child { padding-right: 0; }
+
+    /* ─── Rights Grid ───────────────────────────────── */
+    .rights-grid {
+      background: var(--card);
+      border-radius: 4px;
+      padding: 36px 40px;
+      margin: 24px 0;
+    }
+
+    .rights-grid .right-item {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 0 24px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--hairline);
+      font-size: 15px;
+    }
+
+    .rights-grid .right-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .rights-grid .right-item:first-child { padding-top: 0; }
+
+    .right-name {
+      font-weight: 600;
+      color: var(--ink);
+      font-size: 14px;
+    }
+
+    .right-art {
+      font-size: 12px;
+      color: var(--ink-light);
+      font-weight: 300;
+      display: block;
+      margin-top: 2px;
+    }
+
+    .right-desc { color: var(--ink-mid); line-height: 1.5; }
+
+    .right-action {
+      display: inline-block;
+      margin-top: 4px;
+      font-size: 13px;
+      color: var(--orange);
+      font-weight: 400;
+    }
+
+    /* ─── Arch Block ─────────────────────────────────── */
+    .arch-steps {
+      counter-reset: step;
+      list-style: none;
+      margin: 20px 0;
+    }
+
+    .arch-steps li {
+      counter-increment: step;
+      position: relative;
+      padding: 0 0 20px 40px;
+      border-left: 2px solid var(--hairline);
+      margin-left: 12px;
+    }
+
+    .arch-steps li:last-child { border-left-color: transparent; padding-bottom: 0; }
+
+    .arch-steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: -13px;
+      top: 2px;
+      width: 24px;
+      height: 24px;
+      background: var(--paper);
+      border: 2px solid var(--hairline);
+      border-radius: 50%;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    /* ─── Contact Panel ─────────────────────────────── */
+    .contact-highlight {
+      margin-top: 20px;
+      padding: 20px 24px;
+      background: var(--card);
+      border-radius: 4px;
+      border-left: 3px solid var(--orange);
+    }
+
+    .contact-highlight p { margin-bottom: 0; font-size: 16px; }
+
+    /* ─── ICO Block ─────────────────────────────────── */
+    .ico-block {
+      margin-top: 20px;
+      padding: 20px 24px;
+      background: var(--card);
+      border-radius: 4px;
+    }
+
+    .ico-block p { margin-bottom: 8px; font-size: 15px; }
+    .ico-block p:last-child { margin-bottom: 0; }
+
+    /* ─── Inline highlight ──────────────────────────── */
+    .pull-quote {
+      font-size: 17px;
+      font-style: italic;
+      color: var(--ink-mid);
+      border-left: 3px solid var(--orange);
+      padding: 12px 20px;
+      margin: 24px 0;
+      background: transparent;
+    }
+
+    /* ─── Footer ────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--hairline);
+      padding: 40px 40px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 24px;
+      max-width: 1040px;
+      margin: 40px auto 0;
+    }
+
+    .footer-brand {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: var(--ink);
+    }
+
+    .footer-meta {
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--ink-light);
+      line-height: 1.7;
+    }
+
+    .footer-meta a {
+      color: var(--orange);
+      text-decoration: none;
+    }
+    .footer-meta a:hover { text-decoration: underline; }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--ink-light);
+      text-decoration: none;
+    }
+    .footer-links a:hover { color: var(--orange); }
+
+    /* ─── Responsive ─────────────────────────────────── */
+    @media (max-width: 720px) {
+      .top-rail { padding: 0 20px; }
+      .hero { padding: 48px 20px 40px; }
+      .anchor-nav { padding: 0 20px 40px; }
+      main { padding: 0 20px; }
+      footer { padding: 32px 20px; }
+
+      .policy-section {
+        grid-template-columns: 1fr;
+        gap: 16px 0;
+        padding: 40px 0;
+      }
+
+      .rights-grid .right-item {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+
+      .inset-card, .rights-grid { padding: 24px 20px; }
+
+      .data-table { font-size: 14px; }
+      .data-table th, .data-table td { padding: 10px 10px 10px 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── Top Rail ─────────────────────────────── -->
+  <header role="banner">
+    <div class="top-rail">
+      <a href="/" class="wordmark" aria-label="Refueler home">REFUELER</a>
+      <span class="rail-meta">Last updated: May 2026</span>
+    </div>
+  </header>
+
+  <!-- ─── Hero ─────────────────────────────────── -->
+  <div class="hero">
+    <h1>Your data,<br>handled carefully.</h1>
+    <p class="hero-sub">Refueler collects the minimum needed to run the service — and nothing we don't need. Your location never leaves your device. Your rewards are yours from the moment they are issued.</p>
+  </div>
+
+  <!-- ─── Anchor Navigation ─────────────────────── -->
+  <nav class="anchor-nav" aria-label="Jump to section">
+    <p>Jump to</p>
+    <ul class="anchor-list">
+      <li><a href="#who-we-are">Who we are</a></li>
+      <li><a href="#what-we-process">What we process</a></li>
+      <li><a href="#location">Location</a></li>
+      <li><a href="#legal-basis">Legal basis</a></li>
+      <li><a href="#retention">Retention</a></li>
+      <li><a href="#security">Security</a></li>
+      <li><a href="#bitcoin">Bitcoin &amp; rewards</a></li>
+      <li><a href="#cookies">Cookies</a></li>
+      <li><a href="#newsletter">Newsletter</a></li>
+      <li><a href="#your-rights">Your rights</a></li>
+      <li><a href="#changes">Changes</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- ─── Main Content ──────────────────────────── -->
+  <main id="main-content">
+
+    <!-- 01 · Who we are -->
+    <section class="policy-section" id="who-we-are" aria-labelledby="label-who">
+      <div class="section-label" id="label-who">01 · Who we are</div>
+      <div class="section-body">
+        <p>Refueler (incorporating as Refueler Ltd, England &amp; Wales) is the data controller for all personal data processed through the Refueler platform — including refueler.io, the mobile app, and the Command Centre merchant dashboard.</p>
+        <p>We are registered with the Information Commissioner's Office. Our ICO registration number will be displayed here prior to this policy going live.</p>
+        <p><strong>Third-party processors</strong></p>
+        <div class="inset-card">
+          <table class="data-table" style="margin:0;">
+            <thead>
+              <tr>
+                <th>Processor</th>
+                <th>Role</th>
+                <th>Region</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Supabase</strong></td>
+                <td>Database infrastructure and authentication</td>
+                <td>EU</td>
+              </tr>
+              <tr>
+                <td><strong>Cloudflare</strong></td>
+                <td>Content delivery, DNS, Pages hosting, and Workers API layer</td>
+                <td>Global edge / DPA</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Both processors operate under signed Data Processing Agreements. No other third-party processors handle personal data at this time. Cloudflare's global edge network may route traffic through non-EU nodes; this is governed by Cloudflare's standard contractual clauses under their DPA.</p>
+      </div>
+    </section>
+
+    <!-- 02 · What we process -->
+    <section class="policy-section" id="what-we-process" aria-labelledby="label-process">
+      <div class="section-label" id="label-process">02 · What we process</div>
+      <div class="section-body">
+        <p>We collect only what is necessary to operate the service. The table below covers every category of personal data we process.</p>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Purpose</th>
+              <th>Stored</th>
+              <th>Shared with</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Email address</td>
+              <td>Magic link authentication only</td>
+              <td>Supabase (EU)</td>
+              <td>Nobody</td>
+            </tr>
+            <tr>
+              <td>Order content (item, vendor, timestamp)</td>
+              <td>Fulfilment, vendor queue, reward calculation</td>
+              <td>Supabase (EU)</td>
+              <td>Named vendor only</td>
+            </tr>
+            <tr>
+              <td>Ecash reward amount</td>
+              <td>Issuance record</td>
+              <td>Supabase (EU)</td>
+              <td>Nobody</td>
+            </tr>
+            <tr>
+              <td>Push subscription token</td>
+              <td>Order-ready notification</td>
+              <td>Supabase (EU)</td>
+              <td>Nobody</td>
+            </tr>
+            <tr>
+              <td>Passkey credential (WebAuthn public key)</td>
+              <td>Biometric re-authentication</td>
+              <td>Supabase (EU)</td>
+              <td>Nobody</td>
+            </tr>
+            <tr>
+              <td><strong>Location data</strong></td>
+              <td>On-device geofence only — never transmitted</td>
+              <td><strong>Your device only</strong></td>
+              <td><strong>Nobody</strong></td>
+            </tr>
+          </tbody>
+        </table>
+        <p><strong>We do not collect:</strong> name, phone number, age, gender, payment card details, IP address, browsing behaviour beyond the order flow, or biometric data beyond the Passkey public key (which cannot reconstruct a biometric).</p>
+      </div>
+    </section>
+
+    <!-- 03 · Location -->
+    <section class="policy-section" id="location" aria-labelledby="label-location">
+      <div class="section-label" id="label-location">03 · Location architecture</div>
+      <div class="section-body">
+        <p>The Passive Ambient Awareness feature — which detects when your train is moving and prepares your order — runs entirely on your device. No location data is ever transmitted to our servers.</p>
+
+        <div class="pull-quote">
+          "Refueler knows your train is moving. Your phone works it out locally. We never see where you are."
+        </div>
+
+        <p><strong>How it works, step by step:</strong></p>
+        <ol class="arch-steps">
+          <li>Geofence boundaries are registered locally on your phone's OS — no coordinates are sent to our servers</li>
+          <li>Your phone's OS detects train movement locally (velocity + location) — no data leaves the device at this step</li>
+          <li>A local prompt fires: <em>"Your flat white will be ready in 4 mins, confirm?"</em></li>
+          <li>If you confirm, your phone sends only: item + vendor ID + session token — <strong>no location data</strong></li>
+          <li>Our database has no location column — this is an architectural guarantee, not a policy promise</li>
+        </ol>
+
+        <p><strong>Opt-in required.</strong> You choose whether to enable this feature during onboarding. You can toggle it off at any time in Settings → Location. Disabling it has no effect on ordering, reward earning, or any other app feature.</p>
+      </div>
+    </section>
+
+    <!-- 04 · Legal basis -->
+    <section class="policy-section" id="legal-basis" aria-labelledby="label-legal">
+      <div class="section-label" id="label-legal">04 · Legal basis<br><span style="font-weight:300;font-size:12px;letter-spacing:0;text-transform:none;color:var(--ink-light);">UK GDPR Art. 6</span></div>
+      <div class="section-body">
+        <p>Every processing activity has a lawful basis under Article 6 of the UK GDPR. We do not rely on legitimate interests for anything where consent or contract is the appropriate basis.</p>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Activity</th>
+              <th>Legal basis</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Place an order</td>
+              <td>Art. 6(1)(b) — performance of contract</td>
+            </tr>
+            <tr>
+              <td>Sign in via magic link</td>
+              <td>Art. 6(1)(b) — performance of contract</td>
+            </tr>
+            <tr>
+              <td>Earn a reward</td>
+              <td>Art. 6(1)(b) — performance of contract</td>
+            </tr>
+            <tr>
+              <td>Allow push notifications</td>
+              <td>Art. 6(1)(a) — consent</td>
+            </tr>
+            <tr>
+              <td>Enable train geofence</td>
+              <td>Art. 6(1)(a) — explicit consent, withdrawable anytime</td>
+            </tr>
+            <tr>
+              <td>Register a Passkey</td>
+              <td>Art. 6(1)(a) — consent</td>
+            </tr>
+            <tr>
+              <td>Security &amp; fraud prevention</td>
+              <td>Art. 6(1)(f) — legitimate interests</td>
+            </tr>
+            <tr>
+              <td>Newsletter (opt-in only)</td>
+              <td>Art. 6(1)(a) — consent</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 05 · Retention -->
+    <section class="policy-section" id="retention" aria-labelledby="label-retention">
+      <div class="section-label" id="label-retention">05 · Data retention</div>
+      <div class="section-body">
+        <p>We keep data only as long as necessary. Auto-purge runs automatically for all expired categories — you do not need to request deletion for routine expiry.</p>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Retention</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Order records</td>
+              <td>13 months from order date</td>
+              <td>Dispute resolution window</td>
+            </tr>
+            <tr>
+              <td>Email address</td>
+              <td>Duration of account</td>
+              <td>Authentication</td>
+            </tr>
+            <tr>
+              <td>Push subscription token</td>
+              <td>Until withdrawn, or 90 days inactive</td>
+              <td>Notification delivery</td>
+            </tr>
+            <tr>
+              <td>Ecash reward records</td>
+              <td>6 years</td>
+              <td>HMRC financial compliance</td>
+            </tr>
+            <tr>
+              <td>Passkey public key</td>
+              <td>Duration of account</td>
+              <td>Authentication</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>Ecash reward records are retained for six years under HMRC financial compliance obligations. This retention period applies even if you delete your account. All other data is deleted upon account closure.</p>
+      </div>
+    </section>
+
+    <!-- 06 · Security -->
+    <section class="policy-section" id="security" aria-labelledby="label-security">
+      <div class="section-label" id="label-security">06 · Authentication &amp; security</div>
+      <div class="section-body">
+        <ul>
+          <li><strong>Magic link</strong> — passwordless, single-use, expires after 10 minutes</li>
+          <li><strong>Passkey (WebAuthn)</strong> — biometric re-authentication for returning users; only the public key is stored; your private key never leaves your device</li>
+          <li><strong>Sessions</strong> — short-lived JWT (1 hour); stored in memory only, never in localStorage or persistent cookies</li>
+          <li><strong>Sensitive actions</strong> — linking a new wallet or deleting your account always requires a fresh magic link confirmation, regardless of your active session</li>
+          <li><strong>Encryption</strong> — AES-256 at rest for all Supabase data; TLS 1.3 in transit</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 07 · Bitcoin & rewards -->
+    <section class="policy-section" id="bitcoin" aria-labelledby="label-bitcoin">
+      <div class="section-label" id="label-bitcoin">07 · Bitcoin, ecash &amp; rewards</div>
+      <div class="section-body">
+        <p>Refueler issues rewards as ecash tokens denominated in sats, via the Cashu protocol (Minibits wallet). These are bearer instruments — they live on your device, not on our servers.</p>
+        <div class="inset-card">
+          <p><strong>You own your rewards from the moment they are issued.</strong> We cannot freeze, reverse, or access them.</p>
+        </div>
+        <p><strong>What we record:</strong> reward amount in sats, timestamp, and vendor per transaction (for financial record-keeping only).</p>
+        <p><strong>What we do not record:</strong> Lightning address, Minibits wallet ID, node pubkey, or on-chain address after payment is sent. Lightning addresses are held in transient memory for the duration of the payment push only — they are never written to our database.</p>
+        <p>The Cashu ecash balance lives on your device. When you redeem tokens, they settle as sats on the Lightning Network.</p>
+      </div>
+    </section>
+
+    <!-- 08 · Cookies -->
+    <section class="policy-section" id="cookies" aria-labelledby="label-cookies">
+      <div class="section-label" id="label-cookies">08 · Cookies</div>
+      <div class="section-body">
+        <p>We use one strictly necessary cookie:</p>
+        <div class="inset-card">
+          <p><strong>Supabase session token</strong> — a short-lived JWT that expires when you close the tab, or within 1 hour. That is all.</p>
+        </div>
+        <p>No advertising cookies. No analytics cookies. No third-party cookies. No cookie banner is required — nothing here needs separate consent beyond what you agreed to in the terms of service.</p>
+        <p>Verify this yourself: browser developer tools → Application → Cookies. One token. Nothing else.</p>
+      </div>
+    </section>
+
+    <!-- 09 · Newsletter -->
+    <section class="policy-section" id="newsletter" aria-labelledby="label-newsletter">
+      <div class="section-label" id="label-newsletter">09 · Newsletter</div>
+      <div class="section-body">
+        <p>We send a weekly or fortnightly newsletter — Bitcoin news, platform updates, and event announcements.</p>
+        <p>Newsletter subscription requires a <strong>separate, explicit opt-in</strong> from account creation. You will never be subscribed automatically.</p>
+        <p>Unsubscribe at any time via the footer link in any newsletter, or by emailing <a href="mailto:privacy@refueler.io">privacy@refueler.io</a>. We do not sell, rent, or share your email address with third-party marketing companies.</p>
+      </div>
+    </section>
+
+    <!-- 10 · Your rights -->
+    <section class="policy-section" id="your-rights" aria-labelledby="label-rights">
+      <div class="section-label" id="label-rights">10 · Your rights<br><span style="font-weight:300;font-size:12px;letter-spacing:0;text-transform:none;color:var(--ink-light);">UK GDPR Arts. 15–22</span></div>
+      <div class="section-body">
+        <p>You have the following rights over your personal data. We will acknowledge any request within 24 hours and respond in full within 30 days.</p>
+
+        <div class="rights-grid">
+          <div class="right-item">
+            <div>
+              <span class="right-name">Access</span>
+              <span class="right-art">Art. 15</span>
+            </div>
+            <div class="right-desc">
+              Receive a copy of all personal data we hold about you.
+              <span class="right-action">Email <a href="mailto:privacy@refueler.io">privacy@refueler.io</a></span>
+            </div>
+          </div>
+          <div class="right-item">
+            <div>
+              <span class="right-name">Rectification</span>
+              <span class="right-art">Art. 16</span>
+            </div>
+            <div class="right-desc">
+              Correct any inaccurate personal data we hold.
+              <span class="right-action">Email <a href="mailto:privacy@refueler.io">privacy@refueler.io</a></span>
+            </div>
+          </div>
+          <div class="right-item">
+            <div>
+              <span class="right-name">Erasure</span>
+              <span class="right-art">Art. 17</span>
+            </div>
+            <div class="right-desc">
+              Delete your account and associated data. Note: ecash reward records are retained for 6 years under HMRC obligations.
+              <span class="right-action">Settings → Delete account</span>
+            </div>
+          </div>
+          <div class="right-item">
+            <div>
+              <span class="right-name">Restriction</span>
+              <span class="right-art">Art. 18</span>
+            </div>
+            <div class="right-desc">
+              Pause processing of your data while a complaint or dispute is being resolved.
+              <span class="right-action">Email <a href="mailto:privacy@refueler.io">privacy@refueler.io</a></span>
+            </div>
+          </div>
+          <div class="right-item">
+            <div>
+              <span class="right-name">Portability</span>
+              <span class="right-art">Art. 20</span>
+            </div>
+            <div class="right-desc">
+              Receive a machine-readable JSON export of your orders and reward history.
+              <span class="right-action">Settings → Privacy &amp; data → Export</span>
+            </div>
+          </div>
+          <div class="right-item">
+            <div>
+              <span class="right-name">Object</span>
+              <span class="right-art">Art. 21</span>
+            </div>
+            <div class="right-desc">
+              Object to processing carried out under legitimate interests (currently: security and fraud prevention only).
+              <span class="right-action">Email <a href="mailto:privacy@refueler.io">privacy@refueler.io</a></span>
+            </div>
+          </div>
+          <div class="right-item">
+            <div>
+              <span class="right-name">Automated decisions</span>
+              <span class="right-art">Art. 22</span>
+            </div>
+            <div class="right-desc">
+              No automated decisions with significant legal or similarly significant effects are made about you. All orders are confirmed by a human action.
+              <span class="right-action">Not applicable</span>
+            </div>
+          </div>
+          <div class="right-item">
+            <div>
+              <span class="right-name">Withdraw consent</span>
+              <span class="right-art">Arts. 7, 13</span>
+            </div>
+            <div class="right-desc">
+              Withdraw consent for geofence, push notifications, or newsletter at any time with no penalty.
+              <span class="right-action">Settings or email <a href="mailto:privacy@refueler.io">privacy@refueler.io</a></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-highlight">
+          <p>To exercise any of these rights, email <a href="mailto:privacy@refueler.io">privacy@refueler.io</a>. We will acknowledge within 24 hours and respond in full within 30 days.</p>
+        </div>
+
+        <div class="ico-block" style="margin-top:20px;">
+          <p><strong>Right to complain to the ICO</strong></p>
+          <p>If you believe we have handled your personal data unlawfully, you have the right to lodge a complaint with the Information Commissioner's Office (ICO) under Article 77 of the UK GDPR.</p>
+          <p>ICO website: <a href="https://ico.org.uk" target="_blank" rel="noopener">ico.org.uk</a> &nbsp;·&nbsp; Helpline: 0303 123 1113</p>
+          <p>We would always prefer the opportunity to put things right first — please contact us at <a href="mailto:privacy@refueler.io">privacy@refueler.io</a> and we will respond promptly.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11 · Changes -->
+    <section class="policy-section" id="changes" aria-labelledby="label-changes">
+      <div class="section-label" id="label-changes">11 · Changes to this policy</div>
+      <div class="section-body">
+        <p>We will notify you of any material changes by email before they take effect. The current version is always available at <a href="https://refueler.io/privacy">refueler.io/privacy</a>.</p>
+        <p><strong>Material changes include:</strong> new categories of data collected, new processors, new legal bases, or changes to retention periods.</p>
+        <p><strong>Minor corrections</strong> (wording, address updates) increment the minor version number only and do not trigger email notification.</p>
+        <p><strong>Versioning:</strong> MAJOR.MINOR — e.g. 1.0 (launch) → 1.1 (minor correction) → 2.0 (material change). Version history is maintained in a private Git repository.</p>
+      </div>
+    </section>
+
+    <!-- 12 · Contact -->
+    <section class="policy-section" id="contact" aria-labelledby="label-contact">
+      <div class="section-label" id="label-contact">12 · Contact</div>
+      <div class="section-body">
+        <p>For any data-related enquiries, requests, or concerns:</p>
+        <div class="inset-card">
+          <p><strong>Email:</strong> <a href="mailto:privacy@refueler.io">privacy@refueler.io</a><br />
+          <strong>Post:</strong> [Registered address — to be confirmed at incorporation]<br />
+          <strong>ICO registration:</strong> [Number to be added prior to publication]</p>
+        </div>
+        <p>We are a small, committed team. Every privacy enquiry is read and responded to personally.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ─── Footer ────────────────────────────────── -->
+  <footer role="contentinfo">
+    <div>
+      <div class="footer-brand">REFUELER</div>
+      <div class="footer-meta" style="margin-top:8px;">
+        Privacy Policy · Version 1.1 · May 2026<br />
+        Refueler (incorporating as Refueler Ltd, England &amp; Wales)<br />
+        Data controller · <a href="mailto:privacy@refueler.io">privacy@refueler.io</a>
+      </div>
+    </div>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="/complaints">Complaints</a>
+      <a href="mailto:privacy@refueler.io">Contact</a>
+    </div>
+  </footer>
+
+</body>
+</html>

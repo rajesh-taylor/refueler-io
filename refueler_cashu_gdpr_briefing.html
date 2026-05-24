@@ -1,0 +1,483 @@
+
+<style>
+:root {
+  --orange: #D4690A;
+  --bg-card: var(--color-background-primary);
+  --bg-surface: var(--color-background-secondary);
+  --border: var(--color-border-tertiary);
+  --text: var(--color-text-primary);
+  --text-muted: var(--color-text-secondary);
+  --text-dim: var(--color-text-tertiary);
+  --r: var(--border-radius-lg);
+  --r-sm: var(--border-radius-md);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); color: var(--text); background: transparent; }
+.wrapper { padding: 1rem 0; }
+.nav { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.5rem; }
+.nav-btn {
+  font-size: 12px; padding: 5px 12px; border-radius: 20px;
+  border: 0.5px solid var(--color-border-secondary);
+  background: transparent; color: var(--text-muted); cursor: pointer;
+  transition: all 0.15s;
+}
+.nav-btn.active, .nav-btn:hover {
+  background: var(--color-background-info);
+  color: var(--color-text-info);
+  border-color: var(--color-border-info);
+}
+.section { display: none; }
+.section.active { display: block; }
+.card {
+  background: var(--bg-card);
+  border: 0.5px solid var(--border);
+  border-radius: var(--r);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+.card-title {
+  font-size: 13px; font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.75rem;
+}
+h2 { font-size: 18px; font-weight: 500; margin-bottom: 0.5rem; }
+h3 { font-size: 15px; font-weight: 500; margin-bottom: 0.5rem; }
+p { font-size: 14px; line-height: 1.65; color: var(--text); margin-bottom: 0.65rem; }
+p:last-child { margin-bottom: 0; }
+.step-row { display: flex; gap: 12px; margin-bottom: 10px; align-items: flex-start; }
+.step-num {
+  flex-shrink: 0; width: 22px; height: 22px;
+  background: var(--color-background-info);
+  color: var(--color-text-info);
+  border-radius: 50%; font-size: 11px; font-weight: 500;
+  display: flex; align-items: center; justify-content: center;
+}
+.step-text { font-size: 14px; line-height: 1.6; }
+.step-label { font-weight: 500; color: var(--text); }
+.step-sub { color: var(--text-muted); font-size: 13px; }
+.tag {
+  display: inline-block; font-size: 11px; font-weight: 500;
+  padding: 2px 8px; border-radius: 4px; margin-right: 4px; margin-bottom: 4px;
+}
+.tag-orange { background: #FFF0E0; color: #9A4800; }
+.tag-green { background: var(--color-background-success); color: var(--color-text-success); }
+.tag-blue { background: var(--color-background-info); color: var(--color-text-info); }
+.tag-red { background: var(--color-background-danger); color: var(--color-text-danger); }
+.tag-gray { background: var(--color-background-secondary); color: var(--color-text-secondary); }
+.divider { border: none; border-top: 0.5px solid var(--border); margin: 1rem 0; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; font-weight: 500; font-size: 12px; color: var(--text-muted); padding: 6px 10px; border-bottom: 0.5px solid var(--border); }
+td { padding: 8px 10px; border-bottom: 0.5px solid var(--border); vertical-align: top; line-height: 1.5; }
+tr:last-child td { border-bottom: none; }
+.mono { font-family: var(--font-mono); font-size: 12px; background: var(--bg-surface); padding: 2px 6px; border-radius: 4px; }
+.disclosure-box {
+  background: var(--bg-surface);
+  border-left: 3px solid var(--orange);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  padding: 1rem 1.25rem;
+  font-size: 14px; line-height: 1.7;
+  font-style: italic;
+  margin-bottom: 0.75rem;
+}
+.flag {
+  display: flex; gap: 10px; align-items: flex-start;
+  background: var(--color-background-warning);
+  border: 0.5px solid var(--color-border-warning);
+  border-radius: var(--r-sm);
+  padding: 10px 14px;
+  margin-bottom: 8px;
+}
+.flag-icon { font-size: 14px; flex-shrink: 0; padding-top: 1px; }
+.flag-text { font-size: 13px; line-height: 1.6; color: var(--color-text-warning); }
+.q-card {
+  background: var(--bg-card);
+  border: 0.5px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 1rem;
+  margin-bottom: 8px;
+}
+.q-role { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.q-text { font-size: 14px; line-height: 1.6; }
+.q-why { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.enclave-highlight {
+  background: var(--color-background-success);
+  border: 0.5px solid var(--color-border-success);
+  border-radius: var(--r-sm);
+  padding: 12px 16px;
+  margin-bottom: 10px;
+}
+.prompt-box {
+  background: var(--bg-surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 1rem 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+@media (max-width: 520px) { .two-col { grid-template-columns: 1fr; } }
+</style>
+<h2 class="sr-only" style="position:absolute;left:-9999px">Refueler — Cashu, GDPR & C-Suite Briefing Document</h2>
+<div class="wrapper">
+<div class="nav">
+  <button class="nav-btn active" onclick="show('cashu')">Cashu end-to-end</button>
+  <button class="nav-btn" onclick="show('lightning-gdpr')">Lightning address & GDPR</button>
+  <button class="nav-btn" onclick="show('minibits')">Minibits handoff</button>
+  <button class="nav-btn" onclick="show('issuance')">Sats issuance timing</button>
+  <button class="nav-btn" onclick="show('orders')">Orders table rules</button>
+  <button class="nav-btn" onclick="show('ico')">ICO registration</button>
+  <button class="nav-btn" onclick="show('disclosure')">GDPR disclosures</button>
+  <button class="nav-btn" onclick="show('enclaves')">Enclaves</button>
+  <button class="nav-btn" onclick="show('csuite')">C-suite questions</button>
+  <button class="nav-btn" onclick="show('nextchat')">Next chat prompt</button>
+</div>
+
+<div id="cashu" class="section active">
+  <div class="card">
+    <div class="card-title">Cashu ecash — end-to-end in the Refueler order flow</div>
+    <p>Cashu is a Chaumian blind-signature ecash protocol. The core privacy guarantee is that the mint signs tokens without ever seeing which token belongs to which user. Tokens are bearer instruments — whoever holds the proof, owns the sats.</p>
+    <hr class="divider">
+    <h3 style="margin-bottom:1rem">The six-step flow</h3>
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div class="step-text"><span class="step-label">Mint funding</span><br><span class="step-sub">Refueler funds its Cashu mint (e.g. mint.minibits.cash or a self-hosted Nutshell instance) via Lightning. This is an operational float — sats held in reserve to back all ecash tokens Refueler will ever issue. This is Refueler's custodial exposure; the mint holds the keys to this float.</span></div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-text"><span class="step-label">User completes an order — reward trigger</span><br><span class="step-sub">On collection confirmation (NFC tap or QR scan), the Refueler backend calculates the sats reward for this order. No token exists yet.</span></div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">3</div>
+      <div class="step-text"><span class="step-label">Blinded token request (blind signature)</span><br><span class="step-sub">The user's wallet (Minibits) generates a random secret, blinds it cryptographically, and sends only the blinded value to the mint. The mint never sees the original secret — this is the Chaumian blinding step. The mint signs the blinded value and returns the blind signature.</span></div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">4</div>
+      <div class="step-text"><span class="step-label">Token unblinding</span><br><span class="step-sub">The wallet unblinds the mint's signature using its original secret. The result is a valid Cashu proof (token): a pair (secret, signature) that the mint will honour. The mint has no record linking this proof to the user who requested it.</span></div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">5</div>
+      <div class="step-text"><span class="step-label">Token stored on device</span><br><span class="step-sub">The proof lives only in Minibits on the user's device. Refueler's Supabase has no record of which token was issued to which user. The orders table records that a reward was issued (for HMRC compliance) but not the token value or the unblinded proof.</span></div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">6</div>
+      <div class="step-text"><span class="step-label">Redemption</span><br><span class="step-sub">When the user wants to move sats out (to Lightning, or to spend elsewhere), they redeem the Cashu proof against the mint. The mint checks the proof hasn't been spent before (double-spend prevention via a spent token database) and pays out via Lightning. The user is unlinkable to the original issuance.</span></div>
+    </div>
+    <hr class="divider">
+    <div class="flag">
+      <div class="flag-icon"><i class="ti ti-alert-triangle" aria-hidden="true"></i></div>
+      <div class="flag-text"><strong>Trust model advisory:</strong> Refueler's mint is custodial. The user trusts the mint operator (Refueler, or Minibits' public mint) not to inflate the supply or rug the float. This is the primary trust risk to disclose. Enclaves (see that tab) may resolve this in future.</div>
+    </div>
+  </div>
+</div>
+
+<div id="lightning-gdpr" class="section">
+  <div class="card">
+    <div class="card-title">Lightning address — personal data status under UK GDPR</div>
+    <div class="flag">
+      <div class="flag-icon"><i class="ti ti-shield-lock" aria-hidden="true"></i></div>
+      <div class="flag-text"><strong>Position: Yes — a Lightning address is personal data under UK GDPR.</strong> The ICO's definition covers any identifier that can identify a person "directly or indirectly." A Lightning address (e.g. <span class="mono">rajesh@minibits.cash</span>) is structurally identical to an email address. It identifies a specific wallet, typically controlled by one person, and often contains a username. It must be treated as personal data from the moment it is collected.</div>
+    </div>
+    <hr class="divider">
+    <h3 style="margin-bottom:0.75rem">Legal basis</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Processing activity</th><th>Legal basis</th><th>Notes</th></tr>
+        <tr><td>Collecting the Lightning address</td><td><span class="tag tag-blue">Art. 6(1)(b) contract</span></td><td>User provides it to receive sats — necessary to perform the reward service</td></tr>
+        <tr><td>Using the address to push a Lightning payment</td><td><span class="tag tag-blue">Art. 6(1)(b) contract</span></td><td>Single purpose: execute the payment. No other use permitted.</td></tr>
+        <tr><td>Retaining the address post-payment</td><td><span class="tag tag-red">No basis</span></td><td>Once the payment is sent, the purpose is fulfilled. Retention without a separate basis is unlawful.</td></tr>
+        <tr><td>Using the address to contact the user later</td><td><span class="tag tag-red">No basis unless</span></td><td>Would require a separate consent basis — not implied by the payment relationship</td></tr>
+      </table>
+    </div>
+    <hr class="divider">
+    <h3 style="margin-bottom:0.75rem">Retention position — locked</h3>
+    <p><strong>Lightning address must be deleted immediately after the payment is dispatched.</strong> The payment event itself (amount, timestamp, order ID) is retained for 6 years (HMRC financial records). The address is not part of that record — it is a routing instrument only.</p>
+    <p>Concretely: the address should never be written to the <span class="mono">orders</span> table. It should exist only in transient server memory during the payment execution, then discarded. No column, no log entry, no backup.</p>
+    <div class="flag">
+      <div class="flag-icon"><i class="ti ti-alert-triangle" aria-hidden="true"></i></div>
+      <div class="flag-text"><strong>Data (Use and Access) Act 2025:</strong> Royal Assent June 2025. Introduces "recognised legitimate interests" as a new legal basis — but this applies only to five specific public interest scenarios and does not expand the basis available to a commercial rewards product. Refueler's basis for the Lightning address remains Art. 6(1)(b) — contract. Monitor ICO guidance updates (final guidance expected late 2026).</div>
+    </div>
+  </div>
+</div>
+
+<div id="minibits" class="section">
+  <div class="card">
+    <div class="card-title">Minibits onboarding — what Refueler controls vs what Minibits controls</div>
+    <p>Minibits is an independent open-source wallet. Refueler cannot modify it. The boundary of control matters for both UX design and GDPR data processor mapping.</p>
+    <hr class="divider">
+    <div class="two-col">
+      <div>
+        <h3 style="color:var(--color-text-success); margin-bottom:0.75rem"><i class="ti ti-circle-check" style="font-size:14px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>Refueler controls</h3>
+        <div class="step-row"><div class="step-num" style="background:var(--color-background-success);color:var(--color-text-success)">✓</div><div class="step-text"><span class="step-label">Triggering the handoff</span><br><span class="step-sub">Refueler decides when to prompt: post-collection, when the user has accumulated ≥1 sat reward with no wallet linked</span></div></div>
+        <div class="step-row"><div class="step-num" style="background:var(--color-background-success);color:var(--color-text-success)">✓</div><div class="step-text"><span class="step-label">The Cashu token payload</span><br><span class="step-sub">Refueler generates the token string. The format is a standard Cashu token (base64-encoded serialised proof). Minibits reads it; Refueler constructs it.</span></div></div>
+        <div class="step-row"><div class="step-num" style="background:var(--color-background-success);color:var(--color-text-success)">✓</div><div class="step-text"><span class="step-label">The deep link / handoff UX</span><br><span class="step-sub">Refueler can use a <span class="mono">cashu:</span> URI scheme or a universal link to pass a token directly into Minibits. This creates a one-tap "open in Minibits" experience from within Refueler.</span></div></div>
+        <div class="step-row"><div class="step-num" style="background:var(--color-background-success);color:var(--color-text-success)">✓</div><div class="step-text"><span class="step-label">Pre-handoff education copy</span><br><span class="step-sub">Refueler's screens before the handoff: what is a wallet, what are you about to receive, why it matters. Concierge register throughout.</span></div></div>
+        <div class="step-row"><div class="step-num" style="background:var(--color-background-success);color:var(--color-text-success)">✓</div><div class="step-text"><span class="step-label">Mint selection</span><br><span class="step-sub">Refueler decides which mint backs the token. Default: Minibits' public test mint for MVP, with a path to a Refueler-operated mint post-launch.</span></div></div>
+      </div>
+      <div>
+        <h3 style="color:var(--color-text-danger); margin-bottom:0.75rem"><i class="ti ti-circle-x" style="font-size:14px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>Refueler does not control</h3>
+        <div class="step-row"><div class="step-num" style="background:var(--color-background-danger);color:var(--color-text-danger)">✗</div><div class="step-text"><span class="step-label">Minibits wallet setup screens</span><br><span class="step-sub">Seed phrase backup, wallet name, settings — these are Minibits' UX. Refueler can guide the user to this point; it cannot customise what happens inside Minibits.</span></div></div>
+        <div class="step-row"><div class="step-num" style="background:var(--color-background-danger);color:var(--color-text-danger)">✗</div><div class="step-text"><span class="step-label">Token receipt confirmation</span><br><span class="step-sub">Refueler cannot know if the user successfully received and stored the token inside Minibits. A separate Lightning-address-based confirmation flow is the only feedback mechanism.</span></div></div>
+        <div class="step-row"><div class="step-num" style="background:var(--color-background-danger);color:var(--color-text-danger)">✗</div><div class="step-text"><span class="step-label">Minibits privacy policy</span><br><span class="step-sub">Minibits' mint server processes the blind signature request. This is a separate data controller relationship. Refueler's privacy policy should disclaim the Minibits/mint relationship and link to theirs.</span></div></div>
+        <div class="step-row"><div class="step-num" style="background:var(--color-background-danger);color:var(--color-text-danger)">✗</div><div class="step-text"><span class="step-label">Token recovery if device lost</span><br><span class="step-sub">Once the token is in Minibits, only Minibits' seed-phrase recovery applies. Refueler has no ability to reissue a lost token — this must be disclosed at onboarding.</span></div></div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="flag">
+      <div class="flag-icon"><i class="ti ti-info-circle" aria-hidden="true"></i></div>
+      <div class="flag-text"><strong>CTO action:</strong> Implement <span class="mono">cashu:</span> URI deep-link handoff. Test token ingestion on both iOS (TestFlight PWA → Minibits via share sheet) and Android (direct intent). Minibits NFC tap-to-receive (Android only, Host Card Emulation) is a stretch goal for in-store collection moments.</div>
+    </div>
+  </div>
+</div>
+
+<div id="issuance" class="section">
+  <div class="card">
+    <div class="card-title">Sats issuance — when does the token leave the mint and land in the wallet?</div>
+    <p>The issuance moment is important for both UX design and HMRC records. There are two distinct events, and they must not be conflated.</p>
+    <hr class="divider">
+    <div class="step-row">
+      <div class="step-num" style="background:#FFF0E0;color:#9A4800">A</div>
+      <div class="step-text"><span class="step-label">Reward committed (Refueler's obligation created)</span><br><span class="step-sub">This happens at collection confirmation — when the user taps to collect and the order status transitions to "collected." At this point Refueler's ledger records: order ID, sats amount, timestamp. The token does not yet exist in the user's wallet. This is the HMRC-recordable event.</span></div>
+    </div>
+    <div class="step-row">
+      <div class="step-num" style="background:#FFF0E0;color:#9A4800">B</div>
+      <div class="step-text"><span class="step-label">Token minted and delivered (user's possession)</span><br><span class="step-sub">This happens when the blind-signature exchange completes — either synchronously at collection (if the user has Minibits open and linked) or asynchronously (the token is queued and delivered when the user next opens the app). The token lands in the user's device storage. Refueler no longer holds or knows the token value.</span></div>
+    </div>
+    <hr class="divider">
+    <h3 style="margin-bottom:0.75rem">What the orders table must record at event A</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Column</th><th>Value</th><th>Retention</th></tr>
+        <tr><td><span class="mono">reward_sats</span></td><td>Integer — amount committed</td><td>6 years (HMRC)</td></tr>
+        <tr><td><span class="mono">reward_issued_at</span></td><td>Timestamp</td><td>6 years (HMRC)</td></tr>
+        <tr><td><span class="mono">reward_status</span></td><td><span class="mono">committed</span> → <span class="mono">delivered</span> → <span class="mono">redeemed</span></td><td>6 years (HMRC)</td></tr>
+        <tr><td><span class="mono">order_id</span></td><td>Internal FK</td><td>6 years (HMRC)</td></tr>
+      </table>
+    </div>
+    <p style="margin-top:0.75rem">The <span class="mono">orders</span> table does NOT contain: the Cashu token proof, the blinded secret, the user's Lightning address, or any location data.</p>
+  </div>
+</div>
+
+<div id="orders" class="section">
+  <div class="card">
+    <div class="card-title">Orders table — what it must never contain</div>
+    <div class="flag">
+      <div class="flag-icon"><i class="ti ti-shield-x" aria-hidden="true"></i></div>
+      <div class="flag-text"><strong>Zero-location guarantee:</strong> No location column exists or will ever be added to the orders table without a signed GDPR review. The geofence fires on-device only. The only payload sent to the server on order confirmation is: item + vendor ID + session token. This is an architectural guarantee, not a policy.</div>
+    </div>
+    <hr class="divider">
+    <h3 style="margin-bottom:0.75rem">Confirmed prohibited columns</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Column</th><th>Why prohibited</th><th>Owner of prohibition</th></tr>
+        <tr><td><span class="mono">lat</span> / <span class="mono">lng</span> / <span class="mono">location</span></td><td>Violates zero-location guarantee. Location data under UK GDPR Art. 4(1). On-device processing model would collapse.</td><td>CTO + CPO/DPO joint sign-off required before any addition</td></tr>
+        <tr><td><span class="mono">lightning_address</span></td><td>Personal data. Retention post-payment has no legal basis. Must be transient memory only — used to push payment, then discarded immediately.</td><td>CPO/DPO</td></tr>
+        <tr><td><span class="mono">cashu_proof</span> / <span class="mono">cashu_token</span></td><td>Bearer instrument — if stored server-side, Refueler could double-spend or inflate supply. Fundamentally incompatible with the ecash model. Lives on device only.</td><td>CTO + Bitcoin Advisor</td></tr>
+        <tr><td><span class="mono">device_id</span> / <span class="mono">ip_address</span></td><td>No processing purpose post-order. Finger-printing risk. Not necessary for contract performance.</td><td>CPO/DPO</td></tr>
+        <tr><td><span class="mono">geofence_trigger_time</span></td><td>Derived location data. Would link a user to a physical position at a specific moment. Prohibited by the same architecture guarantee.</td><td>CTO + CPO/DPO</td></tr>
+      </table>
+    </div>
+    <hr class="divider">
+    <h3 style="margin-bottom:0.75rem">What the orders table does contain</h3>
+    <p style="font-size:13px;color:var(--text-muted)">order_id · user_id (FK to auth) · venue_id · item_id(s) · quantity · order_status · created_at · collected_at · reward_sats · reward_status · payment_amount_fiat · payment_method_token</p>
+  </div>
+</div>
+
+<div id="ico" class="section">
+  <div class="card">
+    <div class="card-title">ICO registration — checklist on incorporation</div>
+    <p>Refueler processes personal data as a data controller from the moment it collects a single email address. Registration is a legal requirement — not optional.</p>
+    <hr class="divider">
+    <h3 style="margin-bottom:0.75rem">Current fee (post Feb 2025 increase)</h3>
+    <div class="two-col" style="margin-bottom:1rem">
+      <div class="card" style="border:2px solid var(--color-border-info)">
+        <div class="q-role" style="color:var(--color-text-info)">Tier 1 — Refueler at launch</div>
+        <div style="font-size:22px;font-weight:500;margin:4px 0">£52/year</div>
+        <div style="font-size:13px;color:var(--text-muted)">£47 if paid by Direct Debit. Applies: under 10 staff, turnover under £632k.</div>
+      </div>
+      <div class="card">
+        <div class="q-role" style="color:var(--text-muted)">Tier 2 — post-growth</div>
+        <div style="font-size:22px;font-weight:500;margin:4px 0">£78/year</div>
+        <div style="font-size:13px;color:var(--text-muted)">£73 by DD. Under 250 staff, turnover under £36m. Review at Series A equivalent.</div>
+      </div>
+    </div>
+    <div class="step-row"><div class="step-num">1</div><div class="step-text"><span class="step-label">Incorporate the company</span><br><span class="step-sub">Companies House required first. You will need the registered company name and address for the ICO application.</span></div></div>
+    <div class="step-row"><div class="step-num">2</div><div class="step-text"><span class="step-label">Run the ICO self-assessment tool</span><br><span class="step-sub">ico.org.uk — confirms whether registration is required and your tier. Takes 5 minutes. Do this even if you expect Tier 1 — the self-assessment is your documented due diligence.</span></div></div>
+    <div class="step-row"><div class="step-num">3</div><div class="step-text"><span class="step-label">Register online at ico.org.uk</span><br><span class="step-sub">Required: company name, registered address, description of data processing activities (orders, rewards, authentication, newsletter). Tick all applicable categories: financial data, identity data, online identifiers.</span></div></div>
+    <div class="step-row"><div class="step-num">4</div><div class="step-text"><span class="step-label">Pay by Direct Debit</span><br><span class="step-sub">Saves £5/year and auto-renews. Non-payment is a civil offence — ICO can fine up to £4,350 and publishes non-payers publicly.</span></div></div>
+    <div class="step-row"><div class="step-num">5</div><div class="step-text"><span class="step-label">Receive registration number</span><br><span class="step-sub">Display it in the footer of refueler.io and in the Privacy Policy. It signals compliance to partners, investors, and franchises — particularly important for the Costa and M&S DPA conversations.</span></div></div>
+    <div class="step-row"><div class="step-num">6</div><div class="step-text"><span class="step-label">File the registered address in PRIVACY_POLICY.md</span><br><span class="step-sub">CPO/DPO to update Section 1 (Controller details) with company name, number, and ICO registration number on the day of incorporation.</span></div></div>
+    <div class="step-row"><div class="step-num">7</div><div class="step-text"><span class="step-label">DPA 2025 complaints process (deadline June 19, 2026)</span><br><span class="step-sub">The Data (Use and Access) Act 2025 requires a formal data protection complaints process by June 19, 2026. Publish an accessible complaints route and acknowledge within 30 days. This is now a statutory requirement.</span></div></div>
+    <hr class="divider">
+    <div class="flag">
+      <div class="flag-icon"><i class="ti ti-alert-triangle" aria-hidden="true"></i></div>
+      <div class="flag-text"><strong>DPA 2025 deadline:</strong> The complaints process requirement under the Data (Use and Access) Act 2025 becomes mandatory 19 June 2026 — that is less than 4 weeks away. This must be live on the website before that date.</div>
+    </div>
+  </div>
+</div>
+
+<div id="disclosure" class="section">
+  <div class="card">
+    <div class="card-title">GDPR disclosures — Cashu/ecash reward processing</div>
+    <p>Two disclosures are required. The first covers the ecash reward processing at onboarding (analogous to the geofence disclosure from Session 9). The second is the wallet handoff disclosure shown at the moment the user first links or creates a wallet.</p>
+    <hr class="divider">
+    <h3 style="margin-bottom:0.75rem">Disclosure 1 — ecash reward processing (onboarding opt-in)</h3>
+    <div class="disclosure-box">
+      "Your sats rewards are issued as Cashu ecash tokens — a form of digital cash backed by Bitcoin. When you collect an order, Refueler records that a reward was earned. The token itself is generated using a blind signature process: your wallet creates it in a way that means we cannot see which token we signed. The token lives on your device only. We never see your balance. If you link a Lightning address to receive sats directly, we use it once to send the payment and delete it immediately afterwards. We never store your Lightning address."
+    </div>
+    <p style="font-size:12px;color:var(--text-muted)">Legal basis: Art. 6(1)(b) — contract performance. Processing: reward issuance, payment dispatch. Retention: reward event record (amount + timestamp) — 6 years HMRC. Token: on device, not transmitted. Lightning address: transient, deleted post-payment.</p>
+    <hr class="divider">
+    <h3 style="margin-bottom:0.75rem">Disclosure 2 — wallet handoff (first wallet link screen)</h3>
+    <div class="disclosure-box">
+      "To receive your sats, you'll need an ecash wallet. We'll hand your reward to the wallet you choose — after that, it belongs to you and we cannot access, reverse, or recover it. If you use Minibits, your wallet is managed by Minibits, not Refueler. You can find their privacy policy at minibits.cash. Your sats are real Bitcoin. Keep your wallet recovery phrase somewhere safe — it's the only way to recover your balance if you lose your phone."
+    </div>
+    <p style="font-size:12px;color:var(--text-muted)">This disclosure covers: third-party data controller (Minibits), irrevocability of token transfer, user responsibility for wallet backup. Not a consent trigger — informational notice under Art. 13/14 transparency requirements.</p>
+    <hr class="divider">
+    <h3 style="margin-bottom:0.75rem">Disclosure 3 — loyalty track users (non-wallet, stamp scheme)</h3>
+    <div class="disclosure-box">
+      "Your loyalty stamps are stored in Refueler's system, linked to your account. They're not Bitcoin — they're a count of your purchases with this venue. We keep this record for as long as you have an active account, or until you ask us to delete it. You can switch to earning real Bitcoin sats at any time in your wallet settings."
+    </div>
+    <p style="font-size:12px;color:var(--text-muted)">Legal basis: Art. 6(1)(b) — contract performance. Retention: active account + 30 days post-deletion request. This is a separate processing activity from sats issuance and requires its own entry in the Record of Processing Activities (RoPA).</p>
+  </div>
+</div>
+
+<div id="enclaves" class="section">
+  <div class="card">
+    <div class="card-title">Enclaves — the most significant recent development in Cashu</div>
+    <div class="enclave-highlight">
+      <p style="font-size:13px;font-weight:500;color:var(--color-text-success);margin-bottom:4px"><i class="ti ti-news" style="font-size:13px;vertical-align:-1px;margin-right:4px" aria-hidden="true"></i>Breaking — announced May 1, 2026 by Calle (Cashu creator)</p>
+      <p style="font-size:13px;color:var(--color-text-success)">Non-custodial Cashu ecash mints running inside hardware enclaves. The mint operator cannot access the Bitcoin private keys. They cannot inflate the ecash supply. This is the development that could change Refueler's entire trust model.</p>
+    </div>
+    <hr class="divider">
+    <h3 style="margin-bottom:0.75rem">What a hardware enclave is</h3>
+    <p>A hardware enclave is an isolated compute environment — a sealed box inside a server — where code runs in a way that even the server's administrator cannot inspect the memory, extract keys, or tamper with the execution. AWS Nitro Enclaves is the most widely deployed implementation. ACINQ (the Phoenix Wallet company) already uses this architecture to protect over $100M in a Lightning node.</p>
+    <p>The key properties for Refueler: the Bitcoin private keys are generated inside the enclave and never leave it. The mint operator (Refueler) cannot access them. If the server is compromised, the attacker still cannot steal the Bitcoin. Transparent logs prove what code is running.</p>
+    <hr class="divider">
+    <h3 style="margin-bottom:0.75rem">Why this matters for Refueler — three implications</h3>
+    <div class="step-row">
+      <div class="step-num" style="background:#FFF0E0;color:#9A4800">1</div>
+      <div class="step-text"><span class="step-label">Regulatory / custodial status</span><br><span class="step-sub">Calle's argument: if the operator cannot access the Bitcoin, they are not a custodian under existing law. If this holds, Refueler could operate its own mint without Money Transmitter or e-money licence exposure. This requires UK-specific legal analysis — the FCA's perimeter guidance on crypto assets is different from US law. Flag for the CTO and CPO/DPO to investigate with external counsel.</span></div>
+    </div>
+    <div class="step-row">
+      <div class="step-num" style="background:#FFF0E0;color:#9A4800">2</div>
+      <div class="step-text"><span class="step-label">Security model</span><br><span class="step-sub">Even if Refueler's backend is fully compromised, the user's sats cannot be stolen. This is a material security improvement over the current model (mint on a regular server). The architecture is the same approach ACINQ uses for Phoenix Wallet — battle-tested at scale.</span></div>
+    </div>
+    <div class="step-row">
+      <div class="step-num" style="background:#FFF0E0;color:#9A4800">3</div>
+      <div class="step-text"><span class="step-label">Brand and investor narrative</span><br><span class="step-sub">Refueler's mint, built on enclave architecture, is verifiably non-custodial. This is a legitimate differentiator from every ad-tech loyalty scheme and every crypto rewards product that holds user funds. It is also the final answer to the trust model question that Bitcoin-native users will ask. The copy writes itself: "We cannot steal your sats. The hardware makes it impossible."</span></div>
+    </div>
+    <hr class="divider">
+    <div class="flag">
+      <div class="flag-icon"><i class="ti ti-clock" aria-hidden="true"></i></div>
+      <div class="flag-text"><strong>Timeline:</strong> Enclave support for Cashu was announced May 2026 and is not yet production-ready. Refueler should monitor the Cashu GitHub (Nutshell) for enclave branch development. This is a Session 11+ roadmap item — not a blocker for MVP but worth scoping now so the architecture leaves room for it.</div>
+    </div>
+  </div>
+</div>
+
+<div id="csuite" class="section">
+  <div class="card">
+    <div class="card-title">C-suite investigation questions — for the Claude API briefing agent</div>
+    <p style="margin-bottom:1rem">These are the questions worth routing to the CTO and CPO/DPO as standing research tasks once the Claude API briefing service is live. They are open enough to require real investigation, specific enough to return actionable outputs.</p>
+    <div class="q-card">
+      <div class="q-role" style="color:var(--color-text-danger)"><i class="ti ti-shield-lock" style="font-size:11px;margin-right:4px" aria-hidden="true"></i>CPO/DPO</div>
+      <div class="q-text">Does the FCA's current crypto asset perimeter guidance classify a Cashu ecash mint operator as an e-money issuer, a custodian wallet provider, or neither — and does the answer change if the mint runs inside a hardware enclave where the operator cannot access the keys?</div>
+      <div class="q-why">Why it matters: determines whether Refueler needs FCA authorisation before operating its own mint at scale. Could block the self-hosted mint roadmap or unlock it entirely.</div>
+    </div>
+    <div class="q-card">
+      <div class="q-role" style="color:var(--color-text-danger)"><i class="ti ti-shield-lock" style="font-size:11px;margin-right:4px" aria-hidden="true"></i>CPO/DPO</div>
+      <div class="q-text">Under UK HMRC guidance, is a Cashu ecash token issued as a customer reward (not purchased) a taxable benefit in kind for the recipient — and at what threshold does this reporting obligation trigger for Refueler as the issuer?</div>
+      <div class="q-why">Why it matters: if sats rewards above a threshold are reportable, Refueler needs a P11D-equivalent process. HMRC's cryptoasset guidance is evolving rapidly — this needs a dated answer against current HMRC crypto guidance.</div>
+    </div>
+    <div class="q-card">
+      <div class="q-role" style="color:var(--color-text-info)"><i class="ti ti-cpu" style="font-size:11px;margin-right:4px" aria-hidden="true"></i>CTO</div>
+      <div class="q-text">What is the minimum viable architecture for Refueler to run its own Nutshell-based Cashu mint on Cloudflare infrastructure, and what would be the monthly operational cost at 10,000 active users each earning an average of 50 sats per week?</div>
+      <div class="q-why">Why it matters: the public Minibits mint is suitable for MVP but is a third-party dependency with no SLA. A self-hosted mint is the production architecture. This question scopes the migration cost and timeline.</div>
+    </div>
+    <div class="q-card">
+      <div class="q-role" style="color:var(--color-text-info)"><i class="ti ti-cpu" style="font-size:11px;margin-right:4px" aria-hidden="true"></i>CTO</div>
+      <div class="q-text">When the Cashu blind-signature exchange completes between Refueler's mint and the user's Minibits wallet, what server-side logs are generated by Nutshell by default — and do any of those logs constitute personal data under UK GDPR that would require a retention policy?</div>
+      <div class="q-why">Why it matters: mint logs could inadvertently capture IP addresses, timing patterns, or token amounts that are personal data. Default Nutshell logging behaviour must be audited and hardened before any production deployment.</div>
+    </div>
+    <div class="q-card">
+      <div class="q-role" style="color:var(--color-text-info)"><i class="ti ti-cpu" style="font-size:11px;margin-right:4px" aria-hidden="true"></i>CTO + <span style="color:var(--color-text-danger)">CPO/DPO</span></div>
+      <div class="q-text">If Refueler migrates from Minibits' public mint to its own Nutshell mint, does Minibits become a data processor under UK GDPR during the transition period — and what Data Processing Agreement terms are required before any user token handoff between mints?</div>
+      <div class="q-why">Why it matters: inter-mint token swaps (a user's Minibits-held token being redeemed and reissued by Refueler's mint) involve both mints processing data. The legal relationship needs mapping before the migration is executed.</div>
+    </div>
+    <div class="q-card">
+      <div class="q-role" style="color:var(--color-text-warning)"><i class="ti ti-bolt" style="font-size:11px;margin-right:4px" aria-hidden="true"></i>Bitcoin Advisor</div>
+      <div class="q-text">Given that Cashu enclave mints are now announced but not yet production-ready, what is the earliest realistic date Refueler could migrate its mint to an enclave architecture — and which cloud provider's enclave implementation (AWS Nitro, Azure Confidential Computing, or equivalent) best fits a Cloudflare-primary infrastructure?</div>
+      <div class="q-why">Why it matters: the enclave roadmap is a genuine investor and brand differentiator. Pinning a realistic date to the roadmap requires protocol-level awareness that only the Bitcoin Advisor can assess.</div>
+    </div>
+  </div>
+</div>
+
+<div id="nextchat" class="section">
+  <div class="card">
+    <div class="card-title">Prompt for next new chat — Session 10B</div>
+    <p style="margin-bottom:1rem">Copy the prompt below in full as the first message of the new chat. Attach all files listed in the SESSION_10B_PROMPT.md manifest.</p>
+    <div class="prompt-box">You are simultaneously the Full Stack Lead Website Developer, Lead UX Design Director, and Website Brand Lead Designer for Refueler.
+
+You have read and ratified all decisions in Brand Session v1.0 and all Session 10 and Session 10A (Cashu/GDPR briefing) updates. You do not re-open ratified decisions. You build from what is locked and flag contradictions.
+
+LOCKED DECISIONS ENTERING THIS SESSION:
+- Paper theme everywhere as default. Carbon is a user toggle only (Settings / top-right web).
+- ETA widget: Apple Liquid Glass venue strip (venue name + items) on top. Carbon base below for arc / status / reward. NOT full-colour venue hex bleed.
+- Orange (#F5820A / #D4690A Paper): once per screen maximum. Sats/reward figure only. Never dominant.
+- Arc treatment: still under review. Do not finalise or build to production.
+- Hero metric: NOT 4:22. Time saved not waiting in queue. Directional placeholder until field data.
+- "c2c": do not use in public copy without written consent. "Fenchurch Street" is safe.
+- Reward model: dual-track — sats (wallet users) + loyalty stamps (non-Bitcoin users). Loyalty users see sats nudge.
+- Collect button: "Tap to collect · or show QR"
+- Order handoff: payer shares collection link with non-payer. No auth required on collection screen.
+- Status phrase on ETA screen: order-specific copy e.g. "Your flat white medium is being prepared" — NOT generic "Being prepared for you".
+- Minibits onboarding: guided flow required. Cashu token delivered via cashu: URI deep-link or share sheet.
+- Lightning address is personal data. Deleted immediately post-payment. Never written to orders table.
+- Zero-location guarantee: no location column in orders table, ever. Geofence on-device only.
+- ICO registration: file on incorporation. DPA 2025 complaints process mandatory by 19 June 2026 — urgent.
+- Enclave architecture (Cashu): monitor Nutshell GitHub. Session 11+ roadmap item. Leave architectural room.
+- Brand register: concierge throughout. James Bond, not fintech neon. Nothing shouts.
+
+SESSION 10B AGENDA (in priority order):
+
+1. VALUE PROPOSITION ONE-PAGER
+Write a single-page summary for three audiences: (a) user — non-bitcoiner first, (b) merchant — revenue focus, no Bitcoin jargon, (c) investor — market size, moat, London fintech context. Include the Lyn Alden "Nothing Stops This Train" dry-wit closer on the investor section. Stat cards flagged with † pending field data.
+
+2. FULL UX FLOW FROM APP OPEN (14 screens)
+Design screen-by-screen from cold open through: app open cold → returning user passkey → landing/discovery → sign up/sign in → onboarding checklist → venue discovery → item selection → order confirmation → payment (NOT yet designed — flag and outline) → ETA screen → collection → reward confirmation → wallet/balance overview → settings.
+
+3. MINIBITS WALLET ONBOARDING FLOW (screens M·01–M·06)
+Non-bitcoiner has just earned first sats, no wallet. Design: what is a Minibits wallet (one sentence), how to create one, what sats look like once received, progress indicator to prevent inertia. Concierge register. No jargon.
+
+4. CMO WEEKLY BRIEFING MCP ARTIFACT
+Build the CMO briefing card using the Anthropic API with web search. System prompt: CMO role brief. Weekly output: 3 trend observations, 1 competitor move, 1 C-suite question. Include youth/teen design trends (Nike, Adidas, McDonald's kiosk UX). Validate template before replicating for all 7 C-suite roles.
+
+5. HOMEPAGE HERO REBUILD
+Paper default, Carbon toggle top-right. Remove 4:22, remove c2c. New metric placeholder. Hero copy as specified. DM Sans 300. Sign-in component shared with Command Centre. Bottom 4 metrics adapted.
+
+STANDING INSTRUCTIONS:
+- Flag GDPR implications for any new data type or processing activity
+- Flag budget line items as they arise
+- Paper is the default everywhere — flag any screen that ships Carbon-first
+- Concierge register. Never logistics copy. Never shouting.
+- Pre-Testflight: first person singular (Rajesh / I / me)
+- Do not finalise arc treatment — prototype only
+- DPA 2025 complaints process deadline: 19 June 2026 — flag if any proposed feature delays this
+
+Attach: BRANDING.md · WEBSITE_DESIGN_SPEC.md · SESSION_10B_PROMPT.md · PRIVACY_POLICY.md · ROLE_CMO.md · ROLE_CPO_DPO.md · ROLE_CTO.md · ROLE_CRO.md · ROLE_HEAD_OF_DESIGN.md · ROLE_BITCOIN_LIGHTNING_ADVISOR.md</div>
+  </div>
+</div>
+
+</div>
+<script>
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>

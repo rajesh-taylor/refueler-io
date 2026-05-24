@@ -1,0 +1,429 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500&display=swap');
+
+  .eng-root {
+    font-family: 'DM Sans', sans-serif;
+    background: #CE1124;
+    color: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    min-height: 560px;
+  }
+
+  .eng-cross-h {
+    position: absolute;
+    left: 0; right: 0;
+    top: 50%; transform: translateY(-50%);
+    height: 64px;
+    background: rgba(255,255,255,0.06);
+    pointer-events: none;
+  }
+  .eng-cross-v {
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 50%; transform: translateX(-50%);
+    width: 64px;
+    background: rgba(255,255,255,0.06);
+    pointer-events: none;
+  }
+
+  .eng-header {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 12px;
+  }
+
+  .eng-wordmark {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 3px;
+    color: #fff;
+  }
+
+  .eng-badge {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .eng-match-card {
+    position: relative;
+    z-index: 2;
+    margin: 0 20px;
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 14px;
+    padding: 20px 20px 16px;
+  }
+
+  .eng-match-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 12px;
+  }
+
+  .eng-teams {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .eng-team {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+  }
+
+  .eng-flag {
+    width: 48px;
+    height: 32px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.2);
+    overflow: hidden;
+  }
+
+  .eng-flag-eng {
+    background: #fff;
+    position: relative;
+  }
+  .eng-flag-eng::before {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    top: 50%; transform: translateY(-50%);
+    height: 8px;
+    background: #CE1124;
+  }
+  .eng-flag-eng::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 50%; transform: translateX(-50%);
+    width: 8px;
+    background: #CE1124;
+  }
+
+  .eng-flag-fra {
+    background: linear-gradient(to right, #002395 33%, #fff 33%, #fff 66%, #ED2939 66%);
+  }
+
+  .eng-team-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.9);
+  }
+
+  .eng-vs {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: rgba(255,255,255,0.4);
+    flex: 0 0 40px;
+    text-align: center;
+  }
+
+  .eng-countdown {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .eng-unit {
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 10px 4px 8px;
+    text-align: center;
+  }
+
+  .eng-unit-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    line-height: 1;
+    color: #fff;
+    display: block;
+    min-width: 40px;
+  }
+
+  .eng-unit-label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    display: block;
+    margin-top: 4px;
+  }
+
+  .eng-venue {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.55);
+  }
+
+  .eng-venue i { font-size: 14px; }
+
+  .eng-section-title {
+    position: relative;
+    z-index: 2;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    padding: 18px 24px 8px;
+  }
+
+  .eng-orders {
+    position: relative;
+    z-index: 2;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .eng-order-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 12px 16px;
+  }
+
+  .eng-order-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .eng-order-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.95);
+  }
+
+  .eng-order-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,0.45);
+  }
+
+  .eng-order-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+  }
+
+  .eng-order-price {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .eng-sats-pill {
+    background: rgba(255,163,0,0.2);
+    border: 1px solid rgba(255,163,0,0.4);
+    color: #FFA300;
+    font-size: 11px;
+    border-radius: 20px;
+    padding: 2px 8px;
+  }
+
+  .eng-footer {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px 20px;
+    margin-top: 4px;
+  }
+
+  .eng-sats-total {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .eng-sats-label {
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+  }
+
+  .eng-sats-amount {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    color: #FFA300;
+    letter-spacing: 1px;
+  }
+
+  .eng-order-btn {
+    background: #fff;
+    color: #CE1124;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 22px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.1s;
+  }
+  .eng-order-btn:hover { opacity: 0.9; transform: scale(0.98); }
+  .eng-order-btn:active { transform: scale(0.95); }
+
+  .eng-activation-bar {
+    position: relative;
+    z-index: 2;
+    background: rgba(255,255,255,0.1);
+    border-top: 1px solid rgba(255,255,255,0.12);
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    margin-top: 4px;
+  }
+
+  .eng-trigger-pills {
+    display: flex;
+    gap: 8px;
+  }
+
+  .eng-trigger-pill {
+    background: rgba(255,255,255,0.12);
+    border-radius: 12px;
+    padding: 3px 10px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+  }
+</style>
+
+<h2 class="sr-only">Refueler England Skin — match countdown and pre-order UI</h2>
+
+<div class="eng-root">
+  <div class="eng-cross-h"></div>
+  <div class="eng-cross-v"></div>
+
+  <div class="eng-header">
+    <span class="eng-wordmark">Refueler</span>
+    <span class="eng-badge">⚽ England Mode</span>
+  </div>
+
+  <div class="eng-match-card">
+    <div class="eng-match-label">Next fixture — UEFA Nations League</div>
+    <div class="eng-teams">
+      <div class="eng-team">
+        <div class="eng-flag eng-flag-eng"></div>
+        <span class="eng-team-name">England</span>
+      </div>
+      <div class="eng-vs">VS</div>
+      <div class="eng-team">
+        <div class="eng-flag eng-flag-fra"></div>
+        <span class="eng-team-name">France</span>
+      </div>
+    </div>
+
+    <div class="eng-countdown" id="countdown">
+      <div class="eng-unit"><span class="eng-unit-num" id="cd-d">00</span><span class="eng-unit-label">Days</span></div>
+      <div class="eng-unit"><span class="eng-unit-num" id="cd-h">00</span><span class="eng-unit-label">Hours</span></div>
+      <div class="eng-unit"><span class="eng-unit-num" id="cd-m">00</span><span class="eng-unit-label">Mins</span></div>
+      <div class="eng-unit"><span class="eng-unit-num" id="cd-s">00</span><span class="eng-unit-label">Secs</span></div>
+    </div>
+
+    <div class="eng-venue">
+      <i class="ti ti-map-pin" aria-hidden="true"></i>
+      Wembley Stadium, London — Sat 7 Jun, 20:00 BST
+    </div>
+  </div>
+
+  <div class="eng-section-title">Pre-order near the ground</div>
+
+  <div class="eng-orders">
+    <div class="eng-order-row">
+      <div class="eng-order-left">
+        <span class="eng-order-name">Flat white</span>
+        <span class="eng-order-sub">M&S Café · Olympic Way</span>
+      </div>
+      <div class="eng-order-right">
+        <span class="eng-order-price">£4.50</span>
+        <span class="eng-sats-pill">+480 sats</span>
+      </div>
+    </div>
+    <div class="eng-order-row">
+      <div class="eng-order-left">
+        <span class="eng-order-name">Chicken wrap + crisps</span>
+        <span class="eng-order-sub">M&S Café · Olympic Way</span>
+      </div>
+      <div class="eng-order-right">
+        <span class="eng-order-price">£6.25</span>
+        <span class="eng-sats-pill">+666 sats</span>
+      </div>
+    </div>
+    <div class="eng-order-row">
+      <div class="eng-order-left">
+        <span class="eng-order-name">Black coffee</span>
+        <span class="eng-order-sub">Black Sheep Coffee · Wembley Park</span>
+      </div>
+      <div class="eng-order-right">
+        <span class="eng-order-price">£3.50</span>
+        <span class="eng-sats-pill">+373 sats</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="eng-footer">
+    <div class="eng-sats-total">
+      <span class="eng-sats-label">Sats this trip</span>
+      <span class="eng-sats-amount" id="sats-total">1,519 ⚡</span>
+    </div>
+    <button class="eng-order-btn" onclick="sendPrompt('Add all three England pre-orders to cart and show me the sats I\'ll earn on this trip')">Pre-order all ↗</button>
+  </div>
+
+  <div class="eng-activation-bar">
+    <span>Skin activates automatically</span>
+    <div class="eng-trigger-pills">
+      <span class="eng-trigger-pill">England fixtures</span>
+      <span class="eng-trigger-pill">St George's Day</span>
+      <span class="eng-trigger-pill">50km of venue</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  function tick() {
+    const target = new Date('2025-06-07T19:00:00Z');
+    const now = new Date();
+    let diff = Math.max(0, target - now);
+    const d = Math.floor(diff / 86400000); diff %= 86400000;
+    const h = Math.floor(diff / 3600000); diff %= 3600000;
+    const m = Math.floor(diff / 60000); diff %= 60000;
+    const s = Math.floor(diff / 1000);
+    document.getElementById('cd-d').textContent = String(d).padStart(2,'0');
+    document.getElementById('cd-h').textContent = String(h).padStart(2,'0');
+    document.getElementById('cd-m').textContent = String(m).padStart(2,'0');
+    document.getElementById('cd-s').textContent = String(s).padStart(2,'0');
+  }
+  tick();
+  setInterval(tick, 1000);
+</script>

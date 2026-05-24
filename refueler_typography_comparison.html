@@ -1,0 +1,191 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap');
+  
+  .typo-root {
+    padding: 1.5rem 0;
+    font-family: var(--font-sans);
+  }
+  
+  .col-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  
+  .specimen-card {
+    background: var(--color-background-primary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    padding: 1.5rem;
+    position: relative;
+  }
+  
+  .card-label {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-secondary);
+    margin-bottom: 1.25rem;
+  }
+  
+  .verdict-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-left: 8px;
+    vertical-align: middle;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .tag-no { background: #FCEBEB; color: #A32D2D; }
+  .tag-yes { background: #EAF3DE; color: #3B6D11; }
+
+  .stat-bebas {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 72px;
+    line-height: 1;
+    color: #F5820A;
+    margin-bottom: 0.25rem;
+  }
+  
+  .stat-haas {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 72px;
+    font-weight: 300;
+    line-height: 1;
+    color: #F5820A;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.25rem;
+  }
+  
+  .headline-bebas {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    line-height: 1.05;
+    color: var(--color-text-primary);
+    margin-bottom: 0.75rem;
+  }
+  
+  .headline-haas {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 36px;
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    color: var(--color-text-primary);
+    margin-bottom: 0.75rem;
+  }
+  
+  .body-shared {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  
+  .mono-shared {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 0.5px solid var(--color-border-tertiary);
+  }
+  
+  .mono-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: #2ECC71;
+  }
+  
+  .divider { 
+    border: none;
+    border-top: 0.5px solid var(--color-border-tertiary);
+    margin: 1.5rem 0;
+  }
+
+  .verdict-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+  
+  .verdict-card {
+    background: var(--color-background-secondary);
+    border-radius: var(--border-radius-md);
+    padding: 1rem 1.25rem;
+  }
+  
+  .verdict-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+  }
+  
+  .verdict-text {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--color-text-primary);
+  }
+  
+  .orange { color: #F5820A; }
+</style>
+
+<div class="typo-root">
+  <h2 class="sr-only">Refueler typography comparison: Bebas Neue vs Neue Haas Grotesk Display</h2>
+  
+  <div class="col-grid">
+    <div class="specimen-card">
+      <div class="card-label">Current — Bebas Neue <span class="verdict-tag tag-no">Replace</span></div>
+      
+      <div class="stat-bebas">4:22</div>
+      <div style="font-family:'DM Mono',monospace; font-size:11px; color:var(--color-text-secondary); margin-bottom:1.25rem;">avg. order-ready time</div>
+      
+      <div class="headline-bebas">Your train is moving.<br>Your coffee is ready.</div>
+      
+      <p class="body-shared">Board a C2C train. Your flat white appears before you arrive. No app open. No tap required.</p>
+      
+      <div class="mono-shared">
+        <span style="color:var(--color-text-secondary)">last order ·</span> <span class="mono-val">+186 sats</span> <span style="color:var(--color-text-secondary)">· Fenchurch St · 07:43</span>
+      </div>
+    </div>
+    
+    <div class="specimen-card">
+      <div class="card-label">Recommended — Light-weight DM Sans Display <span class="verdict-tag tag-yes">Adopt</span></div>
+      
+      <div class="stat-haas">4:22</div>
+      <div style="font-family:'DM Mono',monospace; font-size:11px; color:var(--color-text-secondary); margin-bottom:1.25rem;">avg. order-ready time</div>
+      
+      <div class="headline-haas">Your train is moving.<br>Your coffee is ready.</div>
+      
+      <p class="body-shared">Board a C2C train. Your flat white appears before you arrive. No app open. No tap required.</p>
+      
+      <div class="mono-shared">
+        <span style="color:var(--color-text-secondary)">last order ·</span> <span class="mono-val">+186 sats</span> <span style="color:var(--color-text-secondary)">· Fenchurch St · 07:43</span>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="verdict-row">
+    <div class="verdict-card">
+      <div class="verdict-label">Bebas Neue reads as</div>
+      <div class="verdict-text">Gym app. Streetwear drop. Esports brand. "Bold startup energy" — which is exactly the positioning you want to avoid. The 4:22 looks like a personal best, not a measured platform metric.</div>
+    </div>
+    <div class="verdict-card">
+      <div class="verdict-label">Neue Haas / Light DM Sans reads as</div>
+      <div class="verdict-text">Precision instrument. Financial press. Something built by engineers, not marketers. The 4:22 looks clocked — as if it came from a stopwatch, not a slide deck.</div>
+    </div>
+  </div>
+</div>

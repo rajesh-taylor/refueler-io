@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Refueler — Field Log v2</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif}
+
+/* ── THEMES ─────────────────────────────────────────── */
+.carbon{
+  --bg:#0C0C0C;--surface:#141414;--surface2:#1E1E1E;
+  --border:#2A2A2A;--border2:#3A3A3A;
+  --txt:#ECEAE0;--txt2:#8A887E;--txt3:#4A4846;--cream:#FFFDD0;
+}
+.paper{
+  --bg:#F5F5F0;--surface:#FFFFFF;--surface2:#EDEDEA;
+  --border:#D8D6D0;--border2:#C8C6C0;
+  --txt:#1A1A1A;--txt2:#5A5855;--txt3:#A0A09A;--cream:#1A1A1A;
+}
+
+/* ── LAYOUT ─────────────────────────────────────────── */
+.fl{
+  background:var(--bg);min-height:100vh;
+  display:flex;flex-direction:column;
+  font-size:14px;max-width:480px;margin:0 auto;
+  transition:background 0.15s;
+}
+.header{
+  background:var(--surface);border-bottom:0.5px solid var(--border);
+  padding:12px 16px;display:flex;justify-content:space-between;align-items:center;
+  position:sticky;top:0;z-index:10;
+}
+.wordmark{font-size:12px;font-weight:500;letter-spacing:5px;color:var(--cream)}
+.header-right{display:flex;align-items:center;gap:8px}
+.theme-toggle{
+  display:flex;align-items:center;gap:6px;
+  background:var(--surface2);border:0.5px solid var(--border);
+  border-radius:20px;padding:3px 10px;cursor:pointer;user-select:none;
+}
+.theme-toggle span{font-size:10px;letter-spacing:1.5px;color:var(--txt2)}
+.theme-dot{width:8px;height:8px;border-radius:50%;background:#F7931A;flex-shrink:0}
+.session-badge{
+  font-size:11px;color:var(--txt2);background:var(--surface2);
+  border:0.5px solid var(--border);border-radius:20px;
+  padding:3px 8px;display:flex;align-items:center;gap:5px;
+}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--txt3);flex-shrink:0}
+.status-dot.live{background:#30D158}
+
+/* ── VENUE BAR ───────────────────────────────────────── */
+.venue-bar{
+  background:var(--surface);border-bottom:0.5px solid var(--border);
+  padding:10px 16px;display:flex;gap:8px;align-items:center;
+}
+.venue-bar select,.venue-bar input{
+  flex:1;font-size:13px;padding:7px 10px;
+  border-radius:8px;border:0.5px solid var(--border);
+  background:var(--surface2);color:var(--txt);outline:none;
+  font-family:inherit;
+}
+.coord-btn{
+  font-size:11px;padding:7px 10px;border-radius:8px;
+  border:0.5px solid var(--border2);background:transparent;
+  color:var(--txt2);cursor:pointer;white-space:nowrap;
+  display:flex;align-items:center;gap:4px;
+}
+.coord-btn i{font-size:14px}
+
+/* ── MODE STRIP ──────────────────────────────────────── */
+.mode-strip{
+  display:flex;gap:6px;padding:10px 16px;
+  background:var(--surface);border-bottom:0.5px solid var(--border);
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+}
+.mode-strip::-webkit-scrollbar{display:none}
+.mode-btn{
+  font-size:11px;padding:5px 12px;border-radius:20px;
+  border:0.5px solid var(--border);background:transparent;
+  color:var(--txt2);cursor:pointer;white-space:nowrap;
+  flex-shrink:0;font-family:inherit;
+}
+.mode-btn.active{background:#F7931A;border-color:#F7931A;color:#fff}
+
+/* ── MAIN SCROLL AREA ────────────────────────────────── */
+.main{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px}
+
+/* ── CARDS ───────────────────────────────────────────── */
+.card{
+  background:var(--surface);border:0.5px solid var(--border);
+  border-radius:12px;padding:14px 16px;
+}
+.sec-title{
+  font-size:10px;letter-spacing:2px;color:var(--txt3);
+  margin-bottom:8px;text-transform:uppercase;
+}
+
+/* ── TIMER ───────────────────────────────────────────── */
+.timer-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.timer-label{font-size:10px;letter-spacing:2px;color:var(--txt2);text-transform:uppercase}
+.timer-val{
+  font-size:38px;font-weight:300;color:var(--txt);
+  font-variant-numeric:tabular-nums;letter-spacing:2px;
+}
+.timer-val.running{color:#F7931A}
+.timer-btns{display:flex;gap:6px}
+.t-btn{
+  flex:1;padding:9px;border-radius:8px;
+  border:0.5px solid var(--border2);background:transparent;
+  color:var(--txt);font-size:12px;cursor:pointer;font-family:inherit;
+}
+.t-btn.start{border-color:#30D158;color:#30D158}
+.t-btn.stop{border-color:#FF3B30;color:#FF3B30}
+.t-btn.lap{border-color:#F7931A;color:#F7931A}
+
+/* ── OBSERVATION ROWS ────────────────────────────────── */
+.obs-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px 0;border-bottom:0.5px solid var(--border);
+}
+.obs-row:last-child{border-bottom:none;padding-bottom:0}
+.obs-row:first-child{padding-top:0}
+.obs-label{font-size:13px;color:var(--txt2)}
+.stepper{display:flex;align-items:center;gap:10px}
+.step-btn{
+  width:30px;height:30px;border-radius:50%;
+  border:0.5px solid var(--border2);background:transparent;
+  color:var(--txt);font-size:18px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  line-height:1;font-family:inherit;-webkit-tap-highlight-color:transparent;
+}
+.step-val{font-size:16px;font-weight:500;min-width:26px;text-align:center;color:var(--txt)}
+
+/* ── TEXTAREA ────────────────────────────────────────── */
+textarea{
+  width:100%;font-size:13px;line-height:1.6;
+  border:none;background:transparent;color:var(--txt);
+  resize:none;outline:none;font-family:inherit;
+}
+
+/* ── COORDS ──────────────────────────────────────────── */
+.coords-display{
+  background:var(--surface2);border-radius:8px;
+  padding:10px 12px;font-size:12px;color:var(--txt3);
+  min-height:40px;line-height:1.6;word-break:break-all;
+  margin-bottom:10px;
+}
+.coords-display.set{color:#30D158;font-weight:500}
+
+/* ── LOG LIST ────────────────────────────────────────── */
+.log-list{display:flex;flex-direction:column;gap:4px;max-height:160px;overflow-y:auto}
+.log-item{
+  font-size:11px;color:var(--txt2);padding:4px 8px;
+  background:var(--surface2);border-radius:6px;
+  display:flex;justify-content:space-between;gap:8px;
+}
+.log-item b{color:var(--txt);font-weight:500}
+.log-item .ts{color:var(--txt3);flex-shrink:0;font-variant-numeric:tabular-nums}
+
+/* ── EXPORT BAR ──────────────────────────────────────── */
+.export-bar{
+  padding:10px 16px;background:var(--surface);
+  border-top:0.5px solid var(--border);display:flex;gap:8px;
+}
+.exp-btn{
+  flex:1;padding:8px;border-radius:8px;
+  border:0.5px solid var(--border2);background:transparent;
+  color:var(--txt2);font-size:12px;cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.exp-btn.danger{color:#FF3B30;border-color:#FF3B30}
+.exp-btn i{font-size:13px}
+
+/* ── BOTTOM TABS ─────────────────────────────────────── */
+.bottom-tabs{
+  display:flex;border-top:0.5px solid var(--border);
+  background:var(--surface);
+  position:sticky;bottom:0;
+}
+.tab{
+  flex:1;padding:10px 4px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  cursor:pointer;border:none;background:transparent;
+  color:var(--txt3);font-size:10px;letter-spacing:1px;font-family:inherit;
+  -webkit-tap-highlight-color:transparent;
+}
+.tab i{font-size:20px}
+.tab.active{color:#F7931A}
+.tab.danger{color:#FF3B30}
+.tab.danger i{color:#FF3B30}
+
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<div class="fl carbon" id="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <span class="wordmark">REFUELER</span>
+    <div class="header-right">
+      <div class="theme-toggle" onclick="toggleTheme()">
+        <div class="theme-dot"></div>
+        <span id="themeLabel">CARBON</span>
+      </div>
+      <div class="session-badge">
+        <div class="status-dot" id="statusDot"></div>
+        <span id="statusTxt">idle</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- VENUE BAR -->
+  <div class="venue-bar">
+    <select id="venueSelect" onchange="setVenue(this.value)">
+      <option value="">Select venue...</option>
+      <optgroup label="Lakeside">
+        <option>M&amp;S Café · Lakeside</option>
+        <option>Costa Coffee · Lakeside</option>
+        <option>Black Sheep Coffee · Lakeside</option>
+        <option>Costco · Lakeside</option>
+        <option>EV Bay 4 · Car Park G</option>
+      </optgroup>
+      <optgroup label="C2C Rail">
+        <option>Fenchurch Street · Costa</option>
+        <option>Fenchurch Street · Pret</option>
+        <option>Limehouse · Platform</option>
+        <option>Grays · Coffeeshop</option>
+        <option>Purfleet · Coffeeshop</option>
+        <option>Upminster · Platform</option>
+      </optgroup>
+      <optgroup label="TfL / DLR">
+        <option>North Greenwich · O2 Area</option>
+        <option>Canary Wharf · DLR</option>
+        <option>Cutty Sark · DLR</option>
+      </optgroup>
+      <optgroup label="World Cup 2026">
+        <option>Hard Rock Stadium · Miami</option>
+        <option>MetLife Stadium · New York</option>
+        <option>Mercedes-Benz Stadium · Atlanta</option>
+        <option>Gillette Stadium · Boston</option>
+      </optgroup>
+      <option value="__custom">+ Custom venue...</option>
+    </select>
+    <button class="coord-btn" onclick="switchTab('coords')">
+      <i class="ti ti-map-pin"></i> Coords
+    </button>
+  </div>
+
+  <!-- CUSTOM VENUE ROW -->
+  <div id="customVenueRow" class="venue-bar hidden">
+    <input type="text" id="customVenueInput" placeholder="Type venue name..." />
+  </div>
+
+  <!-- MODE STRIP -->
+  <div class="mode-strip">
+    <button class="mode-btn active" id="modeWalk"    onclick="setMode('WALK','Walk timer')">Walk</button>
+    <button class="mode-btn"        id="modeServe"   onclick="setMode('SERVE','Serve timer')">Serve</button>
+    <button class="mode-btn"        id="modeQueue"   onclick="setMode('QUEUE','Queue timer')">Queue</button>
+    <button class="mode-btn"        id="modeObserve" onclick="setMode('OBSERVE','Observe only')">Observe</button>
+    <button class="mode-btn"        id="modeEV"      onclick="setMode('EV','EV session')">EV bay</button>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- TIMER CARD -->
+    <div class="card" id="timerCard">
+      <div class="timer-row">
+        <span class="timer-label" id="timerLabel">Walk timer</span>
+        <span class="timer-val" id="timerDisplay">0:00</span>
+      </div>
+      <div class="timer-btns">
+        <button class="t-btn start" onclick="startTimer()">Start</button>
+        <button class="t-btn lap"   onclick="lapTimer()">Lap</button>
+        <button class="t-btn stop"  onclick="stopTimer()">Stop</button>
+      </div>
+    </div>
+
+    <!-- OBSERVATIONS CARD -->
+    <div class="card" id="obsCard">
+      <div class="obs-row" id="staffRow">
+        <span class="obs-label">Staff on floor</span>
+        <div class="stepper">
+          <button class="step-btn" onclick="adj('staff',-1)">−</button>
+          <span class="step-val" id="staffVal">0</span>
+          <button class="step-btn" onclick="adj('staff',1)">+</button>
+        </div>
+      </div>
+      <div class="obs-row" id="queueRow">
+        <span class="obs-label">Queue length</span>
+        <div class="stepper">
+          <button class="step-btn" onclick="adj('queue',-1)">−</button>
+          <span class="step-val" id="queueVal">0</span>
+          <button class="step-btn" onclick="adj('queue',1)">+</button>
+        </div>
+      </div>
+      <div class="obs-row" id="seatsRow">
+        <span class="obs-label">Seats available</span>
+        <div class="stepper">
+          <button class="step-btn" onclick="adj('seats',-1)">−</button>
+          <span class="step-val" id="seatsVal">0</span>
+          <button class="step-btn" onclick="adj('seats',1)">+</button>
+        </div>
+      </div>
+      <div class="obs-row hidden" id="baysRow">
+        <span class="obs-label">Bays occupied</span>
+        <div class="stepper">
+          <button class="step-btn" onclick="adj('bays',-1)">−</button>
+          <span class="step-val" id="baysVal">0</span>
+          <button class="step-btn" onclick="adj('bays',1)">+</button>
+        </div>
+      </div>
+      <div class="obs-row hidden" id="baysTotalRow">
+        <span class="obs-label">Total EV bays</span>
+        <div class="stepper">
+          <button class="step-btn" onclick="adj('baysTotal',-1)">−</button>
+          <span class="step-val" id="baysTotalVal">0</span>
+          <button class="step-btn" onclick="adj('baysTotal',1)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTES CARD -->
+    <div class="card hidden" id="notesCard">
+      <div class="sec-title">Notes</div>
+      <textarea id="notesField" rows="6" placeholder="Observations, opening hours, vendor contact, anything useful..."></textarea>
+    </div>
+
+    <!-- COORDS CARD -->
+    <div class="card hidden" id="coordsCard">
+      <div class="sec-title">Coordinates</div>
+      <div class="coords-display" id="coordsDisplay">No coordinates saved yet. In Apple Maps, long-press a location, tap the lat/lng at the top to copy, then paste below.</div>
+      <textarea id="coordsPaste" rows="2" placeholder="Paste Apple Maps coordinates here..." oninput="parseCoords(this.value)" style="border-top:0.5px solid var(--border);padding-top:10px;margin-top:10px"></textarea>
+    </div>
+
+    <!-- LOG CARD -->
+    <div class="card hidden" id="logCard">
+      <div class="sec-title">Session log &middot; <span id="logCount">0</span> events</div>
+      <div class="log-list" id="logList"></div>
+    </div>
+
+  </div>
+
+  <!-- EXPORT BAR -->
+  <div class="export-bar">
+    <button class="exp-btn" onclick="copyLog()">
+      <i class="ti ti-copy"></i>Copy JSON
+    </button>
+    <button class="exp-btn" onclick="exportJSON()">
+      <i class="ti ti-download"></i>Save file
+    </button>
+    <button class="exp-btn danger" onclick="clearSession()">
+      <i class="ti ti-refresh"></i>New session
+    </button>
+  </div>
+
+  <!-- BOTTOM TABS -->
+  <div class="bottom-tabs">
+    <button class="tab active" id="tabTimer" onclick="switchTab('timer')">
+      <i class="ti ti-clock"></i>Timer
+    </button>
+    <button class="tab" id="tabNotes" onclick="switchTab('notes')">
+      <i class="ti ti-notes"></i>Notes
+    </button>
+    <button class="tab" id="tabCoords" onclick="switchTab('coords')">
+      <i class="ti ti-map-pin"></i>Coords
+    </button>
+    <button class="tab" id="tabLog" onclick="switchTab('log')">
+      <i class="ti ti-list"></i>Log
+    </button>
+    <button class="tab danger" onclick="abortSession()">
+      <i class="ti ti-x"></i>Abort
+    </button>
+  </div>
+
+</div>
+
+<script>
+var theme='carbon', mode='WALK', venue='';
+var timerInterval=null, timerMs=0, timerRunning=false;
+var counts={staff:0,queue:0,seats:0,bays:0,baysTotal:0};
+var logs=[], sessionStart=new Date();
+var coordsData=null;
+
+function ts(){return new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
+function fmt(ms){var s=Math.floor(ms/1000);return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60;}
+
+function addLog(evt,detail){
+  var entry={time:ts(),event:evt,detail:detail||null};
+  logs.push(entry);
+  var el=document.createElement('div');
+  el.className='log-item';
+  el.innerHTML='<span>'+evt+(detail?' · <b>'+detail+'</b>':'')+'</span><span class="ts">'+entry.time+'</span>';
+  var ll=document.getElementById('logList');
+  ll.insertBefore(el,ll.firstChild);
+  document.getElementById('logCount').textContent=logs.length;
+}
+
+addLog('APP_BOOT','field log v2');
+
+function toggleTheme(){
+  var app=document.getElementById('app');
+  if(theme==='carbon'){
+    app.classList.remove('carbon');app.classList.add('paper');
+    theme='paper';document.getElementById('themeLabel').textContent='PAPER';
+  } else {
+    app.classList.remove('paper');app.classList.add('carbon');
+    theme='carbon';document.getElementById('themeLabel').textContent='CARBON';
+  }
+  addLog('THEME',theme.toUpperCase());
+}
+
+function setVenue(v){
+  if(v==='__custom'){
+    document.getElementById('customVenueRow').classList.remove('hidden');
+    venue='';
+  } else {
+    document.getElementById('customVenueRow').classList.add('hidden');
+    venue=v;
+    if(v) addLog('VENUE',v);
+  }
+}
+
+function setMode(m,label){
+  mode=m;
+  ['Walk','Serve','Queue','Observe','EV'].forEach(function(x){
+    var id='mode'+x;
+    var el=document.getElementById(id);
+    if(el) el.classList.remove('active');
+  });
+  var ids={WALK:'modeWalk',SERVE:'modeServe',QUEUE:'modeQueue',OBSERVE:'modeObserve',EV:'modeEV'};
+  document.getElementById(ids[m]).classList.add('active');
+  document.getElementById('timerLabel').textContent=label;
+  var isEV=(m==='EV');
+  var isObs=(m==='OBSERVE');
+  document.getElementById('timerCard').style.display=isObs?'none':'block';
+  document.getElementById('queueRow').classList.toggle('hidden',isEV);
+  document.getElementById('seatsRow').classList.toggle('hidden',isEV);
+  document.getElementById('baysRow').classList.toggle('hidden',!isEV);
+  document.getElementById('baysTotalRow').classList.toggle('hidden',!isEV);
+  addLog('MODE',m);
+}
+
+function startTimer(){
+  if(timerRunning) return;
+  timerRunning=true;
+  document.getElementById('statusDot').classList.add('live');
+  document.getElementById('statusTxt').textContent='recording';
+  document.getElementById('timerDisplay').classList.add('running');
+  timerInterval=setInterval(function(){
+    timerMs+=100;
+    document.getElementById('timerDisplay').textContent=fmt(timerMs);
+  },100);
+  addLog('TIMER_START',mode);
+}
+
+function lapTimer(){
+  if(!timerRunning) return;
+  addLog('LAP',mode+' = '+fmt(timerMs));
+}
+
+function stopTimer(){
+  if(!timerRunning&&timerMs===0) return;
+  clearInterval(timerInterval);
+  timerRunning=false;
+  document.getElementById('timerDisplay').classList.remove('running');
+  document.getElementById('statusDot').classList.remove('live');
+  document.getElementById('statusTxt').textContent='stopped';
+  addLog('TIMER_STOP',mode+' → '+fmt(timerMs));
+  timerMs=0;
+  document.getElementById('timerDisplay').textContent='0:00';
+}
+
+function adj(key,delta){
+  counts[key]=Math.max(0,(counts[key]||0)+delta);
+  var ids={staff:'staffVal',queue:'queueVal',seats:'seatsVal',bays:'baysVal',baysTotal:'baysTotalVal'};
+  document.getElementById(ids[key]).textContent=counts[key];
+  addLog(key.toUpperCase(),''+counts[key]);
+}
+
+function parseCoords(raw){
+  if(!raw.trim()) return;
+  var m=raw.match(/([-\d.]+)[,\s]+([-\d.]+)/);
+  if(m){
+    coordsData={lat:parseFloat(m[1]),lng:parseFloat(m[2]),raw:raw.trim()};
+    var d=document.getElementById('coordsDisplay');
+    d.textContent='Saved: '+coordsData.lat+', '+coordsData.lng;
+    d.classList.add('set');
+    addLog('COORDS',coordsData.lat+', '+coordsData.lng);
+  }
+}
+
+var allCards=['timerCard','obsCard','notesCard','coordsCard','logCard'];
+var allTabs=['tabTimer','tabNotes','tabCoords','tabLog'];
+
+function switchTab(tab){
+  allCards.forEach(function(id){document.getElementById(id).classList.add('hidden');});
+  allTabs.forEach(function(id){document.getElementById(id).classList.remove('active');});
+
+  if(tab==='timer'){
+    document.getElementById('tabTimer').classList.add('active');
+    if(mode!=='OBSERVE') document.getElementById('timerCard').classList.remove('hidden');
+    document.getElementById('obsCard').classList.remove('hidden');
+  } else if(tab==='notes'){
+    document.getElementById('tabNotes').classList.add('active');
+    document.getElementById('notesCard').classList.remove('hidden');
+    setTimeout(function(){document.getElementById('notesField').focus();},50);
+  } else if(tab==='coords'){
+    document.getElementById('tabCoords').classList.add('active');
+    document.getElementById('coordsCard').classList.remove('hidden');
+    setTimeout(function(){document.getElementById('coordsPaste').focus();},50);
+  } else if(tab==='log'){
+    document.getElementById('tabLog').classList.add('active');
+    document.getElementById('logCard').classList.remove('hidden');
+  }
+}
+
+function abortSession(){
+  if(!confirm('Abort this session? The log will be cleared.')) return;
+  clearInterval(timerInterval);timerMs=0;timerRunning=false;
+  document.getElementById('timerDisplay').textContent='0:00';
+  document.getElementById('timerDisplay').classList.remove('running');
+  document.getElementById('statusDot').classList.remove('live');
+  document.getElementById('statusTxt').textContent='aborted';
+  Object.keys(counts).forEach(function(k){counts[k]=0;});
+  ['staffVal','queueVal','seatsVal','baysVal','baysTotalVal'].forEach(function(id){
+    document.getElementById(id).textContent='0';
+  });
+  document.getElementById('notesField').value='';
+  logs=[];
+  document.getElementById('logList').innerHTML='';
+  document.getElementById('logCount').textContent='0';
+  addLog('ABORTED','session cleared');
+}
+
+function buildExport(){
+  var v=venue||(document.getElementById('customVenueInput').value)||'unknown';
+  return {
+    schema:'refueler_field_log_v2',
+    session_start:sessionStart.toISOString(),
+    exported_at:new Date().toISOString(),
+    venue:v,
+    mode:mode,
+    theme:theme,
+    coords:coordsData,
+    observations:{
+      staff_count:counts.staff,
+      queue_length:counts.queue,
+      seats_available:counts.seats,
+      ev_bays_occupied:counts.bays,
+      ev_bays_total:counts.baysTotal
+    },
+    notes:document.getElementById('notesField').value,
+    log:logs
+  };
+}
+
+function copyLog(){
+  var text=JSON.stringify(buildExport(),null,2);
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(function(){
+      addLog('EXPORTED','clipboard · '+logs.length+' events');
+      alert('Copied to clipboard ('+logs.length+' events).\nDrop the JSON file into Claude to analyse.');
+    });
+  } else {
+    var ta=document.createElement('textarea');
+    ta.value=text;document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);
+    alert('Copied ('+logs.length+' events).');
+  }
+}
+
+function exportJSON(){
+  var data=buildExport();
+  var v=(data.venue).replace(/[^a-z0-9]/gi,'_').toLowerCase().replace(/_+/g,'_');
+  var d=new Date().toISOString().slice(0,10);
+  var filename='refueler_obs_'+d+'_'+v+'.json';
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download=filename;a.click();
+  URL.revokeObjectURL(url);
+  addLog('SAVED',filename);
+}
+
+function clearSession(){
+  if(!confirm('Start a new session? Current data will be lost.')) return;
+  logs=[];sessionStart=new Date();
+  Object.keys(counts).forEach(function(k){counts[k]=0;});
+  clearInterval(timerInterval);timerMs=0;timerRunning=false;
+  document.getElementById('timerDisplay').textContent='0:00';
+  document.getElementById('timerDisplay').classList.remove('running');
+  document.getElementById('statusDot').classList.remove('live');
+  document.getElementById('statusTxt').textContent='idle';
+  ['staffVal','queueVal','seatsVal','baysVal','baysTotalVal'].forEach(function(id){
+    document.getElementById(id).textContent='0';
+  });
+  document.getElementById('notesField').value='';
+  document.getElementById('coordsPaste').value='';
+  var cd=document.getElementById('coordsDisplay');
+  cd.textContent='No coordinates saved yet. In Apple Maps, long-press a location, tap the lat/lng to copy, then paste below.';
+  cd.classList.remove('set');
+  coordsData=null;venue='';
+  document.getElementById('venueSelect').value='';
+  document.getElementById('customVenueRow').classList.add('hidden');
+  document.getElementById('logList').innerHTML='';
+  document.getElementById('logCount').textContent='0';
+  addLog('APP_BOOT','new session');
+}
+
+switchTab('timer');
+</script>
+</body>
+</html>

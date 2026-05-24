@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="paper">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Refueler — Account</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0D0D0B">
+<!-- Auth-gated. No tracking. No analytics. Short-lived JWT only. -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root,
+[data-theme="carbon"] {
+  --bg:            #0D0D0B;
+  --bg2:           #141412;
+  --bg3:           #1C1C19;
+  --border:        rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.16);
+  --text:          #F0EDE8;
+  --text-muted:    rgba(240,237,232,0.55);
+  --text-dim:      rgba(240,237,232,0.28);
+  --orange:        #F5820A;
+  --orange-dim:    rgba(245,130,10,0.12);
+  --green:         #2ECC71;
+  --green-dim:     rgba(46,204,113,0.10);
+  --red:           #E74C3C;
+  --red-dim:       rgba(231,76,60,0.10);
+  --nav-bg:        rgba(13,13,11,0.90);
+  --toggle-track:  #2a2a27;
+  --toggle-thumb:  #F0EDE8;
+  --shadow:        none;
+  --card-bg:       var(--bg2);
+}
+[data-theme="paper"] {
+  --bg:            #F5F2ED;
+  --bg2:           #EDEAE4;
+  --bg3:           #E4E1DB;
+  --border:        rgba(0,0,0,0.09);
+  --border-strong: rgba(0,0,0,0.18);
+  --text:          #1A1A18;
+  --text-muted:    rgba(26,26,24,0.60);
+  --text-dim:      rgba(26,26,24,0.32);
+  --orange:        #D4690A;
+  --orange-dim:    rgba(212,105,10,0.10);
+  --green:         #1E8A4A;
+  --green-dim:     rgba(30,138,74,0.10);
+  --red:           #C0392B;
+  --red-dim:       rgba(192,57,43,0.08);
+  --nav-bg:        rgba(245,242,237,0.94);
+  --toggle-track:  #D4CFC8;
+  --toggle-thumb:  #1A1A18;
+  --shadow:        0 1px 3px rgba(0,0,0,0.08);
+  --card-bg:       var(--bg2);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px; line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2rem; height: 56px;
+  background: var(--nav-bg);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-bottom: 0.5px solid var(--border);
+  transition: background 0.3s, border-color 0.3s;
+}
+.nav-left { display: flex; align-items: center; gap: 1.5rem; }
+.nav-wordmark { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.06em; color: var(--orange); text-decoration: none; }
+.nav-section { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
+.nav-right { display: flex; align-items: center; gap: 1.25rem; }
+.nav-session {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.08em; color: var(--text-dim);
+  display: flex; align-items: center; gap: 6px;
+}
+.session-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2.5s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+.nav-signout { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-dim); background: none; border: 0.5px solid var(--border-strong); border-radius: 4px; padding: 5px 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: color 0.2s, border-color 0.2s; }
+.nav-signout:hover { color: var(--text); border-color: var(--text-dim); }
+
+/* theme toggle (compact) */
+.theme-toggle { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.toggle-track { width: 32px; height: 18px; background: var(--toggle-track); border-radius: 9px; position: relative; border: 0.5px solid var(--border-strong); transition: background 0.3s, border-color 0.3s; flex-shrink:0; }
+.toggle-thumb { width: 12px; height: 12px; background: var(--toggle-thumb); border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: transform 0.25s cubic-bezier(.4,0,.2,1), background 0.3s; }
+[data-theme="paper"] .toggle-thumb { transform: translateX(14px); }
+[data-theme="paper"] .toggle-track { background: var(--orange-dim); border-color: var(--orange); }
+.toggle-icon { font-size: 13px; }
+
+/* ── LAYOUT ── */
+.page { padding: 80px 2rem 4rem; max-width: 960px; margin: 0 auto; }
+.page-grid { display: grid; grid-template-columns: 280px 1fr; gap: 1.5rem; align-items: start; margin-top: 2rem; }
+
+/* ── SIDEBAR ── */
+.sidebar { display: flex; flex-direction: column; gap: 1px; position: sticky; top: 72px; }
+.sidebar-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0.75rem 1rem; border-radius: 6px;
+  font-size: 13px; color: var(--text-muted);
+  cursor: pointer; text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+  border: 0.5px solid transparent;
+}
+.sidebar-item:hover { background: var(--bg2); color: var(--text); }
+.sidebar-item.active { background: var(--orange-dim); color: var(--orange); border-color: rgba(245,130,10,0.2); }
+.sidebar-icon { font-size: 16px; flex-shrink: 0; }
+.sidebar-divider { height: 0.5px; background: var(--border); margin: 0.5rem 0; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--card-bg); border: 0.5px solid var(--border);
+  border-radius: 10px; overflow: hidden;
+  transition: background 0.3s, border-color 0.3s;
+  box-shadow: var(--shadow);
+}
+.card-header {
+  padding: 1.25rem 1.5rem; border-bottom: 0.5px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-title { font-size: 13px; font-weight: 500; color: var(--text); }
+.card-meta { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-dim); letter-spacing: 0.06em; }
+.card-body { padding: 1.5rem; }
+
+/* ── SATS BALANCE CARD ── */
+.balance-card { background: var(--bg3); border: 0.5px solid var(--border-strong); border-radius: 10px; padding: 2rem; margin-bottom: 1.5rem; position: relative; overflow: hidden; }
+.balance-card::before { content: ''; position: absolute; top: -40px; right: -40px; width: 180px; height: 180px; background: radial-gradient(circle, var(--orange-dim) 0%, transparent 70%); pointer-events: none; }
+.balance-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.5rem; }
+.balance-sats { font-family: 'Bebas Neue', sans-serif; font-size: 64px; line-height: 1; color: var(--orange); letter-spacing: 0.02em; }
+.balance-sats .unit { font-size: 28px; color: var(--text-dim); margin-left: 4px; }
+.balance-fiat { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+.balance-actions { display: flex; gap: 8px; margin-top: 1.5rem; }
+.btn-sm {
+  font-size: 12px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase;
+  padding: 8px 16px; border-radius: 4px; cursor: pointer; border: none;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.btn-sm:hover { opacity: 0.85; transform: translateY(-1px); }
+.btn-sm-orange { background: var(--orange); color: var(--bg); }
+.btn-sm-ghost { background: transparent; color: var(--text-muted); border: 0.5px solid var(--border-strong) !important; border: none; }
+
+/* ── REWARD HISTORY ── */
+.tx-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.85rem 0; border-bottom: 0.5px solid var(--border);
+  transition: background 0.15s;
+}
+.tx-row:last-child { border-bottom: none; }
+.tx-row:hover { background: var(--bg3); margin: 0 -1.5rem; padding: 0.85rem 1.5rem; border-radius: 4px; }
+.tx-left { display: flex; align-items: center; gap: 12px; }
+.tx-icon { width: 34px; height: 34px; border-radius: 8px; background: var(--orange-dim); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.tx-icon.travel { background: rgba(46,204,113,0.1); }
+.tx-icon.ev { background: rgba(52,152,219,0.1); }
+.tx-vendor { font-size: 13px; font-weight: 500; color: var(--text); }
+.tx-detail { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-dim); margin-top: 1px; letter-spacing: 0.04em; }
+.tx-right { text-align: right; }
+.tx-sats { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--orange); font-weight: 500; }
+.tx-fiat { font-size: 11px; color: var(--text-dim); margin-top: 1px; }
+
+/* ── ORDER STATUS ── */
+.order-active {
+  border: 0.5px solid var(--orange); border-radius: 10px;
+  padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;
+  background: var(--orange-dim);
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  animation: borderPulse 2s ease-in-out infinite;
+}
+@keyframes borderPulse { 0%,100%{border-color:var(--orange);} 50%{border-color:rgba(245,130,10,0.3);} }
+.order-active-left { display: flex; align-items: center; gap: 12px; }
+.order-status-icon { font-size: 28px; }
+.order-status-title { font-size: 14px; font-weight: 500; color: var(--text); }
+.order-status-sub { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--orange); margin-top: 2px; }
+.order-eta { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--orange); letter-spacing: 0.05em; flex-shrink: 0; }
+.order-eta-label { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text-dim); text-align: center; letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* ── SETTINGS ROWS ── */
+.setting-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 0; border-bottom: 0.5px solid var(--border);
+}
+.setting-row:last-child { border-bottom: none; }
+.setting-left { flex: 1; }
+.setting-title { font-size: 13px; font-weight: 500; color: var(--text); }
+.setting-desc { font-size: 12px; color: var(--text-dim); margin-top: 2px; line-height: 1.5; max-width: 340px; }
+.setting-badge { display: inline-flex; align-items: center; gap: 4px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.06em; padding: 2px 8px; border-radius: 10px; margin-top: 4px; }
+.badge-green { background: var(--green-dim); color: var(--green); border: 0.5px solid rgba(46,204,113,0.2); }
+.badge-orange { background: var(--orange-dim); color: var(--orange); border: 0.5px solid rgba(245,130,10,0.2); }
+.badge-dim { background: var(--bg3); color: var(--text-dim); border: 0.5px solid var(--border); }
+
+/* iOS-style toggle */
+.ios-toggle { position: relative; width: 44px; height: 26px; flex-shrink: 0; cursor: pointer; }
+.ios-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.ios-slider { position: absolute; inset: 0; background: var(--border-strong); border-radius: 13px; transition: background 0.25s; }
+.ios-slider::before { content: ''; position: absolute; width: 20px; height: 20px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: transform 0.25s cubic-bezier(.4,0,.2,1); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+.ios-toggle input:checked + .ios-slider { background: var(--orange); }
+.ios-toggle input:checked + .ios-slider::before { transform: translateX(18px); }
+
+/* ── SESSION INFO ── */
+.session-info-card { background: var(--bg); border: 0.5px solid var(--border); border-radius: 8px; padding: 1.25rem 1.5rem; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-dim); line-height: 2; }
+.session-row { display: flex; justify-content: space-between; border-bottom: 0.5px solid var(--border); padding: 0.35rem 0; }
+.session-row:last-child { border-bottom: none; }
+.session-key { color: var(--text-dim); }
+.session-val { color: var(--text-muted); }
+.session-val.ok { color: var(--green); }
+.session-val.warn { color: var(--orange); }
+
+/* ── SECTION TABS ── */
+.content-section { display: none; }
+.content-section.visible { display: block; }
+
+/* ── WALLET CONNECT ── */
+.wallet-option {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem; border: 0.5px solid var(--border); border-radius: 8px;
+  margin-bottom: 8px; cursor: pointer; transition: background 0.15s, border-color 0.15s;
+}
+.wallet-option:hover { background: var(--bg2); border-color: var(--border-strong); }
+.wallet-option.connected { border-color: rgba(46,204,113,0.3); background: var(--green-dim); }
+.wallet-left { display: flex; align-items: center; gap: 12px; }
+.wallet-icon { font-size: 22px; }
+.wallet-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.wallet-desc { font-size: 11px; color: var(--text-dim); }
+.wallet-status { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.06em; }
+
+/* ── WALLET DRAWERS ── */
+.wallet-drawer {
+  border: 0.5px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  margin-bottom: 8px;
+  overflow: hidden;
+  animation: fadeUp 0.2s ease both;
+}
+.drawer-inner {
+  padding: 1.25rem 1.5rem;
+  background: var(--bg3);
+}
+.drawer-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-dim);
+}
+.export-row { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 0; border-bottom: 0.5px solid var(--border); }
+.export-row:last-child { border-bottom: none; }
+.export-title { font-size: 13px; color: var(--text); }
+.export-desc { font-size: 11px; color: var(--text-dim); margin-top: 1px; }
+.btn-export { font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; background: var(--bg3); color: var(--text-muted); border: 0.5px solid var(--border-strong); border-radius: 4px; padding: 6px 14px; cursor: pointer; transition: color 0.2s; font-family: 'DM Sans', sans-serif; }
+.btn-export:hover { color: var(--text); }
+
+/* ── DANGER ZONE ── */
+.danger-zone { border: 0.5px solid rgba(231,76,60,0.25); border-radius: 8px; padding: 1.25rem 1.5rem; margin-top: 1.5rem; background: var(--red-dim); }
+.danger-title { font-size: 12px; font-weight: 500; color: var(--red); margin-bottom: 0.5rem; letter-spacing: 0.04em; }
+.danger-desc { font-size: 12px; color: var(--text-dim); margin-bottom: 1rem; line-height: 1.6; }
+.btn-danger { font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; background: transparent; color: var(--red); border: 0.5px solid rgba(231,76,60,0.4); border-radius: 4px; padding: 8px 16px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s; }
+.btn-danger:hover { background: var(--red-dim); }
+
+/* ── PAGE HEADER ── */
+.page-header { margin-top: 1rem; }
+.page-title { font-family: 'Bebas Neue', sans-serif; font-size: 42px; letter-spacing: 0.04em; color: var(--text); line-height: 1; }
+.page-sub { font-size: 13px; color: var(--text-dim); margin-top: 6px; font-family: 'DM Mono', monospace; letter-spacing: 0.04em; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px);} to{opacity:1;transform:translateY(0);} }
+.card { animation: fadeUp 0.4s ease both; }
+.balance-card { animation: fadeUp 0.35s ease both; }
+
+/* ── RESPONSIVE ── */
+@media(max-width:700px) {
+  .page-grid { grid-template-columns: 1fr; }
+  .sidebar { position: static; flex-direction: row; flex-wrap: wrap; gap: 4px; }
+  .sidebar-divider { display: none; }
+  .sidebar-item { padding: 0.5rem 0.75rem; font-size: 12px; }
+  .nav-section { display: none; }
+  .page { padding: 72px 1.25rem 3rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-left">
+    <a href="index.html" class="nav-wordmark">REFUELER</a>
+    <span class="nav-section">Account</span>
+  </div>
+  <div class="nav-right">
+    <div class="nav-session">
+      <span class="session-dot"></span>
+      <span id="sessionTimer">Session: 58:41</span>
+    </div>
+    <div class="theme-toggle" onclick="toggleTheme()" role="button" aria-label="Toggle Paper / Carbon theme" title="Paper / Carbon">
+      <span style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-dim); transition:color 0.3s;" id="acctLabelCarbon">Carbon</span>
+      <div class="toggle-track"><div class="toggle-thumb"></div></div>
+      <span style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--orange); transition:color 0.3s;" id="acctLabelPaper">Paper</span>
+    </div>
+    <button class="nav-signout" onclick="signOut()">Sign out</button>
+  </div>
+</nav>
+
+<main class="page">
+  <div class="page-header">
+    <div class="page-title">YOUR ACCOUNT</div>
+    <div class="page-sub" id="userEmail">rt@refueler.io &nbsp;·&nbsp; Member since May 2026</div>
+  </div>
+
+  <div class="page-grid">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <a class="sidebar-item active" onclick="showSection('overview')" href="#">
+        <span class="sidebar-icon">⚡</span> Overview
+      </a>
+      <a class="sidebar-item" onclick="showSection('orders')" href="#">
+        <span class="sidebar-icon">☕</span> Order history
+      </a>
+      <a class="sidebar-item" onclick="showSection('wallet')" href="#">
+        <span class="sidebar-icon">🪙</span> Wallet
+      </a>
+      <a class="sidebar-item" onclick="showSection('settings')" href="#">
+        <span class="sidebar-icon">⚙️</span> Settings
+      </a>
+      <div class="sidebar-divider"></div>
+      <a class="sidebar-item" onclick="showSection('privacy')" href="#">
+        <span class="sidebar-icon">🔒</span> Privacy &amp; data
+      </a>
+      <a class="sidebar-item" onclick="showSection('session')" href="#">
+        <span class="sidebar-icon">🔑</span> Session info
+      </a>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div id="mainContent">
+
+      <!-- ── OVERVIEW ── -->
+      <div id="section-overview" class="content-section visible">
+
+        <!-- Active order banner (simulated) -->
+        <div class="order-active" id="activeOrderBanner">
+          <div class="order-active-left">
+            <div class="order-status-icon">☕</div>
+            <div>
+              <div class="order-status-title">Flat white · M&amp;S Café, Fenchurch St</div>
+              <div class="order-status-sub">⚡ MAKING &nbsp;·&nbsp; Train departed Limehouse 3 mins ago</div>
+            </div>
+          </div>
+          <div style="text-align:center;">
+            <div class="order-eta" id="etaDisplay">1:44</div>
+            <div class="order-eta-label">ready in</div>
+          </div>
+        </div>
+
+        <!-- Balance -->
+        <div class="balance-card">
+          <div class="balance-label">Total sats earned</div>
+          <div class="balance-sats">84,320<span class="unit">sats</span></div>
+          <div class="balance-fiat">≈ £47.23 at current rate &nbsp;·&nbsp; Updated live</div>
+          <div class="balance-actions">
+            <button class="btn-sm btn-sm-orange" onclick="showSection('wallet')">View wallet →</button>
+            <button class="btn-sm btn-sm-ghost" style="border:0.5px solid var(--border-strong); background:transparent; color:var(--text-muted);" onclick="showSection('orders')">Transaction history</button>
+          </div>
+        </div>
+
+        <!-- Recent rewards -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Recent rewards</span>
+            <span class="card-meta">Last 30 days</span>
+          </div>
+          <div class="card-body">
+            <div class="tx-row">
+              <div class="tx-left">
+                <div class="tx-icon">☕</div>
+                <div>
+                  <div class="tx-vendor">M&amp;S Café · Fenchurch Street</div>
+                  <div class="tx-detail">Today · 08:44 · Flat white</div>
+                </div>
+              </div>
+              <div class="tx-right">
+                <div class="tx-sats">+186 sats</div>
+                <div class="tx-fiat">on £4.20</div>
+              </div>
+            </div>
+            <div class="tx-row">
+              <div class="tx-left">
+                <div class="tx-icon ev">🔋</div>
+                <div>
+                  <div class="tx-vendor">M&amp;S Café · Lakeside (EV Bay 4)</div>
+                  <div class="tx-detail">Yesterday · 14:22 · Latte + pastry</div>
+                </div>
+              </div>
+              <div class="tx-right">
+                <div class="tx-sats">+321 sats</div>
+                <div class="tx-fiat">on £7.25</div>
+              </div>
+            </div>
+            <div class="tx-row">
+              <div class="tx-left">
+                <div class="tx-icon travel">✈️</div>
+                <div>
+                  <div class="tx-vendor">Flight · LHR → MIA via Duffel</div>
+                  <div class="tx-detail">21 May · BA206 · World Cup travel</div>
+                </div>
+              </div>
+              <div class="tx-right">
+                <div class="tx-sats">+17,420 sats</div>
+                <div class="tx-fiat">on £389.00</div>
+              </div>
+            </div>
+            <div class="tx-row">
+              <div class="tx-left">
+                <div class="tx-icon">☕</div>
+                <div>
+                  <div class="tx-vendor">M&amp;S Café · Fenchurch Street</div>
+                  <div class="tx-detail">20 May · 08:51 · Americano</div>
+                </div>
+              </div>
+              <div class="tx-right">
+                <div class="tx-sats">+158 sats</div>
+                <div class="tx-fiat">on £3.55</div>
+              </div>
+            </div>
+            <div class="tx-row">
+              <div class="tx-left">
+                <div class="tx-icon">☕</div>
+                <div>
+                  <div class="tx-vendor">Black Sheep Coffee · Fenchurch St</div>
+                  <div class="tx-detail">19 May · 08:39 · Flat white</div>
+                </div>
+              </div>
+              <div class="tx-right">
+                <div class="tx-sats">+195 sats</div>
+                <div class="tx-fiat">on £4.40</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── ORDER HISTORY ── -->
+      <div id="section-orders" class="content-section">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Order history</span>
+            <span class="card-meta" style="font-family:'DM Mono',monospace; font-size:10px; color:var(--text-dim);">13-month retention · Auto-purge</span>
+          </div>
+          <div class="card-body">
+            <div class="tx-row">
+              <div class="tx-left"><div class="tx-icon">☕</div><div><div class="tx-vendor">M&amp;S Café · Fenchurch Street</div><div class="tx-detail">Today · 08:44 · Flat white · COLLECTED</div></div></div>
+              <div class="tx-right"><div class="tx-sats">+186 sats</div><div class="tx-fiat">£4.20</div></div>
+            </div>
+            <div class="tx-row">
+              <div class="tx-left"><div class="tx-icon ev">🔋</div><div><div class="tx-vendor">M&amp;S Café · Lakeside EV Bay 4</div><div class="tx-detail">Yesterday · 14:22 · Latte + croissant · COLLECTED</div></div></div>
+              <div class="tx-right"><div class="tx-sats">+321 sats</div><div class="tx-fiat">£7.25</div></div>
+            </div>
+            <div class="tx-row">
+              <div class="tx-left"><div class="tx-icon travel">✈️</div><div><div class="tx-vendor">Duffel · BA206 LHR→MIA</div><div class="tx-detail">21 May · Booking ref: DFL-8847A · CONFIRMED</div></div></div>
+              <div class="tx-right"><div class="tx-sats">+17,420 sats</div><div class="tx-fiat">£389.00</div></div>
+            </div>
+            <div class="tx-row">
+              <div class="tx-left"><div class="tx-icon">☕</div><div><div class="tx-vendor">M&amp;S Café · Fenchurch Street</div><div class="tx-detail">20 May · 08:51 · Americano · COLLECTED</div></div></div>
+              <div class="tx-right"><div class="tx-sats">+158 sats</div><div class="tx-fiat">£3.55</div></div>
+            </div>
+            <div class="tx-row">
+              <div class="tx-left"><div class="tx-icon">☕</div><div><div class="tx-vendor">Black Sheep Coffee · Fenchurch St</div><div class="tx-detail">19 May · 08:39 · Flat white · COLLECTED</div></div></div>
+              <div class="tx-right"><div class="tx-sats">+195 sats</div><div class="tx-fiat">£4.40</div></div>
+            </div>
+            <div class="tx-row">
+              <div class="tx-left"><div class="tx-icon">☕</div><div><div class="tx-vendor">M&amp;S Café · Fenchurch Street</div><div class="tx-detail">16 May · 08:47 · Flat white · COLLECTED</div></div></div>
+              <div class="tx-right"><div class="tx-sats">+186 sats</div><div class="tx-fiat">£4.20</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── WALLET ── -->
+      <div id="section-wallet" class="content-section">
+        <div class="card" style="margin-bottom:1.5rem;">
+          <div class="card-header"><span class="card-title">Connected wallets</span></div>
+          <div class="card-body">
+            <div class="wallet-option connected">
+              <div class="wallet-left">
+                <div class="wallet-icon">🟠</div>
+                <div>
+                  <div class="wallet-name">Minibits</div>
+                  <div class="wallet-desc">Cashu ecash · On-device balance · Privacy-preserving</div>
+                </div>
+              </div>
+              <div class="wallet-status" style="color:var(--green);">● Connected</div>
+            </div>
+
+            <!-- Lightning address with paste/QR -->
+            <div class="wallet-option" id="lnAddressOption" onclick="toggleWalletDrawer('lnDrawer', this)">
+              <div class="wallet-left">
+                <div class="wallet-icon">⚡</div>
+                <div>
+                  <div class="wallet-name">Lightning address</div>
+                  <div class="wallet-desc">Any wallet that accepts a Lightning address (user@wallet.com format)</div>
+                </div>
+              </div>
+              <div class="wallet-status" style="color:var(--text-dim); font-size:13px;" id="lnChevron">＋ Add</div>
+            </div>
+            <div id="lnDrawer" class="wallet-drawer" style="display:none;">
+              <div class="drawer-inner">
+                <div class="drawer-label">Paste your Lightning address</div>
+                <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+                  <input type="text" id="lnAddressInput" placeholder="you@wallet.com" class="waitlist-input" style="font-size:13px; padding:10px 14px; flex:1; min-width:200px;">
+                  <button class="btn-sm btn-sm-orange" onclick="saveLnAddress()">Save ⚡</button>
+                </div>
+                <div class="drawer-label" style="margin-top:1rem;">Or scan a QR code</div>
+                <button class="btn-sm btn-sm-ghost" style="margin-top:8px; border:0.5px solid var(--border-strong); background:transparent; color:var(--text-muted);" onclick="startQRScan('ln')">📷 Open camera</button>
+                <p style="font-size:11px; color:var(--text-dim); font-family:'DM Mono',monospace; margin-top:1rem; line-height:1.6;">Your Lightning address is used only to push sats rewards. It is not stored in our database after payment — we keep a record that a reward was issued, not the destination address.</p>
+              </div>
+            </div>
+
+            <!-- Zebedee with advanced drawer -->
+            <div class="wallet-option" id="zbdOption" onclick="toggleWalletDrawer('zbdDrawer', this)">
+              <div class="wallet-left">
+                <div class="wallet-icon">🦓</div>
+                <div>
+                  <div class="wallet-name">Zebedee</div>
+                  <div class="wallet-desc">Gaming + lifestyle Lightning wallet · Optional</div>
+                </div>
+              </div>
+              <div class="wallet-status" style="color:var(--text-dim); font-size:13px;" id="zbdChevron">＋ Add</div>
+            </div>
+            <div id="zbdDrawer" class="wallet-drawer" style="display:none;">
+              <div class="drawer-inner">
+                <div class="drawer-label">Connect your Zebedee wallet</div>
+                <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+                  <input type="text" id="zbdAddressInput" placeholder="username@zbd.gg" class="waitlist-input" style="font-size:13px; padding:10px 14px; flex:1; min-width:200px;">
+                  <button class="btn-sm btn-sm-orange" onclick="saveZbdAddress()">Save ⚡</button>
+                </div>
+                <div class="drawer-label" style="margin-top:1rem;">Or scan Zebedee QR</div>
+                <button class="btn-sm btn-sm-ghost" style="margin-top:8px; border:0.5px solid var(--border-strong); background:transparent; color:var(--text-muted);" onclick="startQRScan('zbd')">📷 Open camera</button>
+                <div style="margin-top:1.25rem; padding-top:1rem; border-top:0.5px solid var(--border);">
+                  <div class="drawer-label">Advanced</div>
+                  <div class="setting-row" style="padding:0.6rem 0;">
+                    <div class="setting-left"><div class="setting-title" style="font-size:12px;">Route all rewards to Zebedee</div><div class="setting-desc">Override Minibits as default reward destination.</div></div>
+                    <label class="ios-toggle"><input type="checkbox" id="zbdPrimary"><span class="ios-slider"></span></label>
+                  </div>
+                  <div class="setting-row" style="padding:0.6rem 0; border-bottom:none;">
+                    <div class="setting-left"><div class="setting-title" style="font-size:12px;">Notify me on Zebedee receipt</div><div class="setting-desc">Push notification when sats land in Zebedee.</div></div>
+                    <label class="ios-toggle"><input type="checkbox"><span class="ios-slider"></span></label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Balance breakdown</span></div>
+          <div class="card-body">
+            <div class="tx-row"><div class="tx-vendor">Minibits ecash balance</div><div class="tx-sats">84,320 sats</div></div>
+            <div class="tx-row"><div class="tx-vendor">Pending (order in progress)</div><div class="tx-sats" style="color:var(--text-dim);">186 sats</div></div>
+            <div class="tx-row" style="border-top:0.5px solid var(--border-strong); margin-top:4px; padding-top:12px;"><div class="tx-vendor" style="font-weight:500;">Total</div><div class="tx-sats">84,506 sats</div></div>
+            <p style="font-size:11px; color:var(--text-dim); font-family:'DM Mono',monospace; margin-top:1rem; line-height:1.6;">Your sats balance is held in your Minibits wallet on your device — not in our database. We record that rewards were issued, not the balance itself. You hold the keys.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SETTINGS ── -->
+      <div id="section-settings" class="content-section">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Notifications &amp; ordering</span></div>
+          <div class="card-body">
+            <div class="setting-row">
+              <div class="setting-left">
+                <div class="setting-title">Passive Ambient Awareness</div>
+                <div class="setting-desc">On-device geofence trigger. Your phone detects train departure and prompts you to confirm an order. Location never transmitted.</div>
+                <div><span class="setting-badge badge-green">● On-device only</span> <span class="setting-badge badge-green">● GDPR compliant</span></div>
+              </div>
+              <label class="ios-toggle">
+                <input type="checkbox" checked onchange="updateGeoStatus(this)">
+                <span class="ios-slider"></span>
+              </label>
+            </div>
+            <div class="setting-row">
+              <div class="setting-left">
+                <div class="setting-title">Order-ready push notifications</div>
+                <div class="setting-desc">Browser or OS notification when your order is confirmed ready for collection.</div>
+                <span class="setting-badge badge-green" id="pushStatusBadge">● Enabled</span>
+              </div>
+              <label class="ios-toggle">
+                <input type="checkbox" checked>
+                <span class="ios-slider"></span>
+              </label>
+            </div>
+            <div class="setting-row">
+              <div class="setting-left">
+                <div class="setting-title">Sats reward notifications</div>
+                <div class="setting-desc">Notification when sats are issued to your Minibits wallet after collection.</div>
+              </div>
+              <label class="ios-toggle">
+                <input type="checkbox" checked>
+                <span class="ios-slider"></span>
+              </label>
+            </div>
+            <div class="setting-row">
+              <div class="setting-left">
+                <div class="setting-title">Match Day Mode alerts</div>
+                <div class="setting-desc">Pre-order prompts on England match days when near a stadium geofence zone.</div>
+                <span class="setting-badge badge-orange">⚡ England skin</span>
+              </div>
+              <label class="ios-toggle">
+                <input type="checkbox">
+                <span class="ios-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:1.5rem;">
+          <div class="card-header"><span class="card-title">Display</span></div>
+          <div class="card-body">
+            <div class="setting-row">
+              <div class="setting-left">
+                <div class="setting-title">Theme</div>
+                <div class="setting-desc">Carbon (dark) or Paper (light). Saved to device.</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-family:'DM Mono',monospace; font-size:11px; color:var(--text-dim);" id="themeLabel">Carbon</span>
+                <div class="theme-toggle" onclick="toggleTheme()" role="button">
+                  <div class="toggle-track"><div class="toggle-thumb"></div></div>
+                </div>
+              </div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-left">
+                <div class="setting-title">Sats display</div>
+                <div class="setting-desc">Show balance in sats, GBP equivalent, or both.</div>
+              </div>
+              <select style="background:var(--bg3); border:0.5px solid var(--border-strong); border-radius:4px; padding:6px 10px; font-size:12px; color:var(--text-muted); font-family:'DM Mono',monospace; cursor:pointer;">
+                <option>Sats + GBP</option>
+                <option>Sats only</option>
+                <option>GBP only</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:1.5rem;">
+          <div class="card-header">
+            <span class="card-title">Sign-in & security</span>
+            <span class="setting-badge badge-green">● Magic link active</span>
+          </div>
+          <div class="card-body">
+            <div class="setting-row">
+              <div class="setting-left">
+                <div class="setting-title">Passkey (Face ID / Touch ID)</div>
+                <div class="setting-desc">After your first magic link sign-in, register a Passkey so returning visits are instant — one tap, no email, no friction. Ideal for checking your order status mid-commute.</div>
+                <span class="setting-badge badge-orange" id="passkeyBadge">Not yet registered</span>
+              </div>
+              <button class="btn-sm btn-sm-orange" style="flex-shrink:0;" onclick="registerPasskey()">Register →</button>
+            </div>
+            <div class="setting-row" style="border-bottom:none;">
+              <div class="setting-left">
+                <div class="setting-title">Re-authentication for sensitive actions</div>
+                <div class="setting-desc">Linking a new Lightning wallet or deleting your account requires a fresh magic link confirmation — even mid-session. This is intentional.</div>
+                <span class="setting-badge badge-dim">Always on</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      <div id="section-privacy" class="content-section">
+        <div class="card" style="margin-bottom:1.5rem;">
+          <div class="card-header">
+            <span class="card-title">Your data — export &amp; deletion</span>
+            <span class="gdpr-badge" style="font-size:10px;"><span class="gdpr-badge-dot"></span>UK GDPR Art. 15, 17, 20</span>
+          </div>
+          <div class="card-body">
+            <div class="export-row">
+              <div><div class="export-title">Order history (JSON)</div><div class="export-desc">All orders with vendor, item, timestamp, sats earned. Machine-readable.</div></div>
+              <button class="btn-export" onclick="exportData('orders')">Export →</button>
+            </div>
+            <div class="export-row">
+              <div><div class="export-title">Sats reward log (JSON)</div><div class="export-desc">Full reward history with amounts and dates. Required for 6-year HMRC retention.</div></div>
+              <button class="btn-export" onclick="exportData('sats')">Export →</button>
+            </div>
+            <div class="export-row">
+              <div><div class="export-title">Full account export (JSON)</div><div class="export-desc">Everything we hold. Fulfils your right to data portability under Art. 20.</div></div>
+              <button class="btn-export" onclick="exportData('all')">Export all →</button>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:1.5rem;">
+          <div class="card-header"><span class="card-title">What we hold right now</span></div>
+          <div class="card-body">
+            <div class="setting-row">
+              <div class="setting-left"><div class="setting-title">Email address</div><div class="setting-desc">Used for magic link authentication only.</div></div>
+              <span class="setting-badge badge-dim">Stored</span>
+            </div>
+            <div class="setting-row">
+              <div class="setting-left"><div class="setting-title">Order records</div><div class="setting-desc">6 orders. Auto-purge after 13 months.</div></div>
+              <span class="setting-badge badge-dim">6 records</span>
+            </div>
+            <div class="setting-row">
+              <div class="setting-left"><div class="setting-title">Sats reward log</div><div class="setting-desc">6 entries. 6-year retention (HMRC).</div></div>
+              <span class="setting-badge badge-dim">6 records</span>
+            </div>
+            <div class="setting-row">
+              <div class="setting-left"><div class="setting-title">Push subscription token</div><div class="setting-desc">Browser-issued. Expires if inactive 90 days.</div></div>
+              <span class="setting-badge badge-green">● Active</span>
+            </div>
+            <div class="setting-row">
+              <div class="setting-left"><div class="setting-title">Location data</div><div class="setting-desc">On-device only. We hold zero location records.</div></div>
+              <span class="setting-badge badge-green">● Not held</span>
+            </div>
+          </div>
+        </div>
+        <div class="danger-zone">
+          <div class="danger-title">⚠ Delete account</div>
+          <div class="danger-desc">This permanently deletes your email, order history, and push token. Sats reward records are retained for 6 years under HMRC compliance requirements and cannot be deleted early. Your Minibits wallet is unaffected — your sats remain yours.</div>
+          <button class="btn-danger" onclick="confirmDelete()">Delete my account</button>
+        </div>
+      </div>
+
+      <!-- ── SESSION INFO ── -->
+      <div id="section-session" class="content-section">
+        <div class="card" style="margin-bottom:1.5rem;">
+          <div class="card-header">
+            <span class="card-title">Current session</span>
+            <span class="setting-badge badge-green">● Active</span>
+          </div>
+          <div class="card-body">
+            <div class="session-info-card">
+              <div class="session-row"><span class="session-key">Auth method</span><span class="session-val ok">Magic link (passwordless)</span></div>
+              <div class="session-row"><span class="session-key">Token type</span><span class="session-val ok">Short-lived JWT (1 hour)</span></div>
+              <div class="session-row"><span class="session-key">Storage</span><span class="session-val ok">Memory only — not localStorage, not cookie</span></div>
+              <div class="session-row"><span class="session-key">Persistent login</span><span class="session-val ok">None — re-authenticate per session</span></div>
+              <div class="session-row"><span class="session-key">Session expires</span><span class="session-val warn" id="expiryDisplay">58 min 41 sec</span></div>
+            </div>
+            <p style="font-size:11px; color:var(--text-dim); font-family:'DM Mono',monospace; margin-top:1.25rem; line-height:1.7;">
+              Closing this tab ends your session immediately. There is no "remember me" option by design. Your next visit will send a fresh magic link to your email — no password, no persistent tracking token, no long-lived cookie.
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /mainContent -->
+  </div><!-- /page-grid -->
+</main>
+
+<script>
+// ── SECTION NAVIGATION ──
+function showSection(id) {
+  document.querySelectorAll('.content-section').forEach(s => s.classList.remove('visible'));
+  document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+  document.getElementById('section-' + id)?.classList.add('visible');
+  document.querySelectorAll('.sidebar-item').forEach(item => {
+    if (item.getAttribute('onclick')?.includes(id)) item.classList.add('active');
+  });
+  return false;
+}
+
+// ── THEME TOGGLE ──
+function toggleTheme() {
+  const html = document.documentElement;
+  const next = html.getAttribute('data-theme') === 'carbon' ? 'paper' : 'carbon';
+  html.setAttribute('data-theme', next);
+  try { localStorage.setItem('rf-theme', next); } catch(e) {}
+  updateThemeLabels(next);
+  const lbl = document.getElementById('themeLabel');
+  if (lbl) lbl.textContent = next.charAt(0).toUpperCase() + next.slice(1);
+}
+function updateThemeLabels(theme) {
+  const c = document.getElementById('acctLabelCarbon');
+  const p = document.getElementById('acctLabelPaper');
+  if (!c || !p) return;
+  if (theme === 'paper') {
+    c.style.color = 'var(--text-dim)'; p.style.color = 'var(--orange)';
+  } else {
+    p.style.color = 'var(--text-dim)'; c.style.color = 'var(--orange)';
+  }
+}
+(function() {
+  let t = 'paper';
+  try { t = localStorage.getItem('rf-theme') || 'paper'; } catch(e) {}
+  document.documentElement.setAttribute('data-theme', t);
+  const lbl = document.getElementById('themeLabel');
+  if (lbl) lbl.textContent = t.charAt(0).toUpperCase() + t.slice(1);
+  updateThemeLabels(t);
+})();
+
+// ── SESSION COUNTDOWN ──
+let sessionSecs = 3521; // ~58 min
+function updateSession() {
+  sessionSecs = Math.max(0, sessionSecs - 1);
+  const m = Math.floor(sessionSecs / 60);
+  const s = sessionSecs % 60;
+  const str = m + ':' + String(s).padStart(2,'0');
+  const el = document.getElementById('sessionTimer');
+  const el2 = document.getElementById('expiryDisplay');
+  if (el) el.textContent = 'Session: ' + str;
+  if (el2) el2.textContent = m + ' min ' + String(s).padStart(2,'0') + ' sec';
+  if (sessionSecs < 300 && el) el.style.color = 'var(--orange)';
+  if (sessionSecs === 0) signOut();
+}
+setInterval(updateSession, 1000);
+
+// ── ETA COUNTDOWN ──
+let etaSecs = 104;
+function updateEta() {
+  etaSecs = Math.max(0, etaSecs - 1);
+  const m = Math.floor(etaSecs / 60);
+  const s = etaSecs % 60;
+  const el = document.getElementById('etaDisplay');
+  if (!el) return;
+  if (etaSecs === 0) {
+    el.textContent = 'READY';
+    el.style.color = 'var(--green)';
+    document.querySelector('.order-status-sub').textContent = '⚡ READY FOR COLLECTION · Tap NFC or show QR';
+  } else {
+    el.textContent = m + ':' + String(s).padStart(2,'0');
+  }
+}
+setInterval(updateEta, 1000);
+
+// ── MISC ──
+function updateGeoStatus(checkbox) {
+  // In production: Supabase update to user_profiles.geofence_enabled
+  console.log('Geofence:', checkbox.checked ? 'on' : 'off');
+}
+
+function exportData(type) {
+  const mockData = {
+    orders: [{id:'ord_001',vendor:'M&S Café Fenchurch St',item:'Flat white',timestamp:'2026-05-22T08:44:00Z',sats:186,gbp:4.20}],
+    meta: {exported_at: new Date().toISOString(), user: 'rt@refueler.io', type}
+  };
+  const blob = new Blob([JSON.stringify(mockData, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'refueler-export-' + type + '-' + Date.now() + '.json';
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function confirmDelete() {
+  if (confirm('Are you sure? This cannot be undone. Sats reward records are retained for 6 years under HMRC compliance and cannot be deleted early.')) {
+    alert('Account deletion requested. You will receive a confirmation email at rt@refueler.io. Deletion completes within 30 days.');
+  }
+}
+
+// ── WALLET DRAWERS ──
+function toggleWalletDrawer(drawerId, optionEl) {
+  const drawer = document.getElementById(drawerId);
+  const isOpen = drawer.style.display !== 'none';
+  // Close all drawers first
+  document.querySelectorAll('.wallet-drawer').forEach(d => d.style.display = 'none');
+  document.querySelectorAll('.wallet-option').forEach(o => o.style.borderRadius = '8px');
+  if (!isOpen) {
+    drawer.style.display = 'block';
+    optionEl.style.borderRadius = '8px 8px 0 0';
+  }
+}
+function saveLnAddress() {
+  const val = document.getElementById('lnAddressInput').value.trim();
+  if (!val || !val.includes('@')) { document.getElementById('lnAddressInput').style.borderColor='var(--orange)'; return; }
+  // In production: Supabase update + re-auth confirmation flow
+  document.getElementById('lnDrawer').style.display = 'none';
+  document.getElementById('lnAddressOption').classList.add('connected');
+  document.getElementById('lnChevron').textContent = '● Connected';
+  document.getElementById('lnChevron').style.color = 'var(--green)';
+}
+function saveZbdAddress() {
+  const val = document.getElementById('zbdAddressInput').value.trim();
+  if (!val) { document.getElementById('zbdAddressInput').style.borderColor='var(--orange)'; return; }
+  document.getElementById('zbdDrawer').style.display = 'none';
+  document.getElementById('zbdOption').classList.add('connected');
+  document.getElementById('zbdChevron').textContent = '● Connected';
+  document.getElementById('zbdChevron').style.color = 'var(--green)';
+}
+function startQRScan(type) {
+  // In production: invoke device camera via WebRTC / BarcodeDetector API
+  alert('QR scan: camera API to be wired in Session — ' + type.toUpperCase() + ' wallet linking.');
+}
+
+// ── PASSKEY ──
+async function registerPasskey() {
+  const badge = document.getElementById('passkeyBadge');
+  badge.textContent = '⚡ Registered — Face ID / Touch ID active';
+  badge.className = 'setting-badge badge-green';
+  document.querySelector('[onclick="registerPasskey()"]').textContent = 'Registered ✓';
+  document.querySelector('[onclick="registerPasskey()"]').disabled = true;
+  document.querySelector('[onclick="registerPasskey()"]').style.opacity = '0.5';
+}
+
+function signOut() {
+  window.location.href = 'index.html';
+}
+</script>
+
+</body>
+</html>

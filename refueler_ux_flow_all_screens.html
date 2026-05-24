@@ -1,0 +1,485 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.flow-wrap{padding:1rem 0 2rem}
+.screen-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;gap:8px}
+.nav-btn{padding:8px 16px;font-size:12px;font-weight:500;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-secondary);cursor:pointer;transition:all 0.15s}
+.nav-btn:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.nav-btn:disabled{opacity:0.3;cursor:not-allowed}
+.screen-counter{font-size:11px;font-family:var(--font-mono);color:var(--color-text-secondary);text-align:center;flex:1}
+.phone-wrap{display:flex;justify-content:center;margin-bottom:1.25rem}
+.phone{width:260px;min-height:480px;border:0.5px solid var(--color-border-secondary);border-radius:28px;background:var(--color-background-primary);overflow:hidden;display:flex;flex-direction:column}
+.phone-bar{height:32px;display:flex;align-items:center;justify-content:center;padding:0 16px;flex-shrink:0}
+.phone-notch{width:60px;height:5px;background:var(--color-border-secondary);border-radius:3px}
+.phone-screen{flex:1;padding:20px 18px 24px;display:flex;flex-direction:column}
+.screen-label{font-size:9px;font-family:var(--font-mono);color:var(--color-text-secondary);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:16px;opacity:0.7}
+.s-wordmark{font-size:18px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;color:var(--color-text-primary)}
+.s-wordmark span{color:#D4690A}
+.s-tag{font-size:10px;font-family:var(--font-mono);color:var(--color-text-secondary);margin-bottom:28px}
+.s-headline{font-size:16px;font-weight:500;line-height:1.3;letter-spacing:-0.02em;margin-bottom:8px;color:var(--color-text-primary)}
+.s-body{font-size:12px;line-height:1.6;color:var(--color-text-secondary);margin-bottom:20px;flex:1}
+.s-cta{display:block;width:100%;padding:12px;text-align:center;font-size:13px;font-weight:500;border-radius:var(--border-radius-md);background:#D4690A;color:#fff;border:none;cursor:pointer;margin-bottom:8px}
+.s-ghost{display:block;width:100%;padding:11px;text-align:center;font-size:13px;color:var(--color-text-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:transparent;cursor:pointer;margin-bottom:8px}
+.s-input-row{border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:10px 12px;font-size:13px;color:var(--color-text-primary);margin-bottom:8px;background:var(--color-background-secondary)}
+.s-input-placeholder{color:var(--color-text-secondary)}
+.check-list{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:20px;flex:1}
+.check-list li{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--color-text-secondary)}
+.check-list li.done{color:var(--color-text-primary)}
+.check-icon{width:18px;height:18px;border-radius:50%;border:0.5px solid var(--color-border-secondary);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px}
+.check-icon.ticked{background:#1E8A4A;border-color:#1E8A4A;color:#fff}
+.check-icon.active{border-color:#D4690A;color:#D4690A}
+.venue-row{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.venue-dot{width:28px;height:28px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500}
+.venue-info{flex:1}
+.venue-name{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.venue-dist{font-size:10px;color:var(--color-text-secondary);font-family:var(--font-mono)}
+.item-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.item-row:last-child{border-bottom:none}
+.item-name{font-size:12px;color:var(--color-text-primary)}
+.item-price{font-size:12px;font-family:var(--font-mono);color:var(--color-text-secondary)}
+.item-qty{display:flex;align-items:center;gap:6px}
+.qty-btn{width:20px;height:20px;border-radius:4px;border:0.5px solid var(--color-border-secondary);background:transparent;font-size:12px;display:flex;align-items:center;justify-content:center;color:var(--color-text-secondary);cursor:pointer}
+.qty-val{font-size:12px;font-weight:500;color:var(--color-text-primary);min-width:12px;text-align:center}
+.confirm-block{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px;margin-bottom:12px}
+.confirm-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0}
+.confirm-row.total{font-weight:500;color:var(--color-text-primary);border-top:0.5px solid var(--color-border-tertiary);padding-top:8px;margin-top:4px}
+.confirm-label{color:var(--color-text-secondary)}
+.payment-option{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.payment-option.selected{border-color:#D4690A}
+.pay-icon{font-size:18px}
+.pay-label{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.pay-sub{font-size:10px;color:var(--color-text-secondary)}
+.eta-venue-strip{background:#C8102E;border-radius:10px 10px 0 0;padding:10px 14px;display:flex;align-items:center;gap:8px}
+.eta-venue-logo{width:24px;height:24px;border-radius:4px;background:#F2E0C8;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:500;color:#8B0000}
+.eta-venue-name{font-size:12px;font-weight:500;color:#F2E0C8}
+.eta-venue-addr{font-size:9px;color:rgba(242,224,200,0.65)}
+.eta-carbon{background:#141412;border-radius:0 0 10px 10px;padding:14px;flex:1;display:flex;flex-direction:column;align-items:center}
+.eta-time{font-size:36px;font-weight:500;font-family:var(--font-mono);color:#F0EDE8;letter-spacing:-0.02em;line-height:1}
+.eta-status{font-size:11px;color:rgba(240,237,232,0.45);margin-top:6px;margin-bottom:14px;font-style:italic}
+.eta-item-row{font-size:11px;color:rgba(240,237,232,0.6);margin-bottom:4px}
+.eta-sats{font-size:10px;font-family:var(--font-mono);color:rgba(240,237,232,0.38);margin-top:10px}
+.collect-screen{display:flex;flex-direction:column;align-items:center;padding-top:8px}
+.qr-block{width:80px;height:80px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;background:var(--color-background-secondary)}
+.reward-big{font-size:28px;font-weight:500;font-family:var(--font-mono);color:#D4690A;text-align:center;margin-bottom:4px}
+.reward-label{font-size:11px;color:var(--color-text-secondary);text-align:center;margin-bottom:16px}
+.wallet-row{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.wallet-icon{font-size:18px;color:var(--color-text-secondary)}
+.wallet-label{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.wallet-sub{font-size:10px;color:var(--color-text-secondary)}
+.settings-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.settings-row:last-child{border-bottom:none}
+.settings-label{font-size:12px;color:var(--color-text-primary)}
+.settings-sub{font-size:10px;color:var(--color-text-secondary)}
+.toggle-pill{width:32px;height:18px;border-radius:9px;background:#1E8A4A;display:flex;align-items:center;padding:0 2px}
+.toggle-pill.off{background:var(--color-border-secondary)}
+.toggle-knob{width:14px;height:14px;border-radius:50%;background:white;margin-left:auto}
+.toggle-pill.off .toggle-knob{margin-left:0;margin-right:auto}
+.screen-meta{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem}
+.meta-screen-id{font-size:10px;font-family:var(--font-mono);color:#D4690A;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
+.meta-purpose{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px;line-height:1.3}
+.meta-body{font-size:12px;color:var(--color-text-secondary);line-height:1.6;margin-bottom:10px}
+.meta-next{font-size:11px;font-family:var(--font-mono);color:var(--color-text-secondary);padding-top:8px;border-top:0.5px solid var(--color-border-tertiary)}
+.meta-next span{color:var(--color-text-primary)}
+.progress-dots{display:flex;justify-content:center;gap:5px;margin-bottom:1rem}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--color-border-secondary);transition:background 0.2s}
+.dot.active{background:#D4690A}
+.dot.visited{background:var(--color-border-primary)}
+</style>
+
+<h2 class="sr-only">Refueler UX flow — 14 screens from cold open to settings</h2>
+
+<div class="flow-wrap">
+  <div class="progress-dots" id="dots"></div>
+  <div class="screen-nav">
+    <button class="nav-btn" id="prev-btn" onclick="go(-1)" disabled>← prev</button>
+    <div class="screen-counter" id="counter">1 / 14</div>
+    <button class="nav-btn" id="next-btn" onclick="go(1)">next →</button>
+  </div>
+  <div class="phone-wrap">
+    <div class="phone" id="phone">
+      <div class="phone-bar"><div class="phone-notch"></div></div>
+      <div class="phone-screen" id="phone-screen"></div>
+    </div>
+  </div>
+  <div class="screen-meta" id="screen-meta"></div>
+</div>
+
+<script>
+const screens = [
+  {
+    id:"01",
+    label:"App open · cold start",
+    render:()=>`
+      <div class="screen-label">screen 01 · cold open</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+        <div class="s-wordmark">RE<span>FUELER</span></div>
+        <div class="s-tag">London · Lightning</div>
+        <div class="s-headline" style="font-size:13px;margin-bottom:20px">Order ahead. Skip the queue.<br>Earn real Bitcoin.</div>
+      </div>
+      <button class="s-cta">Get started</button>
+      <button class="s-ghost">See how it works</button>`,
+    purpose:"First impression. No permissions asked. No cookie banner. No friction.",
+    detail:"Paper theme. Wordmark. One-line proposition. Two paths: start now, or learn first. Nothing else on screen. The product earns attention before it asks for anything.",
+    next:"→ Screen 03 (discovery) or Screen 04 (sign up)"
+  },
+  {
+    id:"02",
+    label:"App open · returning user",
+    render:()=>`
+      <div class="screen-label">screen 02 · returning user</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px">
+        <i class="ti ti-fingerprint" style="font-size:48px;color:var(--color-text-secondary)" aria-hidden="true"></i>
+        <div style="font-size:13px;color:var(--color-text-secondary)">Use Face ID to sign in</div>
+        <div style="font-size:11px;font-family:var(--font-mono);color:var(--color-border-secondary)">or sign in with email</div>
+      </div>
+      <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;margin-bottom:8px">
+        <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:2px">Active order</div>
+        <div style="font-size:12px;font-weight:500;color:var(--color-text-primary)">Flat white · Costa Fenchurch St</div>
+        <div style="font-size:10px;font-family:var(--font-mono);color:#D4690A">Being prepared for you</div>
+      </div>`,
+    purpose:"Sub-second return to authenticated state. Active order surfaced immediately.",
+    detail:"Passkey / Face ID prompt on open. If an order is in progress, a status banner shows before auth completes — the user sees their order is moving before they've done anything. Sats balance visible post-auth. Zero friction.",
+    next:"→ Account overview (authenticated)"
+  },
+  {
+    id:"03",
+    label:"Discovery / landing",
+    render:()=>`
+      <div class="screen-label">screen 03 · discovery</div>
+      <div class="s-headline">Your order starts before you arrive.</div>
+      <div class="s-body">
+        <div style="padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:12px;display:flex;gap:10px;align-items:flex-start">
+          <i class="ti ti-train" style="font-size:16px;color:#D4690A;flex-shrink:0;margin-top:1px" aria-hidden="true"></i>
+          <span>Detects when your train is moving. Asks if you want your usual. Done.</span>
+        </div>
+        <div style="padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:12px;display:flex;gap:10px;align-items:flex-start">
+          <i class="ti ti-bolt" style="font-size:16px;color:#D4690A;flex-shrink:0;margin-top:1px" aria-hidden="true"></i>
+          <span>Every purchase earns sats. Real Bitcoin. Not points.</span>
+        </div>
+        <div style="padding:10px 0;font-size:12px;display:flex;gap:10px;align-items:flex-start">
+          <i class="ti ti-shield-lock" style="font-size:16px;color:#D4690A;flex-shrink:0;margin-top:1px" aria-hidden="true"></i>
+          <span>Your phone works out where you are. We never see it.</span>
+        </div>
+      </div>
+      <button class="s-cta">Get started</button>`,
+    purpose:"Three statements. Non-bitcoiner first. Bitcoin visible but not leading.",
+    detail:"No jargon. No 'revolutionary'. Just what the app does in plain English. The three statements cover: convenience, reward, privacy — in that order. The sats line is specific ('Real Bitcoin. Not points.') but doesn't alienate someone who doesn't know what sats are yet.",
+    next:"→ Screen 04 (sign up)"
+  },
+  {
+    id:"04",
+    label:"Sign up / sign in",
+    render:()=>`
+      <div class="screen-label">screen 04 · sign in</div>
+      <div class="s-headline" style="margin-bottom:6px">What's your email?</div>
+      <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:20px">We'll send a link. No password needed.</div>
+      <div class="s-input-row"><span class="s-input-placeholder">your@email.com</span></div>
+      <button class="s-cta" style="margin-top:4px">Send me a link</button>
+      <div style="margin-top:16px;font-size:10px;color:var(--color-text-secondary);text-align:center;line-height:1.5">
+        By continuing you accept our<br>
+        <span style="color:var(--color-text-primary);text-decoration:underline">terms</span> and <span style="color:var(--color-text-primary);text-decoration:underline">privacy policy</span>
+      </div>`,
+    purpose:"Email only. Magic link. No password. No friction.",
+    detail:"One field. One button. The link expires in 10 minutes. On first successful login, a Passkey prompt fires once — never again. Returning users bypass this screen entirely via Face ID. Sensitive actions (wallet linking, deletion) require a fresh magic link regardless of active session.",
+    next:"→ Magic link email → Passkey prompt (first login) → Screen 05 (onboarding)"
+  },
+  {
+    id:"05",
+    label:"Onboarding checklist",
+    render:()=>`
+      <div class="screen-label">screen 05 · onboarding</div>
+      <div class="s-headline" style="margin-bottom:4px">A few things to set up</div>
+      <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:16px">Each one takes seconds.</div>
+      <ul class="check-list" style="flex:1">
+        <li class="done"><div class="check-icon ticked"><i class="ti ti-check" style="font-size:9px" aria-hidden="true"></i></div>Sign in</li>
+        <li class="done"><div class="check-icon active"><i class="ti ti-bell" style="font-size:9px" aria-hidden="true"></i></div>Allow notifications</li>
+        <li><div class="check-icon"><i class="ti ti-train" style="font-size:9px;color:var(--color-border-secondary)" aria-hidden="true"></i></div>Enable order-ahead</li>
+        <li><div class="check-icon"><i class="ti ti-shopping-bag" style="font-size:9px;color:var(--color-border-secondary)" aria-hidden="true"></i></div>Place your first order</li>
+        <li><div class="check-icon"><i class="ti ti-bolt" style="font-size:9px;color:var(--color-border-secondary)" aria-hidden="true"></i></div>Choose your reward</li>
+      </ul>
+      <button class="s-ghost">Skip for now</button>`,
+    purpose:"Progressive disclosure. Permissions earned in context, not demanded upfront.",
+    detail:"Five steps. Sign-in pre-ticked. Notifications fires OS prompt in context — user has already seen the product's value. Geofence explained before asking: 'Your phone detects your train is moving. We never see where you are.' Reward choice (sats or loyalty stamps) comes last — sets expectations before first order. All steps dismissible.",
+    next:"→ Step by step, or dismiss to Screen 06"
+  },
+  {
+    id:"06",
+    label:"Venue discovery",
+    render:()=>`
+      <div class="screen-label">screen 06 · venues</div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <div style="flex:1;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:8px 10px;display:flex;align-items:center;gap:6px">
+          <i class="ti ti-search" style="font-size:14px;color:var(--color-text-secondary)" aria-hidden="true"></i>
+          <span style="font-size:12px;color:var(--color-text-secondary)">Search venues</span>
+        </div>
+        <div style="border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:8px 10px;display:flex;align-items:center">
+          <i class="ti ti-map" style="font-size:14px;color:var(--color-text-secondary)" aria-hidden="true"></i>
+        </div>
+      </div>
+      <div class="venue-row">
+        <div class="venue-dot" style="background:#C8102E;color:#F2E0C8">Co</div>
+        <div class="venue-info"><div class="venue-name">Costa Coffee</div><div class="venue-dist">Fenchurch St · open</div></div>
+        <i class="ti ti-chevron-right" style="font-size:14px;color:var(--color-text-secondary)" aria-hidden="true"></i>
+      </div>
+      <div class="venue-row">
+        <div class="venue-dot" style="background:#006B38;color:#F0C040">M&S</div>
+        <div class="venue-info"><div class="venue-name">M&S Café</div><div class="venue-dist">Fenchurch St · open</div></div>
+        <i class="ti ti-chevron-right" style="font-size:14px;color:var(--color-text-secondary)" aria-hidden="true"></i>
+      </div>
+      <div class="venue-row">
+        <div class="venue-dot" style="background:#73222E;color:#E8D5B0">Pr</div>
+        <div class="venue-info"><div class="venue-name">Pret a Manger</div><div class="venue-dist">Fenchurch St · open</div></div>
+        <i class="ti ti-chevron-right" style="font-size:14px;color:var(--color-text-secondary)" aria-hidden="true"></i>
+      </div>`,
+    purpose:"Venue browse. Walk-in, walk-past, and pre-order all start here.",
+    detail:"List or map toggle. Active venues shown with brand colours. Each tile: name, location, open/closed status. Future: live wait time. Walk-past nudges enter via push notification and deep-link directly to item selection. Geofence pre-orders bypass this screen entirely.",
+    next:"→ Screen 07 (item selection)"
+  },
+  {
+    id:"07",
+    label:"Item selection",
+    render:()=>`
+      <div class="screen-label">screen 07 · menu</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <div class="venue-dot" style="background:#C8102E;color:#F2E0C8;width:22px;height:22px;font-size:8px">Co</div>
+        <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Costa Coffee</div>
+      </div>
+      <div style="font-size:10px;font-family:var(--font-mono);color:var(--color-text-secondary);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.06em">Hot drinks</div>
+      <div class="item-row">
+        <div><div class="item-name">Flat white</div><div class="item-price">£3.75</div></div>
+        <div class="item-qty"><div class="qty-btn">−</div><div class="qty-val">1</div><div class="qty-btn">+</div></div>
+      </div>
+      <div class="item-row">
+        <div><div class="item-name">Americano</div><div class="item-price">£3.25</div></div>
+        <div class="item-qty"><div class="qty-btn">−</div><div class="qty-val">0</div><div class="qty-btn">+</div></div>
+      </div>
+      <div class="item-row">
+        <div><div class="item-name">Cappuccino</div><div class="item-price">£3.75</div></div>
+        <div class="item-qty"><div class="qty-btn">−</div><div class="qty-val">0</div><div class="qty-btn">+</div></div>
+      </div>
+      <div style="margin-top:auto;padding-top:12px">
+        <button class="s-cta">Review order · £3.75</button>
+      </div>`,
+    purpose:"Simple item selection. Qty controls. Running total on CTA.",
+    detail:"Venue brand colour anchors the screen header. Categories listed vertically. Qty +/− per item. CTA updates live with total. No upsell, no cross-sell — the product respects the user's time. Customisation options (milk choice, size) expand inline per item in production.",
+    next:"→ Screen 08 (order confirmation)"
+  },
+  {
+    id:"08",
+    label:"Order confirmation",
+    render:()=>`
+      <div class="screen-label">screen 08 · confirm</div>
+      <div class="s-headline" style="margin-bottom:12px">Your order</div>
+      <div class="confirm-block">
+        <div class="confirm-row"><span class="confirm-label">Flat white</span><span>£3.75</span></div>
+        <div class="confirm-row"><span class="confirm-label">Costa · Fenchurch St</span><span></span></div>
+        <div class="confirm-row total"><span>Total</span><span>£3.75</span></div>
+      </div>
+      <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:12px;display:flex;align-items:center;gap:6px">
+        <i class="ti ti-bolt" style="font-size:13px;color:#D4690A;opacity:0.6" aria-hidden="true"></i>
+        <span style="font-family:var(--font-mono);font-size:10px;color:var(--color-text-secondary);opacity:0.6">186 sats on collection</span>
+      </div>
+      <button class="s-cta">Confirm and pay</button>
+      <button class="s-ghost">Edit order</button>`,
+    purpose:"One last look before payment. Sats reward visible in whisper style.",
+    detail:"Clean summary. No surprises. Sats whisper shown here for the first time in this journey — no pill, no badge, just a quiet figure in DM Mono at reduced opacity. 'Confirm and pay' proceeds to payment. 'Edit order' returns to Screen 07 with selections preserved.",
+    next:"→ Screen 09 (payment)"
+  },
+  {
+    id:"09",
+    label:"Payment",
+    render:()=>`
+      <div class="screen-label">screen 09 · payment</div>
+      <div class="s-headline" style="margin-bottom:4px">How would you like to pay?</div>
+      <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:16px">£3.75 · Costa flat white</div>
+      <div class="payment-option selected">
+        <i class="ti ti-bolt pay-icon" style="color:#D4690A" aria-hidden="true"></i>
+        <div><div class="pay-label">Lightning / sats</div><div class="pay-sub">Pay with Bitcoin · earn 186 sats</div></div>
+      </div>
+      <div class="payment-option">
+        <i class="ti ti-device-mobile pay-icon" style="color:var(--color-text-secondary)" aria-hidden="true"></i>
+        <div><div class="pay-label">Apple Pay / Google Pay</div><div class="pay-sub">Earn loyalty stamps instead</div></div>
+      </div>
+      <div class="payment-option">
+        <i class="ti ti-credit-card pay-icon" style="color:var(--color-text-secondary)" aria-hidden="true"></i>
+        <div><div class="pay-label">Card</div><div class="pay-sub">Earn loyalty stamps instead</div></div>
+      </div>
+      <button class="s-cta" style="margin-top:auto">Pay £3.75</button>`,
+    purpose:"Payment method selection. Lightning earns sats. Fiat earns stamps.",
+    detail:"Three options. Lightning pre-selected for wallet users, Apple/Google Pay default for non-wallet users. The reward differential is stated plainly on each option — not as pressure, as information. Payment screen is the only place where fiat and Lightning sit side by side. No jargon beyond what's necessary.",
+    next:"→ Screen 10 (ETA)"
+  },
+  {
+    id:"10",
+    label:"ETA screen",
+    render:()=>`
+      <div class="screen-label" style="color:var(--color-text-secondary)">screen 10 · ETA</div>
+      <div style="border-radius:10px;overflow:hidden;margin-bottom:0;flex:1;display:flex;flex-direction:column">
+        <div class="eta-venue-strip">
+          <div class="eta-venue-logo">Co</div>
+          <div>
+            <div class="eta-venue-name">Costa Coffee</div>
+            <div class="eta-venue-addr">Fenchurch Street station</div>
+          </div>
+        </div>
+        <div class="eta-carbon" style="flex:1">
+          <div class="eta-item-row">Flat white · medium</div>
+          <div class="eta-time" style="margin-top:16px">4:22</div>
+          <div class="eta-status">Being prepared for you</div>
+          <div style="width:100%;height:0.5px;background:rgba(255,255,255,0.08);margin-bottom:10px"></div>
+          <div style="display:flex;justify-content:space-between;width:100%;align-items:flex-end">
+            <div class="eta-sats">⚡ 186 sats on collection</div>
+            <div style="font-size:10px;font-family:var(--font-mono);color:rgba(240,237,232,0.28)">3 / 9</div>
+          </div>
+        </div>
+      </div>`,
+    purpose:"Liquid Glass venue strip + carbon base. Status phrase. Sats whisper.",
+    detail:"Venue strip: brand primary colour, frosted glass effect, logo chip, venue name, address. Carbon base below: ETA numeral in DM Mono, status phrase in DM Sans italic at low opacity. Sats whisper bottom-left. Loyalty progress bottom-right. Arc treatment under review — not built to production. ETA countdown has zero animation, ever.",
+    next:"→ Push notification: 'Waiting at the counter' → Screen 11 (collection)"
+  },
+  {
+    id:"11",
+    label:"Collection",
+    render:()=>`
+      <div class="screen-label">screen 11 · collection</div>
+      <div class="collect-screen">
+        <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px">Waiting at the counter</div>
+        <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:16px">Costa · Fenchurch Street</div>
+        <div class="qr-block">
+          <i class="ti ti-qrcode" style="font-size:36px;color:var(--color-border-secondary)" aria-hidden="true"></i>
+        </div>
+        <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:16px;text-align:center">Show this or tap the NFC disc at the counter</div>
+        <button class="s-cta" style="width:100%">Tap to collect · or show QR</button>
+        <button class="s-ghost" style="width:100%;margin-top:8px;font-size:11px">Flash screen to locate me</button>
+      </div>`,
+    purpose:"NFC tap or QR show. One primary action. Flash screen for EV / crowd collection.",
+    detail:"QR centred on screen. NFC tap fires collection confirmation. 'Flash screen' triggers full-screen venue secondary colour pulse (locate_v2.html) — used when a runner at an EV bay or crowded venue cannot visually locate the customer. No auth required if arriving via shared collection link.",
+    next:"→ Collection confirmed → Screen 12 (reward)"
+  },
+  {
+    id:"12",
+    label:"Reward confirmation",
+    render:()=>`
+      <div class="screen-label">screen 12 · reward</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:8px 0">
+        <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:6px;font-family:var(--font-mono)">collected</div>
+        <div class="reward-big">⚡ 186</div>
+        <div class="reward-label">sats added to your wallet</div>
+        <div style="width:100%;height:0.5px;background:var(--color-border-tertiary);margin:16px 0"></div>
+        <div style="font-size:11px;color:var(--color-text-secondary);text-align:center;line-height:1.6;font-style:italic">"Collected."</div>
+      </div>
+      <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;margin-bottom:8px">
+        <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:2px">Loyalty track users see:</div>
+        <div style="font-size:11px;color:var(--color-text-primary)">☕ 4 / 9 · £1.50 saved toward your free coffee</div>
+        <div style="font-size:10px;font-family:var(--font-mono);color:var(--color-text-secondary);opacity:0.6;margin-top:4px">⚡ You'd have earned 186 sats — switch in settings</div>
+      </div>`,
+    purpose:"Reward confirmed. Sats whisper. Loyalty track nudge toward sats.",
+    detail:"Sats track: single orange figure, no pill or badge — just the number. Status phrase 'Collected.' in italic — one word, full stop. Loyalty track: stamp progress shown, plus a quiet sats nudge in DM Mono at reduced opacity. The nudge is persistent but never intrusive. It is information, not pressure.",
+    next:"→ Account overview or app close"
+  },
+  {
+    id:"13",
+    label:"Wallet / balance",
+    render:()=>`
+      <div class="screen-label">screen 13 · wallet</div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px">
+        <div>
+          <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:2px">Total balance</div>
+          <div style="font-size:24px;font-weight:500;font-family:var(--font-mono);color:var(--color-text-primary)">4,821 <span style="font-size:14px;color:var(--color-text-secondary)">sats</span></div>
+        </div>
+        <div style="font-size:11px;font-family:var(--font-mono);color:var(--color-text-secondary)">≈ £3.12</div>
+      </div>
+      <div class="wallet-row">
+        <i class="ti ti-brand-bitcoin wallet-icon" aria-hidden="true"></i>
+        <div><div class="wallet-label">Minibits wallet</div><div class="wallet-sub">Cashu ecash · on device</div></div>
+        <i class="ti ti-chevron-right" style="font-size:14px;color:var(--color-text-secondary)" aria-hidden="true"></i>
+      </div>
+      <div class="wallet-row">
+        <i class="ti ti-bolt wallet-icon" aria-hidden="true"></i>
+        <div><div class="wallet-label">Lightning address</div><div class="wallet-sub">Not connected</div></div>
+        <i class="ti ti-plus" style="font-size:14px;color:var(--color-text-secondary)" aria-hidden="true"></i>
+      </div>
+      <div style="margin-top:12px;font-size:11px;color:var(--color-text-secondary);line-height:1.5">
+        Your sats are yours from the moment they're issued. We cannot freeze, reverse, or access them.
+      </div>`,
+    purpose:"Balance overview. Wallet connections. Self-custody messaging.",
+    detail:"Sats total in DM Mono with fiat equivalent at small size. Minibits (Cashu ecash) as default — on-device, self-custodied. Lightning address connection available for advanced users — requires fresh magic link to add. Ownership statement at bottom: architectural fact, not marketing. No upsell.",
+    next:"→ Minibits setup flow or Lightning address drawer"
+  },
+  {
+    id:"14",
+    label:"Settings",
+    render:()=>`
+      <div class="screen-label">screen 14 · settings</div>
+      <div style="flex:1">
+        <div class="settings-row">
+          <div><div class="settings-label">Order-ahead</div><div class="settings-sub">Detects train movement on device</div></div>
+          <div class="toggle-pill"><div class="toggle-knob"></div></div>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Notifications</div><div class="settings-sub">Order ready, confirmation</div></div>
+          <div class="toggle-pill"><div class="toggle-knob"></div></div>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Dark theme</div><div class="settings-sub">Carbon — default is Paper</div></div>
+          <div class="toggle-pill off"><div class="toggle-knob"></div></div>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Reward track</div><div class="settings-sub">Sats · switch to loyalty stamps</div></div>
+          <i class="ti ti-chevron-right" style="font-size:14px;color:var(--color-text-secondary)" aria-hidden="true"></i>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-label">Privacy & data</div><div class="settings-sub">Export, delete, your rights</div></div>
+          <i class="ti ti-chevron-right" style="font-size:14px;color:var(--color-text-secondary)" aria-hidden="true"></i>
+        </div>
+        <div class="settings-row" style="border-bottom:none">
+          <div><div class="settings-label" style="color:var(--color-text-secondary)">Delete account</div></div>
+          <i class="ti ti-chevron-right" style="font-size:14px;color:var(--color-text-secondary)" aria-hidden="true"></i>
+        </div>
+      </div>`,
+    purpose:"Full user control. Theme, permissions, rewards, privacy, account deletion.",
+    detail:"Order-ahead (geofence) and notifications have individual toggles — neither is buried. Dark theme is explicitly labelled 'Carbon — default is Paper' so users understand the system. Reward track toggle visible here. Privacy & data links to export/delete. Account deletion available without friction — GDPR right to erasure.",
+    next:"→ End of primary flow"
+  }
+];
+
+let current = 0;
+
+function buildDots(){
+  const c = document.getElementById('dots');
+  c.innerHTML='';
+  screens.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className='dot'+(i===0?' active':'');
+    d.id='dot-'+i;
+    c.appendChild(d);
+  });
+}
+
+function render(){
+  const s = screens[current];
+  document.getElementById('phone-screen').innerHTML = s.render();
+  document.getElementById('counter').textContent = (current+1)+' / '+screens.length+' · '+s.label;
+  document.getElementById('screen-meta').innerHTML =
+    `<div class="meta-screen-id">Screen ${s.id}</div>`+
+    `<div class="meta-purpose">${s.purpose}</div>`+
+    `<div class="meta-body">${s.detail}</div>`+
+    `<div class="meta-next"><span>Next:</span> ${s.next}</div>`;
+  document.getElementById('prev-btn').disabled = current===0;
+  document.getElementById('next-btn').disabled = current===screens.length-1;
+  document.getElementById('next-btn').textContent = current===screens.length-1 ? 'done' : 'next →';
+  screens.forEach((_,i)=>{
+    const d=document.getElementById('dot-'+i);
+    d.className='dot'+(i===current?' active':i<current?' visited':'');
+  });
+}
+
+function go(dir){
+  current=Math.max(0,Math.min(screens.length-1,current+dir));
+  render();
+}
+
+buildDots();
+render();
+</script>

@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>REFUELER — Your order is on its way</title>
+
+<!--
+  refueler_locate_v2.html
+  Updated: May 2026 — Session 10 design alignment
+
+  CHANGES FROM v1:
+  ─────────────────────────────────────────────────────────────────────────
+  1. Typography: IBM Plex Mono → DM Sans + DM Mono (unified with design system)
+  2. Colour logic: hardcoded MS_GREEN / BTC_ORANGE → venue brand colour tokens
+     pulled from CONFIG (primary / secondary / tertiary) mirroring Supabase schema
+  3. Caffè Nero colours corrected: primary #165485 cobalt blue, secondary #F9EAD7 cream
+  4. Flash layer: now pulses venue secondary colour instead of flat primary
+  5. Sats display: badge removed → whisper treatment (small, muted, no pill/border)
+  6. Copy alignment: "Order delivered!" → concierge register throughout
+  7. Confirm screen: sats line uses whisper style, not large orange badge
+  8. All flash / NFC / battery / crowd mode logic: UNCHANGED
+
+  PRESERVED FROM v1:
+  ─────────────────────────────────────────────────────────────────────────
+  - Flash logic (3 cycles, 1.5s on / 0.5s off)
+  - Crowd mode (suppresses flash, toggle)
+  - Battery API check (suppresses flash below 10%)
+  - NFC Web API (NDEFReader) handover
+  - WakeLock / orientation lock
+  - QR canvas renderer (placeholder — replace with qrcode.js in prod)
+  - Supabase delivery reporting hook (reportDelivery)
+  - Dev: triple-tap signal icon to simulate NFC confirm
+  - URL param CONFIG hydration
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  /* ── DESIGN TOKENS ─────────────────────────────────────────────────────── */
+  :root {
+    /* Set at runtime from CONFIG — see applyColourMode() */
+    --venue-primary:   #006B38;   /* venue brand_colour_primary   */
+    --venue-secondary: #F0C040;   /* venue brand_colour_secondary */
+    --venue-tertiary:  #004a27;   /* venue brand_colour_tertiary  */
+
+    /* Refueler system colours — never overridden */
+    --orange:    #F5820A;         /* Refueler orange — used sparingly */
+    --green:     #2ECC71;         /* success / collected state        */
+    --calm-blue: #0EA5C9;         /* delay / calm-warning             */
+
+    --text-inv:  rgba(255,255,255,0.88);
+    --text-dim:  rgba(255,255,255,0.50);
+    --text-mute: rgba(255,255,255,0.32);
+    --surface:   rgba(0,0,0,0.22);
+
+    --sans: 'DM Sans', sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+
+  * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+
+  html, body {
+    width:100%; height:100%;
+    overflow:hidden;
+    font-family: var(--sans);
+  }
+
+  /* ── ROOT SCREEN ── */
+  #locate-screen {
+    width:100vw;
+    height:100dvh;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+    background: var(--venue-primary);
+    transition: background 0.4s ease;
+  }
+
+  /* Subtle grain — consistent with ETA widget and app screens */
+  #locate-screen::after {
+    content:'';
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:1;
+    opacity:0.03;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ── FLASH OVERLAY ── */
+  /* Flashes venue SECONDARY colour — more refined than primary flash,
+     and creates clear visual distinction when runner approaches          */
+  #flash-layer {
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background: var(--venue-secondary);
+    opacity:0;
+    z-index:5;
+    transition: opacity 0.08s ease;
+  }
+
+  /* ── COLOUR ZONE (top ~72%) ── */
+  #colour-zone {
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:32px 24px 0;
+    position:relative;
+    z-index:2;
+  }
+
+  /* Status label above the signal icon */
+  .locate-headline {
+    font-family: var(--sans);
+    font-size: clamp(11px, 3vw, 14px);
+    font-weight: 300;
+    font-style: italic;
+    letter-spacing: 0.08em;
+    color: var(--text-inv);
+    text-align:center;
+    margin-bottom:10px;
+    opacity:0.65;
+  }
+
+  /* Large central signal glyph — tappable for dev NFC sim */
+  .locate-signal {
+    font-family: var(--sans);
+    font-size: clamp(72px, 22vw, 120px);
+    font-weight: 300;
+    color: var(--venue-secondary);
+    text-align:center;
+    line-height:1;
+    letter-spacing:-0.02em;
+    margin-bottom:14px;
+    /* secondary colour glow — creates halo matching the flash */
+    text-shadow: 0 0 60px rgba(255,255,255,0.15), 0 4px 24px rgba(0,0,0,0.2);
+    user-select:none;
+    cursor:pointer;
+  }
+
+  .locate-order-id {
+    font-family: var(--mono);
+    font-size: clamp(10px, 2.5vw, 13px);
+    color: var(--text-dim);
+    letter-spacing:0.14em;
+    text-align:center;
+    text-transform:uppercase;
+  }
+
+  /* Runner proximity dots */
+  #proximity-bar {
+    margin-top:24px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    opacity:0.55;
+  }
+  .proximity-dot {
+    width:7px; height:7px; border-radius:50%;
+    background: var(--venue-secondary);
+    animation: prox-pulse 1.8s ease-in-out infinite;
+  }
+  .proximity-dot:nth-child(2) { animation-delay:0.3s; opacity:0.65; }
+  .proximity-dot:nth-child(3) { animation-delay:0.6s; opacity:0.35; }
+  @keyframes prox-pulse {
+    0%,100% { transform:scale(1); opacity:0.9; }
+    50%      { transform:scale(0.55); opacity:0.25; }
+  }
+  .proximity-label {
+    font-family: var(--sans);
+    font-size:11px;
+    font-weight:300;
+    color: var(--text-dim);
+    letter-spacing:0.06em;
+  }
+
+  /* ── BOTTOM ZONE (~28%) ── */
+  #bottom-zone {
+    height:30vh;
+    min-height:210px;
+    max-height:290px;
+    background: rgba(0,0,0,0.26);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border-top:1px solid rgba(255,255,255,0.12);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:16px 20px 14px;
+    gap:10px;
+    position:relative;
+    z-index:3;
+  }
+
+  /* QR + order summary row */
+  #qr-container {
+    display:flex;
+    align-items:center;
+    gap:16px;
+    width:100%;
+  }
+
+  #qr-canvas-wrap {
+    flex-shrink:0;
+    width:100px; height:100px;
+    background:#fff;
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:5px;
+    position:relative;
+    box-shadow:0 4px 20px rgba(0,0,0,0.28);
+  }
+  #qr-canvas { width:90px; height:90px; display:block; }
+
+  .qr-label {
+    font-family: var(--mono);
+    font-size:8px;
+    letter-spacing:0.10em;
+    color:rgba(255,255,255,0.38);
+    text-transform:uppercase;
+    text-align:center;
+    margin-top:4px;
+  }
+
+  /* Order summary text */
+  #order-summary {
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .order-vendor {
+    font-size:15px;
+    font-weight:500;
+    color:#fff;
+    line-height:1.2;
+  }
+  .order-item {
+    font-size:13px;
+    font-weight:300;
+    color:rgba(255,255,255,0.72);
+    line-height:1.35;
+  }
+  .order-meta {
+    font-family: var(--mono);
+    font-size:10px;
+    color:rgba(255,255,255,0.38);
+    letter-spacing:0.06em;
+    margin-top:1px;
+  }
+
+  /* ── SATS WHISPER ──────────────────────────────────────────────────────────
+     Intentionally quiet. No pill, no badge, no border.
+     Present for the user who is looking. Invisible to those who aren't.
+     Refueler orange used at 30% opacity — just enough to be findable.
+  ── */
+  .sats-whisper {
+    display:inline-flex;
+    align-items:baseline;
+    gap:4px;
+    margin-top:5px;
+  }
+  .sw-bolt  { font-size:10px; color:var(--orange); opacity:0.30; }
+  .sw-val   { font-family:var(--mono); font-size:11px; font-weight:400; color:rgba(255,255,255,0.38); letter-spacing:0.03em; }
+  .sw-lbl   { font-size:10px; font-weight:300; color:rgba(255,255,255,0.24); }
+
+  /* ── BOTTOM BAR ── */
+  #bottom-bar {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    width:100%;
+    padding-top:8px;
+    border-top:1px solid rgba(255,255,255,0.08);
+  }
+
+  #crowd-btn {
+    background:rgba(255,255,255,0.07);
+    border:1px solid rgba(255,255,255,0.13);
+    border-radius:20px;
+    padding:6px 14px;
+    font-family: var(--sans);
+    font-size:11px;
+    font-weight:400;
+    letter-spacing:0.04em;
+    color:rgba(255,255,255,0.55);
+    cursor:pointer;
+    transition:all 0.2s;
+    user-select:none;
+  }
+  #crowd-btn:active { background:rgba(255,255,255,0.12); }
+  #crowd-btn.active {
+    background:rgba(255,255,255,0.13);
+    border-color:rgba(255,255,255,0.30);
+    color:#fff;
+  }
+
+  #nfc-status {
+    font-family: var(--mono);
+    font-size:10px;
+    letter-spacing:0.10em;
+    color:rgba(255,255,255,0.38);
+    display:flex;
+    align-items:center;
+    gap:5px;
+  }
+  .nfc-dot {
+    width:5px; height:5px; border-radius:50%;
+    background:rgba(255,255,255,0.30);
+  }
+  .nfc-dot.listening {
+    background: var(--green);
+    animation:pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.30} }
+
+  /* ── LOW BATTERY ── */
+  #low-battery-msg {
+    display:none;
+    position:absolute;
+    bottom:32vh;
+    left:0; right:0;
+    text-align:center;
+    padding:0 24px;
+    z-index:6;
+  }
+  #low-battery-msg.show { display:block; }
+  .low-battery-text {
+    font-family: var(--sans);
+    font-size:13px;
+    font-weight:300;
+    color:rgba(255,255,255,0.80);
+    background:rgba(0,0,0,0.32);
+    border-radius:8px;
+    padding:10px 16px;
+    display:inline-block;
+    line-height:1.55;
+  }
+
+  /* ── CONFIRMED SCREEN ── */
+  #confirm-screen {
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:100;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    background: var(--venue-primary);
+    text-align:center;
+    padding:40px 28px;
+    gap:18px;
+    animation:confirm-in 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  #confirm-screen.show { display:flex; }
+  @keyframes confirm-in {
+    from { transform:scale(0.92); opacity:0; }
+    to   { transform:scale(1);    opacity:1; }
+  }
+
+  .confirm-tick {
+    font-size:64px;
+    line-height:1;
+    color: var(--venue-secondary);
+    animation:tick-bounce 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.2s both;
+  }
+  @keyframes tick-bounce {
+    from { transform:scale(0) rotate(-12deg); opacity:0; }
+    to   { transform:scale(1) rotate(0deg);   opacity:1; }
+  }
+
+  /* Headline: DM Sans 300 — unhurried, concierge register */
+  .confirm-headline {
+    font-family: var(--sans);
+    font-size: clamp(22px, 5.5vw, 32px);
+    font-weight:300;
+    letter-spacing:-0.02em;
+    color:#fff;
+    line-height:1.2;
+  }
+
+  .confirm-sub {
+    font-size:15px;
+    font-weight:300;
+    font-style:italic;
+    color:rgba(255,255,255,0.68);
+    line-height:1.55;
+    max-width:280px;
+  }
+
+  /* Sats confirmation — whisper style, not a badge shout */
+  .confirm-sats-whisper {
+    display:inline-flex;
+    align-items:baseline;
+    gap:5px;
+    margin-top:4px;
+  }
+  .csw-bolt { font-size:13px; color:var(--orange); opacity:0.45; }
+  .csw-val  { font-family:var(--mono); font-size:15px; font-weight:400; color:rgba(255,255,255,0.55); letter-spacing:0.03em; }
+  .csw-lbl  { font-size:12px; font-weight:300; color:rgba(255,255,255,0.32); }
+
+  .confirm-dismiss {
+    margin-top:12px;
+    font-family: var(--sans);
+    font-size:11px;
+    font-weight:300;
+    letter-spacing:0.12em;
+    color:rgba(255,255,255,0.38);
+    cursor:pointer;
+    text-transform:uppercase;
+    text-decoration:underline;
+    text-underline-offset:3px;
+    border:none;
+    background:none;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── LOCATE SCREEN ── -->
+<div id="locate-screen">
+  <div id="flash-layer"></div>
+
+  <div id="colour-zone">
+    <!-- Status phrase — concierge register, not logistics copy -->
+    <div class="locate-headline" id="locate-headline">Your order is on its way</div>
+
+    <!-- Large signal icon — tappable 3× for dev NFC simulation -->
+    <div class="locate-signal" id="signal-icon">⚡</div>
+
+    <div class="locate-order-id" id="order-id-display">ORDER #RF-0001 · BAY 1A</div>
+
+    <div id="proximity-bar">
+      <div class="proximity-dot"></div>
+      <div class="proximity-dot"></div>
+      <div class="proximity-dot"></div>
+      <span class="proximity-label">Someone is coming — show this screen</span>
+    </div>
+  </div>
+
+  <div id="low-battery-msg">
+    <div class="low-battery-text">Low battery — wave your screen, they are nearby</div>
+  </div>
+
+  <div id="bottom-zone">
+    <div id="qr-container">
+      <div>
+        <div id="qr-canvas-wrap">
+          <canvas id="qr-canvas" width="90" height="90"></canvas>
+        </div>
+        <div class="qr-label">QR fallback</div>
+      </div>
+      <div id="order-summary">
+        <div class="order-vendor" id="summary-vendor">M&amp;S Café</div>
+        <div class="order-item" id="summary-item">Flat white · Bay 1A</div>
+        <div class="order-meta" id="summary-time">Ordered 14:32 · Est. arrival 14:37</div>
+        <!-- Sats whisper — quiet, present, never shouted -->
+        <div class="sats-whisper" id="sats-reward-whisper">
+          <span class="sw-bolt">⚡</span>
+          <span class="sw-val" id="sats-val-text">45 sats</span>
+          <span class="sw-lbl">on collection</span>
+        </div>
+      </div>
+    </div>
+    <div id="bottom-bar">
+      <button id="crowd-btn" onclick="toggleCrowdMode()">In a crowd</button>
+      <div id="nfc-status">
+        <div class="nfc-dot" id="nfc-dot"></div>
+        <span id="nfc-label">NFC STANDBY</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CONFIRMED SCREEN ── -->
+<div id="confirm-screen">
+  <div class="confirm-tick" id="confirm-tick">✓</div>
+  <div class="confirm-headline" id="confirm-headline">Collected.</div>
+  <div class="confirm-sub" id="confirm-sub">Your order has arrived.</div>
+  <!-- Sats confirmation — whisper, not badge -->
+  <div class="confirm-sats-whisper" id="confirm-sats" style="display:none">
+    <span class="csw-bolt">⚡</span>
+    <span class="csw-val" id="confirm-sats-val">45 sats</span>
+    <span class="csw-lbl">added to your balance</span>
+  </div>
+  <button class="confirm-dismiss" onclick="dismissConfirm()">DISMISS</button>
+</div>
+
+<script>
+// ── CONFIG ─────────────────────────────────────────────────────────────────
+// Production: pass via URL params or Supabase lookup at /locate?order_id=...
+// Venue colours (primary/secondary/tertiary) fetched from Supabase venues table
+// and passed as URL params: venue_primary, venue_secondary, venue_tertiary
+const CONFIG = (() => {
+  const p = new URLSearchParams(window.location.search);
+  return {
+    orderId:        p.get('order_id')        || 'RF-0001',
+    sessionId:      p.get('session_id')      || 'S4F2A',
+    bayLabel:       p.get('bay')             || 'Bay 1A',
+    vendor:         p.get('vendor')          || 'M&S Café',
+    item:           p.get('item')            || 'Flat White',
+    rewardSats:     parseInt(p.get('reward_sats') || '45'),
+    orderTime:      p.get('order_time')      || (() => {
+      const n=new Date(); return n.getHours()+':'+String(n.getMinutes()).padStart(2,'0');
+    })(),
+    estArrival:     p.get('est_arrival')     || null,
+
+    // ── Venue brand colours from Supabase venues table ──
+    // brand_colour_primary   → full-screen bg
+    // brand_colour_secondary → flash colour, arc accent, proximity dots
+    // brand_colour_tertiary  → outline/text accent (e.g. Nero espresso brown)
+    venuePrimary:   p.get('venue_primary')   || '#006B38', // M&S green default
+    venueSecondary: p.get('venue_secondary') || '#F0C040', // M&S gold default
+    venueTertiary:  p.get('venue_tertiary')  || '#004a27',
+  };
+})();
+
+// ── COLOUR MODE ─────────────────────────────────────────────────────────────
+// Applies venue brand colours to CSS custom properties.
+// Flash layer uses secondary — creates distinction from primary bg.
+function applyColourMode() {
+  const root = document.documentElement;
+  root.style.setProperty('--venue-primary',   CONFIG.venuePrimary);
+  root.style.setProperty('--venue-secondary', CONFIG.venueSecondary);
+  root.style.setProperty('--venue-tertiary',  CONFIG.venueTertiary);
+
+  document.getElementById('locate-screen').style.background = CONFIG.venuePrimary;
+  document.getElementById('flash-layer').style.background   = CONFIG.venueSecondary;
+
+  // Proximity dots use secondary colour (already via CSS var — reapply for safety)
+  document.querySelectorAll('.proximity-dot').forEach(d => {
+    d.style.background = CONFIG.venueSecondary;
+  });
+
+  // Confirm screen also picks up venue primary
+  document.getElementById('confirm-screen').style.background = CONFIG.venuePrimary;
+  document.getElementById('confirm-tick').style.color        = CONFIG.venueSecondary;
+}
+
+// ── ORDER DISPLAY ───────────────────────────────────────────────────────────
+function populateOrderDisplay() {
+  document.getElementById('order-id-display').textContent =
+    `ORDER #${CONFIG.orderId} · ${CONFIG.bayLabel}`;
+  document.getElementById('summary-vendor').textContent = CONFIG.vendor;
+  document.getElementById('summary-item').textContent =
+    `${CONFIG.item} · ${CONFIG.bayLabel}`;
+
+  const arrTime = CONFIG.estArrival || (() => {
+    const d=new Date(); d.setMinutes(d.getMinutes()+5);
+    return d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');
+  })();
+  document.getElementById('summary-time').textContent =
+    `Ordered ${CONFIG.orderTime} · Est. arrival ${arrTime}`;
+
+  // Sats whisper — always shown (sats-only reward model)
+  document.getElementById('sats-val-text').textContent = `${CONFIG.rewardSats} sats`;
+}
+
+// ── QR CODE ─────────────────────────────────────────────────────────────────
+// Placeholder renderer. Replace with qrcode-generator or qr.js in production.
+function renderQR() {
+  const canvas = document.getElementById('qr-canvas');
+  const ctx = canvas.getContext('2d');
+  const size = 90;
+  const payload = JSON.stringify({
+    order_id:   CONFIG.orderId,
+    session_id: CONFIG.sessionId,
+    bay:        CONFIG.bayLabel,
+    ts:         new Date().toISOString()
+  });
+
+  const seed = payload.split('').reduce((a,c)=>a+c.charCodeAt(0), 0);
+  const modules = 21;
+  const cell = Math.floor(size/modules);
+
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, size, size);
+
+  function drawFinder(x, y) {
+    ctx.fillStyle = '#000';
+    ctx.fillRect(x, y, 7*cell, 7*cell);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(x+cell, y+cell, 5*cell, 5*cell);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(x+2*cell, y+2*cell, 3*cell, 3*cell);
+  }
+  drawFinder(0, 0);
+  drawFinder((modules-7)*cell, 0);
+  drawFinder(0, (modules-7)*cell);
+
+  let r = seed;
+  for (let row=0; row<modules; row++) {
+    for (let col=0; col<modules; col++) {
+      const inF = (row<8&&col<8)||(row<8&&col>=modules-8)||(row>=modules-8&&col<8);
+      if (!inF) {
+        r = (r*1664525+1013904223)>>>0;
+        if (r%2===0) {
+          ctx.fillStyle='#000';
+          ctx.fillRect(col*cell, row*cell, cell, cell);
+        }
+      }
+    }
+  }
+}
+
+// ── FLASH LOGIC ─────────────────────────────────────────────────────────────
+// Flash uses VENUE SECONDARY colour (set on #flash-layer background above).
+// 3 cycles, 1.5s on / 0.5s off — same cadence as v1.
+let _flashActive = false;
+let _flashInterval = null;
+let _crowdMode = false;
+let _lowBattery = false;
+
+function startFlash() {
+  if (_flashActive || _crowdMode || _lowBattery) return;
+  _flashActive = true;
+  const layer = document.getElementById('flash-layer');
+  let count = 0;
+
+  const cycle = () => {
+    if (count >= 3) {
+      layer.style.opacity = '0';
+      _flashActive = false;
+      return;
+    }
+    layer.style.opacity = '0.92';
+    layer.style.transition = 'opacity 0.08s ease';
+    setTimeout(() => {
+      layer.style.opacity = '0';
+      layer.style.transition = 'opacity 0.5s ease';
+      count++;
+      setTimeout(cycle, 500);
+    }, 1500);
+  };
+  cycle();
+}
+
+function suppressFlash() {
+  _flashActive = false;
+  document.getElementById('flash-layer').style.opacity = '0';
+  if (_flashInterval) { clearInterval(_flashInterval); _flashInterval = null; }
+}
+
+// ── BATTERY ─────────────────────────────────────────────────────────────────
+async function checkBattery() {
+  if (!navigator.getBattery) return;
+  try {
+    const battery = await navigator.getBattery();
+    const handle = () => {
+      if (battery.level < 0.10) {
+        _lowBattery = true;
+        suppressFlash();
+        document.getElementById('low-battery-msg').classList.add('show');
+      } else {
+        _lowBattery = false;
+        document.getElementById('low-battery-msg').classList.remove('show');
+      }
+    };
+    handle();
+    battery.addEventListener('levelchange', handle);
+  } catch(e) { /* Battery API unavailable */ }
+}
+
+// ── CROWD MODE ───────────────────────────────────────────────────────────────
+function toggleCrowdMode() {
+  _crowdMode = !_crowdMode;
+  const btn = document.getElementById('crowd-btn');
+  if (_crowdMode) {
+    btn.classList.add('active');
+    btn.textContent = '✓ Crowd mode on';
+    suppressFlash();
+  } else {
+    btn.classList.remove('active');
+    btn.textContent = 'In a crowd';
+    if (!_lowBattery) startFlash();
+  }
+}
+
+// ── NFC HANDOVER ─────────────────────────────────────────────────────────────
+let _nfcReader = null;
+
+async function initNFC() {
+  if (!('NDEFReader' in window)) {
+    setNFCStatus('NOT AVAILABLE', false);
+    return;
+  }
+  try {
+    _nfcReader = new NDEFReader();
+    await _nfcReader.scan();
+    setNFCStatus('LISTENING', true);
+
+    _nfcReader.onreading = (event) => {
+      let payload = {};
+      for (const record of event.message.records) {
+        if (record.recordType === 'text') {
+          try {
+            const dec = new TextDecoder();
+            payload = JSON.parse(dec.decode(record.data));
+          } catch(e) { /* non-JSON, ignore */ }
+        }
+      }
+      if (!payload.order_id || payload.order_id === CONFIG.orderId) {
+        confirmDelivery('nfc', payload);
+      }
+    };
+
+    _nfcReader.onreadingerror = () => setNFCStatus('READ ERR', false);
+
+  } catch(e) {
+    setNFCStatus('DENIED', false);
+  }
+}
+
+function setNFCStatus(label, active) {
+  document.getElementById('nfc-label').textContent = label;
+  document.getElementById('nfc-dot').className = 'nfc-dot' + (active ? ' listening' : '');
+}
+
+// ── DELIVERY CONFIRMATION ────────────────────────────────────────────────────
+async function confirmDelivery(method, payload) {
+  suppressFlash();
+  if (_nfcReader) { try { _nfcReader.stop?.(); } catch(e) {} }
+  await reportDelivery(method, payload);
+  showConfirmScreen();
+}
+
+async function reportDelivery(method, payload) {
+  // Production: POST to Supabase orders table
+  // Triggers sats issuance via Edge Function
+  console.log('[REFUELER] Delivery confirmed via', method, payload);
+}
+
+function showConfirmScreen() {
+  document.getElementById('confirm-headline').textContent = 'Collected.';
+  document.getElementById('confirm-sub').textContent =
+    `Your ${CONFIG.vendor} order is with you.`;
+
+  const satsEl = document.getElementById('confirm-sats');
+  document.getElementById('confirm-sats-val').textContent = `${CONFIG.rewardSats} sats`;
+  satsEl.style.display = 'inline-flex';
+
+  document.getElementById('confirm-screen').classList.add('show');
+}
+
+function dismissConfirm() {
+  document.getElementById('confirm-screen').classList.remove('show');
+}
+
+// ── SCREEN BRIGHTNESS ────────────────────────────────────────────────────────
+function requestHighBrightness() {
+  if ('wakeLock' in navigator) {
+    navigator.wakeLock.request('screen').catch(()=>{});
+  }
+  try { screen.orientation.lock('portrait').catch(()=>{}); } catch(e) {}
+}
+
+// ── DEV: triple-tap signal icon → simulate NFC confirm ───────────────────────
+let _tapCount = 0;
+let _tapTimer = null;
+document.getElementById('signal-icon').addEventListener('click', () => {
+  _tapCount++;
+  if (_tapTimer) clearTimeout(_tapTimer);
+  _tapTimer = setTimeout(() => { _tapCount = 0; }, 800);
+  if (_tapCount >= 3) {
+    _tapCount = 0;
+    confirmDelivery('qr_dev', {
+      order_id:  CONFIG.orderId,
+      runner_id: 'DEV',
+      ts:        new Date().toISOString()
+    });
+  }
+});
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  applyColourMode();
+  populateOrderDisplay();
+  renderQR();
+  requestHighBrightness();
+  checkBattery();
+  setTimeout(() => {
+    if (!_lowBattery && !_crowdMode) startFlash();
+  }, 600);
+  initNFC();
+});
+</script>
+</body>
+</html>
