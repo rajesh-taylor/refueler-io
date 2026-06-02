@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="" style="scroll-behavior: smooth;">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Support · Refueler</title>
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=Satoshi:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ============================================================
+       REFUELER COMPLAINTS PAGE — v8
+       Aligned to editorial design system (Nothing to collect / The Float)
+       Satoshi heading · Source Serif 4 body · DM Sans UI
+       Paper default · Carbon toggle (single outlined pill)
+       Carbon accent: #C8A96E aged gold — inset card left-rule + widget borders
+       ============================================================ */
+
+    :root {
+      --paper:          #F7F4EF;
+      --carbon:         #1E1F22;
+      --carbon-soft:    #26282C;
+      --ink:            #3D3A36;
+      --ink-secondary:  #5A5751;
+      --ink-tertiary:   #9A948D;
+      --rule:           #D6D1C8;
+      --accent-carbon:  #C8A96E;
+
+      --bg:             var(--paper);
+      --text-primary:   var(--ink);
+      --text-secondary: var(--ink-secondary);
+      --text-tertiary:  var(--ink-tertiary);
+      --border:         var(--rule);
+      --surface:        #EDEAE4;
+      --inset-rule:     var(--border);
+
+      --font-heading:   'Satoshi', 'DM Sans', sans-serif;
+      --font-serif:     'Source Serif 4', Georgia, serif;
+      --font-sans:      'DM Sans', system-ui, sans-serif;
+
+      --max-w:          1200px;
+      --content-w:      960px;
+      --gutter:         clamp(1.25rem, 4vw, 3rem);
+    }
+
+    [data-theme="carbon"] {
+      --bg:             var(--carbon);
+      --text-primary:   #E4E2DC;
+      --text-secondary: #8A8680;
+      --text-tertiary:  #5A5751;
+      --border:         #35373B;
+      --surface:        var(--carbon-soft, #26282C);
+      --inset-rule:     var(--accent-carbon);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-font-smoothing: antialiased; }
+
+    body {
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 17px;
+      line-height: 1.7;
+      transition: background 0.3s ease, color 0.3s ease;
+      min-height: 100vh;
+    }
+
+    a {
+      color: var(--text-primary);
+      text-decoration: underline;
+      text-decoration-color: var(--border);
+      text-underline-offset: 2px;
+      transition: text-decoration-color 0.2s, color 0.3s;
+    }
+    a:hover { text-decoration-color: var(--text-secondary); }
+
+    /* ── Site header — exact editorial pattern ────────────────── */
+    .site-header {
+      border-bottom: 1px solid var(--border);
+      padding: 0 var(--gutter);
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 100;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .header-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .wordmark {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 0.875rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .wordmark-divider { font-weight: 300; opacity: 0.3; margin: 0 0.5rem; }
+    .wordmark-section { font-weight: 400; letter-spacing: 0.08em; opacity: 0.55; text-transform: uppercase; }
+
+    nav { display: flex; align-items: center; gap: 2rem; }
+    nav a {
+      font-family: var(--font-heading);
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    nav a:hover { color: var(--text-primary); }
+
+    /* Single outlined pill — editorial pattern */
+    .theme-pill {
+      font-family: var(--font-heading);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 0.35rem 0.85rem;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      white-space: nowrap;
+    }
+    .theme-pill:hover {
+      border-color: var(--text-secondary);
+      color: var(--text-primary);
+    }
+
+    /* ── Page layout ──────────────────────────────────────────── */
+    .page-wrap {
+      max-width: var(--content-w);
+      margin: 0 auto;
+      padding: 0 var(--gutter);
+    }
+
+    /* ── Hero ─────────────────────────────────────────────────── */
+    .hero { padding: 80px 0 64px; }
+
+    .hero-headline {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      line-height: 1.15;
+      margin-bottom: 20px;
+      transition: color 0.3s;
+    }
+    .hero-sub {
+      font-family: var(--font-serif);
+      font-size: 1.0625rem;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin-bottom: 24px;
+      transition: color 0.3s;
+    }
+    .hero-cta {
+      font-family: var(--font-heading);
+      font-weight: 500;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      color: var(--text-secondary);
+      text-decoration: underline;
+      text-decoration-color: var(--border);
+      text-underline-offset: 2px;
+    }
+    .hero-cta:hover { color: var(--text-primary); }
+
+    /* ── Inset card ───────────────────────────────────────────── */
+    /* Carbon mode: left accent rule using aged gold, matching editorial widget treatment */
+    .inset-card {
+      background: var(--surface);
+      border-left: 2px solid var(--inset-rule);
+      border-radius: 0 4px 4px 0;
+      padding: 40px 48px;
+      max-width: 680px;
+      margin: 0 auto;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .intro-section { padding: 0 0 72px; }
+
+    .intro-text {
+      font-family: var(--font-serif);
+      font-size: 1rem;
+      color: var(--text-primary);
+      line-height: 1.7;
+      transition: color 0.3s;
+    }
+
+    /* ── Two-column panels ────────────────────────────────────── */
+    .panel {
+      border-top: 1px solid var(--border);
+      padding: 56px 0;
+      display: grid;
+      grid-template-columns: 28% 1fr;
+      gap: 40px;
+      transition: border-color 0.3s;
+    }
+    .panel-label {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-tertiary);
+      padding-top: 4px;
+      transition: color 0.3s;
+    }
+    .panel-body p {
+      font-family: var(--font-serif);
+      font-size: 0.9375rem;
+      line-height: 1.65;
+      color: var(--text-primary);
+      margin-bottom: 24px;
+      transition: color 0.3s;
+    }
+    .panel-body p:last-child { margin-bottom: 0; }
+    .panel-body p strong {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+
+    /* ── What you can raise ───────────────────────────────────── */
+    .raise-section {
+      padding: 72px 0;
+      border-top: 1px solid var(--border);
+      transition: border-color 0.3s;
+    }
+    .raise-heading {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-tertiary);
+      margin-bottom: 32px;
+      text-align: center;
+      transition: color 0.3s;
+    }
+    .raise-items { display: flex; flex-direction: column; gap: 16px; }
+    .raise-item {
+      font-family: var(--font-serif);
+      font-size: 0.9375rem;
+      line-height: 1.65;
+      color: var(--text-primary);
+      transition: color 0.3s;
+    }
+
+    /* ── Contact extras ───────────────────────────────────────── */
+    .contact-sub {
+      font-family: var(--font-serif);
+      font-size: 0.9375rem;
+      line-height: 1.65;
+      color: var(--text-secondary);
+      margin-top: 12px;
+      margin-bottom: 20px;
+      transition: color 0.3s;
+    }
+    .contact-rights {
+      font-family: var(--font-sans);
+      font-size: 0.8125rem;
+      color: var(--text-tertiary);
+      letter-spacing: 0.02em;
+      transition: color 0.3s;
+    }
+
+    /* ── Footer — editorial two-column pattern ────────────────── */
+    .site-footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem var(--gutter);
+      margin-top: 2rem;
+      transition: border-color 0.3s;
+    }
+    .footer-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .footer-note,
+    .footer-links a {
+      font-family: var(--font-heading);
+      font-size: 0.6375rem;
+      letter-spacing: 0.06em;
+      color: var(--text-tertiary);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .footer-links { display: flex; gap: 1.5rem; }
+    .footer-links a:hover { color: var(--text-secondary); }
+
+    /* ── Responsive ───────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .panel { grid-template-columns: 1fr; gap: 20px; }
+      .inset-card { padding: 28px 28px 28px 26px; }
+      .hero { padding: 56px 0 48px; }
+      nav a { display: none; }
+      nav .theme-pill { display: inline-flex; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header" aria-label="Site navigation">
+    <div class="header-inner">
+      <a href="../" class="wordmark">
+        Refueler
+        <span class="wordmark-divider">/</span>
+        <span class="wordmark-section">Support</span>
+      </a>
+      <nav>
+        <a href="../">App</a>
+        <a href="../editorial/refueler-editorial-index.html">Editorial</a>
+        <a href="privacy.html">Privacy</a>
+        <button class="theme-pill" onclick="toggleTheme()" id="theme-btn">Paper / Carbon</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <div class="page-wrap">
+
+      <section class="hero" aria-labelledby="hero-heading">
+        <h1 class="hero-headline" id="hero-heading">Something not right?</h1>
+        <p class="hero-sub">Tell us what happened. We'd genuinely like to know — and we'll do everything we can to make it right.</p>
+        <a href="#contact" class="hero-cta">Get in touch →</a>
+      </section>
+
+      <section class="intro-section" aria-label="Introduction">
+        <div class="inset-card">
+          <p class="intro-text">
+            Refueler is a small team building something we care about. If we've fallen short — a missed order, a reward that didn't arrive, something that just felt off — we want to hear it. Every message is read by a person. Please contact us, we are here to help you.
+          </p>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="how-label">
+        <div class="panel-label" id="how-label">How it works</div>
+        <div class="panel-body">
+          <p>
+            <strong>Write to us.</strong> Send a message to <a href="mailto:privacy@refueler.io">privacy@refueler.io</a> and tell us what happened in your own words. There's no form to fill in. You don't need order numbers or account details to get started — just tell us what's on your mind.
+          </p>
+          <p>
+            <strong>We'll be in touch.</strong> We'll acknowledge your message within 24 hours. A real person on the team will read what you've written and send you a substantive response within 30 days. In practice, it's usually much sooner.
+          </p>
+          <p>
+            <strong>We'll sort it out together.</strong> If something has gone wrong on our side, we'll put it right — whether that means reissuing a reward, correcting your account, or simply being straight with you about what happened and why. You'll hear from us either way.
+          </p>
+        </div>
+      </section>
+
+    </div>
+
+    <section class="raise-section" aria-labelledby="raise-heading">
+      <div class="page-wrap">
+        <p class="raise-heading" id="raise-heading">What can I raise?</p>
+        <div class="inset-card">
+          <div class="raise-items">
+            <p class="raise-item">A reward that wasn't issued or was the wrong amount</p>
+            <p class="raise-item">An order that wasn't ready or wasn't right</p>
+            <p class="raise-item">A data protection concern — how we've collected, used, stored, or shared your information</p>
+            <p class="raise-item">Anything else that felt wrong — we'd rather hear it</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="page-wrap">
+
+      <section class="panel" id="contact" aria-labelledby="contact-label">
+        <div class="panel-label" id="contact-label">Get in touch</div>
+        <div class="panel-body">
+          <p>
+            Email us: <a href="mailto:privacy@refueler.io" style="font-family:var(--font-heading);font-weight:500;font-size:0.875rem;">privacy@refueler.io</a>
+          </p>
+          <p class="contact-sub">
+            We aim to come back to you within 24 hours. If your concern is about your personal data or how we've handled it, this is the right address for that too — the same team looks after both.
+          </p>
+          <p class="contact-rights">
+            For a full explanation of your rights under UK GDPR (Articles 15–22), take a look at our <a href="/privacy#your-rights">Privacy Policy</a>. If you feel we haven't resolved your concern to your satisfaction, you also have the right to raise it with the Information Commissioner's Office at <a href="https://ico.org.uk">ico.org.uk</a>.
+          </p>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span class="footer-note">© 2026 Refueler Ltd (incorporating) · refueler.io/support</span>
+      <div class="footer-links">
+        <a href="privacy.html">Privacy</a>
+        <a href="complaints.html">Support</a>
+        <a href="mailto:privacy@refueler.io">privacy@refueler.io</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+  const THEME_KEY = 'rfTheme';
+
+  function applyTheme(theme) {
+    const root = document.documentElement;
+    const pill = document.getElementById('themePill') || document.getElementById('theme-btn');
+    if (theme === 'carbon') {
+      root.classList.add('carbon-mode');
+      root.setAttribute('data-theme', 'carbon');
+      if (pill) pill.textContent = 'Carbon / Paper';
+    } else {
+      root.classList.remove('carbon-mode');
+      root.removeAttribute('data-theme');
+      if (pill) pill.textContent = 'Paper / Carbon';
+    }
+  }
+
+  function toggleTheme() {
+    const current = localStorage.getItem(THEME_KEY) || 'paper';
+    const next = current === 'paper' ? 'carbon' : 'paper';
+    localStorage.setItem(THEME_KEY, next);
+    applyTheme(next);
+  }
+
+  (function () {
+    applyTheme(localStorage.getItem(THEME_KEY) || 'paper');
+  })();
+</script>
+
+</body>
+</html>
