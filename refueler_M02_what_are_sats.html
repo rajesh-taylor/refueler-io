@@ -1,0 +1,264 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap');
+
+  .rf-phone {
+    width: 320px;
+    min-height: 620px;
+    background: #0D0D0D;
+    border-radius: 40px;
+    margin: 1.5rem auto;
+    border: 1px solid #2a2a2a;
+    overflow: hidden;
+    position: relative;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rf-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #555;
+    letter-spacing: 0.04em;
+  }
+
+  .rf-pill {
+    width: 80px;
+    height: 5px;
+    background: #1e1e1e;
+    border-radius: 3px;
+    margin: 0 auto;
+  }
+
+  .rf-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0 28px 40px;
+  }
+
+  .rf-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: #F5820A;
+    text-transform: uppercase;
+    margin-top: 40px;
+    margin-bottom: 16px;
+  }
+
+  .rf-headline {
+    font-size: 36px;
+    font-weight: 300;
+    color: #EFEFEF;
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+  }
+
+  .rf-headline em {
+    font-style: italic;
+    color: #b8b8b8;
+  }
+
+  .rf-rule {
+    width: 32px;
+    height: 1px;
+    background: #F5820A;
+    margin: 20px 0;
+    opacity: 0.7;
+  }
+
+  .rf-sub {
+    font-size: 16px;
+    font-weight: 300;
+    color: #777;
+    line-height: 1.6;
+    letter-spacing: 0.01em;
+    margin-bottom: 0;
+  }
+
+  .rf-analogy-stack {
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .rf-analogy-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #111;
+    border: 0.5px solid #1e1e1e;
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+
+  .rf-analogy-icon {
+    font-size: 20px;
+    color: #444;
+    width: 24px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .rf-analogy-text {
+    flex: 1;
+  }
+
+  .rf-analogy-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: #444;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+
+  .rf-analogy-desc {
+    font-size: 14px;
+    font-weight: 300;
+    color: #888;
+    line-height: 1.4;
+  }
+
+  .rf-analogy-desc strong {
+    color: #bbb;
+    font-weight: 400;
+  }
+
+  .rf-highlight-row {
+    border-color: #2a2a2a;
+  }
+
+  .rf-highlight-row .rf-analogy-icon {
+    color: #F5820A;
+  }
+
+  .rf-highlight-row .rf-analogy-desc strong {
+    color: #EFEFEF;
+  }
+
+  .rf-cta {
+    margin-top: auto;
+    padding-top: 24px;
+  }
+
+  .rf-step-dots {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .rf-dot {
+    width: 18px;
+    height: 3px;
+    border-radius: 2px;
+    background: #222;
+  }
+
+  .rf-dot.active {
+    background: #F5820A;
+    width: 28px;
+  }
+
+  .rf-btn-continue {
+    width: 100%;
+    padding: 15px;
+    background: #EFEFEF;
+    color: #0D0D0D;
+    border: none;
+    border-radius: 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-bottom: 12px;
+  }
+
+  .rf-btn-skip {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    color: #3a3a3a;
+    border: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-align: center;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+</style>
+
+<h2 class="sr-only">Refueler Minibits onboarding screen M·02 — What are sats?</h2>
+
+<div class="rf-phone">
+  <div class="rf-status">
+    <span>09:41</span>
+    <div class="rf-pill"></div>
+    <span>●●●</span>
+  </div>
+
+  <div class="rf-body">
+    <div class="rf-eyebrow">Understanding sats · M·02</div>
+
+    <div class="rf-headline">
+      Small unit.<br>
+      <em>Real money.</em>
+    </div>
+
+    <div class="rf-rule"></div>
+
+    <div class="rf-sub">
+      A satoshi — sat for short — is the smallest piece of Bitcoin. Think of it the way you'd think of a penny to a pound.
+    </div>
+
+    <div class="rf-analogy-stack">
+      <div class="rf-analogy-row">
+        <i class="ti ti-coin-pound rf-analogy-icon" aria-hidden="true"></i>
+        <div class="rf-analogy-text">
+          <div class="rf-analogy-label">You already know this</div>
+          <div class="rf-analogy-desc"><strong>100 pence</strong> make one pound</div>
+        </div>
+      </div>
+
+      <div class="rf-analogy-row rf-highlight-row">
+        <i class="ti ti-currency-bitcoin rf-analogy-icon" aria-hidden="true"></i>
+        <div class="rf-analogy-text">
+          <div class="rf-analogy-label">Same idea</div>
+          <div class="rf-analogy-desc"><strong>100,000,000 sats</strong> make one Bitcoin</div>
+        </div>
+      </div>
+
+      <div class="rf-analogy-row">
+        <i class="ti ti-clock rf-analogy-icon" aria-hidden="true"></i>
+        <div class="rf-analogy-text">
+          <div class="rf-analogy-label">And they keep</div>
+          <div class="rf-analogy-desc">No expiry. No issuer. <strong>Yours to keep.</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rf-cta">
+      <div class="rf-step-dots">
+        <div class="rf-dot"></div>
+        <div class="rf-dot active"></div>
+        <div class="rf-dot"></div>
+        <div class="rf-dot"></div>
+        <div class="rf-dot"></div>
+        <div class="rf-dot"></div>
+      </div>
+      <button class="rf-btn-continue" onclick="sendPrompt('Confirm M·02 and build M·03 — Your two paths')">· Continue ·</button>
+      <button class="rf-btn-skip" onclick="sendPrompt('Skip sats explanation — go to loyalty stamps')">prefer stamps</button>
+    </div>
+  </div>
+</div>

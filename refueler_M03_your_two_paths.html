@@ -1,0 +1,289 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap');
+
+  .rf-phone {
+    width: 320px;
+    min-height: 640px;
+    background: #0D0D0D;
+    border-radius: 40px;
+    margin: 1.5rem auto;
+    border: 1px solid #2a2a2a;
+    overflow: hidden;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rf-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #555;
+    letter-spacing: 0.04em;
+  }
+
+  .rf-pill {
+    width: 80px; height: 5px;
+    background: #1e1e1e;
+    border-radius: 3px;
+  }
+
+  .rf-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0 24px 36px;
+  }
+
+  .rf-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: #F5820A;
+    text-transform: uppercase;
+    margin-top: 36px;
+    margin-bottom: 14px;
+  }
+
+  .rf-headline {
+    font-size: 34px;
+    font-weight: 300;
+    color: #EFEFEF;
+    line-height: 1.12;
+    margin-bottom: 6px;
+  }
+
+  .rf-headline em { font-style: italic; color: #b8b8b8; }
+
+  .rf-rule {
+    width: 32px; height: 1px;
+    background: #F5820A;
+    margin: 16px 0;
+    opacity: 0.7;
+  }
+
+  .rf-sub {
+    font-size: 15px;
+    font-weight: 300;
+    color: #666;
+    line-height: 1.55;
+    margin-bottom: 24px;
+  }
+
+  .rf-track-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .rf-track {
+    background: #111;
+    border: 0.5px solid #1e1e1e;
+    border-radius: 16px;
+    padding: 18px 18px 16px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    position: relative;
+  }
+
+  .rf-track.selected {
+    border-color: #F5820A;
+    background: #141410;
+  }
+
+  .rf-track-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .rf-track-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #444;
+  }
+
+  .rf-track.selected .rf-track-label {
+    color: #F5820A;
+  }
+
+  .rf-track-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #1a1a1a;
+    color: #444;
+    border: 0.5px solid #2a2a2a;
+  }
+
+  .rf-track.selected .rf-track-badge {
+    background: #1f1a0f;
+    color: #F5820A;
+    border-color: #3a2a10;
+  }
+
+  .rf-track-title {
+    font-size: 22px;
+    font-weight: 300;
+    color: #ccc;
+    margin-bottom: 8px;
+    line-height: 1.1;
+  }
+
+  .rf-track-title em { font-style: italic; }
+
+  .rf-track-desc {
+    font-size: 13px;
+    font-weight: 300;
+    color: #555;
+    line-height: 1.5;
+  }
+
+  .rf-track-desc strong { color: #888; font-weight: 400; }
+
+  .rf-selector {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 0.5px solid #2a2a2a;
+    background: transparent;
+  }
+
+  .rf-track.selected .rf-selector {
+    background: #F5820A;
+    border-color: #F5820A;
+  }
+
+  .rf-cta { margin-top: auto; padding-top: 22px; }
+
+  .rf-step-dots {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 18px;
+  }
+
+  .rf-dot {
+    width: 18px; height: 3px;
+    border-radius: 2px;
+    background: #222;
+  }
+
+  .rf-dot.active { background: #F5820A; width: 28px; }
+
+  .rf-btn-continue {
+    width: 100%;
+    padding: 15px;
+    background: #EFEFEF;
+    color: #0D0D0D;
+    border: none;
+    border-radius: 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .rf-change-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: #2e2e2e;
+    text-align: center;
+    margin-top: 10px;
+    text-transform: uppercase;
+  }
+</style>
+
+<h2 class="sr-only">Refueler Minibits onboarding screen M·03 — Your two paths</h2>
+
+<div class="rf-phone">
+  <div class="rf-status">
+    <span>09:41</span>
+    <div class="rf-pill"></div>
+    <span>●●●</span>
+  </div>
+
+  <div class="rf-body">
+    <div class="rf-eyebrow">Choose your reward · M·03</div>
+
+    <div class="rf-headline">How would you<br><em>like to be</em><br>rewarded?</div>
+
+    <div class="rf-rule"></div>
+
+    <div class="rf-sub">Both tracks earn on every order. You can switch at any time.</div>
+
+    <div class="rf-track-grid">
+
+      <div class="rf-track" id="track-stamps" onclick="selectTrack('stamps')">
+        <div class="rf-selector" id="sel-stamps"></div>
+        <div class="rf-track-header">
+          <div class="rf-track-label">Track one</div>
+          <div class="rf-track-badge">No setup</div>
+        </div>
+        <div class="rf-track-title">Loyalty <em>stamps</em></div>
+        <div class="rf-track-desc">
+          Every purchase counts toward a <strong>free item</strong>. Works like your café card — collect nine, tenth is free.
+        </div>
+      </div>
+
+      <div class="rf-track selected" id="track-sats" onclick="selectTrack('sats')">
+        <div class="rf-selector" id="sel-sats"></div>
+        <div class="rf-track-header">
+          <div class="rf-track-label">Track two</div>
+          <div class="rf-track-badge">Recommended</div>
+        </div>
+        <div class="rf-track-title">Bitcoin <em>sats</em></div>
+        <div class="rf-track-desc">
+          Real Bitcoin — tiny amounts that <strong>accumulate and hold value</strong>. Takes two minutes to set up a wallet.
+        </div>
+      </div>
+
+    </div>
+
+    <div class="rf-cta">
+      <div class="rf-step-dots">
+        <div class="rf-dot"></div>
+        <div class="rf-dot"></div>
+        <div class="rf-dot active"></div>
+        <div class="rf-dot"></div>
+        <div class="rf-dot"></div>
+        <div class="rf-dot"></div>
+      </div>
+      <button class="rf-btn-continue" id="cta-btn" onclick="handleContinue()">· continue ·</button>
+      <div class="rf-change-note">you can change this later in settings</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let selected = 'sats';
+
+  function selectTrack(track) {
+    selected = track;
+    document.getElementById('track-stamps').classList.toggle('selected', track === 'stamps');
+    document.getElementById('track-sats').classList.toggle('selected', track === 'sats');
+  }
+
+  function handleContinue() {
+    if (selected === 'sats') {
+      sendPrompt('Confirm M·03 with sats selected — build M·04, the sats nudge for loyalty users, then M·05 wallet setup');
+    } else {
+      sendPrompt('Confirm M·03 with stamps selected — build M·04, the sats nudge shown to loyalty-track users');
+    }
+  }
+</script>

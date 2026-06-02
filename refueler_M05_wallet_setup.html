@@ -1,0 +1,287 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap');
+
+  .rf-phone {
+    width: 320px;
+    min-height: 640px;
+    background: #0D0D0D;
+    border-radius: 40px;
+    margin: 1.5rem auto;
+    border: 1px solid #2a2a2a;
+    overflow: hidden;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rf-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #555;
+    letter-spacing: 0.04em;
+  }
+
+  .rf-pill { width: 80px; height: 5px; background: #1e1e1e; border-radius: 3px; }
+
+  .rf-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0 24px 36px;
+  }
+
+  .rf-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: #F5820A;
+    text-transform: uppercase;
+    margin-top: 36px;
+    margin-bottom: 14px;
+  }
+
+  .rf-headline {
+    font-size: 34px;
+    font-weight: 300;
+    color: #EFEFEF;
+    line-height: 1.12;
+    margin-bottom: 6px;
+  }
+
+  .rf-headline em { font-style: italic; color: #b8b8b8; }
+
+  .rf-rule { width: 32px; height: 1px; background: #F5820A; margin: 16px 0; opacity: 0.7; }
+
+  .rf-sub {
+    font-size: 15px;
+    font-weight: 300;
+    color: #666;
+    line-height: 1.55;
+    margin-bottom: 24px;
+  }
+
+  /* Minibits identity strip */
+  .rf-minibits-strip {
+    background: #111;
+    border: 0.5px solid #1e1e1e;
+    border-radius: 16px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .rf-minibits-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #1a1a1a;
+    border: 0.5px solid #2a2a2a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .rf-minibits-text {}
+
+  .rf-minibits-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: #ccc;
+    letter-spacing: 0.04em;
+    margin-bottom: 3px;
+  }
+
+  .rf-minibits-desc {
+    font-size: 13px;
+    font-weight: 300;
+    color: #444;
+    line-height: 1.3;
+  }
+
+  /* Feature list */
+  .rf-features {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .rf-feature-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .rf-feature-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #2e2e2e;
+    margin-top: 7px;
+    flex-shrink: 0;
+  }
+
+  .rf-feature-text {
+    font-size: 14px;
+    font-weight: 300;
+    color: #555;
+    line-height: 1.45;
+  }
+
+  .rf-feature-text strong { color: #888; font-weight: 400; }
+
+  /* Action cards */
+  .rf-action-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .rf-action-card {
+    background: #111;
+    border: 0.5px solid #1e1e1e;
+    border-radius: 14px;
+    padding: 16px 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: border-color 0.2s;
+  }
+
+  .rf-action-card.primary {
+    background: #EFEFEF;
+    border-color: #EFEFEF;
+  }
+
+  .rf-action-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #444;
+    margin-bottom: 3px;
+  }
+
+  .rf-action-card.primary .rf-action-label { color: #888; }
+
+  .rf-action-title {
+    font-size: 17px;
+    font-weight: 300;
+    color: #ccc;
+  }
+
+  .rf-action-card.primary .rf-action-title { color: #0D0D0D; }
+
+  .rf-action-arrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    color: #2a2a2a;
+  }
+
+  .rf-action-card.primary .rf-action-arrow { color: #555; }
+
+  .rf-cta { margin-top: auto; padding-top: 20px; }
+
+  .rf-step-dots {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 18px;
+  }
+
+  .rf-dot { width: 18px; height: 3px; border-radius: 2px; background: #222; }
+  .rf-dot.active { background: #F5820A; width: 28px; }
+
+  .rf-skip-link {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #2e2e2e;
+    text-align: center;
+    display: block;
+    margin-top: 12px;
+    cursor: pointer;
+  }
+</style>
+
+<div class="rf-phone">
+  <div class="rf-status">
+    <span>09:41</span>
+    <div class="rf-pill"></div>
+    <span>●●●</span>
+  </div>
+
+  <div class="rf-body">
+    <div class="rf-eyebrow">Your wallet · M·05</div>
+
+    <div class="rf-headline">Somewhere to<br><em>keep</em> what<br>you earn.</div>
+
+    <div class="rf-rule"></div>
+
+    <div class="rf-sub">Sats need a home. We use Minibits — a lightweight Bitcoin wallet, on your phone.</div>
+
+    <div class="rf-minibits-strip">
+      <div class="rf-minibits-icon">⚡</div>
+      <div class="rf-minibits-text">
+        <div class="rf-minibits-name">Minibits</div>
+        <div class="rf-minibits-desc">Open-source · Lightning Network · non-custodial</div>
+      </div>
+    </div>
+
+    <div class="rf-features">
+      <div class="rf-feature-row">
+        <div class="rf-feature-dot"></div>
+        <div class="rf-feature-text"><strong>You hold your own sats.</strong> No third party, no middleman.</div>
+      </div>
+      <div class="rf-feature-row">
+        <div class="rf-feature-dot"></div>
+        <div class="rf-feature-text"><strong>Instant transfers.</strong> Send or receive in seconds.</div>
+      </div>
+      <div class="rf-feature-row">
+        <div class="rf-feature-dot"></div>
+        <div class="rf-feature-text"><strong>Takes two minutes</strong> to set up. No ID required.</div>
+      </div>
+    </div>
+
+    <div class="rf-action-stack">
+      <div class="rf-action-card primary" onclick="sendPrompt('User tapped create new Minibits wallet — confirm M·05 and build M·06 confirmation screen')">
+        <div>
+          <div class="rf-action-label">New to Bitcoin</div>
+          <div class="rf-action-title">Create a wallet</div>
+        </div>
+        <div class="rf-action-arrow">↗</div>
+      </div>
+
+      <div class="rf-action-card" onclick="sendPrompt('User tapped connect existing wallet — confirm M·05 and build M·06 confirmation screen')">
+        <div>
+          <div class="rf-action-label">Already have one</div>
+          <div class="rf-action-title">Connect my wallet</div>
+        </div>
+        <div class="rf-action-arrow">→</div>
+      </div>
+    </div>
+
+    <div class="rf-cta">
+      <div class="rf-step-dots">
+        <div class="rf-dot"></div>
+        <div class="rf-dot"></div>
+        <div class="rf-dot"></div>
+        <div class="rf-dot"></div>
+        <div class="rf-dot active"></div>
+        <div class="rf-dot"></div>
+      </div>
+      <span class="rf-skip-link" onclick="sendPrompt('User skipped wallet setup — confirm M·05 and build M·06')">set up later</span>
+    </div>
+  </div>
+</div>

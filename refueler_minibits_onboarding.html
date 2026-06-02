@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Refueler — Minibits Onboarding M·01–M·06</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+
+<style>
+/* ─── Brand tokens (Carbon default per spec) ─── */
+:root {
+  --carbon:   #141412;
+  --carbon-2: #1C1C19;
+  --carbon-3: #252520;
+  --paper:    #F5F0E8;
+  --orange:   #F5820A;
+  --orange-d: #D4690A;
+  --green:    #2ECC71;
+  --blue:     #0EA5C9;
+
+  --bg:           var(--carbon);
+  --bg-2:         var(--carbon-2);
+  --bg-3:         var(--carbon-3);
+  --fg:           var(--paper);
+  --fg-muted:     rgba(245,240,232,0.55);
+  --fg-subtle:    rgba(245,240,232,0.30);
+  --border:       rgba(245,240,232,0.08);
+  --border-med:   rgba(245,240,232,0.14);
+  --orange-tint:  rgba(245,130,10,0.10);
+  --green-tint:   rgba(46,204,113,0.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #0D0D0B;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  color: var(--fg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 20px 48px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Header ─── */
+.session-header {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+.session-wordmark {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+.session-wordmark em { color: var(--orange-d); font-style: normal; }
+.session-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--fg-subtle);
+  text-align: right;
+  line-height: 1.7;
+}
+
+/* ─── Track selector ─── */
+.track-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 28px;
+  background: var(--bg-2);
+  border: 0.5px solid var(--border-med);
+  border-radius: 8px;
+  padding: 4px;
+}
+.track-btn {
+  flex: 1;
+  padding: 8px 16px;
+  border-radius: 5px;
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--fg-muted);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.02em;
+}
+.track-btn.active {
+  background: var(--bg-3);
+  color: var(--fg);
+  border: 0.5px solid var(--border-med);
+}
+.track-badge {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  margin-left: 5px;
+  background: var(--orange-tint);
+  color: var(--orange);
+  border: 0.5px solid rgba(245,130,10,0.2);
+  vertical-align: middle;
+}
+
+/* ─── Screen nav ─── */
+.screen-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 360px;
+}
+.nav-btn {
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  border: 0.5px solid var(--border-med);
+  border-radius: 4px;
+  background: var(--bg-2);
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'DM Sans', sans-serif;
+}
+.nav-btn:hover { color: var(--fg); border-color: rgba(245,240,232,0.25); }
+.nav-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+.screen-counter {
+  flex: 1;
+  text-align: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--fg-subtle);
+}
+
+/* ─── Progress pills ─── */
+.progress-pills {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.pill {
+  height: 3px;
+  flex: 1;
+  border-radius: 2px;
+  background: var(--border-med);
+  transition: background 0.3s ease;
+  max-width: 40px;
+}
+.pill.active { background: var(--orange); }
+.pill.done   { background: rgba(245,240,232,0.25); }
+
+/* ─── Phone shell ─── */
+.phone-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.phone {
+  width: 300px;
+  min-height: 560px;
+  background: var(--bg);
+  border: 0.5px solid var(--border-med);
+  border-radius: 32px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.phone-bar {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.phone-notch {
+  width: 72px;
+  height: 6px;
+  background: var(--border-med);
+  border-radius: 3px;
+}
+.phone-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 22px 28px;
+  position: relative;
+}
+
+/* ─── Screen ID label ─── */
+.s-id {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--fg-subtle);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.s-id-track {
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 0.5px solid var(--border-med);
+  color: var(--fg-subtle);
+}
+.s-id-track.track-a { border-color: rgba(245,130,10,0.3); color: var(--orange-d); }
+.s-id-track.track-b { border-color: rgba(14,165,201,0.3); color: var(--blue); }
+.s-id-track.shared  { border-color: var(--border-med); color: var(--fg-subtle); }
+
+/* ─── Typography ─── */
+.s-eyebrow {
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--orange-d);
+  margin-bottom: 10px;
+}
+.s-headline {
+  font-size: 19px;
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  margin-bottom: 10px;
+}
+.s-body {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--fg-muted);
+  margin-bottom: 20px;
+  font-weight: 300;
+}
+
+/* ─── Feature rows ─── */
+.feature-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 0.5px solid var(--border);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--fg-muted);
+}
+.feature-row:first-child { border-top: 0.5px solid var(--border); }
+.feature-icon {
+  font-size: 17px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  width: 20px;
+  text-align: center;
+}
+.feature-text strong { color: var(--fg); font-weight: 400; display: block; font-size: 13px; margin-bottom: 1px; }
+
+/* ─── Wallet options ─── */
+.wallet-section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--fg-subtle);
+  margin-bottom: 8px;
+  margin-top: 16px;
+  padding-bottom: 6px;
+  border-bottom: 0.5px solid var(--border);
+}
+.wallet-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border: 0.5px solid var(--border-med);
+  border-radius: 8px;
+  margin-bottom: 7px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+}
+.wallet-option:hover { border-color: rgba(245,240,232,0.22); background: var(--bg-2); }
+.wallet-option.selected { border-color: var(--orange); background: var(--orange-tint); }
+.wallet-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.wallet-name { font-size: 13px; font-weight: 400; color: var(--fg); }
+.wallet-sub  { font-size: 10px; color: var(--fg-subtle); margin-top: 1px; font-family: 'DM Mono', monospace; }
+.wallet-badge {
+  margin-left: auto;
+  font-size: 9px;
+  font-family: 'DM Mono', monospace;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--green-tint);
+  color: var(--green);
+  border: 0.5px solid rgba(46,204,113,0.2);
+  flex-shrink: 0;
+}
+.divider-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 0 10px;
+}
+.divider-line::before, .divider-line::after {
+  content: '';
+  flex: 1;
+  height: 0.5px;
+  background: var(--border);
+}
+.divider-label {
+  font-size: 10px;
+  color: var(--fg-subtle);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.06em;
+}
+
+/* ─── Sats animation block ─── */
+.sats-reveal {
+  text-align: center;
+  padding: 28px 0 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.sats-amount {
+  font-family: 'DM Mono', monospace;
+  font-size: 48px;
+  font-weight: 500;
+  color: var(--orange);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.sats-unit {
+  font-size: 11px;
+  color: var(--fg-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 20px;
+  font-family: 'DM Mono', monospace;
+}
+.sats-context {
+  font-size: 12px;
+  color: var(--fg-muted);
+  text-align: center;
+  line-height: 1.6;
+  max-width: 210px;
+}
+
+/* ─── Earn track blocks ─── */
+.earn-block {
+  border: 0.5px solid var(--border-med);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 9px;
+  position: relative;
+}
+.earn-block.active { border-color: var(--orange); background: var(--orange-tint); }
+.earn-block.secondary { background: var(--bg-2); }
+.earn-block-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+  color: var(--fg-subtle);
+}
+.earn-block.active .earn-block-label { color: var(--orange); }
+.earn-block-headline { font-size: 13px; font-weight: 400; color: var(--fg); margin-bottom: 3px; }
+.earn-block-body { font-size: 11px; color: var(--fg-muted); line-height: 1.5; }
+.earn-nudge {
+  margin-top: 10px;
+  font-size: 10px;
+  color: var(--fg-subtle);
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.earn-nudge .nudge-sats { color: var(--orange); font-style: normal; font-family: 'DM Mono', monospace; }
+
+/* ─── Privacy block ─── */
+.privacy-visual {
+  background: var(--bg-2);
+  border: 0.5px solid var(--border-med);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  flex: 1;
+}
+.privacy-statement {
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.55;
+  color: var(--fg);
+  letter-spacing: -0.01em;
+  margin-bottom: 14px;
+}
+.privacy-statement em { color: var(--orange-d); font-style: italic; }
+.privacy-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--fg-subtle);
+  padding: 6px 0;
+  border-top: 0.5px solid var(--border);
+}
+.privacy-detail-row:first-child { border-top: none; }
+.privacy-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+}
+
+/* ─── Setup complete ─── */
+.setup-complete {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px 0;
+}
+.setup-icon {
+  font-size: 36px;
+  margin-bottom: 14px;
+}
+.setup-headline {
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--fg);
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+.setup-body {
+  font-size: 12px;
+  color: var(--fg-muted);
+  line-height: 1.65;
+  max-width: 220px;
+  margin-bottom: 20px;
+}
+.setup-reward-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: var(--orange-tint);
+  border: 0.5px solid rgba(245,130,10,0.25);
+  font-size: 12px;
+  color: var(--orange);
+  font-family: 'DM Mono', monospace;
+  margin-bottom: 14px;
+}
+
+/* ─── Stamp progress (Track A) ─── */
+.stamp-row {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.stamp {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 0.5px solid var(--border-med);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: var(--fg-subtle);
+  background: var(--bg-2);
+}
+.stamp.filled { background: var(--orange); border-color: var(--orange); color: var(--bg); }
+
+/* ─── CTA buttons ─── */
+.s-cta {
+  width: 100%;
+  padding: 13px;
+  background: var(--fg);
+  color: var(--bg);
+  border: none;
+  border-radius: 4px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin-top: auto;
+  transition: opacity 0.15s;
+}
+.s-cta:hover { opacity: 0.85; }
+.s-cta.ghost {
+  background: transparent;
+  border: 0.5px solid var(--border-med);
+  color: var(--fg-muted);
+  margin-top: 8px;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 12px;
+}
+.s-cta.ghost:hover { color: var(--fg); border-color: rgba(245,240,232,0.25); }
+
+/* ─── Consent placeholder ─── */
+.consent-placeholder {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: var(--bg-3);
+  border: 0.5px dashed rgba(245,240,232,0.15);
+  border-radius: 6px;
+  font-size: 10px;
+  color: var(--fg-subtle);
+  font-family: 'DM Mono', monospace;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* ─── Screen meta panel ─── */
+.screen-meta {
+  width: 100%;
+  max-width: 360px;
+  background: var(--bg-2);
+  border: 0.5px solid var(--border-med);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.meta-id {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--orange-d);
+  margin-bottom: 5px;
+}
+.meta-purpose { font-size: 13px; font-weight: 400; color: var(--fg); margin-bottom: 5px; line-height: 1.35; }
+.meta-detail { font-size: 11px; color: var(--fg-muted); line-height: 1.6; margin-bottom: 8px; }
+.meta-next {
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  color: var(--fg-subtle);
+  padding-top: 8px;
+  border-top: 0.5px solid var(--border);
+  line-height: 1.5;
+}
+.meta-next strong { color: var(--fg-muted); }
+
+/* ─── Track flag note ─── */
+.track-flag {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  line-height: 1.5;
+}
+.track-flag.flag-a { background: var(--orange-tint); color: var(--orange-d); border: 0.5px solid rgba(245,130,10,0.2); }
+.track-flag.flag-b { background: rgba(14,165,201,0.06); color: var(--blue); border: 0.5px solid rgba(14,165,201,0.2); }
+.track-flag.flag-shared { background: var(--bg-3); color: var(--fg-subtle); border: 0.5px solid var(--border); }
+
+/* ─── Manual LN section ─── */
+.invoice-box {
+  background: var(--bg-3);
+  border: 0.5px solid var(--border-med);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--fg-subtle);
+  word-break: break-all;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+.invoice-copy-btn {
+  width: 100%;
+  padding: 9px;
+  background: transparent;
+  border: 0.5px solid var(--border-med);
+  border-radius: 4px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  color: var(--fg-muted);
+  cursor: pointer;
+  letter-spacing: 0.04em;
+}
+.nwc-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 0.5px solid var(--border-med);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+.nwc-label { font-weight: 400; color: var(--fg); font-size: 12px; }
+.nwc-sub { font-size: 9px; color: var(--fg-subtle); font-family: 'DM Mono', monospace; }
+
+/* ─── Ambient privacy indicator ─── */
+.ambient-privacy {
+  position: absolute;
+  bottom: 12px;
+  left: 22px;
+  right: 22px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+  color: var(--fg-subtle);
+  font-family: 'DM Mono', monospace;
+}
+.ambient-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse-green 3s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes pulse-green {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+</style>
+</head>
+<body>
+
+<div class="session-header">
+  <div class="session-wordmark">RE<em>FUELER</em></div>
+  <div class="session-meta">
+    Minibits onboarding · M·01–M·06<br>
+    Session 10B · Pre-TestFlight
+  </div>
+</div>
+
+<!-- Track selector -->
+<div class="track-selector" style="width:100%;max-width:360px;">
+  <button class="track-btn active" id="track-a-btn" onclick="setTrack('A')">
+    Track A <span class="track-badge">stamps + sats</span>
+  </button>
+  <button class="track-btn" id="track-b-btn" onclick="setTrack('B')">
+    Track B <span class="track-badge" style="background:rgba(14,165,201,0.1);color:#0EA5C9;border-color:rgba(14,165,201,0.2)">sats-only</span>
+  </button>
+</div>
+
+<!-- Screen nav -->
+<div class="screen-nav">
+  <button class="nav-btn" id="prev-btn" onclick="go(-1)" disabled>← prev</button>
+  <div class="screen-counter" id="counter">M·01 / M·06</div>
+  <button class="nav-btn" id="next-btn" onclick="go(1)">next →</button>
+</div>
+
+<!-- Progress pills -->
+<div class="progress-pills" id="pills"></div>
+
+<!-- Phone -->
+<div class="phone-wrap">
+  <div class="phone">
+    <div class="phone-bar"><div class="phone-notch"></div></div>
+    <div class="phone-screen" id="phone-screen"></div>
+  </div>
+</div>
+
+<!-- Meta panel -->
+<div class="screen-meta" id="screen-meta"></div>
+
+<script>
+let currentTrack = 'A';
+let currentScreen = 0;
+
+function setTrack(t) {
+  currentTrack = t;
+  document.getElementById('track-a-btn').className = 'track-btn' + (t === 'A' ? ' active' : '');
+  document.getElementById('track-b-btn').className = 'track-btn' + (t === 'B' ? ' active' : '');
+  renderScreen();
+}
+
+function go(dir) {
+  const max = screens.length - 1;
+  currentScreen = Math.max(0, Math.min(max, currentScreen + dir));
+  renderScreen();
+}
+
+// ── SCREEN DEFINITIONS ──
+const screens = [
+
+  // M·01 — Intro / hook
+  {
+    id: 'M·01',
+    track: 'shared',
+    label: 'Intro · hook',
+    render: (track) => `
+      <div class="s-id">
+        <span>m·01 · intro</span>
+        <span class="s-id-track shared">all tracks</span>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;">
+        <div class="s-eyebrow">Your rewards</div>
+        <div class="s-headline">Your coffee earns you something real.</div>
+        <div class="s-body">Most apps give you points. Refueler gives you Bitcoin — small amounts, real value, yours to keep. We'll walk you through it in a minute.</div>
+        <div class="feature-row">
+          <div class="feature-icon">⚡</div>
+          <div class="feature-text">
+            <strong>Sats — tiny pieces of Bitcoin</strong>
+            You earn a little with every order. It adds up.
+          </div>
+        </div>
+        <div class="feature-row">
+          <div class="feature-icon">🔒</div>
+          <div class="feature-text">
+            <strong>Private by design</strong>
+            Stored in a wallet on your phone. We don't hold it.
+          </div>
+        </div>
+        <div class="feature-row" style="border-bottom:none">
+          <div class="feature-icon">☕</div>
+          <div class="feature-text">
+            <strong>No crypto knowledge needed</strong>
+            Just order your coffee. The rest is automatic.
+          </div>
+        </div>
+      </div>
+      <button class="s-cta" style="margin-top:20px">Let's set up your wallet</button>
+      <button class="s-cta ghost">Skip for now</button>
+      <div class="ambient-privacy">
+        <div class="ambient-dot"></div>
+        <span>on-device only · no location transmitted</span>
+      </div>
+    `,
+    purpose: 'First impression. Warm, honest, non-technical.',
+    detail: 'No Bitcoin jargon upfront. "Something real" lands for both bitcoiners and sceptics. Three feature rows establish: value, privacy, ease — in that order. Skip path exists; product doesn\'t demand engagement.',
+    next: '→ M·02 (what is a wallet + wallet selection)'
+  },
+
+  // M·02 — Wallet intro + selection
+  {
+    id: 'M·02',
+    track: 'shared',
+    label: 'Wallet intro + selection',
+    render: (track) => `
+      <div class="s-id">
+        <span>m·02 · wallet select</span>
+        <span class="s-id-track shared">all tracks</span>
+      </div>
+      <div class="s-eyebrow">Choose a wallet</div>
+      <div class="s-headline">Where do your sats go?</div>
+      <div class="s-body" style="margin-bottom:4px">A wallet is an app that holds your sats. Think of it like a purse — you own it, we can't access it.</div>
+
+      <div class="wallet-section-label">Privacy-first · recommended</div>
+
+      <button class="wallet-option selected">
+        <div class="wallet-icon" style="background:#1a1a18;font-size:16px">🌰</div>
+        <div>
+          <div class="wallet-name">Minibits</div>
+          <div class="wallet-sub">ecash · private · simple</div>
+        </div>
+        <div class="wallet-badge">set up for you</div>
+      </button>
+
+      <button class="wallet-option">
+        <div class="wallet-icon" style="background:#1a1a18;font-size:16px">🥥</div>
+        <div>
+          <div class="wallet-name">Macadamia</div>
+          <div class="wallet-sub">ecash · nostr-native</div>
+        </div>
+      </button>
+
+      <button class="wallet-option">
+        <div class="wallet-icon" style="background:#1a1a18;font-size:16px">🌿</div>
+        <div>
+          <div class="wallet-name">Sovran</div>
+          <div class="wallet-sub">ecash · self-custody</div>
+        </div>
+      </button>
+
+      <button class="wallet-option">
+        <div class="wallet-icon" style="background:#1a1a18;font-size:16px">💧</div>
+        <div>
+          <div class="wallet-name">Cashu.me</div>
+          <div class="wallet-sub">browser-based ecash</div>
+        </div>
+      </button>
+
+      <div class="divider-line"><span class="divider-label">or connect manually</span></div>
+
+      <button class="wallet-option" style="flex-direction:column;align-items:flex-start;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px;width:100%">
+          <div class="wallet-icon" style="background:#1a1a18;font-size:16px">⚡</div>
+          <div style="flex:1">
+            <div class="wallet-name">Lightning invoice</div>
+            <div class="wallet-sub">paste your invoice to receive</div>
+          </div>
+        </div>
+      </button>
+
+      <div class="nwc-row" style="margin-top:7px">
+        <div class="wallet-icon" style="background:#1a1a18;font-size:13px;width:24px;height:24px;border-radius:4px">🔑</div>
+        <div>
+          <div class="nwc-label">NWC connection</div>
+          <div class="nwc-sub">nostr wallet connect · for Nostr / Fountain users</div>
+        </div>
+      </div>
+
+      <button class="s-cta" style="margin-top:16px">Continue with Minibits</button>
+      <div class="ambient-privacy">
+        <div class="ambient-dot"></div>
+        <span>on-device only · no location transmitted</span>
+      </div>
+    `,
+    purpose: 'Wallet selection. Privacy-first wallets at top. Manual tier below.',
+    detail: 'Minibits pre-selected as recommended. Ecash wallets occupy the primary list. Manual Lightning invoice uses copy/paste UX (same muscle memory as sending a payment). NWC surfaced clearly in manual tier for Nostr/Fountain users. Head of Design: minimal, no scrolling required on this screen.',
+    next: '→ M·03 (your first sats)'
+  },
+
+  // M·03 — First sats reveal
+  {
+    id: 'M·03',
+    track: 'shared',
+    label: 'Your first sats',
+    render: (track) => `
+      <div class="s-id">
+        <span>m·03 · first sats</span>
+        <span class="s-id-track shared">all tracks</span>
+      </div>
+      <div class="s-eyebrow">Welcome gift</div>
+      <div class="s-headline">Here's a little something to start with.</div>
+      <div class="sats-reveal">
+        <div class="sats-amount">21</div>
+        <div class="sats-unit">sats · your first ones</div>
+        <div class="sats-context">We've put 21 sats into your Minibits wallet. That's ₿0.00000021 — a tiny piece of Bitcoin, yours to keep.</div>
+      </div>
+      <div style="background:var(--bg-2);border:0.5px solid var(--border-med);border-radius:8px;padding:12px;margin-bottom:16px;">
+        <div style="font-size:11px;color:var(--fg-subtle);margin-bottom:4px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.08em">What is 21 sats worth?</div>
+        <div style="font-size:12px;color:var(--fg-muted);line-height:1.55">Not much today — a fraction of a penny. But every flat white you order adds more. Over time, sats are real Bitcoin. The price moves. We never take them back.</div>
+      </div>
+      <button class="s-cta">That's interesting — tell me more</button>
+      <div class="ambient-privacy">
+        <div class="ambient-dot"></div>
+        <span>on-device only · no location transmitted</span>
+      </div>
+    `,
+    purpose: 'Delight moment. First tangible contact with sats.',
+    detail: '21 sats as onboarding gift — a knowing nod to the Bitcoin supply cap without being preachy. Amount is meaningful (21 million cap) but not so large as to feel like a marketing trick. Explains value in honest, non-hype language. Works for both new users and bitcoiners.',
+    next: '→ M·04 (how you earn — Track A/B diverge here)'
+  },
+
+  // M·04 — How you earn (DIVERGES)
+  {
+    id: 'M·04',
+    track: 'diverges',
+    label: 'How you earn',
+    render: (track) => {
+      if (track === 'A') return `
+        <div class="s-id">
+          <span>m·04 · how you earn</span>
+          <span class="s-id-track track-a">track a</span>
+        </div>
+        <div class="s-eyebrow">Your rewards</div>
+        <div class="s-headline">Two ways to earn. You choose.</div>
+        <div class="s-body">Start with loyalty stamps if Bitcoin feels new. Switch to sats whenever you're ready.</div>
+
+        <div class="earn-block secondary">
+          <div class="earn-block-label">Loyalty stamps</div>
+          <div class="earn-block-headline">Familiar — like a paper stamp card, but in the app</div>
+          <div class="earn-block-body">Buy 9 coffees, the 10th is on us. Works at all Refueler venues.</div>
+        </div>
+
+        <div class="earn-block active">
+          <div class="earn-block-label">⚡ Sats · Bitcoin</div>
+          <div class="earn-block-headline">Earn a little Bitcoin with every order</div>
+          <div class="earn-block-body">Automatically sent to your Minibits wallet on collection. Real Bitcoin.</div>
+        </div>
+
+        <div class="earn-nudge">
+          <span>Switch from stamps to sats at any time in</span>
+          <span class="nudge-sats">Settings → Rewards</span>
+        </div>
+
+        <!-- CONSENT PLACEHOLDER — DO NOT FINALISE WORDING -->
+        <div class="consent-placeholder">
+          [CONSENT PLACEHOLDER — Track A reward selection · FCA/ICO review pending.<br>
+          Do not draft final wording until Ben Cousins query resolved.]
+        </div>
+
+        <button class="s-cta" style="margin-top:12px">Start with sats</button>
+        <button class="s-cta ghost">Start with stamps instead</button>
+        <div class="ambient-privacy">
+          <div class="ambient-dot"></div>
+          <span>on-device only · no location transmitted</span>
+        </div>
+      `;
+      // Track B — sats only
+      return `
+        <div class="s-id">
+          <span>m·04 · how you earn</span>
+          <span class="s-id-track track-b">track b</span>
+        </div>
+        <div class="s-eyebrow">Your rewards</div>
+        <div class="s-headline">Every order earns sats.</div>
+        <div class="s-body">Automatically. No button to press. On collection, they go straight to your Minibits wallet.</div>
+
+        <div class="earn-block active" style="margin-bottom:12px">
+          <div class="earn-block-label">⚡ Sats · Bitcoin</div>
+          <div class="earn-block-headline">Real Bitcoin. Every time.</div>
+          <div class="earn-block-body">A flat white earns ~186 sats. That's the current rate — it adjusts with the Bitcoin price so your reward stays proportional.</div>
+        </div>
+
+        <div style="background:var(--bg-2);border:0.5px solid var(--border-med);border-radius:8px;padding:12px;margin-bottom:12px">
+          <div style="font-size:11px;color:var(--fg-subtle);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">When do they arrive?</div>
+          <div style="font-size:12px;color:var(--fg-muted);line-height:1.55">The moment you tap to collect your order. Instant. On-chain settlement happens in the background — you don't need to think about it.</div>
+        </div>
+
+        <button class="s-cta">Got it — let's go</button>
+        <div class="ambient-privacy">
+          <div class="ambient-dot"></div>
+          <span>on-device only · no location transmitted</span>
+        </div>
+      `;
+    },
+    purpose: 'Reward track selection. Track A offers choice. Track B is sats-native.',
+    detail: 'Track A: dual-track visible, sats as default/recommended, stamps as fallback. Migration nudge points to Settings. Consent placeholder locked — no wording until FCA/ICO query resolved. Track B: clean sats-only. Explains rate adjustment honestly. No upsell, no cross-sell.',
+    next: '→ M·05 (privacy promise)'
+  },
+
+  // M·05 — Privacy promise
+  {
+    id: 'M·05',
+    track: 'shared',
+    label: 'Privacy promise',
+    render: (track) => `
+      <div class="s-id">
+        <span>m·05 · privacy</span>
+        <span class="s-id-track shared">all tracks</span>
+      </div>
+      <div class="s-eyebrow">Your data</div>
+      <div class="s-headline">One thing we want you to know.</div>
+      <div class="privacy-visual">
+        <div class="privacy-statement">
+          <em>Refueler knows your train is moving.</em> Your phone works it out locally. We never see where you are.
+        </div>
+        <div class="privacy-detail-row">
+          <div class="privacy-dot"></div>
+          <span>Location stays on your device. Always. This is architecture, not policy.</span>
+        </div>
+        <div class="privacy-detail-row">
+          <div class="privacy-dot"></div>
+          <span>Order-ahead fires a prompt — we never log which train you're on.</span>
+        </div>
+        <div class="privacy-detail-row">
+          <div class="privacy-dot"></div>
+          <span>Your sats wallet is yours. We don't control it.</span>
+        </div>
+        <div class="privacy-detail-row">
+          <div class="privacy-dot"></div>
+          <span>Turn off order-ahead at any time in Settings → Privacy.</span>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--fg-subtle);line-height:1.6;margin-bottom:16px;">
+        This isn't legal copy. It's how the product actually works. Full details in our <span style="color:var(--fg-muted);text-decoration:underline">privacy policy</span>.
+      </div>
+      <button class="s-cta">Understood — I'm in</button>
+      <div class="ambient-privacy">
+        <div class="ambient-dot"></div>
+        <span>on-device only · no location transmitted</span>
+      </div>
+    `,
+    purpose: 'GDPR consent + privacy trust moment. Locked approved copy.',
+    detail: 'Approved privacy wording verbatim: "Refueler knows your train is moving. Your phone works it out locally. We never see where you are." Four concrete detail rows — each factual, not legal. Distinguishes product language from legal copy explicitly. Privacy indicator ambient throughout.',
+    next: '→ M·06 (you\'re set up — Track A/B variants)'
+  },
+
+  // M·06 — You're set up (DIVERGES)
+  {
+    id: 'M·06',
+    track: 'diverges',
+    label: "You're set up",
+    render: (track) => {
+      if (track === 'A') return `
+        <div class="s-id">
+          <span>m·06 · complete</span>
+          <span class="s-id-track track-a">track a</span>
+        </div>
+        <div class="setup-complete">
+          <div class="setup-icon">✦</div>
+          <div class="setup-headline">You're all set.</div>
+          <div class="setup-body">Your first order will earn you a stamp — and we'll show you what sats would have been worth, so you can switch when you're ready.</div>
+          <div class="setup-reward-pill">
+            <span>🎟</span>
+            <span>Loyalty stamps · active</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:16px;">
+            <div style="font-size:10px;color:var(--fg-subtle);font-family:'DM Mono',monospace;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.08em">Stamp progress</div>
+            <div class="stamp-row">
+              <div class="stamp filled">✓</div>
+              ${Array(8).fill('<div class="stamp">○</div>').join('')}
+              <div class="stamp" style="opacity:0.3">🎁</div>
+            </div>
+            <div style="font-size:10px;color:var(--fg-subtle)">1 / 9 · free coffee at 10</div>
+          </div>
+          <div style="font-size:11px;color:var(--fg-subtle);text-align:center;line-height:1.6;max-width:220px">
+            You would have earned <span style="color:var(--orange);font-family:'DM Mono',monospace">⚡ 186 sats</span> on that order.<br>Switch in Settings whenever you like.
+          </div>
+        </div>
+        <button class="s-cta" style="margin-top:0">Place your first order</button>
+        <div class="ambient-privacy">
+          <div class="ambient-dot"></div>
+          <span>on-device only · no location transmitted</span>
+        </div>
+      `;
+      // Track B
+      return `
+        <div class="s-id">
+          <span>m·06 · complete</span>
+          <span class="s-id-track track-b">track b</span>
+        </div>
+        <div class="setup-complete">
+          <div class="setup-icon">⚡</div>
+          <div class="setup-headline">You're earning sats.</div>
+          <div class="setup-body">Your Minibits wallet is ready. Every order from here stacks a little Bitcoin. Automatically. On collection.</div>
+          <div class="setup-reward-pill" style="background:rgba(14,165,201,0.08);border-color:rgba(14,165,201,0.2);color:#0EA5C9;">
+            <span>⚡</span>
+            <span style="font-family:'DM Mono',monospace">sats · active</span>
+          </div>
+          <div style="background:var(--bg-2);border:0.5px solid var(--border-med);border-radius:8px;padding:12px;margin-bottom:4px;text-align:left;width:100%">
+            <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--fg-subtle);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Minibits wallet</div>
+            <div style="font-size:24px;font-family:'DM Mono',monospace;color:var(--orange);letter-spacing:-0.02em">21 sats</div>
+            <div style="font-size:10px;color:var(--fg-subtle);margin-top:2px">welcome gift · more on every order</div>
+          </div>
+        </div>
+        <button class="s-cta">Place your first order</button>
+        <div class="ambient-privacy">
+          <div class="ambient-dot"></div>
+          <span>on-device only · no location transmitted</span>
+        </div>
+      `;
+    },
+    purpose: 'Flow completion. Track A: stamps confirmed + sats nudge. Track B: sats wallet ready.',
+    detail: 'Track A: stamp progress visible from step 1 — "1/9". Sats they would have earned shown as quiet nudge. Migration CTA points to Settings. Track B: clean sats confirmation, Minibits balance showing welcome 21 sats. Both tracks: ambient privacy indicator persists. Handoff-ready for Session 10C.',
+    next: '→ Session 10C (Minibits round 2) · or → Full UX flow Screen 07 (venue)'
+  }
+
+];
+
+function renderScreen() {
+  const s = screens[currentScreen];
+  const max = screens.length - 1;
+
+  // Pills
+  const pillsEl = document.getElementById('pills');
+  pillsEl.innerHTML = screens.map((_, i) => {
+    let cls = 'pill';
+    if (i < currentScreen) cls += ' done';
+    if (i === currentScreen) cls += ' active';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+
+  // Counter
+  document.getElementById('counter').textContent = `${s.id} / M·06`;
+
+  // Nav buttons
+  document.getElementById('prev-btn').disabled = currentScreen === 0;
+  document.getElementById('next-btn').disabled = currentScreen === max;
+
+  // Phone screen
+  document.getElementById('phone-screen').innerHTML = s.render(currentTrack);
+
+  // Meta panel
+  const trackNote = s.track === 'diverges'
+    ? `<div class="track-flag flag-${currentTrack.toLowerCase()}">⚑ This screen has Track A / Track B variants. Use the track selector above to switch.</div>`
+    : `<div class="track-flag flag-shared">Shared screen — identical across Track A and Track B.</div>`;
+
+  document.getElementById('screen-meta').innerHTML = `
+    <div class="meta-id">${s.id} · ${s.label}</div>
+    <div class="meta-purpose">${s.purpose}</div>
+    <div class="meta-detail">${s.detail}</div>
+    <div class="meta-next"><strong>Next:</strong> ${s.next}</div>
+    ${trackNote}
+  `;
+}
+
+renderScreen();
+</script>
+
+</body>
+</html>

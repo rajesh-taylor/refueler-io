@@ -52,6 +52,8 @@
 | `--green` | `#2ECC71` (Carbon) / `#1E8A4A` (Paper) | Success, connected, Collect button (ready state) |
 | `--calm-blue` | `#0EA5C9` | Delay state only. Overrides venue secondary on arc. |
 
+Orange #F5820A — BANNED from all editorial surfaces, article pages, complaints, privacy, and footer links. Permitted only: ETA screen sats/reward figures. No exceptions without CMO + Head of Design sign-off.
+
 ### Carbon theme
 
 | Token | Value |
@@ -107,6 +109,8 @@
 **Arc numerals:** DM Mono only. "Ready" state: DM Sans 300 italic — visually distinct from numerals.
 
 Phase 2: Neue Haas Grotesk Display (~£300–500/yr). Budget line logged.
+
+Variant A locked across all article pages: Source Serif 4, 68ch column, 18px/1.8. B · Sans toggle removed from production HTML. Drop cap: weight 400 only.
 
 ---
 
@@ -276,3 +280,47 @@ STRATEGIC_UX_FLOW.md     ← All user journeys from app open
 PRIVACY_POLICY.md        ← GDPR source of truth
 SESSION_10B_PROMPT.md    ← Next session brief
 ```
+## Locked decisions — post Session 10C/11 (27 May 2026)
+
+**Colour — Paper body text:**
+`--ink` lifted to `#3D3A36` on all editorial and article surfaces.
+Rationale: Source Serif 4 renders heavier than Satoshi at identical colour values;
+lifting ink reduces contrast ratio and matches perceived weight across both typefaces.
+Apply to: index, all article pages. Complaints page: same token for consistency.
+
+**Colour — Carbon body text:**
+`#E4E2DC` confirmed correct for Carbon mode body text. Do not change.
+
+**Orange (#F5820A) — banned from all pages except ETA screen sats/reward figures.**
+No exceptions without CMO + Head of Design sign-off.
+Confirmed absent: complaints, editorial index, all article pages.
+
+**Drop cap — removed from all article pages.**
+Opening paragraph renders as clean body text. No float, no oversized first letter.
+
+**A/B typography toggle — removed from production HTML.**
+Variant A locked: Source Serif 4 body, 68ch, 18px/1.8 desktop.
+No toggle visible to readers. setVariant() JS removed.
+
+**Column width selector — removed from production HTML.**
+68ch editorial measure locked. setCol() JS removed.
+
+**Article order (editorial index):**
+Position 1: the-app-that-earns-your-trust.html (privacy/data)
+Position 2: the-float.html (FCA/regulation)
+Rationale: data article establishes the problem; float article explains the money.
+
+**Article standfirst — The Float:**
+"Your morning coffee app knows more about you than your bank does.
+On 7 May 2026, the regulator finally noticed."
+PS25/12 reference held for body copy only.
+
+**Navigation — all pages must use editorial nav system:**
+REFUELER / [SECTION] wordmark (all-caps, Satoshi 600, 0.12em tracking)
+Nav links: App · Editorial · Privacy · Paper/Carbon toggle pill
+Complaints uses REFUELER / SUPPORT. No bespoke navs on any page.
+
+**Filenames / URL slugs:**
+the-float.html → refueler.io/editorial/the-float
+the-app-that-earns-your-trust.html → refueler.io/editorial/the-app-that-earns-your-trust
+Descriptive slugs carry SEO weight. Never use article-1.html or article-2.html.

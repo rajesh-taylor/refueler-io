@@ -1,0 +1,284 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap');
+
+  .rf-phone {
+    width: 320px;
+    min-height: 640px;
+    background: #0D0D0D;
+    border-radius: 40px;
+    margin: 1.5rem auto;
+    border: 1px solid #2a2a2a;
+    overflow: hidden;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rf-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #555;
+    letter-spacing: 0.04em;
+  }
+
+  .rf-pill { width: 80px; height: 5px; background: #1e1e1e; border-radius: 3px; }
+
+  .rf-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0 24px 40px;
+  }
+
+  .rf-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: #F5820A;
+    text-transform: uppercase;
+    margin-top: 36px;
+    margin-bottom: 14px;
+  }
+
+  .rf-headline {
+    font-size: 40px;
+    font-weight: 300;
+    color: #EFEFEF;
+    line-height: 1.08;
+    margin-bottom: 6px;
+  }
+
+  .rf-headline em { font-style: italic; color: #b8b8b8; }
+
+  .rf-rule { width: 32px; height: 1px; background: #F5820A; margin: 18px 0; opacity: 0.7; }
+
+  .rf-sub {
+    font-size: 15px;
+    font-weight: 300;
+    color: #555;
+    line-height: 1.55;
+    margin-bottom: 28px;
+  }
+
+  /* Balance card — the centrepiece */
+  .rf-balance-card {
+    background: #111;
+    border: 0.5px solid #222;
+    border-radius: 20px;
+    padding: 24px 22px 20px;
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .rf-balance-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 60px;
+    background: linear-gradient(to top, #0f0f0f08, transparent);
+    pointer-events: none;
+  }
+
+  .rf-balance-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #333;
+    margin-bottom: 16px;
+  }
+
+  .rf-balance-amount {
+    font-family: 'DM Mono', monospace;
+    font-size: 52px;
+    font-weight: 300;
+    color: #EFEFEF;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .rf-balance-unit {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: #F5820A;
+    letter-spacing: 0.1em;
+    margin-bottom: 18px;
+  }
+
+  .rf-balance-divider {
+    border: none;
+    border-top: 0.5px solid #1a1a1a;
+    margin-bottom: 14px;
+  }
+
+  .rf-balance-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .rf-balance-source {
+    font-size: 13px;
+    font-weight: 300;
+    color: #444;
+  }
+
+  .rf-balance-venue {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: #333;
+    letter-spacing: 0.06em;
+  }
+
+  /* Status strip */
+  .rf-status-strip {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .rf-status-pill {
+    flex: 1;
+    background: #111;
+    border: 0.5px solid #1e1e1e;
+    border-radius: 10px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+
+  .rf-status-pill-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #333;
+    margin-bottom: 4px;
+  }
+
+  .rf-status-pill-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #666;
+    letter-spacing: 0.04em;
+  }
+
+  .rf-status-pill.confirmed .rf-status-pill-value {
+    color: #4a7a4a;
+  }
+
+  /* Enter app button */
+  .rf-enter-btn {
+    width: 100%;
+    padding: 17px;
+    background: #161616;
+    border: 0.5px solid #2a2a2a;
+    border-radius: 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: #888;
+    cursor: pointer;
+    text-transform: lowercase;
+    margin-top: auto;
+    transition: border-color 0.2s, color 0.2s;
+    position: relative;
+  }
+
+  .rf-enter-btn::after {
+    content: '→';
+    position: absolute;
+    right: 20px;
+    color: #333;
+    font-size: 13px;
+  }
+
+  .rf-enter-btn:hover {
+    border-color: #3a3a3a;
+    color: #bbb;
+  }
+
+  .rf-closing-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: #222;
+    text-align: center;
+    margin-top: 12px;
+    text-transform: uppercase;
+  }
+
+  /* Step dots */
+  .rf-step-dots {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 18px;
+  }
+
+  .rf-dot { width: 18px; height: 3px; border-radius: 2px; background: #222; }
+  .rf-dot.active { background: #F5820A; width: 28px; }
+</style>
+
+<div class="rf-phone">
+  <div class="rf-status">
+    <span>09:41</span>
+    <div class="rf-pill"></div>
+    <span>●●●</span>
+  </div>
+
+  <div class="rf-body">
+    <div class="rf-eyebrow">All set · M·06</div>
+
+    <div class="rf-headline">Your sats<br>are <em>waiting</em><br>for you.</div>
+
+    <div class="rf-rule"></div>
+
+    <div class="rf-sub">Wallet connected. Every order from here earns — quietly, automatically.</div>
+
+    <div class="rf-balance-card">
+      <div class="rf-balance-label">opening balance</div>
+      <div class="rf-balance-amount">42</div>
+      <div class="rf-balance-unit">sats</div>
+      <hr class="rf-balance-divider">
+      <div class="rf-balance-meta">
+        <div class="rf-balance-source">Flat white · this order</div>
+        <div class="rf-balance-venue">Costa · Fenchurch St</div>
+      </div>
+    </div>
+
+    <div class="rf-status-strip">
+      <div class="rf-status-pill confirmed">
+        <div class="rf-status-pill-label">Wallet</div>
+        <div class="rf-status-pill-value">connected</div>
+      </div>
+      <div class="rf-status-pill confirmed">
+        <div class="rf-status-pill-label">Rewards</div>
+        <div class="rf-status-pill-value">active</div>
+      </div>
+      <div class="rf-status-pill">
+        <div class="rf-status-pill-label">Track</div>
+        <div class="rf-status-pill-value">sats</div>
+      </div>
+    </div>
+
+    <div class="rf-step-dots">
+      <div class="rf-dot"></div>
+      <div class="rf-dot"></div>
+      <div class="rf-dot"></div>
+      <div class="rf-dot"></div>
+      <div class="rf-dot"></div>
+      <div class="rf-dot active"></div>
+    </div>
+
+    <button class="rf-enter-btn" onclick="sendPrompt('User completed onboarding — enter Refueler app')">· enter refueler ·</button>
+
+    <div class="rf-closing-note">sats accumulate with every order</div>
+  </div>
+</div>

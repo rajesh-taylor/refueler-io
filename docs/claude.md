@@ -250,6 +250,27 @@ This section tracks what has been decided and what is next. Update it at the end
 - Duffel pitch v1.3: locked; not to be sent pending Services Agreement and fee rate analysis ✓
 - Homepage: Paper default, Carbon toggle top-right ✓
 - Agent architecture: CTO persistent first; CPO/DPO persistent second ✓
+- "Fenchurch St line" only. Never C2C (trademark PENDING).
+- Orange #F5820A: CTA only. Never dominant, never on links or rule lines.
+- Gold #C8A96E: Carbon inset-rule, Carbon toggle active, Carbon blockquote rule ONLY.
+- --link token: ABOLISHED. All links = var(--text-primary) + underline decoration.
+- <td> cells: Source Serif 4 weight 300 only. Never wrap in <strong>.
+- Inset card <p>: italic Source Serif 4 weight 300. Labels = DM Sans upright 600.
+- Satoshi: loaded from Google Fonts. All h1/headings.
+- Carbon default: all app/mobile screens. Paper default: website/editorial.
+- Dual-track rewards: sats + stamp. Stamp dropped if FCA confirms PII.
+- Wallet selection: 3 options only (Minibits / NWC / manual).
+- Stat cards flagged † until queue times field-validated.
+- Lyn Alden "Nothing Stops This Train" — investor one-pager closer, one line only.
+- NUT-14 HTLC escrow on both terminal tracks.
+- NUT-18 not yet live in ippon — confirm endpoint at Cashu dev call.
+- Preparation gate = primary no-show/griefing defence.
+- WEBHOOK_SIGNING_SECRET: Supabase Vault only. Never in .env.
+- Eyebrow label: "Limehouse → Fenchurch Street" until CMO homepage session.
+- Ambient geofence polygons: ~80m approximations — CTO field-validate before production.
+- corridor.ts: single source of truth for all station data. No hardcoded coords elsewhere.
+- Notification bare tap = Confirm intent.
+- Badge count: never set.
 
 ### Pending — Next Sessions (w/c 2 June 2026)
 
@@ -284,6 +305,57 @@ This section tracks what has been decided and what is next. Update it at the end
 | Privacy Page Build | Public-facing /privacy page — privacy.html delivered, Cloudflare Pages ready | Complete |
 | Complaints Page v2 | Public-facing /complaints — HTML delivered. Warm concierge tone, no ICO escalation, Paper theme, all v2 brief items applied. | Complete |
 | Session 10B-i | Homepage hero evaluation — typography (migrated to DM Sans 300), metric (replaced with behavioural statement, no invented figure), headline (locked: "Your order is ready. So is your train."), sign-in panel (in-hero, self-contained component, extraction-ready), Carbon toggle (functional), copyright flag retained | Complete |
+
+## Session 12 — 29 May 2026
+
+### NUT-18 full flow design (customer side — locked)
+- Refueler generates NUT-18 request: amount (sats), mint whitelist (v1 = Minibits only), order ref
+- Delivery: Minibits deeplink primary, QR fallback for NWC/manual wallet users
+- Rate source: CoinGecko primary (60s poll, GBP confirmed supported in ippon exchangeRateService)
+- Kraken as emergency fallback. NUT-18 request validity window = 60 seconds, re-quote prompt on expiry
+- Refueler never touches or routes tokens. Orchestration layer only.
+- Settlement proof returned to Refueler via webhook (preferred) or NUT-07 poll (GDPR risk — see below)
+- Error states locked: (A) insufficient balance — inline, offer stamp fallback; (B) mint rejects proof — "sats are safe, try again"; (C) venue webhook fail — retry 3× exponential backoff, customer sees holding state, support auto-notified at 2 min
+
+### NUT-17 ETA copy + UX framing (locked)
+- Three timing states based on ETA at moment of "ready" push:
+  - >90s: hold push, re-evaluate every 15s, release at ≤90s
+  - 30–90s: "Your flat white is almost ready — you're nearly there."
+  - <30s: "Your flat white is ready. Head straight to the collection point."
+  - ETA unknown: "Your order is confirmed and being prepared. Head to [venue] when you're ready."
+- Never say "ready now" when ETA >30s. Never mention temperature or freshness.
+- "Collection point" not "counter" or "till"
+- Widget arc states: Travelling → Almost ready (slow pulse) → Ready now (full arc, haptic) → Collected (dims, reward confirmed)
+- Pulse = opacity only, 2s cycle, prefers-reduced-motion respected
+
+### Merchant terminal two-track design (locked)
+- Track 1 (Numo-fork APK): independents/small franchises, Android, NUT-18 integrated, auto-sweep to Lightning address, no BTCPay required. Numo = partnership candidate.
+- Track 2 (Command Centre API): franchise head offices, webhook/REST API, EPOS integration, BTCPay optional. Build CC first — stronger investor pitch.
+- NUT-14 HTLC escrow across both: auto-refund if venue misses fulfilment window
+- Supabase venues table = single source of truth for both tracks
+
+### Minibits ippon code review — key findings
+- Stack: TypeScript/Node, Fastify, Prisma, SQLite/PostgreSQL dual schema
+- Database: zero IP fields, zero user identity. Wallet model = accessKey, name, mint, unit, limits only
+- Logging: console/stdout only via react-native-logs, no file/DB writes, no IP in app logs
+- GDPR residual question: Fastify/nginx access log IP capture at infrastructure level — unknown, must ask
+- NUT-11 P2PK: CONFIRMED LIVE. lock_to_pubkey in send route, accepts npub/hex. Dad-pays-son-collects buildable today.
+- NUT-18 payment: CONFIRMED NOT YET LIVE. Decode works, send throws "not yet supported". Critical roadmap question.
+- NUT-17 WebSocket: NOT FOUND in routes. poller.ts in wallet repo suggests polling model. Ask Minibits.
+- NUT-22 blind auth: NOT in codebase. Bearer token auth only (32-byte random accessKey). Roadmap question.
+- Exchange rate: GBP CONFIRMED. CoinGecko primary, 2-min cache, stale fallback. Can call /v1/rate/gbp directly.
+- Multi-mint: operator-configured whitelist. User-dynamic multi-mint = open question.
+- NostrService: pubkey normalisation utility only. Not used for push messaging.
+- Minibits wallet repo: React Native, iOS + Android, 436 commits, actively maintained. They use Claude Code (Opus) for development.
+
+### Minibits email — status
+- Final draft written. Personalised, peer tone, honest about early stage.
+- Do NOT send to support@minibits.cash
+- Contact strategy: introduce on next Cashu dev call (Calle moderates, last Thursday of month), follow up directly after
+- Potential: Bitcoin/Lightning Advisor role for Refueler — best ecash wallet implementation seen, active dev, uses Claude Code
+
+### NUT-11 use case locked
+"Dad orders from the car while charging the EV, locks token to son's wallet pubkey. Son walks into venue, QR scanned, token verified cryptographically. No forwarding, no spoofing. Invisible to user." — approved for investor materials and product docs.
 ---
 
 ## 14. What This File Is Not

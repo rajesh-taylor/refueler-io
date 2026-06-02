@@ -8,60 +8,133 @@
   <meta name="description" content="Refueler Privacy Policy — how we handle your data, your rights, and our GDPR commitments." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Satoshi:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;1,8..60,300;1,8..60,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,600&display=swap" rel="stylesheet" />
   <style>
-    /* ─── Reset & Base ─────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+    /* ─── CSS Custom Properties ─────────────────────── */
     :root {
-      --paper:      #F5F0E8;
-      --ink:        #1A1A1A;
-      --ink-mid:    #5A5650;
-      --ink-light:  #8A8478;
-      --hairline:   #C8C2B8;
-      --card:       #EDE8DF;
-      --orange:     #F5820A;
-      --font:       'DM Sans', sans-serif;
+      --accent-carbon:  #C8A96E;
+
+      --bg:             #F7F4EF;
+      --surface:        #EDEAE4;
+      --text-primary:   #3D3A36;
+      --text-secondary: #5A5751;
+      --text-tertiary:  #9A948D;
+      --border:         #D6D1C8;
+      --inset-rule:     var(--border);
+
+      --font-heading:   'Satoshi', 'DM Sans', sans-serif;
+      --font-serif:     'Source Serif 4', Georgia, serif;
+      --font-sans:      'DM Sans', system-ui, sans-serif;
+
+      --max-w:          1200px;
+      --gutter:         clamp(1.25rem, 4vw, 3rem);
     }
 
+    [data-theme="carbon"] {
+      --bg:             #1E1F22;
+      --surface:        #26282C;
+      --text-primary:   #E4E2DC;
+      --text-secondary: #8A8680;
+      --text-tertiary:  #5A5751;
+      --border:         #35373B;
+      --inset-rule:     var(--accent-carbon);
+    }
+
+    /* ─── Reset ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
 
     body {
-      background: var(--paper);
-      color: var(--ink);
-      font-family: var(--font);
-      font-weight: 300;
-      font-size: 17px;
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-weight: 400;
+      font-size: 16px;
       line-height: 1.7;
       -webkit-font-smoothing: antialiased;
+      transition: background 0.22s ease, color 0.22s ease;
     }
 
-    /* ─── Top Rail ──────────────────────────────────── */
-    .top-rail {
-      position: sticky;
-      top: 0;
+    /* Global link — complaints_v6 pattern: text-primary + underline decoration, no gold */
+    a {
+      color: var(--text-primary);
+      text-decoration: underline;
+      text-decoration-color: var(--border);
+      text-underline-offset: 2px;
+    }
+    a:hover {
+      text-decoration-color: var(--text-secondary);
+    }
+
+    /* ─── Site Header (canonical — matches editorial + complaints) ── */
+    .site-header {
+      border-bottom: 1px solid var(--border);
+      padding: 0 var(--gutter);
+      position: sticky; top: 0;
+      background: var(--bg);
       z-index: 100;
-      height: 52px;
-      background: var(--paper);
-      border-bottom: 1px solid var(--hairline);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .header-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      height: 56px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 40px;
     }
-
     .wordmark {
-      font-size: 15px;
+      font-family: var(--font-heading);
       font-weight: 600;
-      letter-spacing: 0.06em;
+      font-size: 0.875rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-primary);
       text-decoration: none;
-      color: var(--ink);
     }
-
-    .rail-meta {
-      font-size: 13px;
+    .wordmark-divider {
       font-weight: 300;
-      color: var(--ink-light);
+      opacity: 0.3;
+      margin: 0 0.5rem;
+    }
+    .wordmark-section {
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      opacity: 0.55;
+    }
+    nav { display: flex; align-items: center; gap: 2rem; }
+    nav a {
+      font-family: var(--font-heading);
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    nav a:hover { color: var(--text-primary); }
+    nav a.active { color: var(--text-primary); }
+
+    /* Single outlined pill toggle — canonical */
+    .theme-pill {
+      font-family: var(--font-heading);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 0.35rem 0.85rem;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      white-space: nowrap;
+    }
+    .theme-pill:hover {
+      border-color: var(--text-secondary);
+      color: var(--text-primary);
     }
 
     /* ─── Hero ──────────────────────────────────────── */
@@ -71,58 +144,67 @@
     }
 
     .hero h1 {
+      font-family: 'Satoshi', 'DM Sans', system-ui, sans-serif;
       font-size: clamp(2rem, 5vw, 3.5rem);
-      font-weight: 300;
+      font-weight: 400;
       line-height: 1.15;
       letter-spacing: -0.01em;
-      color: var(--ink);
+      color: var(--text-primary);
       margin-bottom: 20px;
     }
 
     .hero-sub {
-      font-size: 19px;
-      font-weight: 300;
-      color: var(--ink-mid);
-      max-width: 620px;
-      line-height: 1.6;
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+      max-width: 52ch;
+      line-height: 1.7;
     }
 
     /* ─── Anchor Nav ────────────────────────────────── */
     .anchor-nav {
       padding: 0 40px 56px;
-      border-bottom: 1px solid var(--hairline);
+      border-bottom: 1px solid var(--border);
     }
 
-    .anchor-nav p {
+    .anchor-nav-label {
+      font-family: 'DM Sans', system-ui, sans-serif;
       font-size: 12px;
       font-weight: 600;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--ink-light);
+      color: var(--text-tertiary);
       margin-bottom: 14px;
     }
 
     .anchor-list {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px 0;
+      gap: 6px 0;
       list-style: none;
     }
 
     .anchor-list li::after {
       content: '·';
       margin: 0 12px;
-      color: var(--hairline);
+      color: var(--border);
     }
     .anchor-list li:last-child::after { content: ''; }
 
     .anchor-list a {
+      font-family: 'DM Sans', system-ui, sans-serif;
       font-size: 15px;
       font-weight: 300;
-      color: var(--orange);
+      color: var(--text-secondary);
       text-decoration: none;
     }
-    .anchor-list a:hover { text-decoration: underline; }
+    .anchor-list a:hover {
+      color: var(--text-primary);
+      text-decoration: underline;
+      text-decoration-color: var(--border);
+      text-underline-offset: 2px;
+    }
 
     /* ─── Main Layout ───────────────────────────────── */
     main {
@@ -131,44 +213,65 @@
       padding: 0 40px;
     }
 
-    /* ─── Section Panel ─────────────────────────────── */
+    /* ─── Policy Section ────────────────────────────── */
     .policy-section {
       display: grid;
       grid-template-columns: 28% 72%;
       gap: 0 48px;
       padding: 52px 0;
-      border-top: 1px solid var(--hairline);
+      border-top: 1px solid var(--border);
     }
 
     .section-label {
-      font-size: 13px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 12px;
       font-weight: 600;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--ink-light);
+      color: var(--text-tertiary);
       padding-top: 4px;
-      line-height: 1.4;
+      line-height: 1.5;
     }
 
-    .section-label a {
-      color: var(--ink-light);
-      text-decoration: none;
+    .section-label .label-sub {
+      display: block;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-weight: 300;
+      font-size: 12px;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--text-tertiary);
+      margin-top: 4px;
     }
 
-    .section-body h2 {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 16px;
-      color: var(--ink);
-      line-height: 1.3;
-    }
-
+    /* ─── Body copy — Source Serif 4 throughout ──────── */
     .section-body p {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 16px;
+      font-weight: 300;
+      line-height: 1.7;
       margin-bottom: 16px;
-      color: var(--ink);
+      color: var(--text-primary);
     }
 
     .section-body p:last-child { margin-bottom: 0; }
+
+    /* strong/b in body = DM Sans for visual contrast */
+    .section-body strong,
+    .section-body b {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-weight: 600;
+      font-style: normal;
+      color: var(--text-primary);
+    }
+
+    .section-body a {
+      color: var(--text-primary);
+      text-decoration: underline;
+      text-decoration-color: var(--border);
+      text-underline-offset: 2px;
+    }
+    .section-body a:hover { text-decoration-color: var(--text-secondary); }
 
     .section-body ul {
       list-style: none;
@@ -176,77 +279,117 @@
     }
 
     .section-body ul li {
-      padding: 4px 0 4px 18px;
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 16px;
+      font-weight: 300;
+      padding: 5px 0 5px 22px;
       position: relative;
+      color: var(--text-primary);
+      line-height: 1.65;
     }
 
     .section-body ul li::before {
       content: '—';
       position: absolute;
       left: 0;
-      color: var(--hairline);
+      color: var(--border);
     }
 
-    .section-body a {
-      color: var(--orange);
-      text-decoration: none;
-    }
-    .section-body a:hover { text-decoration: underline; }
-
-    /* ─── Inset Card ────────────────────────────────── */
-    .inset-card {
-      background: var(--card);
-      border-radius: 4px;
-      padding: 36px 40px;
-      margin: 24px 0;
+    .section-body ul li strong {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-weight: 600;
+      color: var(--text-primary);
     }
 
-    .inset-card p {
-      font-size: 16px;
-      font-style: italic;
-      color: var(--ink-mid);
-      margin-bottom: 0;
-    }
-
-    /* ─── Data Table ────────────────────────────────── */
+    /* ─── Data Table — Source Serif 4 body, DM Sans headers ── */
     .data-table {
       width: 100%;
       border-collapse: collapse;
       margin: 24px 0;
-      font-size: 15px;
     }
 
     .data-table th {
-      font-size: 12px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.10em;
       text-transform: uppercase;
-      color: var(--ink-light);
+      color: var(--text-tertiary);
       text-align: left;
       padding: 10px 14px 10px 0;
-      border-bottom: 1px solid var(--hairline);
+      border-bottom: 1px solid var(--border);
     }
 
+    /* All table cells: Source Serif 4 — no mixed fonts */
     .data-table td {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 15px;
+      font-weight: 300;
       padding: 13px 14px 13px 0;
-      border-bottom: 1px solid var(--hairline);
+      border-bottom: 1px solid var(--border);
       vertical-align: top;
-      color: var(--ink);
+      color: var(--text-primary);
       line-height: 1.55;
+    }
+
+    /* strong in td = Source Serif bold, not DM Sans — keeps column uniform */
+    .data-table td strong {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-weight: 600;
       font-size: 15px;
     }
 
     .data-table tr:last-child td { border-bottom: none; }
 
-    .data-table td strong,
-    .data-table th:last-child { padding-right: 0; }
+    /* Table inside inset card — remove top margin */
+    .inset-card .data-table { margin: 0; }
 
-    /* ─── Rights Grid ───────────────────────────────── */
-    .rights-grid {
-      background: var(--card);
-      border-radius: 4px;
-      padding: 36px 40px;
+    /* ─── Inset Card ─────────────────────────────────── */
+    .inset-card {
+      background: var(--surface);
+      border-left: 2px solid var(--inset-rule);
+      border-radius: 0 4px 4px 0;
+      padding: 28px 32px;
       margin: 24px 0;
+      transition: background 0.22s, border-color 0.22s;
+    }
+
+    .inset-card p {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 16px;
+      font-style: italic;
+      font-weight: 300;
+      color: var(--text-secondary);
+      margin-bottom: 0;
+      line-height: 1.65;
+    }
+
+    .inset-card p + p { margin-top: 12px; }
+
+    .inset-card p strong {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-style: normal;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    .inset-card a {
+      font-style: normal;
+    }
+
+    /* §13 contact card — upright body text, no italic */
+    .contact-card p {
+      font-style: normal;
+    }
+
+    /* ─── Rights Grid ────────────────────────────────── */
+    .rights-grid {
+      background: var(--surface);
+      border-radius: 4px;
+      padding: 28px 32px;
+      margin: 24px 0;
+      transition: background 0.22s;
     }
 
     .rights-grid .right-item {
@@ -254,38 +397,54 @@
       grid-template-columns: 200px 1fr;
       gap: 0 24px;
       padding: 14px 0;
-      border-bottom: 1px solid var(--hairline);
-      font-size: 15px;
+      border-bottom: 1px solid var(--border);
     }
 
     .rights-grid .right-item:last-child { border-bottom: none; padding-bottom: 0; }
     .rights-grid .right-item:first-child { padding-top: 0; }
 
     .right-name {
+      font-family: 'DM Sans', system-ui, sans-serif;
       font-weight: 600;
-      color: var(--ink);
+      color: var(--text-primary);
       font-size: 14px;
     }
 
     .right-art {
+      font-family: 'DM Sans', system-ui, sans-serif;
       font-size: 12px;
-      color: var(--ink-light);
+      color: var(--text-tertiary);
       font-weight: 300;
       display: block;
       margin-top: 2px;
     }
 
-    .right-desc { color: var(--ink-mid); line-height: 1.5; }
+    .right-desc {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
 
     .right-action {
       display: inline-block;
       margin-top: 4px;
+      font-family: 'DM Sans', system-ui, sans-serif;
       font-size: 13px;
-      color: var(--orange);
+      color: var(--text-secondary);
       font-weight: 400;
     }
 
-    /* ─── Arch Block ─────────────────────────────────── */
+    .right-action a {
+      color: var(--text-primary);
+      text-decoration: underline;
+      text-decoration-color: var(--border);
+      text-underline-offset: 2px;
+    }
+    .right-action a:hover { text-decoration-color: var(--text-secondary); }
+
+    /* ─── Arch Steps ─────────────────────────────────── */
     .arch-steps {
       counter-reset: step;
       list-style: none;
@@ -293,11 +452,16 @@
     }
 
     .arch-steps li {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 16px;
+      font-weight: 300;
       counter-increment: step;
       position: relative;
-      padding: 0 0 20px 40px;
-      border-left: 2px solid var(--hairline);
+      padding: 0 0 22px 40px;
+      border-left: 2px solid var(--border);
       margin-left: 12px;
+      color: var(--text-primary);
+      line-height: 1.65;
     }
 
     .arch-steps li:last-child { border-left-color: transparent; padding-bottom: 0; }
@@ -309,105 +473,150 @@
       top: 2px;
       width: 24px;
       height: 24px;
-      background: var(--paper);
-      border: 2px solid var(--hairline);
+      background: var(--bg);
+      border: 2px solid var(--border);
       border-radius: 50%;
+      font-family: 'DM Sans', system-ui, sans-serif;
       font-size: 12px;
       font-weight: 600;
-      color: var(--ink-light);
+      color: var(--text-tertiary);
       display: flex;
       align-items: center;
       justify-content: center;
-      line-height: 1;
+      transition: background 0.22s;
     }
 
-    /* ─── Contact Panel ─────────────────────────────── */
+    /* ─── Pull Quote ─────────────────────────────────── */
+    .pull-quote {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 18px;
+      font-style: italic;
+      font-weight: 300;
+      color: var(--text-secondary);
+      border-left: 2px solid var(--inset-rule);
+      padding: 14px 22px;
+      margin: 28px 0;
+      line-height: 1.65;
+      transition: border-color 0.22s;
+    }
+
+    /* ─── Contact / ICO Blocks ───────────────────────── */
     .contact-highlight {
       margin-top: 20px;
       padding: 20px 24px;
-      background: var(--card);
+      background: var(--surface);
       border-radius: 4px;
-      border-left: 3px solid var(--orange);
+      border-left: 2px solid var(--inset-rule);
+      transition: background 0.22s, border-color 0.22s;
     }
 
     .contact-highlight p { margin-bottom: 0; font-size: 16px; }
 
-    /* ─── ICO Block ─────────────────────────────────── */
     .ico-block {
       margin-top: 20px;
       padding: 20px 24px;
-      background: var(--card);
+      background: var(--surface);
       border-radius: 4px;
+      border-left: 2px solid var(--border);
+      transition: background 0.22s;
     }
 
-    .ico-block p { margin-bottom: 8px; font-size: 15px; }
+    .ico-block p {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 15px;
+      font-weight: 300;
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
     .ico-block p:last-child { margin-bottom: 0; }
-
-    /* ─── Inline highlight ──────────────────────────── */
-    .pull-quote {
-      font-size: 17px;
-      font-style: italic;
-      color: var(--ink-mid);
-      border-left: 3px solid var(--orange);
-      padding: 12px 20px;
-      margin: 24px 0;
-      background: transparent;
+    .ico-block strong {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-weight: 600;
+      color: var(--text-primary);
     }
 
-    /* ─── Footer ────────────────────────────────────── */
+    /* ─── Notice Block ───────────────────────────────── */
+    .notice-block {
+      margin: 20px 0;
+      padding: 14px 20px;
+      background: var(--surface);
+      border-radius: 4px;
+      border-left: 2px solid var(--inset-rule);
+      transition: background 0.22s;
+    }
+
+    .notice-block p {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--text-secondary);
+      margin-bottom: 0;
+      line-height: 1.55;
+    }
+
+    /* ─── Footer ─────────────────────────────────────── */
     footer {
-      border-top: 1px solid var(--hairline);
-      padding: 40px 40px;
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      flex-wrap: wrap;
+      border-top: 1px solid var(--border);
+      padding: 40px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: start;
       gap: 24px;
       max-width: 1040px;
-      margin: 40px auto 0;
+      margin: 48px auto 0;
     }
 
     .footer-brand {
+      font-family: 'DM Sans', system-ui, sans-serif;
       font-size: 13px;
       font-weight: 600;
       letter-spacing: 0.06em;
-      color: var(--ink);
+      color: var(--text-primary);
+      margin-bottom: 8px;
     }
 
     .footer-meta {
+      font-family: 'DM Sans', system-ui, sans-serif;
       font-size: 13px;
       font-weight: 300;
-      color: var(--ink-light);
+      color: var(--text-tertiary);
       line-height: 1.7;
     }
 
     .footer-meta a {
-      color: var(--orange);
-      text-decoration: none;
+      color: var(--text-tertiary);
+      text-decoration: underline;
+      text-decoration-color: var(--border);
+      text-underline-offset: 2px;
     }
-    .footer-meta a:hover { text-decoration: underline; }
 
     .footer-links {
       display: flex;
       gap: 24px;
       flex-wrap: wrap;
+      align-items: flex-start;
     }
 
     .footer-links a {
+      font-family: 'DM Sans', system-ui, sans-serif;
       font-size: 13px;
       font-weight: 300;
-      color: var(--ink-light);
+      color: var(--text-tertiary);
       text-decoration: none;
     }
-    .footer-links a:hover { color: var(--orange); }
+    .footer-links a:hover { color: var(--text-primary); text-decoration: none; }
 
     /* ─── Responsive ─────────────────────────────────── */
+    @media (max-width: 860px) {
+      .rail-nav { display: none; }
+    }
+
     @media (max-width: 720px) {
       .top-rail { padding: 0 20px; }
       .hero { padding: 48px 20px 40px; }
       .anchor-nav { padding: 0 20px 40px; }
       main { padding: 0 20px; }
-      footer { padding: 32px 20px; }
+      footer { padding: 32px 20px; grid-template-columns: 1fr; }
 
       .policy-section {
         grid-template-columns: 1fr;
@@ -420,32 +629,40 @@
         gap: 6px;
       }
 
-      .inset-card, .rights-grid { padding: 24px 20px; }
-
+      .inset-card, .rights-grid { padding: 20px 16px; }
       .data-table { font-size: 14px; }
-      .data-table th, .data-table td { padding: 10px 10px 10px 0; }
+      .data-table th, .data-table td { padding: 10px 8px 10px 0; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ─── Top Rail ─────────────────────────────── -->
-  <header role="banner">
-    <div class="top-rail">
-      <a href="/" class="wordmark" aria-label="Refueler home">REFUELER</a>
-      <span class="rail-meta">Last updated: May 2026</span>
+  <!-- ─── Site Header (canonical) ──────────────── -->
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="index.html" class="wordmark">
+        Refueler
+        <span class="wordmark-divider">/</span>
+        <span class="wordmark-section">Privacy</span>
+      </a>
+      <nav>
+        <a href="index.html">App</a>
+        <a href="refueler-editorial-index.html">Editorial</a>
+        <a href="privacy_v1_3.html" class="active">Privacy</a> <!-- LINK FIX: /privacy → privacy_v1_3.html (flat structure) -->
+        <button class="theme-pill" onclick="toggleTheme()" id="theme-btn">Paper / Carbon</button>
+      </nav>
     </div>
   </header>
 
   <!-- ─── Hero ─────────────────────────────────── -->
   <div class="hero">
-    <h1>Your data,<br>handled carefully.</h1>
+    <h1>Privacy Policy</h1>
     <p class="hero-sub">Refueler collects the minimum needed to run the service — and nothing we don't need. Your location never leaves your device. Your rewards are yours from the moment they are issued.</p>
   </div>
 
   <!-- ─── Anchor Navigation ─────────────────────── -->
   <nav class="anchor-nav" aria-label="Jump to section">
-    <p>Jump to</p>
+    <p class="anchor-nav-label">Jump to</p>
     <ul class="anchor-list">
       <li><a href="#who-we-are">Who we are</a></li>
       <li><a href="#what-we-process">What we process</a></li>
@@ -453,7 +670,8 @@
       <li><a href="#legal-basis">Legal basis</a></li>
       <li><a href="#retention">Retention</a></li>
       <li><a href="#security">Security</a></li>
-      <li><a href="#bitcoin">Bitcoin &amp; rewards</a></li>
+      <li><a href="#payments">Payments &amp; ecash</a></li>
+      <li><a href="#rewards">Rewards</a></li>
       <li><a href="#cookies">Cookies</a></li>
       <li><a href="#newsletter">Newsletter</a></li>
       <li><a href="#your-rights">Your rights</a></li>
@@ -462,7 +680,7 @@
     </ul>
   </nav>
 
-  <!-- ─── Main Content ──────────────────────────── -->
+  <!-- ─── Main ──────────────────────────────────── -->
   <main id="main-content">
 
     <!-- 01 · Who we are -->
@@ -473,7 +691,7 @@
         <p>We are registered with the Information Commissioner's Office. Our ICO registration number will be displayed here prior to this policy going live.</p>
         <p><strong>Third-party processors</strong></p>
         <div class="inset-card">
-          <table class="data-table" style="margin:0;">
+          <table class="data-table">
             <thead>
               <tr>
                 <th>Processor</th>
@@ -483,12 +701,12 @@
             </thead>
             <tbody>
               <tr>
-                <td><strong>Supabase</strong></td>
+                <td>Supabase</td>
                 <td>Database infrastructure and authentication</td>
                 <td>EU</td>
               </tr>
               <tr>
-                <td><strong>Cloudflare</strong></td>
+                <td>Cloudflare</td>
                 <td>Content delivery, DNS, Pages hosting, and Workers API layer</td>
                 <td>Global edge / DPA</td>
               </tr>
@@ -545,14 +763,20 @@
               <td>Nobody</td>
             </tr>
             <tr>
-              <td><strong>Location data</strong></td>
-              <td>On-device geofence only — never transmitted</td>
-              <td><strong>Your device only</strong></td>
-              <td><strong>Nobody</strong></td>
+              <td>Webhook source IP</td>
+              <td>Security audit — HMAC signature verification log only</td>
+              <td>Supabase (EU) · 90 days</td>
+              <td>Nobody</td>
+            </tr>
+            <tr>
+              <td>Location data</td>
+              <td>On-device geofence — never transmitted</td>
+              <td>Your device only</td>
+              <td>Nobody</td>
             </tr>
           </tbody>
         </table>
-        <p><strong>We do not collect:</strong> name, phone number, age, gender, payment card details, IP address, browsing behaviour beyond the order flow, or biometric data beyond the Passkey public key (which cannot reconstruct a biometric).</p>
+        <p><strong>We do not collect:</strong> name, phone number, age, gender, payment card details, browsing behaviour beyond the order flow, or biometric data beyond the Passkey public key (which cannot reconstruct a biometric).</p>
       </div>
     </section>
 
@@ -560,12 +784,10 @@
     <section class="policy-section" id="location" aria-labelledby="label-location">
       <div class="section-label" id="label-location">03 · Location architecture</div>
       <div class="section-body">
-        <p>The Passive Ambient Awareness feature — which detects when your train is moving and prepares your order — runs entirely on your device. No location data is ever transmitted to our servers.</p>
-
+        <p>The Passive Ambient Awareness feature — which detects when your train is approaching and prepares your order — runs entirely on your device. No location data is ever transmitted to our servers.</p>
         <div class="pull-quote">
           "Refueler knows your train is moving. Your phone works it out locally. We never see where you are."
         </div>
-
         <p><strong>How it works, step by step:</strong></p>
         <ol class="arch-steps">
           <li>Geofence boundaries are registered locally on your phone's OS — no coordinates are sent to our servers</li>
@@ -574,14 +796,16 @@
           <li>If you confirm, your phone sends only: item + vendor ID + session token — <strong>no location data</strong></li>
           <li>Our database has no location column — this is an architectural guarantee, not a policy promise</li>
         </ol>
-
         <p><strong>Opt-in required.</strong> You choose whether to enable this feature during onboarding. You can toggle it off at any time in Settings → Location. Disabling it has no effect on ordering, reward earning, or any other app feature.</p>
       </div>
     </section>
 
     <!-- 04 · Legal basis -->
     <section class="policy-section" id="legal-basis" aria-labelledby="label-legal">
-      <div class="section-label" id="label-legal">04 · Legal basis<br><span style="font-weight:300;font-size:12px;letter-spacing:0;text-transform:none;color:var(--ink-light);">UK GDPR Art. 6</span></div>
+      <div class="section-label" id="label-legal">
+        04 · Legal basis
+        <span class="label-sub">UK GDPR Art. 6</span>
+      </div>
       <div class="section-body">
         <p>Every processing activity has a lawful basis under Article 6 of the UK GDPR. We do not rely on legitimate interests for anything where consent or contract is the appropriate basis.</p>
         <table class="data-table">
@@ -617,7 +841,7 @@
               <td>Art. 6(1)(a) — consent</td>
             </tr>
             <tr>
-              <td>Security &amp; fraud prevention</td>
+              <td>Security &amp; fraud prevention (incl. webhook IP log)</td>
               <td>Art. 6(1)(f) — legitimate interests</td>
             </tr>
             <tr>
@@ -668,9 +892,15 @@
               <td>Duration of account</td>
               <td>Authentication</td>
             </tr>
+            <tr>
+              <td>Webhook security log (source IP)</td>
+              <td>90 days — auto-purged</td>
+              <td>Security audit only · not linked to user identity · not used for profiling</td>
+            </tr>
           </tbody>
         </table>
-        <p>Ecash reward records are retained for six years under HMRC financial compliance obligations. This retention period applies even if you delete your account. All other data is deleted upon account closure.</p>
+        <p>Ecash reward records are retained for six years under HMRC financial compliance obligations. This applies even if you delete your account. All other data is deleted upon account closure.</p>
+        <p>The webhook security log records the source IP of incoming payment settlement webhooks solely to detect forged or replayed requests. It is not linked to any user identity and is never used for profiling.</p>
       </div>
     </section>
 
@@ -682,42 +912,61 @@
           <li><strong>Magic link</strong> — passwordless, single-use, expires after 10 minutes</li>
           <li><strong>Passkey (WebAuthn)</strong> — biometric re-authentication for returning users; only the public key is stored; your private key never leaves your device</li>
           <li><strong>Sessions</strong> — short-lived JWT (1 hour); stored in memory only, never in localStorage or persistent cookies</li>
-          <li><strong>Sensitive actions</strong> — linking a new wallet or deleting your account always requires a fresh magic link confirmation, regardless of your active session</li>
+          <li><strong>Sensitive actions</strong> — linking a new wallet or deleting your account always requires a fresh magic link confirmation, regardless of active session</li>
           <li><strong>Encryption</strong> — AES-256 at rest for all Supabase data; TLS 1.3 in transit</li>
+          <li><strong>Webhook security</strong> — incoming payment confirmations are verified using HMAC-SHA256 signatures; unverified requests are silently rejected and the source IP is logged for 90 days (audit only — see §05)</li>
         </ul>
       </div>
     </section>
 
-    <!-- 07 · Bitcoin & rewards -->
-    <section class="policy-section" id="bitcoin" aria-labelledby="label-bitcoin">
-      <div class="section-label" id="label-bitcoin">07 · Bitcoin, ecash &amp; rewards</div>
+    <!-- 07 · Payments & ecash -->
+    <section class="policy-section" id="payments" aria-labelledby="label-payments">
+      <div class="section-label" id="label-payments">07 · Payments &amp; ecash</div>
       <div class="section-body">
-        <p>Refueler issues rewards as ecash tokens denominated in sats, via the Cashu protocol (Minibits wallet). These are bearer instruments — they live on your device, not on our servers.</p>
+        <p>Refueler uses the Cashu ecash protocol for payments. When you pay for an order, your wallet generates an ecash token. Settlement is confirmed via a webhook from the mint — a server-to-server message that tells us your payment has cleared, without revealing your wallet identity.</p>
         <div class="inset-card">
-          <p><strong>You own your rewards from the moment they are issued.</strong> We cannot freeze, reverse, or access them.</p>
+          <p><strong>We never see your wallet address, Lightning invoice, or on-chain address.</strong> The mint confirms payment to us. We do not query the mint about you.</p>
         </div>
-        <p><strong>What we record:</strong> reward amount in sats, timestamp, and vendor per transaction (for financial record-keeping only).</p>
-        <p><strong>What we do not record:</strong> Lightning address, Minibits wallet ID, node pubkey, or on-chain address after payment is sent. Lightning addresses are held in transient memory for the duration of the payment push only — they are never written to our database.</p>
-        <p>The Cashu ecash balance lives on your device. When you redeem tokens, they settle as sats on the Lightning Network.</p>
+        <p><strong>Payment confirmation fallback.</strong> In exceptional cases where payment webhook delivery fails after three retries over two minutes, our backend may query the mint directly to verify payment status. This is a last-resort mechanism only.</p>
+        <div class="notice-block">
+          <p>This fallback (NUT-07) is the only instance where our backend initiates contact with the mint about a specific order. It is logged in our webhook failure audit table for ICO compliance. The log records only: order reference, timestamp, and outcome — never wallet identity.</p>
+        </div>
+        <p>Lightning addresses are held in transient memory for the duration of the payment push only — they are never written to our database.</p>
       </div>
     </section>
 
-    <!-- 08 · Cookies -->
+    <!-- 08 · Rewards -->
+    <section class="policy-section" id="rewards" aria-labelledby="label-rewards">
+      <div class="section-label" id="label-rewards">08 · Rewards</div>
+      <div class="section-body">
+        <p>Refueler offers two reward tracks. You choose during onboarding and can switch at any time in Settings.</p>
+        <div class="inset-card">
+          <p><strong>Sats track (default).</strong> Rewards are issued as ecash tokens denominated in Bitcoin satoshis. Tokens are bearer instruments — they live on your device from the moment of issuance. We record: amount in sats, timestamp, and vendor — for financial records only. We do not record your wallet address or node pubkey.</p>
+          <p><strong>Loyalty stamp track.</strong> A digital stamp card mirroring the participating venue's own scheme. Stamp progress is stored locally on your device and synchronised with our servers solely for continuity across devices. The same access, correction, and deletion rights apply to your stamp record as to any other personal data we hold.</p>
+        </div>
+        <p><strong>A note on stamp data classification.</strong> Whether locally stored loyalty stamp progress constitutes personally identifiable data under FCA and ICO frameworks is a question we have raised formally. Until we receive guidance, stamp data is treated as potentially personal data in this policy, and all GDPR rights apply to it accordingly.</p>
+        <div class="notice-block">
+          <p>FCA pre-application meetings open July 2026. This section will be updated following formal guidance on loyalty stamp classification. If guidance confirms stamps are not PII, the stamp track data section will be updated at v2.0 with email notification to affected users.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 09 · Cookies -->
     <section class="policy-section" id="cookies" aria-labelledby="label-cookies">
-      <div class="section-label" id="label-cookies">08 · Cookies</div>
+      <div class="section-label" id="label-cookies">09 · Cookies</div>
       <div class="section-body">
         <p>We use one strictly necessary cookie:</p>
         <div class="inset-card">
           <p><strong>Supabase session token</strong> — a short-lived JWT that expires when you close the tab, or within 1 hour. That is all.</p>
         </div>
-        <p>No advertising cookies. No analytics cookies. No third-party cookies. No cookie banner is required — nothing here needs separate consent beyond what you agreed to in the terms of service.</p>
+        <p>No advertising cookies. No analytics cookies. No third-party cookies. No cookie banner is required — nothing here needs separate consent beyond what you agreed at sign-up.</p>
         <p>Verify this yourself: browser developer tools → Application → Cookies. One token. Nothing else.</p>
       </div>
     </section>
 
-    <!-- 09 · Newsletter -->
+    <!-- 10 · Newsletter -->
     <section class="policy-section" id="newsletter" aria-labelledby="label-newsletter">
-      <div class="section-label" id="label-newsletter">09 · Newsletter</div>
+      <div class="section-label" id="label-newsletter">10 · Newsletter</div>
       <div class="section-body">
         <p>We send a weekly or fortnightly newsletter — Bitcoin news, platform updates, and event announcements.</p>
         <p>Newsletter subscription requires a <strong>separate, explicit opt-in</strong> from account creation. You will never be subscribed automatically.</p>
@@ -725,12 +974,14 @@
       </div>
     </section>
 
-    <!-- 10 · Your rights -->
+    <!-- 11 · Your rights -->
     <section class="policy-section" id="your-rights" aria-labelledby="label-rights">
-      <div class="section-label" id="label-rights">10 · Your rights<br><span style="font-weight:300;font-size:12px;letter-spacing:0;text-transform:none;color:var(--ink-light);">UK GDPR Arts. 15–22</span></div>
+      <div class="section-label" id="label-rights">
+        11 · Your rights
+        <span class="label-sub">UK GDPR Arts. 15–22</span>
+      </div>
       <div class="section-body">
         <p>You have the following rights over your personal data. We will acknowledge any request within 24 hours and respond in full within 30 days.</p>
-
         <div class="rights-grid">
           <div class="right-item">
             <div>
@@ -813,11 +1064,9 @@
             </div>
           </div>
         </div>
-
         <div class="contact-highlight">
           <p>To exercise any of these rights, email <a href="mailto:privacy@refueler.io">privacy@refueler.io</a>. We will acknowledge within 24 hours and respond in full within 30 days.</p>
         </div>
-
         <div class="ico-block" style="margin-top:20px;">
           <p><strong>Right to complain to the ICO</strong></p>
           <p>If you believe we have handled your personal data unlawfully, you have the right to lodge a complaint with the Information Commissioner's Office (ICO) under Article 77 of the UK GDPR.</p>
@@ -827,26 +1076,26 @@
       </div>
     </section>
 
-    <!-- 11 · Changes -->
+    <!-- 12 · Changes -->
     <section class="policy-section" id="changes" aria-labelledby="label-changes">
-      <div class="section-label" id="label-changes">11 · Changes to this policy</div>
+      <div class="section-label" id="label-changes">12 · Changes to this policy</div>
       <div class="section-body">
         <p>We will notify you of any material changes by email before they take effect. The current version is always available at <a href="https://refueler.io/privacy">refueler.io/privacy</a>.</p>
         <p><strong>Material changes include:</strong> new categories of data collected, new processors, new legal bases, or changes to retention periods.</p>
         <p><strong>Minor corrections</strong> (wording, address updates) increment the minor version number only and do not trigger email notification.</p>
-        <p><strong>Versioning:</strong> MAJOR.MINOR — e.g. 1.0 (launch) → 1.1 (minor correction) → 2.0 (material change). Version history is maintained in a private Git repository.</p>
+        <p><strong>Versioning:</strong> MAJOR.MINOR — e.g. 1.0 (launch) → 1.2 (minor additions) → 2.0 (material change). Version history is maintained in a private Git repository.</p>
       </div>
     </section>
 
-    <!-- 12 · Contact -->
+    <!-- 13 · Contact -->
     <section class="policy-section" id="contact" aria-labelledby="label-contact">
-      <div class="section-label" id="label-contact">12 · Contact</div>
+      <div class="section-label" id="label-contact">13 · Contact</div>
       <div class="section-body">
         <p>For any data-related enquiries, requests, or concerns:</p>
-        <div class="inset-card">
-          <p><strong>Email:</strong> <a href="mailto:privacy@refueler.io">privacy@refueler.io</a><br />
-          <strong>Post:</strong> [Registered address — to be confirmed at incorporation]<br />
-          <strong>ICO registration:</strong> [Number to be added prior to publication]</p>
+        <div class="inset-card contact-card">
+          <p><strong>Email:</strong> <a href="mailto:privacy@refueler.io">privacy@refueler.io</a></p>
+          <p><strong>Post:</strong> [Registered address — to be confirmed at incorporation]</p>
+          <p><strong>ICO registration:</strong> [Number to be added prior to publication]</p>
         </div>
         <p>We are a small, committed team. Every privacy enquiry is read and responded to personally.</p>
       </div>
@@ -859,17 +1108,45 @@
     <div>
       <div class="footer-brand">REFUELER</div>
       <div class="footer-meta" style="margin-top:8px;">
-        Privacy Policy · Version 1.1 · May 2026<br />
+        Privacy Policy · Version 1.2 · May 2026<br />
         Refueler (incorporating as Refueler Ltd, England &amp; Wales)<br />
         Data controller · <a href="mailto:privacy@refueler.io">privacy@refueler.io</a>
       </div>
     </div>
     <div class="footer-links">
-      <a href="/">Home</a>
-      <a href="/complaints">Complaints</a>
+      <a href="complaints_v8.html">Support</a>
+      <a href="privacy_v1_3.html" aria-current="page">Privacy</a> <!-- LINK FIX: /privacy → privacy_v1_3.html (flat structure) -->
       <a href="mailto:privacy@refueler.io">Contact</a>
     </div>
   </footer>
+
+  <script>
+  /* THEME FIX — rfTheme localStorage persistence */
+  const THEME_KEY = 'rfTheme';
+
+  function applyTheme(theme) {
+    const root = document.documentElement;
+    const pill = document.getElementById('themePill') || document.getElementById('theme-btn');
+    if (theme === 'carbon') {
+      root.classList.add('carbon-mode');
+      root.setAttribute('data-theme', 'carbon');
+      if (pill) pill.textContent = 'Carbon / Paper';
+    } else {
+      root.classList.remove('carbon-mode');
+      root.removeAttribute('data-theme');
+      if (pill) pill.textContent = 'Paper / Carbon';
+    }
+  }
+
+  function toggleTheme() {
+    const current = localStorage.getItem(THEME_KEY) || 'paper';
+    const next = current === 'paper' ? 'carbon' : 'paper';
+    localStorage.setItem(THEME_KEY, next);
+    applyTheme(next);
+  }
+
+  (function () { applyTheme(localStorage.getItem(THEME_KEY) || 'paper'); })();
+</script>
 
 </body>
 </html>

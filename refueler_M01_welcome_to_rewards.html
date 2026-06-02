@@ -1,0 +1,265 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap');
+
+  .rf-phone {
+    width: 320px;
+    min-height: 620px;
+    background: #0D0D0D;
+    border-radius: 40px;
+    margin: 1.5rem auto;
+    border: 1px solid #2a2a2a;
+    overflow: hidden;
+    position: relative;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rf-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #555;
+    letter-spacing: 0.04em;
+  }
+
+  .rf-pill {
+    width: 80px;
+    height: 5px;
+    background: #1e1e1e;
+    border-radius: 3px;
+    margin: 0 auto;
+  }
+
+  .rf-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0 28px 40px;
+  }
+
+  .rf-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: #F5820A;
+    text-transform: uppercase;
+    margin-top: 40px;
+    margin-bottom: 16px;
+  }
+
+  .rf-headline {
+    font-size: 38px;
+    font-weight: 300;
+    color: #EFEFEF;
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+  }
+
+  .rf-headline em {
+    font-style: italic;
+    color: #b8b8b8;
+  }
+
+  .rf-rule {
+    width: 32px;
+    height: 1px;
+    background: #F5820A;
+    margin: 20px 0;
+    opacity: 0.7;
+  }
+
+  .rf-sub {
+    font-size: 16px;
+    font-weight: 300;
+    color: #777;
+    line-height: 1.6;
+    letter-spacing: 0.01em;
+  }
+
+  .rf-reward-card {
+    margin-top: 32px;
+    background: #141414;
+    border: 0.5px solid #2a2a2a;
+    border-radius: 16px;
+    padding: 20px 20px 18px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .rf-reward-card::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 24px;
+    right: 24px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #F5820A22, transparent);
+  }
+
+  .rf-reward-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: #555;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .rf-sats-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .rf-sats-amount {
+    font-family: 'DM Mono', monospace;
+    font-size: 36px;
+    font-weight: 300;
+    color: #EFEFEF;
+    letter-spacing: -0.02em;
+  }
+
+  .rf-sats-unit {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: #F5820A;
+    letter-spacing: 0.08em;
+  }
+
+  .rf-fiat-equiv {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #444;
+    margin-top: 6px;
+    letter-spacing: 0.04em;
+  }
+
+  .rf-divider {
+    border: none;
+    border-top: 0.5px solid #1e1e1e;
+    margin: 14px 0;
+  }
+
+  .rf-order-line {
+    font-size: 13px;
+    color: #555;
+    font-weight: 300;
+    letter-spacing: 0.01em;
+  }
+
+  .rf-order-line span {
+    color: #888;
+    float: right;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+  }
+
+  .rf-cta {
+    margin-top: auto;
+    padding-top: 28px;
+  }
+
+  .rf-btn-primary {
+    width: 100%;
+    padding: 16px;
+    background: #EFEFEF;
+    color: #0D0D0D;
+    border: none;
+    border-radius: 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-bottom: 12px;
+  }
+
+  .rf-btn-ghost {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    color: #444;
+    border: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-align: center;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+
+  .rf-step-dots {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .rf-dot {
+    width: 18px;
+    height: 3px;
+    border-radius: 2px;
+    background: #222;
+  }
+
+  .rf-dot.active {
+    background: #F5820A;
+    width: 28px;
+  }
+</style>
+
+<h2 class="sr-only">Refueler Minibits onboarding screen M·01 — Welcome to rewards</h2>
+
+<div class="rf-phone">
+  <div class="rf-status">
+    <span>09:41</span>
+    <div class="rf-pill"></div>
+    <span>●●●</span>
+  </div>
+
+  <div class="rf-body">
+    <div class="rf-eyebrow">Your rewards · M·01</div>
+
+    <div class="rf-headline">
+      You've just<br>
+      <em>earned something</em><br>
+      worth keeping.
+    </div>
+
+    <div class="rf-rule"></div>
+
+    <div class="rf-sub">
+      Your flat white earned you sats — a tiny piece of Bitcoin. They're real, they're yours, and they don't expire.
+    </div>
+
+    <div class="rf-reward-card">
+      <div class="rf-reward-label">From this order</div>
+      <div class="rf-sats-row">
+        <span class="rf-sats-amount">42</span>
+        <span class="rf-sats-unit">sats</span>
+      </div>
+      <div class="rf-fiat-equiv">≈ £0.03 at today's rate</div>
+      <hr class="rf-divider">
+      <div class="rf-order-line">Flat white · Costa, Fenchurch St <span>£3.20</span></div>
+    </div>
+
+    <div class="rf-cta">
+      <div class="rf-step-dots">
+        <div class="rf-dot active"></div>
+        <div class="rf-dot"></div>
+        <div class="rf-dot"></div>
+        <div class="rf-dot"></div>
+        <div class="rf-dot"></div>
+        <div class="rf-dot"></div>
+      </div>
+      <button class="rf-btn-primary" onclick="sendPrompt('Confirm M·01 and build M·02 — What are sats?')">Claim my sats ↗</button>
+      <button class="rf-btn-ghost" onclick="sendPrompt('Skip onboarding — show loyalty stamps instead')">Use loyalty stamps instead</button>
+    </div>
+  </div>
+</div>

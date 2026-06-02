@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nothing to collect. Nothing to hide. · Refueler Editorial</title>
+<meta name="description" content="Loyalty app data UK: every major coffee-chain ordering app is quietly running a data operation. On-device location privacy, ICO enforcement 2025, and the architecture that changes it.">
+<meta property="og:title" content="Nothing to collect. Nothing to hide. · Refueler Editorial">
+<meta property="og:description" content="Every major coffee-chain ordering app is quietly running a data operation alongside its coffee business. Most customers have never been told what it collects, what it is worth, or where it goes.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://refueler.io/editorial/nothing-to-collect-nothing-to-hide.html">
+<meta property="og:site_name" content="Refueler">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Nothing to collect. Nothing to hide. · Refueler Editorial">
+<meta name="twitter:description" content="Every major coffee-chain ordering app is quietly running a data operation alongside its coffee business. Most customers have never been told what it collects, what it is worth, or where it goes.">
+<link rel="canonical" href="https://refueler.io/editorial/nothing-to-collect-nothing-to-hide.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=Satoshi:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   REFUELER EDITORIAL — ARTICLE PAGE
+   The app that earns your trust — and nothing else
+   Token system matches the-float.html exactly
+   ============================================================ */
+
+  :root {
+    --paper:          #F7F4EF;
+    --carbon:         #1E1F22;
+    --carbon-soft:    #26282C;
+    --carbon-mid:     #2E3035;
+    --ink:            #3D3A36;
+    --ink-secondary:  #5A5751;
+    --ink-tertiary:   #9A948D;
+    --rule:           #D6D1C8;
+    --blockquote-rule:#8A8680;
+
+    --bg:             var(--paper);
+    --text-primary:   var(--ink);
+    --text-secondary: var(--ink-secondary);
+    --text-tertiary:  var(--ink-tertiary);
+    --border:         var(--rule);
+
+    --font-heading:   'Satoshi', 'DM Sans', sans-serif;
+    --font-serif:     'Source Serif 4', Georgia, serif;
+    --font-sans:      'DM Sans', system-ui, sans-serif;
+
+    --body-font:      var(--font-serif);
+    --body-size-d:    18px;
+    --body-size-m:    17px;
+    --body-lh-d:      1.8;
+    --body-lh-m:      1.75;
+    --para-spacing:   1.5em;
+
+    --article-max:    68ch;
+    --article-max-m:  48ch;
+
+    --max-w:          1200px;
+    --gutter:         clamp(1.25rem, 4vw, 3rem);
+  }
+
+  [data-theme="carbon"] {
+    --bg:             var(--carbon);
+    --text-primary:   #E4E2DC;
+    --text-secondary: #8A8680;
+    --text-tertiary:  #5A5751;
+    --border:         #35373B;
+    --blockquote-rule:#8A8680;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-font-smoothing: antialiased; }
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--body-font);
+    font-size: var(--body-size-d);
+    line-height: var(--body-lh-d);
+    transition: background 0.3s, color 0.3s;
+    min-height: 100vh;
+  }
+
+  /* ============ SITE HEADER ============ */
+  .site-header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 var(--gutter);
+    position: sticky; top: 0;
+    background: var(--bg);
+    z-index: 100;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .header-inner {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .wordmark {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.06em;
+    text-transform: none;
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .wordmark-divider { font-weight: 300; opacity: 0.3; margin: 0 0.5rem; }
+  .wordmark-section { font-weight: 400; letter-spacing: 0.06em; opacity: 0.55; text-transform: none; }
+
+  nav { display: flex; align-items: center; gap: 2rem; }
+  nav a {
+    font-family: var(--font-heading);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  nav a:hover { color: var(--text-primary); }
+
+  .theme-pill {
+    font-family: var(--font-heading);
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 0.35rem 0.85rem;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    white-space: nowrap;
+  }
+  .theme-pill:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+
+  /* ============ ARTICLE LAYOUT ============ */
+  .article-wrap {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    padding: 0 var(--gutter);
+  }
+
+  .breadcrumb {
+    padding: 1.75rem 0 0;
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    letter-spacing: 0.07em;
+    color: var(--text-tertiary);
+  }
+  .breadcrumb a { color: inherit; text-decoration: none; }
+  .breadcrumb a:hover { color: var(--text-secondary); }
+  .breadcrumb-sep { margin: 0 0.4rem; opacity: 0.35; }
+
+  .article-header {
+    padding: 2.5rem 0 2.25rem;
+    max-width: var(--article-max);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+    transition: border-color 0.3s;
+  }
+
+  .article-eyebrow {
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 1.25rem;
+    display: flex;
+    gap: 0.625rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .dot { width: 2px; height: 2px; border-radius: 50%; background: currentColor; opacity: 0.3; flex-shrink: 0; }
+
+  .article-title {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 4.5vw, 3.25rem);
+    font-weight: 600;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    color: var(--text-primary);
+    margin-bottom: 1.25rem;
+  }
+
+  .article-standfirst {
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+  }
+
+  .article-dateline {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    letter-spacing: 0.06em;
+    color: var(--text-tertiary);
+  }
+
+  /* ============ BODY ============ */
+  .article-body {
+    max-width: var(--article-max);
+    font-family: var(--body-font);
+    font-size: var(--body-size-d);
+    line-height: var(--body-lh-d);
+    color: var(--text-primary);
+    overflow: visible;
+    transition: color 0.3s;
+  }
+
+  .drop-cap::first-letter {
+    float: left;
+    font-family: var(--font-heading);
+    font-size: 4.25em;
+    font-weight: 400;
+    line-height: 0.78;
+    margin-right: 0.1em;
+    margin-top: 0.08em;
+    color: var(--text-primary);
+  }
+  .article-body p { margin-bottom: var(--para-spacing); }
+
+  .article-body h2 {
+    font-family: var(--font-heading);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    margin-top: 3rem;
+    margin-bottom: 1.125rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .article-body hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2.5rem 0;
+  }
+
+  .article-body blockquote {
+    border-left: 2px solid var(--blockquote-rule);
+    margin: 2rem 0;
+    padding: 0.125rem 0 0.125rem 1.5rem;
+    font-style: italic;
+    color: var(--text-secondary);
+    font-size: 1.0625em;
+    line-height: 1.65;
+  }
+  .article-body blockquote p { margin-bottom: 0; }
+
+  .article-body sup {
+    font-family: var(--font-heading);
+    font-size: 0.65em;
+    color: var(--text-tertiary);
+    vertical-align: super;
+    margin-left: 0.1em;
+  }
+
+  /* Widget placeholders */
+  .widget-placeholder {
+    margin: 2.5rem 0;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.5rem;
+  }
+  .widget-label {
+    font-family: var(--font-heading);
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 0.4rem;
+  }
+  .widget-title {
+    font-family: var(--font-heading);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  /* Sources block */
+  .sources {
+    margin-top: 4.5rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--border);
+    max-width: var(--article-max);
+  }
+  .sources-label {
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 1rem;
+  }
+  .sources-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+  .sources-list li {
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    line-height: 1.55;
+    padding-left: 1.25em;
+    position: relative;
+  }
+  .sources-list li::before { content: '—'; position: absolute; left: 0; opacity: 0.3; }
+
+  /* ============ FOOTER ============ */
+  .site-footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem var(--gutter);
+    margin-top: 5rem;
+  }
+  .footer-inner {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .footer-note, .footer-links a {
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    letter-spacing: 0.06em;
+    color: var(--text-tertiary);
+    text-decoration: none;
+  }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-links a:hover { color: var(--text-secondary); }
+
+  @media (max-width: 680px) {
+    body { font-size: var(--body-size-m); line-height: var(--body-lh-m); }
+    .article-body { max-width: var(--article-max-m); font-size: var(--body-size-m); line-height: var(--body-lh-m); }
+    nav a { display: none; }
+  }
+
+  /* ── Carbon mode accent ─────────────────────────────────────────
+     Token: #C8A96E (aged gold) — Carbon mode only
+     Widget header left-rule + interactive trigger button.
+     Not connected to any third-party brand or partner.
+  ──────────────────────────────────────────────────────────────── */
+  [data-theme="carbon"] .article-body blockquote {
+    border-left-color: #C8A96E;
+  }
+
+    [data-theme="carbon"] .widget--dv,
+  [data-theme="carbon"] .widget--ico,
+  [data-theme="carbon"] .widget--arch-b,
+  [data-theme="carbon"] .widget--fca,
+  [data-theme="carbon"] .widget--franchise,
+  [data-theme="carbon"] .widget--fscs {
+    border-left-color: #C8A96E;
+  }
+  [data-theme="carbon"] .dv-open-btn,
+  [data-theme="carbon"] .arch-b-open-btn,
+  [data-theme="carbon"] .fca-open-btn,
+  [data-theme="carbon"] .fr-open-btn {
+    border-color: #C8A96E;
+    color: #C8A96E;
+  }
+  [data-theme="carbon"] .dv-open-btn:hover,
+  [data-theme="carbon"] .arch-b-open-btn:hover,
+  [data-theme="carbon"] .fca-open-btn:hover,
+  [data-theme="carbon"] .fr-open-btn:hover {
+    border-color: #E0C48A;
+    color: #E0C48A;
+  }
+  [data-theme="carbon"] .arch-b-modal-panel,
+  [data-theme="carbon"] .dv-modal-panel,
+  [data-theme="carbon"] .fca-modal-panel,
+  [data-theme="carbon"] .fr-modal-panel {
+    border-top-color: #C8A96E;
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="refueler-editorial-index.html" class="wordmark">
+      Refueler
+      <span class="wordmark-divider">/</span>
+      <span class="wordmark-section">Editorial</span>
+    </a>
+    <nav>
+      <a href="../">App</a>
+      <a href="refueler-editorial-index.html" class="active">Editorial</a>
+      <a href="../privacy/privacy_v1_3.html">Privacy</a>
+      <button class="theme-pill" onclick="toggleTheme()" id="theme-btn">Paper / Carbon</button>
+    </nav>
+  </div>
+</header>
+
+<div class="article-wrap">
+
+  <p class="breadcrumb">
+    <a href="refueler-editorial-index.html">Editorial</a>
+    <span class="breadcrumb-sep">/</span>
+    Privacy · Data architecture
+  </p>
+
+  <header class="article-header">
+    <div class="article-eyebrow">
+      <span>Privacy</span><span class="dot"></span>
+      <span>Data architecture</span><span class="dot"></span>
+      <span>Loyalty apps</span><span class="dot"></span>
+      <span>Bitcoin payments</span>
+    </div>
+    <h1 class="article-title">Nothing to collect. Nothing to hide.</h1>
+    <p class="article-standfirst">Every major coffee-chain ordering app is quietly running a data operation alongside its coffee business. Most customers have never been told what it collects, what it is worth, or where it goes.</p>
+    <div class="article-dateline">
+      <span>May 2026</span><span class="dot"></span>
+      <span>8 min read</span><span class="dot"></span>
+      <span>refueler.io/editorial/the-app-that-earns-your-trust</span>
+    </div>
+  </header>
+
+  <article class="article-body">
+
+    <p>There is a scene in every good thriller where a bureaucrat in a tailored suit slides a manila folder across an oak desk. The room is quiet. The lighting is deliberate. The subject — seated on the other side — assumes they are there to discuss something routine. An administrative matter. A formality.</p>
+
+    <p>The folder opens. Inside: a full dossier. Not a summary. A life in cross-referenced detail. Movements recorded over months. Financial patterns. Known associates. The coffee shop visited every Tuesday at 7.43am, reliably, for eleven weeks. The longer commute taken on Fridays. The change in routine in September — a new job, perhaps, or a different station. The bureaucrat has not asked a single question. Everything he needed was already there, assembled gradually, through the ordinary business of a person going about their day.</p>
+
+    <p>The subject looks up from the folder and says the only thing there is to say: "How long have you known?"</p>
+
+    <p>The answer, in the thriller, is always the same. "Long enough."</p>
+
+    <hr>
+
+    <p>This is not a metaphor. If you use one of the major coffee-chain ordering apps available on the British high street today, that folder exists. It is not in a manila envelope. It is in a data centre — probably in Dublin or Oregon — and it is considerably more detailed than anything assembled in a thriller's opening act. The subject, in this version, is you. The bureaucrat across the desk is a marketing technology platform you have never heard of. And the Tuesday coffee was, among other things, a data point.</p>
+
+    <h2>What the app actually collects</h2>
+
+    <p>When you download a franchise ordering app and tap accept, most people assume they are handing over their coffee order. In practice, account creation alone captures your name, email address, phone number, birthday, and a loyalty ID attached to every transaction you make from that moment forward. Before you have ordered a single flat white, the app knows who you are.</p>
+
+    <p>From there, location tracking begins. Most apps request "while using the app" permissions, but several operate with background access — meaning the app can note your proximity to a store even when you are doing something else entirely. Wi-Fi and Bluetooth beacon data adds indoor precision: the app can often determine which queue you stood in, how long you waited, and whether you sat in or left immediately. This is not presented as surveillance. It is presented as convenience.</p>
+
+    <p>Device identifiers go further. Your advertising ID — a unique string assigned by Apple or Google specifically so advertisers can track you across applications — is typically collected alongside your IP address, mobile carrier, device model, and app version. These are not operational necessities. They are marketing infrastructure, assembled quietly by design.</p>
+
+    <p>Behavioural analytics are logged throughout every session: which items you viewed but did not order, how long you spent on the customisation screen, what you searched for, whether you abandoned your cart. This is the data that advertising platforms prize most — high-intent, temporally precise, and updated every time you open the app. Loyalty app data is, in this sense, among the most valuable categories of on-device location privacy data available to the ad-tech industry.</p>
+
+    <h2>What it is worth</h2>
+
+    <p>The honest answer is: more than the coffee.</p>
+
+<div class="widget widget--dv" id="dv-widget">
+      <style>
+        .widget--dv {
+          margin: 3rem 0;
+          border: 1px solid var(--border);
+          border-left: 2px solid var(--blockquote-rule);
+          background: var(--bg);
+          transition: background 0.3s, border-color 0.3s;
+        }
+        .dv-header {
+          padding: 1.125rem 1.5rem 0;
+          border-bottom: 1px solid var(--border);
+        }
+        .dv-eyebrow {
+          font-family: var(--font-heading);
+          font-size: 0.575rem;
+          letter-spacing: 0.13em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+          margin-bottom: 0.35rem;
+        }
+        .dv-title {
+          font-family: var(--font-heading);
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          letter-spacing: -0.01em;
+          margin-bottom: 0.875rem;
+        }
+        /* Preview table — 3 rows */
+        .dv-preview {
+          width: 100%;
+          border-collapse: collapse;
+          font-family: var(--font-heading);
+        }
+        .dv-preview thead tr { border-bottom: 1px solid var(--border); }
+        .dv-preview th {
+          font-size: 0.575rem;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+          font-weight: 500;
+          padding: 0.6rem 1.5rem;
+          text-align: left;
+        }
+        .dv-preview th:last-child { text-align: right; }
+        .dv-preview td {
+          font-size: 0.8125rem;
+          padding: 0.75rem 1.5rem;
+          border-bottom: 1px solid var(--border);
+          vertical-align: top;
+          line-height: 1.5;
+          color: var(--text-secondary);
+        }
+        .dv-preview tbody tr:last-child td { border-bottom: none; }
+        .dv-preview td:last-child { text-align: right; }
+        .dv-cat {
+          font-size: 0.7rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          display: block;
+          margin-bottom: 0.15rem;
+        }
+        .dv-note {
+          font-size: 0.6375rem;
+          color: var(--text-tertiary);
+          display: block;
+        }
+        .dv-val {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          white-space: nowrap;
+        }
+        .dv-val-sub {
+          display: block;
+          font-size: 0.6rem;
+          font-weight: 400;
+          color: var(--text-tertiary);
+          margin-top: 0.1rem;
+        }
+        /* Trigger row */
+        .dv-trigger-row {
+          padding: 0.875rem 1.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          border-top: 1px solid var(--border);
+          gap: 1rem;
+        }
+        .dv-trigger-note {
+          font-family: var(--font-heading);
+          font-size: 0.6375rem;
+          color: var(--text-tertiary);
+        }
+        .dv-trigger-note strong { color: var(--text-secondary); font-weight: 500; }
+        .dv-open-btn {
+          font-family: var(--font-heading);
+          font-size: 0.6375rem;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--text-secondary);
+          background: transparent;
+          border: 1px solid var(--border);
+          border-radius: 2px;
+          padding: 0.4rem 0.875rem;
+          cursor: pointer;
+          transition: border-color 0.2s, color 0.2s;
+          white-space: nowrap;
+        }
+        .dv-open-btn:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+        /* Modal */
+        .dv-modal {
+          display: none;
+          position: fixed;
+          inset: 0;
+          z-index: 1000;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem var(--gutter, 1.5rem);
+        }
+        .dv-modal.is-open { display: flex; }
+        .dv-scrim {
+          position: absolute;
+          inset: 0;
+          background: rgba(0,0,0,0.55);
+          cursor: pointer;
+          animation: dv-scrim-in 0.25s ease;
+        }
+        [data-theme="carbon"] .dv-scrim { background: rgba(0,0,0,0.72); }
+        @keyframes dv-scrim-in { from { opacity:0; } to { opacity:1; } }
+        .dv-modal-panel {
+          position: relative;
+          z-index: 1;
+          background: var(--bg);
+          border: 1px solid var(--border);
+          border-top: 2px solid var(--blockquote-rule);
+          width: min(760px, 100%);
+          max-height: min(88vh, 820px);
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          animation: dv-panel-in 0.3s cubic-bezier(0.16,1,0.3,1);
+        }
+        @keyframes dv-panel-in {
+          from { opacity:0; transform: translateY(12px) scale(0.98); }
+          to   { opacity:1; transform: translateY(0) scale(1); }
+        }
+        .dv-modal-panel.is-closing {
+          animation: dv-panel-out 0.15s ease forwards;
+        }
+        @keyframes dv-panel-out {
+          from { opacity:1; }
+          to   { opacity:0; }
+        }
+        .dv-modal-header {
+          padding: 1.25rem 2rem 1.125rem;
+          border-bottom: 1px solid var(--border);
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 1rem;
+          flex-shrink: 0;
+        }
+        .dv-modal-header-left { display: flex; flex-direction: column; gap: 0.3rem; }
+        .dv-modal-eyebrow {
+          font-family: var(--font-heading);
+          font-size: 0.575rem;
+          letter-spacing: 0.13em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+        }
+        .dv-modal-title {
+          font-family: var(--font-heading);
+          font-size: 1.0625rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          letter-spacing: -0.015em;
+        }
+        .dv-close-btn {
+          font-family: var(--font-heading);
+          font-size: 0.6375rem;
+          font-weight: 500;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+          background: transparent;
+          border: 1px solid var(--border);
+          border-radius: 2px;
+          padding: 0.4rem 0.75rem;
+          cursor: pointer;
+          flex-shrink: 0;
+          margin-top: 0.2rem;
+          transition: color 0.2s, border-color 0.2s;
+        }
+        .dv-close-btn:hover { color: var(--text-primary); border-color: var(--text-secondary); }
+        .dv-modal-table-wrap { overflow-y: auto; overflow-x: hidden; flex: 1; }
+        .dv-modal-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-family: var(--font-heading);
+          table-layout: fixed;
+        }
+        .dv-modal-table colgroup .col-cat { width: 58%; }
+        .dv-modal-table colgroup .col-val { width: 42%; }
+        .dv-modal-table thead {
+          position: sticky;
+          top: 0;
+          z-index: 2;
+          background: var(--bg);
+        }
+        .dv-modal-table thead tr { border-bottom: 1px solid var(--border); }
+        .dv-modal-table th {
+          font-size: 0.6375rem;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+          font-weight: 500;
+          padding: 0.875rem 2rem;
+          text-align: left;
+        }
+        .dv-modal-table th:last-child { text-align: right; }
+        .dv-modal-table td {
+          font-size: 0.9375rem;
+          padding: 1.125rem 2rem;
+          border-bottom: 1px solid var(--border);
+          vertical-align: top;
+          line-height: 1.55;
+        }
+        .dv-modal-table tbody tr:last-child td { border-bottom: none; }
+        .dv-modal-table td:last-child { text-align: right; }
+        .dv-modal-cat {
+          font-size: 0.8125rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          display: block;
+          margin-bottom: 0.2rem;
+        }
+        .dv-modal-note {
+          font-size: 0.6875rem;
+          color: var(--text-tertiary);
+          display: block;
+          line-height: 1.45;
+        }
+        .dv-modal-val {
+          font-size: 1rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          white-space: nowrap;
+        }
+        .dv-modal-val-sub {
+          display: block;
+          font-size: 0.6375rem;
+          font-weight: 400;
+          color: var(--text-tertiary);
+          margin-top: 0.15rem;
+        }
+        .dv-total-row td { border-top: 1px solid var(--border) !important; }
+        .dv-modal-footer {
+          padding: 0.75rem 2rem 1rem;
+          border-top: 1px solid var(--border);
+          font-family: var(--font-heading);
+          font-size: 0.6875rem;
+          color: var(--text-tertiary);
+          line-height: 1.55;
+          flex-shrink: 0;
+        }
+      </style>
+
+      <div class="dv-header">
+        <p class="dv-eyebrow">Data economics</p>
+        <p class="dv-title">Estimated data value per loyalty app user per year</p>
+        <table class="dv-preview">
+          <thead>
+            <tr><th style="width:58%">Data category</th><th>Est. value / user / yr</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="dv-cat">Location &amp; movement history</span><span class="dv-note">Background GPS, beacon proximity, dwell time, commute pattern inference</span></td>
+              <td><span class="dv-val">£4–9<span class="dv-val-sub">per user</span></span></td>
+            </tr>
+            <tr>
+              <td><span class="dv-cat">Purchase &amp; transaction history</span><span class="dv-note">Item-level spend, frequency, basket size, payment method, timestamp</span></td>
+              <td><span class="dv-val">£6–14<span class="dv-val-sub">per user</span></span></td>
+            </tr>
+            <tr>
+              <td><span class="dv-cat">Behavioural &amp; intent signals</span><span class="dv-note">Items viewed, cart abandonment, search queries, session depth, A/B exposure</span></td>
+              <td><span class="dv-val">£3–8<span class="dv-val-sub">per user</span></span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="dv-trigger-row">
+        <span class="dv-trigger-note"><strong>2 more categories</strong> — device identity graph, audience segment licensing</span>
+        <button class="dv-open-btn" onclick="dvModalOpen()" aria-expanded="false" id="dv-open-btn">View full breakdown ›</button>
+      </div>
+    </div>
+
+    <p>No major coffee chain will tell you in plain English that it sells your data. They do not have to. Privacy policies run to the effect of "sharing with partners," "engaging analytics vendors," or "working with business affiliates." Under UK GDPR, some of this sharing can legally constitute a sale of personal data — even where no direct payment changes hands.</p>
+
+    <p>The commercial reality is straightforward. An analytics platform receives your behavioural data. An ad network derives an audience segment from it. A data broker acquires that segment, merges it with data from other apps and sources, and licenses the resulting profile onward. The process repeats. The profile deepens. The person who placed the order — tapping their phone in the queue near Fenchurch Street — has become, without ever being asked, a revenue line in someone else's annual report.</p>
+
+    <blockquote>
+      <p>"They call it a loyalty programme. It is, more accurately, a loyalty extraction programme — where the currency being extracted is not points. It is you."</p>
+    </blockquote>
+
+    <h2>The categories that should concern you</h2>
+
+    <p>Most data collection in this space sits under six headings. Understanding them is useful — not because you will read every privacy policy in full, but because it clarifies what you are actually trading for the occasional free coffee.</p>
+
+    <p>Loyalty and rewards profiling is where behavioural analysis becomes commercially aggressive. Apps categorise their users — "morning commuter," "high-value customer," "weekend visitor," "lapsed customer." These labels are not operational shorthand. They are audience segments, built to be sold to, or sold.</p>
+
+    <p>Marketing and ad tracking is where third-party software enters uninvited. Facebook's tracking code, TikTok's equivalent, and Google Ads attribution are embedded — with varying degrees of disclosure — into many of the most popular loyalty apps. Their function is to connect your in-app behaviour to your activity elsewhere. The flat white you bought on a Wednesday morning can, in principle, influence what you are shown on your phone by Thursday.</p>
+
+    <p>There is a term in the intelligence world for information that has passed through several hands before reaching its destination. It is called "sanitised." The data industry prefers a different word for the same process. They call it "enriched."</p>
+
+    <h2>The regulatory picture — and why it is tightening</h2>
+
+    <p>The UK's Information Commissioner's Office has the power to fine organisations up to £17.5 million — or four percent of global annual turnover — for serious data protection failures. In 2025, that power was deployed with considerably more force than in prior years, even as the number of formal investigations declined sharply.</p>
+
+<div class="widget widget--ico" style="margin:2.5rem 0;">
+      <style>
+        .widget--ico { border:1px solid var(--border); border-left:2px solid var(--blockquote-rule); background:var(--bg); transition:background 0.3s, border-color 0.3s; }
+        .ico-header { padding:1rem 1.25rem 0.875rem; border-bottom:1px solid var(--border); }
+        .ico-header .widget__eyebrow { font-family:var(--font-heading); font-size:0.575rem; letter-spacing:0.13em; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:0.3rem; }
+        .ico-header .widget__title { font-family:var(--font-heading); font-size:0.8125rem; font-weight:600; color:var(--text-primary); letter-spacing:-0.01em; }
+        .ico-stats { display:grid; grid-template-columns:repeat(3,1fr); border-bottom:1px solid var(--border); }
+        .ico-stat { padding:1.25rem 1.25rem 1rem; border-right:1px solid var(--border); }
+        .ico-stat:last-child { border-right:none; }
+        .ico-stat__num { font-family:var(--font-heading); font-size:1.625rem; font-weight:700; letter-spacing:-0.03em; color:var(--text-primary); line-height:1; margin-bottom:0.35rem; }
+        .ico-stat__label { font-family:var(--font-heading); font-size:0.6375rem; font-weight:500; color:var(--text-secondary); line-height:1.4; margin-bottom:0.2rem; }
+        .ico-stat__note { font-family:var(--font-heading); font-size:0.575rem; color:var(--text-tertiary); line-height:1.45; }
+        .ico-rows { border-bottom:1px solid var(--border); }
+        .ico-row { display:flex; justify-content:space-between; align-items:baseline; gap:1rem; padding:0.6rem 1.25rem; border-bottom:1px solid var(--border); font-family:var(--font-heading); }
+        .ico-row:last-child { border-bottom:none; }
+        .ico-row__key { font-size:0.6875rem; color:var(--text-secondary); flex:1; }
+        .ico-row__val { font-size:0.7rem; font-weight:600; color:var(--text-primary); white-space:nowrap; text-align:right; }
+        .ico-row__val--muted { font-weight:400; color:var(--text-tertiary); font-size:0.6375rem; }
+        .ico-footnote { padding:0.625rem 1.25rem 0.875rem; font-family:var(--font-heading); font-size:0.6375rem; color:var(--text-tertiary); line-height:1.55; }
+        @media(max-width:540px){ .ico-stats { grid-template-columns:1fr 1fr; } .ico-stats .ico-stat:nth-child(2) { border-right:none; } .ico-stats .ico-stat:nth-child(3) { border-top:1px solid var(--border); border-right:none; grid-column:1/-1; } }
+      </style>
+      <div class="ico-header">
+        <p class="widget__eyebrow">Regulatory · ICO</p>
+        <p class="widget__title">ICO Enforcement 2025 — key figures</p>
+      </div>
+      <div class="ico-stats">
+        <div class="ico-stat">
+          <div class="ico-stat__num">£17.5m</div>
+          <div class="ico-stat__label">Maximum fine per infringement</div>
+          <div class="ico-stat__note">Or 4% of global annual turnover — whichever is higher</div>
+        </div>
+        <div class="ico-stat">
+          <div class="ico-stat__num">↓ 34%</div>
+          <div class="ico-stat__label">Formal investigations opened vs prior year</div>
+          <div class="ico-stat__note">Fewer cases — but larger, more concentrated enforcement action</div>
+        </div>
+        <div class="ico-stat">
+          <div class="ico-stat__num">↑ 2×</div>
+          <div class="ico-stat__label">Average fine value for cases concluded</div>
+          <div class="ico-stat__note">2025 settlements materially larger than 2023–24 comparators</div>
+        </div>
+      </div>
+      <div class="ico-rows">
+        <div class="ico-row"><span class="ico-row__key">Largest single fine issued, 2025</span><span class="ico-row__val">£3.07m — Capita plc <span class="ico-row__val--muted">(Oct 2025)</span></span></div>
+        <div class="ico-row"><span class="ico-row__key">Primary enforcement trigger</span><span class="ico-row__val">Inadequate technical &amp; organisational measures</span></div>
+        <div class="ico-row"><span class="ico-row__key">Sectors with active enforcement interest</span><span class="ico-row__val">Financial services · Retail · AdTech</span></div>
+        <div class="ico-row"><span class="ico-row__key">Lawful basis most frequently contested</span><span class="ico-row__val">Legitimate interests &amp; consent validity</span></div>
+        <div class="ico-row"><span class="ico-row__key">ICO stated enforcement priority, 2025–26</span><span class="ico-row__val">Location data &amp; online tracking</span></div>
+      </div>
+      <p class="ico-footnote">Sources: URM Consulting ICO enforcement analysis 2025; ICO Annual Report 2024–25; Clifford Chance briefing, October 2025; Skadden ICO enforcement review, February 2026. Fine quantum reflects concluded cases; investigations ongoing as at May 2026 not included.</p>
+    </div>
+
+    <p>The direction of travel is clear. Fewer investigations does not mean diminished risk — it means concentrated risk. When the ICO acts, the consequences are material. Companies whose business models depend on broad, permissive data collection face a period of genuine uncertainty as these powers mature. Companies whose architecture does not collect the data in the first place face something different: a structural competitive advantage, written into their codebase from day one.</p>
+
+    <h2>Refueler does not do any of this</h2>
+
+    <p>This is not a soft claim. It is an architectural one — and for the technically minded, it is verifiable. Open your browser developer tools on the Refueler web app. Navigate to Application → Cookies. You will find one token: a short-lived session identifier that expires when you close the tab. Nothing else. No advertising trackers. No third-party pixels. No location column in the orders database — by design, not policy.</p>
+
+<!-- Widget 3: Architecture contrast — pop-out desktop · accordion mobile -->
+    <div class="widget widget--arch-b" id="arch-widget">
+      <style>
+        /* ═══════════════════════════════════════════════════════════
+           ARCHITECTURE WIDGET — VARIANT B (POP-OUT)
+           
+           Desktop: compact in-column panel + modal overlay on trigger
+           Mobile (≤860px): pure HTML details/summary accordion
+           
+           SECOND CHOICE (if modal feels heavyweight for editorial):
+             Use contained gutter-bleed instead:
+               .widget--arch-b { margin: 3rem -2rem; width: calc(100% + 4rem); }
+             Equal 2rem each side, stays in document flow, no JS.
+             All table, accordion, and token CSS below still applies.
+        ═══════════════════════════════════════════════════════════ */
+
+        /* ── IN-COLUMN PANEL (desktop default) ─────────────────── */
+        .widget--arch-b {
+          margin: 3rem 0;
+          border: 1px solid var(--border);
+          border-left: 2px solid var(--blockquote-rule);
+          border-radius: 0;
+          background: var(--bg);
+          transition: background 0.3s, border-color 0.3s;
+        }
+
+        .arch-b-panel-header {
+          padding: 1.125rem 1.5rem 1rem;
+          border-bottom: 1px solid var(--border);
+        }
+        .arch-b-eyebrow {
+          font-family: var(--font-heading);
+          font-size: 0.575rem;
+          letter-spacing: 0.13em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+          margin-bottom: 0.35rem;
+        }
+        .arch-b-title {
+          font-family: var(--font-heading);
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          letter-spacing: -0.01em;
+          margin-bottom: 0.75rem;
+        }
+
+        /* Preview rows — 3 rows shown in-column as teaser */
+        .arch-b-preview {
+          width: 100%;
+          border-collapse: collapse;
+          font-family: var(--font-heading);
+        }
+        .arch-b-preview thead tr {
+          border-bottom: 1px solid var(--border);
+        }
+        .arch-b-preview th {
+          font-size: 0.575rem;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+          font-weight: 500;
+          padding: 0.6rem 1.5rem;
+          text-align: left;
+        }
+        .arch-b-preview th.th-rfr {
+          background: rgba(0,0,0,0.02);
+          border-left: 1px solid var(--border);
+        }
+        [data-theme="carbon"] .arch-b-preview th.th-rfr {
+          background: rgba(255,255,255,0.025);
+        }
+        .arch-b-preview td {
+          font-size: 0.8125rem;
+          padding: 0.8rem 1.5rem;
+          border-bottom: 1px solid var(--border);
+          vertical-align: top;
+          line-height: 1.5;
+          color: var(--text-secondary);
+        }
+        .arch-b-preview td.td-dim {
+          font-size: 0.575rem;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+          border-right: 1px solid var(--border);
+          width: 18%;
+        }
+        .arch-b-preview td.td-rfr {
+          color: var(--text-primary);
+          font-weight: 500;
+          background: rgba(0,0,0,0.02);
+          border-left: 1px solid var(--border);
+        }
+        [data-theme="carbon"] .arch-b-preview td.td-rfr {
+          background: rgba(255,255,255,0.025);
+        }
+        .arch-b-preview tbody tr:last-child td {
+          border-bottom: none;
+        }
+
+        /* Trigger row */
+        .arch-b-trigger-row {
+          padding: 0.875rem 1.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          border-top: 1px solid var(--border);
+        }
+        .arch-b-trigger-note {
+          font-family: var(--font-heading);
+          font-size: 0.6375rem;
+          color: var(--text-tertiary);
+        }
+        .arch-b-trigger-note strong {
+          color: var(--text-secondary);
+          font-weight: 500;
+        }
+        .arch-b-open-btn {
+          font-family: var(--font-heading);
+          font-size: 0.6375rem;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--text-secondary);
+          background: transparent;
+          border: 1px solid var(--border);
+          border-radius: 2px;
+          padding: 0.4rem 0.875rem;
+          cursor: pointer;
+          transition: border-color 0.2s, color 0.2s;
+          white-space: nowrap;
+        }
+        .arch-b-open-btn:hover {
+          border-color: var(--text-secondary);
+          color: var(--text-primary);
+        }
+
+        /* ── MODAL OVERLAY ──────────────────────────────────────── */
+        .arch-b-modal {
+          display: none;
+          position: fixed;
+          inset: 0;
+          z-index: 1000;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem var(--gutter, 1.5rem);
+        }
+        .arch-b-modal.is-open {
+          display: flex;
+        }
+        .arch-b-scrim {
+          position: absolute;
+          inset: 0;
+          background: rgba(0,0,0,0.55);
+          cursor: pointer;
+          animation: scrim-in 0.25s ease;
+        }
+        [data-theme="carbon"] .arch-b-scrim {
+          background: rgba(0,0,0,0.72);
+        }
+        @keyframes scrim-in {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+
+        .arch-b-modal-panel {
+          position: relative;
+          z-index: 1;
+          background: var(--bg);
+          border: 1px solid var(--border);
+          border-top: 2px solid var(--blockquote-rule);
+          width: min(1000px, 100%);
+          max-height: min(88vh, 800px);
+          display: flex;
+          flex-direction: column;
+          animation: panel-in 0.3s cubic-bezier(0.16,1,0.3,1);
+          overflow: hidden;
+        }
+        @keyframes panel-in {
+          from { opacity: 0; transform: translateY(12px) scale(0.98); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes panel-out {
+          from { opacity: 1; }
+          to   { opacity: 0; }
+        }
+        .arch-b-modal-panel.is-closing {
+          animation: panel-out 0.15s ease forwards;
+        }
+
+        /* Modal header */
+        .arch-b-modal-header {
+          padding: 1.25rem 2rem 1.125rem;
+          border-bottom: 1px solid var(--border);
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 1rem;
+          flex-shrink: 0;
+        }
+        .arch-b-modal-header-left {
+          display: flex;
+          flex-direction: column;
+          gap: 0.3rem;
+        }
+        .arch-b-modal-eyebrow {
+          font-family: var(--font-heading);
+          font-size: 0.575rem;
+          letter-spacing: 0.13em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+        }
+        .arch-b-modal-title {
+          font-family: var(--font-heading);
+          font-size: 1.0625rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          letter-spacing: -0.015em;
+        }
+        .arch-b-close-btn {
+          font-family: var(--font-heading);
+          font-size: 0.6375rem;
+          font-weight: 500;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+          background: transparent;
+          border: 1px solid var(--border);
+          border-radius: 2px;
+          padding: 0.4rem 0.75rem;
+          cursor: pointer;
+          flex-shrink: 0;
+          margin-top: 0.2rem;
+          transition: color 0.2s, border-color 0.2s;
+        }
+        .arch-b-close-btn:hover {
+          color: var(--text-primary);
+          border-color: var(--text-secondary);
+        }
+
+        /* Modal table — scrollable body */
+        .arch-b-modal-table-wrap {
+          overflow-y: auto;
+          overflow-x: hidden;
+          flex: 1;
+        }
+        .arch-b-modal-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-family: var(--font-heading);
+          table-layout: fixed;
+        }
+        .arch-b-modal-table colgroup .col-dim { width: 14%; }
+        .arch-b-modal-table colgroup .col-std { width: 43%; }
+        .arch-b-modal-table colgroup .col-rfr { width: 43%; }
+
+        .arch-b-modal-table thead {
+          position: sticky;
+          top: 0;
+          z-index: 2;
+          background: var(--bg);
+        }
+        .arch-b-modal-table thead tr {
+          border-bottom: 1px solid var(--border);
+        }
+        .arch-b-modal-table th {
+          font-size: 0.6375rem;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+          font-weight: 500;
+          padding: 0.875rem 2rem;
+          text-align: left;
+          vertical-align: bottom;
+        }
+        .arch-b-modal-table th.th-rfr {
+          background: rgba(0,0,0,0.025);
+          border-left: 1px solid var(--border);
+        }
+        [data-theme="carbon"] .arch-b-modal-table th.th-rfr {
+          background: rgba(255,255,255,0.03);
+        }
+        .arch-b-modal-table td {
+          font-size: 0.9375rem;
+          padding: 1.125rem 2rem;
+          border-bottom: 1px solid var(--border);
+          vertical-align: top;
+          line-height: 1.55;
+          transition: background 0.3s;
+        }
+        .arch-b-modal-table tbody tr:last-child td {
+          border-bottom: none;
+        }
+        .arch-b-modal-table td.td-dim {
+          font-size: 0.6rem;
+          font-weight: 600;
+          letter-spacing: 0.09em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+          vertical-align: top;
+          padding-top: 1.25rem;
+          border-right: 1px solid var(--border);
+        }
+        .arch-b-modal-table td.td-std {
+          color: var(--text-secondary);
+        }
+        .arch-b-modal-table td.td-rfr {
+          color: var(--text-primary);
+          font-weight: 500;
+          background: rgba(0,0,0,0.02);
+          border-left: 1px solid var(--border);
+        }
+        [data-theme="carbon"] .arch-b-modal-table td.td-rfr {
+          background: rgba(255,255,255,0.025);
+        }
+        .arch-b-badge {
+          display: inline-block;
+          font-size: 0.575rem;
+          font-weight: 400;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          border: 1px solid var(--border);
+          border-radius: 2px;
+          padding: 0.2rem 0.45rem;
+          margin-top: 0.5rem;
+          color: var(--text-tertiary);
+        }
+
+        /* Modal footer */
+        .arch-b-modal-footer {
+          padding: 0.75rem 2rem 1rem;
+          border-top: 1px solid var(--border);
+          font-family: var(--font-heading);
+          font-size: 0.6875rem;
+          color: var(--text-tertiary);
+          line-height: 1.55;
+          flex-shrink: 0;
+        }
+
+        /* ── MOBILE ACCORDION (≤860px) ──────────────────────────── */
+        /* Hide desktop panel and modal trigger on mobile */
+        @media (max-width: 860px) {
+          .arch-b-preview,
+          .arch-b-trigger-row { display: none; }
+          .arch-b-modal { display: none !important; } /* modal never shows on mobile */
+
+          .widget--arch-b {
+            border: 1px solid var(--border);
+            border-left: 2px solid var(--blockquote-rule);
+            margin: 2.5rem 0;
+          }
+          .arch-b-panel-header {
+            border-bottom: 1px solid var(--border);
+          }
+          .arch-b-title { font-size: 0.8125rem; }
+        }
+
+        /* Show accordion only on mobile */
+        .arch-b-accordion { display: none; }
+        @media (max-width: 860px) {
+          .arch-b-accordion { display: block; }
+
+          .arch-b-item {
+            border-bottom: 1px solid var(--border);
+          }
+          .arch-b-item:last-child { border-bottom: none; }
+          .arch-b-item summary {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.875rem 1.25rem;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+          }
+          .arch-b-item summary::-webkit-details-marker { display: none; }
+          .arch-b-summary-label {
+            font-family: var(--font-heading);
+            font-size: 0.6875rem;
+            font-weight: 600;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+          }
+          .arch-b-chevron {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            transition: transform 0.2s;
+            flex-shrink: 0;
+          }
+          .arch-b-item[open] .arch-b-chevron { transform: rotate(90deg); }
+          .arch-b-item[open] summary { border-bottom: 1px solid var(--border); }
+
+          .arch-b-pair {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+          }
+          .arch-b-acc-panel {
+            padding: 0.875rem 1.25rem 1rem;
+          }
+          .arch-b-acc-panel:first-child {
+            border-right: 1px solid var(--border);
+          }
+          .arch-b-acc-panel:last-child {
+            background: rgba(0,0,0,0.02);
+          }
+          [data-theme="carbon"] .arch-b-acc-panel:last-child {
+            background: rgba(255,255,255,0.025);
+          }
+          .arch-b-acc-label {
+            font-family: var(--font-heading);
+            font-size: 0.575rem;
+            font-weight: 600;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: 0.5rem;
+          }
+          .arch-b-acc-label--rfr { color: var(--text-secondary); }
+          .arch-b-acc-val {
+            font-family: var(--font-heading);
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+          }
+          .arch-b-acc-val--rfr {
+            color: var(--text-primary);
+            font-weight: 500;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .arch-b-pair { grid-template-columns: 1fr; }
+          .arch-b-acc-panel:first-child {
+            border-right: none;
+            border-bottom: 1px solid var(--border);
+          }
+        }
+      </style>
+
+      <!-- In-column panel header -->
+      <div class="arch-b-panel-header">
+        <p class="arch-b-eyebrow">Architecture</p>
+        <p class="arch-b-title">Standard loyalty app vs Refueler — key architectural differences</p>
+        <!-- Preview table: 3 rows shown as teaser -->
+        <table class="arch-b-preview">
+          <thead>
+            <tr>
+              <th style="width:18%"></th>
+              <th>Standard loyalty app</th>
+              <th class="th-rfr">Refueler</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="td-dim">Location<br>data</td>
+              <td>Collected server-side; background access common; stored against user profile indefinitely</td>
+              <td class="td-rfr">Processed on-device only. Geofence logic local. No location transmitted to servers. Ever.</td>
+            </tr>
+            <tr>
+              <td class="td-dim">Payment<br>rail</td>
+              <td>Card networks or preloaded balance; transaction metadata retained by issuer and card network</td>
+              <td class="td-rfr">Bitcoin Lightning Network. Payment settles peer-to-peer. No merchant-enriched metadata passes to third parties.</td>
+            </tr>
+            <tr>
+              <td class="td-dim">Rewards<br>custody</td>
+              <td>Points held by operator; can be devalued, expired, or withheld at operator discretion</td>
+              <td class="td-rfr">Satoshis issued to user's ecash wallet at point of earning. On-device. Operator cannot freeze, reverse, or access.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Trigger row -->
+      <div class="arch-b-trigger-row">
+        <span class="arch-b-trigger-note"><strong>5 more dimensions</strong> — trackers, profiling, float, GDPR, cookies</span>
+        <button class="arch-b-open-btn" onclick="archModalOpen()" aria-expanded="false" id="arch-open-btn">
+          View full comparison ›
+        </button>
+      </div>
+
+      <!-- Mobile accordion -->
+      <div class="arch-b-accordion">
+        <details class="arch-b-item">
+          <summary><span class="arch-b-summary-label">Location data</span><span class="arch-b-chevron">›</span></summary>
+          <div class="arch-b-pair">
+            <div class="arch-b-acc-panel"><div class="arch-b-acc-label">Standard app</div><div class="arch-b-acc-val">Collected server-side; background access common; stored against user profile indefinitely</div></div>
+            <div class="arch-b-acc-panel"><div class="arch-b-acc-label arch-b-acc-label--rfr">Refueler</div><div class="arch-b-acc-val arch-b-acc-val--rfr">Processed on-device only. Geofence logic local. No location transmitted. Ever.<br><span class="arch-b-badge">Structural · not contractual</span></div></div>
+          </div>
+        </details>
+        <details class="arch-b-item">
+          <summary><span class="arch-b-summary-label">Payment rail</span><span class="arch-b-chevron">›</span></summary>
+          <div class="arch-b-pair">
+            <div class="arch-b-acc-panel"><div class="arch-b-acc-label">Standard app</div><div class="arch-b-acc-val">Card networks or preloaded balance; transaction metadata retained by issuer and card network</div></div>
+            <div class="arch-b-acc-panel"><div class="arch-b-acc-label arch-b-acc-label--rfr">Refueler</div><div class="arch-b-acc-val arch-b-acc-val--rfr">Bitcoin Lightning Network. Settles peer-to-peer. No merchant-enriched metadata to third parties.</div></div>
+          </div>
+        </details>
+        <details class="arch-b-item">
+          <summary><span class="arch-b-summary-label">Rewards custody</span><span class="arch-b-chevron">›</span></summary>
+          <div class="arch-b-pair">
+            <div class="arch-b-acc-panel"><div class="arch-b-acc-label">Standard app</div><div class="arch-b-acc-val">Points held by operator; can be devalued, expired, or withheld at operator discretion</div></div>
+            <div class="arch-b-acc-panel"><div class="arch-b-acc-label arch-b-acc-label--rfr">Refueler</div><div class="arch-b-acc-val arch-b-acc-val--rfr">Satoshis to your ecash wallet at point of earning. Operator cannot freeze, reverse, or access.</div></div>
+          </div>
+        </details>
+        <details class="arch-b-item">
+          <summary><span class="arch-b-summary-label">Third-party trackers</span><span class="arch-b-chevron">›</span></summary>
+          <div class="arch-b-pair">
+            <div class="arch-b-acc-panel"><div class="arch-b-acc-label">Standard app</div><div class="arch-b-acc-val">Facebook pixel, Google Ads, TikTok attribution SDK typically embedded; data shared under "partner" consent</div></div>
+            <div class="arch-b-acc-panel"><div class="arch-b-acc-label arch-b-acc-label--rfr">Refueler</div><div class="arch-b-acc-val arch-b-acc-val--rfr">None. No advertising SDK. No third-party pixel. Verifiable via browser developer tools.</div></div>
+          </div>
+        </details>
+        <details class="arch-b-item">
+          <summary><span class="arch-b-summary-label">User profiling</span><span class="arch-b-chevron">›</span></summary>
+          <div class="arch-b-pair">
+            <div class="arch-b-acc-panel"><div class="arch-b-acc-label">Standard app</div><div class="arch-b-acc-val">Behavioural segments built and licensed: "morning commuter," "high-value," "lapsed." Revenue line.</div></div>
+            <div class="arch-b-acc-panel"><div class="arch-b-acc-label arch-b-acc-label--rfr">Refueler</div><div class="arch-b-acc-val arch-b-acc-val--rfr">No profile constructed. No segment sold. What we do not collect, we cannot license.</div></div>
+          </div>
+        </details>
+        <details class="arch-b-item">
+          <summary><span class="arch-b-summary-label">Float income</span><span class="arch-b-chevron">›</span></summary>
+          <div class="arch-b-pair">
+            <div class="arch-b-acc-panel"><div class="arch-b-acc-label">Standard app</div><div class="arch-b-acc-val">Preloaded customer balances earn interest for the operator. Breakage captured as revenue on expiry.</div></div>
+            <div class="arch-b-acc-panel"><div class="arch-b-acc-label arch-b-acc-label--rfr">Refueler</div><div class="arch-b-acc-val arch-b-acc-val--rfr">No preloaded balance model. No float. No breakage. No FCA safeguarding obligation.</div></div>
+          </div>
+        </details>
+        <details class="arch-b-item">
+          <summary><span class="arch-b-summary-label">GDPR exposure</span><span class="arch-b-chevron">›</span></summary>
+          <div class="arch-b-pair">
+            <div class="arch-b-acc-panel"><div class="arch-b-acc-label">Standard app</div><div class="arch-b-acc-val">High — broad data collection, third-party sharing, location processing, consent chain complexity</div></div>
+            <div class="arch-b-acc-panel"><div class="arch-b-acc-label arch-b-acc-label--rfr">Refueler</div><div class="arch-b-acc-val arch-b-acc-val--rfr">Structurally minimal. No location column in orders database. Architecture, not policy.</div></div>
+          </div>
+        </details>
+        <details class="arch-b-item">
+          <summary><span class="arch-b-summary-label">Cookies (web)</span><span class="arch-b-chevron">›</span></summary>
+          <div class="arch-b-pair">
+            <div class="arch-b-acc-panel"><div class="arch-b-acc-label">Standard app</div><div class="arch-b-acc-val">Typically 15–40 cookies on page load; advertising, analytics, and personalisation trackers</div></div>
+            <div class="arch-b-acc-panel"><div class="arch-b-acc-label arch-b-acc-label--rfr">Refueler</div><div class="arch-b-acc-val arch-b-acc-val--rfr">One short-lived session token. Expires on tab close. Verifiable in Application → Cookies.</div></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <p>The passive ambient awareness feature — the mechanism that detects when you have boarded your train and sends a quiet prompt to confirm your order — runs entirely on your device. The geofence logic, the velocity check, the trigger: all local. Nothing is transmitted to Refueler's servers until the moment you confirm your order, at which point only the item and vendor are sent — no location, no route, no timing data.</p>
+
+    <p>What we know is what you tell us when you place an order: what you want, and where to collect it. The feature requires explicit opt-in at onboarding, with a toggle in settings withdrawable at any time. This is not a novelty — it is a minimum standard. What is less common is that the architecture makes the privacy promise structurally true, rather than contractually asserted. You are not trusting Refueler not to misuse your location data. You are relying on the fact that we do not have it.</p>
+
+    <blockquote>
+      <p>"Your phone works it out locally. We never see where you are."</p>
+    </blockquote>
+
+    <h2>The payment rail — and why money matters here too</h2>
+
+    <p>Most payment systems are, on closer inspection, also data systems. Every card transaction leaves a trace: merchant category, amount, timestamp, location. That trace is valuable to card networks, to banks, and to the data-brokerage industry that processes it downstream. It is the loyalty-app extraction problem, running quietly in the background of every contactless payment.</p>
+
+    <p>Refueler's payment rail is built on Bitcoin's Lightning Network, with rewards settled in satoshis — the smallest denomination of the hardest, scarcest money ever created. Bitcoin does not ask for your birthday. It does not maintain a behavioural profile. A Lightning payment carries no merchant-enriched metadata to a third party. The transaction settles. The satoshis move. There is nothing left to license.</p>
+
+    <p>Lightning addresses — used solely to push your reward payment — are held in transient memory for the duration of that payment and are never written to the database. Your ecash balance lives on your device. We cannot freeze it, reverse it, or access it. The rewards are yours from the moment they are issued — not a promise, a technical fact.</p>
+
+    <h2>A sealed room</h2>
+
+    <p>In the thriller's second act, the subject returns to the oak-panelled room. This time, they are not handed a folder. Instead, the bureaucrat — looking faintly embarrassed — informs them that the operation has been wound down. The pipeline was discontinued. The data, it turned out, had never been collected.</p>
+
+    <p>There was nothing to intercept. Nothing to protect against. Nothing to explain to a regulator, a journalist, or a customer who eventually, inevitably, asked the question.</p>
+
+    <p>Refueler made a deliberate decision. We could have built the folder. Every app in this space has the opportunity to earn twice — once from the merchant, and once from the quiet commerce of knowing who you are. We declined, not out of sentiment, but out of design. Some intelligence services describe their most sensitive assets as being held "in a sealed room" — a place where access is controlled not by policy, but by the structure of the room itself. Nobody enters without clearance. Nothing leaves without need.</p>
+
+    <p>That is, more or less, how Refueler handles your data. The room is sealed. What is inside belongs to you.</p>
+
+  </article>
+
+  <div class="sources">
+    <p class="sources-label">Sources</p>
+    <ul class="sources-list">
+      <li>URM Consulting — Analysis of ICO enforcement action 2025: urmconsulting.com</li>
+      <li>ICO Annual Report 2024–25: ico.org.uk/about-the-ico/our-information/annual-report</li>
+      <li>ICO — Your data matters: ico.org.uk/your-data-matters</li>
+      <li>Clifford Chance — ICO fines Capita for UK GDPR infringements, October 2025</li>
+      <li>Skadden — Recent ICO data breach enforcement, February 2026</li>
+      <li>Privacy International — GDPR complaint filed against Oracle and Acxiom, November 2018</li>
+    </ul>
+  </div>
+
+</div><!-- /article-wrap -->
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span class="footer-note">© 2026 Refueler Ltd (incorporating) · refueler.io/editorial/the-app-that-earns-your-trust</span>
+    <div class="footer-links">
+      <a href="refueler-editorial-index.html">← Editorial</a>
+      <a href="the-float.html">Article 2 →</a>
+      <a href="../privacy/privacy_v1_3.html">Privacy</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  /* THEME FIX — rfTheme localStorage persistence */
+  const THEME_KEY = 'rfTheme';
+
+  function applyTheme(theme) {
+    const root = document.documentElement;
+    const pill = document.getElementById('themePill') || document.getElementById('theme-btn');
+    if (theme === 'carbon') {
+      root.classList.add('carbon-mode');
+      root.setAttribute('data-theme', 'carbon');
+      if (pill) pill.textContent = 'Carbon / Paper';
+    } else {
+      root.classList.remove('carbon-mode');
+      root.removeAttribute('data-theme');
+      if (pill) pill.textContent = 'Paper / Carbon';
+    }
+  }
+
+  function toggleTheme() {
+    const current = localStorage.getItem(THEME_KEY) || 'paper';
+    const next = current === 'paper' ? 'carbon' : 'paper';
+    localStorage.setItem(THEME_KEY, next);
+    applyTheme(next);
+  }
+
+  (function () { applyTheme(localStorage.getItem(THEME_KEY) || 'paper'); })();
+</script>
+    <!-- Modal — lives outside .article-body so it overlays the full viewport -->
+    <div class="arch-b-modal" id="arch-modal" role="dialog" aria-modal="true" aria-label="Architecture comparison table">
+      <div class="arch-b-scrim" onclick="archModalClose()" aria-hidden="true"></div>
+      <div class="arch-b-modal-panel">
+        <div class="arch-b-modal-header">
+          <div class="arch-b-modal-header-left">
+            <span class="arch-b-modal-eyebrow">Architecture · 8 dimensions · Full comparison</span>
+            <span class="arch-b-modal-title">Standard loyalty app vs Refueler</span>
+          </div>
+          <button class="arch-b-close-btn" onclick="archModalClose()" aria-label="Close comparison table">Close ✕</button>
+        </div>
+
+        <div class="arch-b-modal-table-wrap">
+          <table class="arch-b-modal-table">
+            <colgroup>
+              <col class="col-dim">
+              <col class="col-std">
+              <col class="col-rfr">
+            </colgroup>
+            <thead>
+              <tr>
+                <th></th>
+                <th>Standard loyalty app</th>
+                <th class="th-rfr">Refueler</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="td-dim">Location<br>data</td>
+                <td class="td-std">Collected server-side; background access common; stored against user profile indefinitely</td>
+                <td class="td-rfr">Processed on-device only. Geofence logic local. No location transmitted to servers. Ever.<br><span class="arch-b-badge">Structural · not contractual</span></td>
+              </tr>
+              <tr>
+                <td class="td-dim">Payment<br>rail</td>
+                <td class="td-std">Card networks or preloaded balance; transaction metadata retained by issuer and card network</td>
+                <td class="td-rfr">Bitcoin Lightning Network. Payment settles peer-to-peer. No merchant-enriched metadata passes to third parties.</td>
+              </tr>
+              <tr>
+                <td class="td-dim">Rewards<br>custody</td>
+                <td class="td-std">Points held by operator; can be devalued, expired, or withheld at operator discretion</td>
+                <td class="td-rfr">Satoshis issued to user's ecash wallet at point of earning. On-device. Operator cannot freeze, reverse, or access.</td>
+              </tr>
+              <tr>
+                <td class="td-dim">Third-party<br>trackers</td>
+                <td class="td-std">Facebook pixel, Google Ads, TikTok attribution SDK typically embedded; data shared under "partner" consent</td>
+                <td class="td-rfr">None. No advertising SDK. No third-party pixel. Verifiable via browser developer tools.</td>
+              </tr>
+              <tr>
+                <td class="td-dim">User<br>profiling</td>
+                <td class="td-std">Behavioural segments built and licensed: "morning commuter," "high-value," "lapsed." Revenue line.</td>
+                <td class="td-rfr">No behavioural profile constructed. No segment sold. What we do not collect, we cannot license.</td>
+              </tr>
+              <tr>
+                <td class="td-dim">Float<br>income</td>
+                <td class="td-std">Preloaded customer balances earn interest for the operator. Breakage captured as revenue on expiry.</td>
+                <td class="td-rfr">No preloaded balance model. No float. No breakage. No FCA safeguarding obligation on customer funds.</td>
+              </tr>
+              <tr>
+                <td class="td-dim">GDPR<br>exposure</td>
+                <td class="td-std">High — broad data collection, third-party sharing, location processing, consent chain complexity</td>
+                <td class="td-rfr">Structurally minimal — no location column in orders database. Data minimisation by architecture, not policy.</td>
+              </tr>
+              <tr>
+                <td class="td-dim">Cookies<br>(web)</td>
+                <td class="td-std">Typically 15–40 cookies on page load; advertising, analytics, and personalisation trackers</td>
+                <td class="td-rfr">One short-lived session token. Expires on tab close. Verifiable in Application → Cookies.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="arch-b-modal-footer">Architecture claims reflect Refueler's current build as at May 2026. Standard loyalty app characteristics based on published privacy policies of major UK franchise ordering apps and independent technical audits. Specific chains not named.</p>
+      </div>
+    </div>
+
+    <script>
+      function archModalOpen() {
+        var modal = document.getElementById('arch-modal');
+        var btn = document.getElementById('arch-open-btn');
+        modal.classList.add('is-open');
+        btn.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+        // Trap focus on close button
+        modal.querySelector('.arch-b-close-btn').focus();
+      }
+      function archModalClose() {
+        var modal = document.getElementById('arch-modal');
+        var panel = modal.querySelector('.arch-b-modal-panel');
+        var btn = document.getElementById('arch-open-btn');
+        panel.classList.add('is-closing');
+        setTimeout(function() {
+          modal.classList.remove('is-open');
+          panel.classList.remove('is-closing');
+          btn.setAttribute('aria-expanded', 'false');
+          document.body.style.overflow = '';
+          btn.focus();
+        }, 150);
+      }
+      // Escape key closes modal
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') archModalClose();
+      });
+    </script>
+
+    <!-- Modal: data value widget -->
+    <div class="dv-modal" id="dv-modal" role="dialog" aria-modal="true" aria-label="Data value breakdown">
+      <div class="dv-scrim" onclick="dvModalClose()" aria-hidden="true"></div>
+      <div class="dv-modal-panel" id="dv-modal-panel">
+        <div class="dv-modal-header">
+          <div class="dv-modal-header-left">
+            <span class="dv-modal-eyebrow">Data economics · 5 categories · Full breakdown</span>
+            <span class="dv-modal-title">Estimated data value per loyalty app user per year</span>
+          </div>
+          <button class="dv-close-btn" onclick="dvModalClose()" aria-label="Close">Close ✕</button>
+        </div>
+        <div class="dv-modal-table-wrap">
+          <table class="dv-modal-table">
+            <colgroup><col class="col-cat"><col class="col-val"></colgroup>
+            <thead><tr><th>Data category</th><th>Est. value / user / yr</th></tr></thead>
+            <tbody>
+              <tr><td><span class="dv-modal-cat">Location &amp; movement history</span><span class="dv-modal-note">Background GPS, beacon proximity, dwell time, commute pattern inference</span></td><td><span class="dv-modal-val">£4–9<span class="dv-modal-val-sub">per user per year</span></span></td></tr>
+              <tr><td><span class="dv-modal-cat">Purchase &amp; transaction history</span><span class="dv-modal-note">Item-level spend, frequency, basket size, payment method, timestamp</span></td><td><span class="dv-modal-val">£6–14<span class="dv-modal-val-sub">per user per year</span></span></td></tr>
+              <tr><td><span class="dv-modal-cat">Behavioural &amp; intent signals</span><span class="dv-modal-note">Items viewed, cart abandonment, search queries, session depth, A/B exposure</span></td><td><span class="dv-modal-val">£3–8<span class="dv-modal-val-sub">per user per year</span></span></td></tr>
+              <tr><td><span class="dv-modal-cat">Device &amp; identity graph</span><span class="dv-modal-note">Advertising ID, IP address, device model, carrier — enables cross-app identity resolution</span></td><td><span class="dv-modal-val">£2–5<span class="dv-modal-val-sub">per user per year</span></span></td></tr>
+              <tr class="dv-total-row"><td><span class="dv-modal-cat">Audience segment licensing</span><span class="dv-modal-note">Profile passed to ad networks, data brokers, and third-party "partners" as enriched segment</span></td><td><span class="dv-modal-val">£3–7<span class="dv-modal-val-sub">per user per year</span></span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="dv-modal-footer">Estimates derived from industry CPM benchmarks, data broker licensing rates, and academic valuation frameworks (Gartner, RAND Europe, WEF personal data valuations). Ranges reflect variation by user activity level and data completeness. Not a claim as to any specific chain's practices.</p>
+      </div>
+    </div>
+    <script>
+      function dvModalOpen() {
+        var modal = document.getElementById('dv-modal');
+        var btn = document.getElementById('dv-open-btn');
+        modal.classList.add('is-open');
+        btn.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+        modal.querySelector('.dv-close-btn').focus();
+      }
+      function dvModalClose() {
+        var modal = document.getElementById('dv-modal');
+        var panel = document.getElementById('dv-modal-panel');
+        var btn = document.getElementById('dv-open-btn');
+        panel.classList.add('is-closing');
+        setTimeout(function() {
+          modal.classList.remove('is-open');
+          panel.classList.remove('is-closing');
+          btn.setAttribute('aria-expanded', 'false');
+          document.body.style.overflow = '';
+          btn.focus();
+        }, 150);
+      }
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') { dvModalClose(); archModalClose(); }
+      });
+    </script>
+</body>
+</html>

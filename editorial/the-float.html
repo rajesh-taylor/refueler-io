@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The float — Refueler Editorial</title>
+<meta name="description" content="FCA e-money regulations loyalty apps UK 2026: PS25/12 changes what coffee chains must do with your preloaded balance. What it means — and what was already built.">
+<meta property="og:title" content="The float · Refueler Editorial">
+<meta property="og:description" content="Your morning coffee app knows more about you than your bank does. On 7 May 2026, the regulator finally noticed.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://refueler.io/editorial/the-float.html">
+<meta property="og:site_name" content="Refueler">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The float · Refueler Editorial">
+<meta name="twitter:description" content="Your morning coffee app knows more about you than your bank does. On 7 May 2026, the regulator finally noticed.">
+<link rel="canonical" href="https://refueler.io/editorial/the-float.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=Satoshi:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   REFUELER EDITORIAL — ARTICLE PAGE v2
+   Carbon: #1E1F22 (Claude.ai-calibrated)
+   Paper default · Command-centre style toggle
+   A/B typography toggle retained
+   Article column measure options: same 3 as index
+   ============================================================ */
+
+  :root {
+    --paper:          #F7F4EF;
+    --carbon:         #1E1F22;
+    --carbon-soft:    #26282C;
+    --carbon-mid:     #2E3035;
+    --ink:            #3D3A36;
+    --ink-secondary:  #5A5751;
+    --ink-tertiary:   #9A948D;
+    --rule:           #D6D1C8;
+    --blockquote-rule:#8A8680;
+
+    --bg:             var(--paper);
+    --text-primary:   var(--ink);
+    --text-secondary: var(--ink-secondary);
+    --text-tertiary:  var(--ink-tertiary);
+    --border:         var(--rule);
+
+    --font-heading:   'Satoshi', 'DM Sans', sans-serif;
+    --font-serif:     'Source Serif 4', Georgia, serif;
+    --font-sans:      'DM Sans', system-ui, sans-serif;
+
+    /* Variant A (serif) defaults */
+    --body-font:      var(--font-serif);
+    --body-size-d:    18px;
+    --body-size-m:    17px;
+    --body-lh-d:      1.8;
+    --body-lh-m:      1.75;
+    --para-spacing:   1.5em;
+
+    /* Article column width — Option A (editorial measure) */
+    --article-max:    68ch;
+    --article-max-m:  48ch;
+
+    --max-w:          1200px;
+    --gutter:         clamp(1.25rem, 4vw, 3rem);
+  }
+
+  [data-theme="carbon"] {
+    --bg:             var(--carbon);
+    --text-primary:   #E4E2DC;
+    --text-secondary: #8A8680;
+    --text-tertiary:  #5A5751;
+    --border:         #35373B;
+    --blockquote-rule:#8A8680;
+  }
+
+  /* Variant A (serif) locked — Source Serif 4, 68ch, 18px/1.8 */
+
+  /* Column width locked: Option A (68ch editorial measure) */
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-font-smoothing: antialiased; }
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--body-font);
+    font-size: var(--body-size-d);
+    line-height: var(--body-lh-d);
+    transition: background 0.3s, color 0.3s;
+    min-height: 100vh;
+  }
+
+  /* ============ SITE HEADER ============ */
+  .site-header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 var(--gutter);
+    position: sticky; top: 0;
+    background: var(--bg);
+    z-index: 100;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .header-inner {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .wordmark {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.06em;
+    text-transform: none;
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .wordmark-divider { font-weight: 300; opacity: 0.3; margin: 0 0.5rem; }
+  .wordmark-section { font-weight: 400; letter-spacing: 0.06em; opacity: 0.55; text-transform: none; }
+
+  nav { display: flex; align-items: center; gap: 2rem; }
+  nav a {
+    font-family: var(--font-heading);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  nav a:hover { color: var(--text-primary); }
+
+  /* Command-centre Paper / Carbon pill */
+  .theme-pill {
+    font-family: var(--font-heading);
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 0.35rem 0.85rem;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    white-space: nowrap;
+  }
+  .theme-pill:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+
+  /* ============ ARTICLE LAYOUT ============ */
+  .article-wrap {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    padding: 0 var(--gutter);
+  }
+
+  .breadcrumb {
+    padding: 1.75rem 0 0;
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    letter-spacing: 0.07em;
+    color: var(--text-tertiary);
+  }
+  .breadcrumb a { color: inherit; text-decoration: none; }
+  .breadcrumb a:hover { color: var(--text-secondary); }
+  .breadcrumb-sep { margin: 0 0.4rem; opacity: 0.35; }
+
+  .article-header {
+    padding: 2.5rem 0 2.25rem;
+    max-width: var(--article-max);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+    transition: border-color 0.3s;
+    transition: max-width 0.4s ease;
+  }
+
+  .article-eyebrow {
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 1.25rem;
+    display: flex;
+    gap: 0.625rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .dot { width: 2px; height: 2px; border-radius: 50%; background: currentColor; opacity: 0.3; flex-shrink: 0; }
+
+  .article-title {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 4.5vw, 3.25rem);
+    font-weight: 600;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    color: var(--text-primary);
+    margin-bottom: 1.25rem;
+  }
+
+  .article-standfirst {
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+  }
+
+
+  .article-dateline {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    letter-spacing: 0.06em;
+    color: var(--text-tertiary);
+  }
+
+  /* ============ BODY ============ */
+  .article-body {
+    max-width: var(--article-max);
+    font-family: var(--body-font);
+    font-size: var(--body-size-d);
+    line-height: var(--body-lh-d);
+    color: var(--text-primary);
+    overflow: visible;
+    transition: color 0.3s;
+    transition: max-width 0.4s ease, font-family 0.2s, font-size 0.2s, line-height 0.2s;
+  }
+
+  /* Drop cap — Variant A only */
+  .article-body .drop-cap::first-letter {
+    float: left;
+    font-family: var(--font-heading);
+    font-size: 4.25em;
+    font-weight: 400;
+    line-height: 0.78;
+    margin-right: 0.1em;
+    margin-top: 0.08em;
+    color: var(--text-primary);
+  }
+
+
+  .article-body p { margin-bottom: var(--para-spacing); }
+
+  .article-body h2 {
+    font-family: var(--font-heading);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    margin-top: 3rem;
+    margin-bottom: 1.125rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .article-body hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2.5rem 0;
+  }
+
+  .article-body blockquote {
+    border-left: 2px solid var(--blockquote-rule);
+    margin: 2rem 0;
+    padding: 0.125rem 0 0.125rem 1.5rem;
+    font-style: italic;
+    color: var(--text-secondary);
+    font-size: 1.0625em;
+    line-height: 1.65;
+  }
+  .article-body blockquote p { margin-bottom: 0; }
+
+  .article-body sup {
+    font-family: var(--font-heading);
+    font-size: 0.65em;
+    color: var(--text-tertiary);
+    vertical-align: super;
+    margin-left: 0.1em;
+  }
+
+  /* Widget placeholders */
+  .widget-placeholder {
+    margin: 2.5rem 0;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.5rem;
+  }
+  .widget-label {
+    font-family: var(--font-heading);
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 0.4rem;
+  }
+  .widget-title {
+    font-family: var(--font-heading);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  /* Sources block */
+  .sources {
+    margin-top: 4.5rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--border);
+    max-width: var(--article-max);
+    transition: max-width 0.4s ease;
+  }
+  .sources-label {
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 1rem;
+  }
+  .sources-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+  .sources-list li {
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    line-height: 1.55;
+    padding-left: 1.25em;
+    position: relative;
+  }
+  .sources-list li::before { content: '—'; position: absolute; left: 0; opacity: 0.3; }
+  .footnote-note {
+    margin-top: 0.75rem;
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    font-style: italic;
+    color: var(--text-tertiary);
+  }
+
+  /* ============ FOOTER ============ */
+  .site-footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem var(--gutter);
+    margin-top: 5rem;
+  }
+  .footer-inner {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .footer-note, .footer-links a {
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    letter-spacing: 0.06em;
+    color: var(--text-tertiary);
+    text-decoration: none;
+  }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-links a:hover { color: var(--text-secondary); }
+
+  @media (max-width: 680px) {
+    body { font-size: var(--body-size-m); line-height: var(--body-lh-m); }
+    .article-body { max-width: var(--article-max-m); font-size: var(--body-size-m); line-height: var(--body-lh-m); }
+    nav a { display: none; }
+  }
+
+  /* ── Carbon mode accent ─────────────────────────────────────────
+     Token: #C8A96E (aged gold) — Carbon mode only
+     Widget header left-rule + interactive trigger button.
+     Not connected to any third-party brand or partner.
+  ──────────────────────────────────────────────────────────────── */
+  [data-theme="carbon"] .article-body blockquote {
+    border-left-color: #C8A96E;
+  }
+
+    [data-theme="carbon"] .widget--dv,
+  [data-theme="carbon"] .widget--ico,
+  [data-theme="carbon"] .widget--arch-b,
+  [data-theme="carbon"] .widget--fca,
+  [data-theme="carbon"] .widget--franchise,
+  [data-theme="carbon"] .widget--fscs {
+    border-left-color: #C8A96E;
+  }
+  [data-theme="carbon"] .dv-open-btn,
+  [data-theme="carbon"] .arch-b-open-btn,
+  [data-theme="carbon"] .fca-open-btn,
+  [data-theme="carbon"] .fr-open-btn {
+    border-color: #C8A96E;
+    color: #C8A96E;
+  }
+  [data-theme="carbon"] .dv-open-btn:hover,
+  [data-theme="carbon"] .arch-b-open-btn:hover,
+  [data-theme="carbon"] .fca-open-btn:hover,
+  [data-theme="carbon"] .fr-open-btn:hover {
+    border-color: #E0C48A;
+    color: #E0C48A;
+  }
+  [data-theme="carbon"] .arch-b-modal-panel,
+  [data-theme="carbon"] .dv-modal-panel,
+  [data-theme="carbon"] .fca-modal-panel,
+  [data-theme="carbon"] .fr-modal-panel {
+    border-top-color: #C8A96E;
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="refueler-editorial-index.html" class="wordmark">
+      Refueler
+      <span class="wordmark-divider">/</span>
+      <span class="wordmark-section">Editorial</span>
+    </a>
+    <nav>
+      <a href="../">App</a>
+      <a href="refueler-editorial-index.html" class="active">Editorial</a>
+      <a href="../privacy/privacy_v1_3.html">Privacy</a>
+      <button class="theme-pill" onclick="toggleTheme()" id="theme-btn">Paper / Carbon</button>
+    </nav>
+  </div>
+</header>
+
+<div class="article-wrap">
+
+  <p class="breadcrumb">
+    <a href="refueler-editorial-index.html">Editorial</a>
+    <span class="breadcrumb-sep">/</span>
+    Regulation · FCA
+  </p>
+
+  <header class="article-header" id="article-header">
+    <div class="article-eyebrow">
+      <span>Regulation</span><span class="dot"></span>
+      <span>FCA · PS25/12</span><span class="dot"></span>
+      <span>Loyalty apps</span><span class="dot"></span>
+      <span>Bitcoin payments</span>
+    </div>
+    <h1 class="article-title">The float</h1>
+    <p class="article-standfirst">Your coffee app knows more about you than your bank. And the regulator finally noticed.</p>
+    <div class="article-dateline">
+      <span>May 2026</span><span class="dot"></span>
+      <span>9 min read</span><span class="dot"></span>
+      <span>refueler.io/editorial/the-float</span>
+    </div>
+  </header>
+
+  <article class="article-body" id="article-body">
+
+    <p>On 7 May 2026, the rules changed. Most people ordering their morning flat white did not notice. The coffee was the same temperature. The queue was the same length. The app worked exactly as it always had. But somewhere in a Canary Wharf legal department — or several — a compliance team was reading the same filing rather carefully, and trying to work out what it meant for a revenue line that had never, until now, attracted much regulatory attention.</p>
+
+    <p>The filing had a number. PS25/12. And it had an effective date.</p>
+
+    <hr>
+
+    <p>There is a particular kind of quiet that falls over a boardroom when someone slides a regulatory instrument across the table.</p>
+
+    <p>Not a warning letter. Not an enforcement notice. Something more useful, and considerably more uncomfortable: a new set of obligations that apply to everyone in the room, effective immediately. The kind that arrives not with a bang but with the measured cadence of a consultation paper that has finally, after two years, become law.</p>
+
+    <p>PS25/12 — the FCA's Supplementary Safeguarding Regime — is described by the FCA itself as "the most significant set of changes to the safeguarding regime since its inception." It came into force on 7 May 2026. It was not aimed specifically at coffee chains. It did not need to be.</p>
+
+    <p>Because here is the thing about loyalty programmes. The ones operated by the major UK coffee chains — Costa, Starbucks, Pret, Caffè Nero — are not, in the strict sense, coffee businesses. They are, in regulatory terms, something closer to unregistered banks. Customers preload money. Balances accumulate. Funds sit on the chain's books, earning interest, providing float income, and occasionally — frequently, in fact — going unspent. The industry term for unspent customer balances is "breakage." In 2018, Starbucks reported $155 million in breakage income from its loyalty programme alone. That is not a rounding error. That is a revenue line.</p>
+
+    <p>The question the filing now places in front of every franchise chain is a simple one: are you holding customer funds? And if so — under what framework, exactly, are you doing that?</p>
+
+<!-- Widget 1: FCA Safeguarding — pop-out desktop · accordion mobile -->
+    <div class="widget widget--fca" id="fca-widget">
+      <style>
+        .widget--fca {
+          margin: 3rem 0;
+          border: 1px solid var(--border);
+          border-left: 2px solid var(--blockquote-rule);
+          background: var(--bg);
+          transition: background 0.3s, border-color 0.3s;
+        }
+        .fca-panel-header {
+          padding: 1.125rem 1.5rem 0;
+          border-bottom: 1px solid var(--border);
+        }
+        .fca-eyebrow {
+          font-family: var(--font-heading);
+          font-size: 0.575rem;
+          letter-spacing: 0.13em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+          margin-bottom: 0.35rem;
+        }
+        .fca-title {
+          font-family: var(--font-heading);
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          letter-spacing: -0.01em;
+          margin-bottom: 0.875rem;
+        }
+        .fca-preview {
+          width: 100%;
+          border-collapse: collapse;
+          font-family: var(--font-heading);
+        }
+        .fca-preview thead tr { border-bottom: 1px solid var(--border); }
+        .fca-preview th {
+          font-size: 0.575rem;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+          font-weight: 500;
+          padding: 0.6rem 1.5rem;
+          text-align: left;
+        }
+        .fca-preview th.th-applies { width: 32%; text-align: right; }
+        .fca-preview td {
+          font-size: 0.8125rem;
+          padding: 0.75rem 1.5rem;
+          border-bottom: 1px solid var(--border);
+          vertical-align: top;
+          line-height: 1.5;
+          color: var(--text-secondary);
+        }
+        .fca-preview tbody tr:last-child td { border-bottom: none; }
+        .fca-preview td.td-applies {
+          text-align: right;
+          font-size: 0.7rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          white-space: nowrap;
+        }
+        .fca-req-label {
+          font-size: 0.6rem;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+          display: block;
+          margin-bottom: 0.2rem;
+        }
+        .fca-preview td.td-req-name .fca-req-sub {
+          display: block;
+          font-size: 0.6rem;
+          font-weight: 400;
+          letter-spacing: 0;
+          text-transform: none;
+          color: var(--text-tertiary);
+          margin-top: 0.25rem;
+          line-height: 1.45;
+        }
+                .fca-preview td.td-req-name {
+          font-size: 0.6rem;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+          vertical-align: top;
+          padding-top: 0.875rem;
+          border-right: 1px solid var(--border);
+          line-height: 1.4;
+        }
+        .fca-trigger-row {
+          padding: 0.875rem 1.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          border-top: 1px solid var(--border);
+          gap: 1rem;
+        }
+        .fca-trigger-note {
+          font-family: var(--font-heading);
+          font-size: 0.6375rem;
+          color: var(--text-tertiary);
+        }
+        .fca-trigger-note strong { color: var(--text-secondary); font-weight: 500; }
+        .fca-open-btn {
+          font-family: var(--font-heading);
+          font-size: 0.6375rem;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--text-secondary);
+          background: transparent;
+          border: 1px solid var(--border);
+          border-radius: 2px;
+          padding: 0.4rem 0.875rem;
+          cursor: pointer;
+          transition: border-color 0.2s, color 0.2s;
+          white-space: nowrap;
+        }
+        .fca-open-btn:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+        /* Modal */
+        .fca-modal {
+          display: none;
+          position: fixed;
+          inset: 0;
+          z-index: 1000;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem var(--gutter, 1.5rem);
+        }
+        .fca-modal.is-open { display: flex; }
+        .fca-scrim {
+          position: absolute;
+          inset: 0;
+          background: rgba(0,0,0,0.55);
+          cursor: pointer;
+          animation: fca-scrim-in 0.25s ease;
+        }
+        [data-theme="carbon"] .fca-scrim { background: rgba(0,0,0,0.72); }
+        @keyframes fca-scrim-in { from { opacity:0; } to { opacity:1; } }
+        .fca-modal-panel {
+          position: relative;
+          z-index: 1;
+          background: var(--bg);
+          border: 1px solid var(--border);
+          border-top: 2px solid var(--blockquote-rule);
+          width: min(940px, 100%);
+          max-height: min(88vh, 820px);
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          animation: fca-panel-in 0.3s cubic-bezier(0.16,1,0.3,1);
+        }
+        @keyframes fca-panel-in {
+          from { opacity:0; transform: translateY(12px) scale(0.98); }
+          to   { opacity:1; transform: translateY(0) scale(1); }
+        }
+        .fca-modal-panel.is-closing { animation: fca-panel-out 0.15s ease forwards; }
+        @keyframes fca-panel-out { from { opacity:1; } to { opacity:0; } }
+        .fca-modal-header {
+          padding: 1.25rem 2rem 1.125rem;
+          border-bottom: 1px solid var(--border);
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 1rem;
+          flex-shrink: 0;
+        }
+        .fca-modal-header-left { display: flex; flex-direction: column; gap: 0.3rem; }
+        .fca-modal-eyebrow {
+          font-family: var(--font-heading);
+          font-size: 0.575rem;
+          letter-spacing: 0.13em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+        }
+        .fca-modal-title {
+          font-family: var(--font-heading);
+          font-size: 1.0625rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          letter-spacing: -0.015em;
+        }
+        .fca-close-btn {
+          font-family: var(--font-heading);
+          font-size: 0.6375rem;
+          font-weight: 500;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+          background: transparent;
+          border: 1px solid var(--border);
+          border-radius: 2px;
+          padding: 0.4rem 0.75rem;
+          cursor: pointer;
+          flex-shrink: 0;
+          margin-top: 0.2rem;
+          transition: color 0.2s, border-color 0.2s;
+        }
+        .fca-close-btn:hover { color: var(--text-primary); border-color: var(--text-secondary); }
+        .fca-modal-table-wrap { overflow-y: auto; overflow-x: hidden; flex: 1; }
+        .fca-modal-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-family: var(--font-heading);
+          table-layout: fixed;
+        }
+        .fca-modal-table colgroup .col-req  { width: 20%; }
+        .fca-modal-table colgroup .col-desc { width: 50%; }
+        .fca-modal-table colgroup .col-app  { width: 30%; }
+        .fca-modal-table thead {
+          position: sticky; top: 0; z-index: 2; background: var(--bg);
+        }
+        .fca-modal-table thead tr { border-bottom: 1px solid var(--border); }
+        .fca-modal-table th {
+          font-size: 0.6375rem;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+          font-weight: 500;
+          padding: 0.875rem 2rem;
+          text-align: left;
+        }
+        .fca-modal-table td {
+          font-size: 0.9375rem;
+          padding: 1.125rem 2rem;
+          border-bottom: 1px solid var(--border);
+          vertical-align: top;
+          line-height: 1.55;
+          color: var(--text-secondary);
+        }
+        .fca-modal-table tbody tr:last-child td { border-bottom: none; }
+        .fca-modal-table td.td-req {
+          font-size: 0.6rem;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+        }
+        .fca-modal-table td.td-applies {
+          font-size: 0.8125rem;
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+        .fca-applies-threshold {
+          display: block;
+          font-size: 0.6875rem;
+          font-weight: 400;
+          color: var(--text-tertiary);
+          margin-top: 0.25rem;
+        }
+        .fca-tag {
+          display: inline-block;
+          font-family: var(--font-heading);
+          font-size: 0.575rem;
+          letter-spacing: 0.07em;
+          text-transform: uppercase;
+          border: 1px solid var(--border);
+          border-radius: 2px;
+          padding: 0.2rem 0.45rem;
+          color: var(--text-tertiary);
+          margin-top: 0.3rem;
+        }
+        .fca-modal-footer {
+          padding: 0.75rem 2rem 1rem;
+          border-top: 1px solid var(--border);
+          font-family: var(--font-heading);
+          font-size: 0.6875rem;
+          color: var(--text-tertiary);
+          line-height: 1.55;
+          flex-shrink: 0;
+        }
+        /* Mobile accordion */
+        .fca-accordion { display: none; }
+        @media (max-width: 860px) {
+          .fca-preview, .fca-trigger-row { display: none; }
+          .fca-modal { display: none !important; }
+          .fca-accordion { display: block; }
+          .widget--fca { margin: 2.5rem 0; }
+          .fca-title { font-size: 0.8125rem; }
+          .fca-item { border-bottom: 1px solid var(--border); }
+          .fca-item:last-child { border-bottom: none; }
+          .fca-item summary {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.875rem 1.25rem;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+          }
+          .fca-item summary::-webkit-details-marker { display: none; }
+          .fca-item[open] summary { border-bottom: 1px solid var(--border); }
+          .fca-summary-label {
+            font-family: var(--font-heading);
+            font-size: 0.6875rem;
+            font-weight: 600;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+          }
+          .fca-chevron { font-size: 0.75rem; color: var(--text-tertiary); transition: transform 0.2s; flex-shrink: 0; }
+          .fca-item[open] .fca-chevron { transform: rotate(90deg); }
+          .fca-acc-body { padding: 0.875rem 1.25rem 1rem; }
+          .fca-acc-req {
+            font-family: var(--font-heading);
+            font-size: 0.575rem;
+            font-weight: 600;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: 0.5rem;
+          }
+          .fca-acc-desc {
+            font-family: var(--font-heading);
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 0.5rem;
+          }
+          .fca-acc-applies {
+            font-family: var(--font-heading);
+            font-size: 0.6875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-top: 1px solid var(--border);
+            padding-top: 0.5rem;
+            margin-top: 0.5rem;
+          }
+        }
+        @media (max-width: 480px) {
+          .fca-panel-header { padding: 1rem 1.25rem 0; }
+        }
+      </style>
+
+      <div class="fca-panel-header">
+        <p class="fca-eyebrow">Regulation · PS25/12 · Effective 7 May 2026</p>
+        <p class="fca-title">FCA Supplementary Safeguarding Regime — key requirements</p>
+        <table class="fca-preview">
+          <thead>
+            <tr>
+              <th style="width:48%">Requirement</th>
+              <th style="width:52%">Applies when</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="td-req-name">Mandatory registration<span class="fca-req-sub">Register as e-money or payment institution before accepting funds</span></td>
+              <td class="td-applies">Customer balance held &gt;£0 at scale</td>
+            </tr>
+            <tr>
+              <td class="td-req-name">Ring-fencing &amp; segregation<span class="fca-req-sub">Funds in designated safeguarding account, separate from firm's own</span></td>
+              <td class="td-applies">Immediately upon receipt of customer funds</td>
+            </tr>
+            <tr>
+              <td class="td-req-name">Daily reconciliation<span class="fca-req-sub">Shortfall must be remedied within one business day</span></td>
+              <td class="td-applies">Every business day</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="fca-trigger-row">
+        <span class="fca-trigger-note"><strong>4 more requirements</strong> — independent audit, winding-down plan, return of funds, Refueler position</span>
+        <button class="fca-open-btn" onclick="fcaModalOpen()" aria-expanded="false" id="fca-open-btn">View full regime ›</button>
+      </div>
+
+      <!-- Mobile accordion -->
+      <div class="fca-accordion">
+        <details class="fca-item">
+          <summary><span class="fca-summary-label">Mandatory registration</span><span class="fca-chevron">›</span></summary>
+          <div class="fca-acc-body"><div class="fca-acc-req">What it means</div><div class="fca-acc-desc">Any firm holding customer funds above de minimis thresholds must register as an e-money or payment institution with the FCA before accepting funds.</div><div class="fca-acc-applies">Customer balance held &gt;£0 at scale</div></div>
+        </details>
+        <details class="fca-item">
+          <summary><span class="fca-summary-label">Ring-fencing &amp; segregation</span><span class="fca-chevron">›</span></summary>
+          <div class="fca-acc-body"><div class="fca-acc-req">What it means</div><div class="fca-acc-desc">Relevant funds must be held in a designated safeguarding account at an approved credit institution, strictly separated from the firm's own operational funds at all times.</div><div class="fca-acc-applies">Immediately upon receipt of customer funds</div></div>
+        </details>
+        <details class="fca-item">
+          <summary><span class="fca-summary-label">Daily reconciliation</span><span class="fca-chevron">›</span></summary>
+          <div class="fca-acc-body"><div class="fca-acc-req">What it means</div><div class="fca-acc-desc">Firms must reconcile safeguarded funds against outstanding customer liabilities daily. Any shortfall must be remedied within one business day.</div><div class="fca-acc-applies">Ongoing · every business day</div></div>
+        </details>
+        <details class="fca-item">
+          <summary><span class="fca-summary-label">Independent audit</span><span class="fca-chevron">›</span></summary>
+          <div class="fca-acc-body"><div class="fca-acc-req">What it means</div><div class="fca-acc-desc">Annual independent audit of safeguarding compliance is mandatory unless the firm held less than £100,000 across all relevant funds in any 53-week period.</div><div class="fca-acc-applies">Annual · exempt only if &lt;£100k held in 53-week period</div></div>
+        </details>
+        <details class="fca-item">
+          <summary><span class="fca-summary-label">Winding-down plan</span><span class="fca-chevron">›</span></summary>
+          <div class="fca-acc-body"><div class="fca-acc-req">What it means</div><div class="fca-acc-desc">Firms must maintain a documented resolution plan setting out how customer funds would be returned in an insolvency or wind-down scenario, reviewed annually.</div><div class="fca-acc-applies">All in-scope firms</div></div>
+        </details>
+        <details class="fca-item">
+          <summary><span class="fca-summary-label">Return of funds on failure</span><span class="fca-chevron">›</span></summary>
+          <div class="fca-acc-body"><div class="fca-acc-req">What it means</div><div class="fca-acc-desc">PS25/12 introduces a statutory priority claim for e-money holders in insolvency — but only for firms that have correctly ring-fenced. Unregistered operators provide no statutory protection.</div><div class="fca-acc-applies">Registered &amp; compliant firms only · no protection if unregistered</div></div>
+        </details>
+        <details class="fca-item">
+          <summary><span class="fca-summary-label">Refueler position</span><span class="fca-chevron">›</span></summary>
+          <div class="fca-acc-body"><div class="fca-acc-req">Our architecture</div><div class="fca-acc-desc">Refueler holds no customer float. Rewards are issued as ecash to the user's device at point of earning. No preloaded balance model. No safeguarding obligation arises.</div><div class="fca-acc-applies">Outside perimeter by architecture</div></div>
+        </details>
+      </div>
+    </div>
+
+    <p>The audit exemption is notable. A chain operating a loyalty programme at the scale of the major UK franchises will, in almost every case, have held well in excess of £100,000 in customer funds within any 53-week period. The exemption exists. It will not apply to them.</p>
+
+    <!-- INTERNAL: 35p recovery rate — verify against PSR source before publish -->
+    <p>The FSCS position is worth stating plainly. If a major coffee chain were to fail, customer loyalty balances would not be protected by the Financial Services Compensation Scheme. Between Q1 2018 and Q2 2023, customers of failed payment and e-money firms recovered on average only 35p in every pound owed, and only after significant delay. The loyalty float is not, in this sense, particularly loyal.</p>
+
+    <p>The secondary question — the one with its own kind of quiet — is whether a chain whose loyalty programme has not been registered as an e-money institution is now operating outside the regulatory perimeter entirely. That is, legally speaking, its own kind of problem.</p>
+
+    <h2>The investment thesis — why your coffee app is a data business</h2>
+
+    <p>Before we reach the proposition, it is worth pausing on a question that has never quite been asked in plain English.</p>
+
+    <p>If a City of London coffee unit faces rent at £85–90 per square foot in Central London, and the industry net margin runs at around 8%, then a reasonable person might ask how the economics of being there — at that density, at that scale — make sense on coffee alone.</p>
+
+    <p>The honest answer is that the coffee is not the only product.</p>
+
+    <p>The loyalty app is the data infrastructure. Every tap — the Monday 7.20am Americano, the longer commute on Fridays, the changed routine in September — is being assembled, profiled, and passed to marketing technology platforms with considerably more commercial precision than the coffee has ever achieved.</p>
+
+    <p>Call the operation what it was — call it, for the purposes of this article, <em>The Consortium</em> — and the investment logic becomes clear. The Consortium raised $63.4 million. It built the loyalty and payment infrastructure behind a major UK coffee chain's app, embedded itself across 60 UK universities, and deployed at corporate locations including some of the most data-hungry financial institutions in the square mile. The investor list was not assembled by accident. It included a global telecoms conglomerate, a multinational payment network, and a major retail group with considerable interest in consumer behaviour at scale. These are not organisations that invest in coffee.</p>
+
+    <p>One of The Consortium's co-founders was explicit about the inspiration: the Tesco Clubcard's data analytics, combined with the Starbucks loyalty float, deployed across the broader retail market. The pitch was always exactly what it looked like — if you knew where to look.</p>
+
+    <blockquote><p>The answer — in the Consortium's pitch deck, in the Starbucks annual report, in every loyalty programme operating at scale. The loyalty float funds the operation. The data is the return.</p></blockquote>
+
+    <p>The Consortium was subsequently acquired. The coffee chain's app continues operating on the same infrastructure. The customer support address, for those who look, still routes to the original wallet domain.</p>
+
+    <p>Its public review record — accumulated over several years of service disruptions, expired vouchers, unresponsive support, and payment integrations that ceased working for weeks without acknowledgement — now functions as something close to a technical dossier. $63 million raised. Premium institutional partners. The finest loyalty data operation capital could buy.</p>
+
+    <p>Nero paper cards, as one reviewer noted, were a far better option.</p>
+
+    <p>The villain, in this story, is not the technology. The villain is surveillance capitalism with a loyalty card and a contactless reader. Capitalised accordingly. Reviewed accordingly.</p>
+
+    <p>Refueler is the product built after reading that dossier.</p>
+
+    <h2>For the independent shop — the same question, differently posed</h2>
+
+    <p>At the other end of the high street, the calculation looks entirely different.</p>
+
+    <p>The paper stamp card — nine coffees, one free, no data, no FCA registration, no monthly returns to anyone — carries none of the regulatory exposure described above. It also carries none of the infrastructure. No customer insight. No digital presence. No way to know whether the person who just claimed their free coffee visits every day or found the card on the pavement in February.</p>
+
+    <p>The paper stamp is honest. It is also, in a market where a competitor's app offers a personalised order, ambient awareness, and a reward denominated in actual money rather than a theoretical future coffee, quietly losing ground.</p>
+
+    <p>The question for the independent shop is not regulation. It is relevance.</p>
+
+    <h2>Three models for the mint — a note for the technically interested</h2>
+
+    <p>For the Bitcoin-native reader and the investor following the ecash landscape, the architecture question is the interesting one. Refueler's rewards are issued as sats via the Cashu ecash protocol. But who holds the ecash liability? The answer depends on which model is in operation.</p>
+
+    <p><strong>Model (a) — Refueler operates its own mint.</strong> Full control over issuance and redemption of ecash tokens. Long-term, this is the direction of independent ecash infrastructure — particularly given work on enclave-based mint architecture, where the mint operator is structurally unable to access keys or inspect data processed inside it. This model is investor-attractive and architecturally elegant. FCA perimeter clarity is required before proceeding. <em>Status: roadmap.</em></p>
+
+    <p><strong>Model (b) — Mint partner.</strong> Refueler routes rewards through a preferred ecash mint partner, currently in development. Custody of the ecash liability sits with the mint. Refueler takes no ecash liability and no mint infrastructure responsibility. This is the launch model. <em>Status: in development.</em></p>
+
+    <p><strong>Model (c) — Shop-as-mint.</strong> The independent coffee shop issues its own Cashu tokens, redeemable in-store only. Closed loop. Fully private. No chain dependency. The paper stamp card, rebuilt in Bitcoin — and considerably harder to lose in a coat pocket. <em>Status: in development.</em></p>
+
+    <h2>The white-label proposition — stated honestly</h2>
+
+<!-- Widget 3: Franchise cost/benefit — pop-out desktop · accordion mobile -->
+    <div class="widget widget--franchise" id="fr-widget">
+      <style>
+        .widget--franchise {
+          margin: 3rem 0;
+          border: 1px solid var(--border);
+          border-left: 2px solid var(--blockquote-rule);
+          background: var(--bg);
+          transition: background 0.3s, border-color 0.3s;
+        }
+        .fr-panel-header {
+          padding: 1.125rem 1.5rem 0;
+          border-bottom: 1px solid var(--border);
+        }
+        .fr-eyebrow {
+          font-family: var(--font-heading);
+          font-size: 0.575rem;
+          letter-spacing: 0.13em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+          margin-bottom: 0.35rem;
+        }
+        .fr-title {
+          font-family: var(--font-heading);
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          letter-spacing: -0.01em;
+          margin-bottom: 0.875rem;
+        }
+        .fr-preview {
+          width: 100%;
+          border-collapse: collapse;
+          font-family: var(--font-heading);
+        }
+        .fr-preview thead tr { border-bottom: 1px solid var(--border); }
+        .fr-preview th {
+          font-size: 0.575rem;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+          font-weight: 500;
+          padding: 0.6rem 1.5rem;
+          text-align: left;
+        }
+        .fr-preview th.th-rfr { background: rgba(0,0,0,0.02); border-left: 1px solid var(--border); }
+        [data-theme="carbon"] .fr-preview th.th-rfr { background: rgba(255,255,255,0.025); }
+        .fr-preview td {
+          font-size: 0.8125rem;
+          padding: 0.75rem 1.5rem;
+          border-bottom: 1px solid var(--border);
+          vertical-align: top;
+          line-height: 1.5;
+          color: var(--text-secondary);
+        }
+        .fr-preview tbody tr:last-child td { border-bottom: none; }
+        .fr-preview td.td-dim {
+          font-size: 0.575rem;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+          border-right: 1px solid var(--border);
+          width: 16%;
+        }
+        .fr-preview td.td-rfr {
+          color: var(--text-primary);
+          font-weight: 500;
+          background: rgba(0,0,0,0.02);
+          border-left: 1px solid var(--border);
+        }
+        [data-theme="carbon"] .fr-preview td.td-rfr { background: rgba(255,255,255,0.025); }
+        .fr-trigger-row {
+          padding: 0.875rem 1.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          border-top: 1px solid var(--border);
+          gap: 1rem;
+        }
+        .fr-trigger-note {
+          font-family: var(--font-heading);
+          font-size: 0.6375rem;
+          color: var(--text-tertiary);
+        }
+        .fr-trigger-note strong { color: var(--text-secondary); font-weight: 500; }
+        .fr-open-btn {
+          font-family: var(--font-heading);
+          font-size: 0.6375rem;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--text-secondary);
+          background: transparent;
+          border: 1px solid var(--border);
+          border-radius: 2px;
+          padding: 0.4rem 0.875rem;
+          cursor: pointer;
+          transition: border-color 0.2s, color 0.2s;
+          white-space: nowrap;
+        }
+        .fr-open-btn:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+        /* Modal */
+        .fr-modal {
+          display: none;
+          position: fixed;
+          inset: 0;
+          z-index: 1000;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem var(--gutter, 1.5rem);
+        }
+        .fr-modal.is-open { display: flex; }
+        .fr-scrim {
+          position: absolute;
+          inset: 0;
+          background: rgba(0,0,0,0.55);
+          cursor: pointer;
+          animation: fr-scrim-in 0.25s ease;
+        }
+        [data-theme="carbon"] .fr-scrim { background: rgba(0,0,0,0.72); }
+        @keyframes fr-scrim-in { from { opacity:0; } to { opacity:1; } }
+        .fr-modal-panel {
+          position: relative;
+          z-index: 1;
+          background: var(--bg);
+          border: 1px solid var(--border);
+          border-top: 2px solid var(--blockquote-rule);
+          width: min(1020px, 100%);
+          max-height: min(88vh, 860px);
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          animation: fr-panel-in 0.3s cubic-bezier(0.16,1,0.3,1);
+        }
+        @keyframes fr-panel-in {
+          from { opacity:0; transform: translateY(12px) scale(0.98); }
+          to   { opacity:1; transform: translateY(0) scale(1); }
+        }
+        .fr-modal-panel.is-closing { animation: fr-panel-out 0.15s ease forwards; }
+        @keyframes fr-panel-out { from { opacity:1; } to { opacity:0; } }
+        .fr-modal-header {
+          padding: 1.25rem 2rem 1.125rem;
+          border-bottom: 1px solid var(--border);
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 1rem;
+          flex-shrink: 0;
+        }
+        .fr-modal-header-left { display: flex; flex-direction: column; gap: 0.3rem; }
+        .fr-modal-eyebrow {
+          font-family: var(--font-heading);
+          font-size: 0.575rem;
+          letter-spacing: 0.13em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+        }
+        .fr-modal-title {
+          font-family: var(--font-heading);
+          font-size: 1.0625rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          letter-spacing: -0.015em;
+        }
+        .fr-close-btn {
+          font-family: var(--font-heading);
+          font-size: 0.6375rem;
+          font-weight: 500;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+          background: transparent;
+          border: 1px solid var(--border);
+          border-radius: 2px;
+          padding: 0.4rem 0.75rem;
+          cursor: pointer;
+          flex-shrink: 0;
+          margin-top: 0.2rem;
+          transition: color 0.2s, border-color 0.2s;
+        }
+        .fr-close-btn:hover { color: var(--text-primary); border-color: var(--text-secondary); }
+        .fr-modal-table-wrap { overflow-y: auto; overflow-x: hidden; flex: 1; }
+        .fr-modal-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-family: var(--font-heading);
+          table-layout: fixed;
+        }
+        .fr-modal-table colgroup .col-dim  { width: 14%; }
+        .fr-modal-table colgroup .col-leg  { width: 43%; }
+        .fr-modal-table colgroup .col-rfr  { width: 43%; }
+        .fr-modal-table thead { position: sticky; top: 0; z-index: 2; background: var(--bg); }
+        .fr-modal-table thead tr { border-bottom: 1px solid var(--border); }
+        .fr-modal-table th {
+          font-size: 0.6375rem;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+          font-weight: 500;
+          padding: 0.875rem 2rem;
+          text-align: left;
+        }
+        .fr-modal-table th.th-rfr { background: rgba(0,0,0,0.025); border-left: 1px solid var(--border); }
+        [data-theme="carbon"] .fr-modal-table th.th-rfr { background: rgba(255,255,255,0.03); }
+        .fr-modal-table td {
+          font-size: 0.9375rem;
+          padding: 1.125rem 2rem;
+          border-bottom: 1px solid var(--border);
+          vertical-align: top;
+          line-height: 1.55;
+          color: var(--text-secondary);
+        }
+        .fr-modal-table tbody tr:last-child td { border-bottom: none; }
+        .fr-modal-table td.td-dim {
+          font-size: 0.6rem;
+          font-weight: 600;
+          letter-spacing: 0.09em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+          border-right: 1px solid var(--border);
+          padding-top: 1.25rem;
+        }
+        .fr-modal-table td.td-rfr {
+          color: var(--text-primary);
+          font-weight: 500;
+          background: rgba(0,0,0,0.02);
+          border-left: 1px solid var(--border);
+        }
+        [data-theme="carbon"] .fr-modal-table td.td-rfr { background: rgba(255,255,255,0.025); }
+        .fr-pill {
+          display: inline-block;
+          font-size: 0.575rem;
+          font-weight: 400;
+          letter-spacing: 0.07em;
+          text-transform: uppercase;
+          border: 1px solid var(--border);
+          border-radius: 2px;
+          padding: 0.2rem 0.4rem;
+          color: var(--text-tertiary);
+          margin-top: 0.35rem;
+        }
+        .fr-divider-row td {
+          padding: 0.35rem 2rem;
+          border-bottom: 1px solid var(--border);
+        }
+        .fr-divider-label {
+          font-size: 0.55rem;
+          font-weight: 600;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+          opacity: 0.6;
+        }
+        .fr-modal-footer {
+          padding: 0.75rem 2rem 1rem;
+          border-top: 1px solid var(--border);
+          font-family: var(--font-heading);
+          font-size: 0.6875rem;
+          color: var(--text-tertiary);
+          line-height: 1.55;
+          flex-shrink: 0;
+        }
+        /* Mobile accordion */
+        .fr-accordion { display: none; }
+        @media (max-width: 860px) {
+          .fr-preview, .fr-trigger-row { display: none; }
+          .fr-modal { display: none !important; }
+          .fr-accordion { display: block; }
+          .widget--franchise { margin: 2.5rem 0; }
+          .fr-title { font-size: 0.8125rem; }
+          .fr-item { border-bottom: 1px solid var(--border); }
+          .fr-item:last-child { border-bottom: none; }
+          .fr-section-divider {
+            padding: 0.5rem 1.25rem;
+            font-family: var(--font-heading);
+            font-size: 0.55rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            border-bottom: 1px solid var(--border);
+            opacity: 0.7;
+            background: transparent;
+          }
+          .fr-item summary {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.875rem 1.25rem;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+          }
+          .fr-item summary::-webkit-details-marker { display: none; }
+          .fr-item[open] summary { border-bottom: 1px solid var(--border); }
+          .fr-summary-label {
+            font-family: var(--font-heading);
+            font-size: 0.6875rem;
+            font-weight: 600;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+          }
+          .fr-chevron { font-size: 0.75rem; color: var(--text-tertiary); transition: transform 0.2s; flex-shrink: 0; }
+          .fr-item[open] .fr-chevron { transform: rotate(90deg); }
+          .fr-acc-pair { display: grid; grid-template-columns: 1fr 1fr; }
+          .fr-acc-panel { padding: 0.875rem 1.25rem 1rem; }
+          .fr-acc-panel:first-child { border-right: 1px solid var(--border); }
+          .fr-acc-panel:last-child { background: rgba(0,0,0,0.02); }
+          [data-theme="carbon"] .fr-acc-panel:last-child { background: rgba(255,255,255,0.025); }
+          .fr-acc-label {
+            font-family: var(--font-heading);
+            font-size: 0.575rem;
+            font-weight: 600;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: 0.5rem;
+          }
+          .fr-acc-label--rfr { color: var(--text-secondary); }
+          .fr-acc-val { font-family: var(--font-heading); font-size: 0.8125rem; color: var(--text-secondary); line-height: 1.5; }
+          .fr-acc-val--rfr { color: var(--text-primary); font-weight: 500; }
+        }
+        @media (max-width: 480px) {
+          .fr-acc-pair { grid-template-columns: 1fr; }
+          .fr-acc-panel:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+        }
+      </style>
+
+      <div class="fr-panel-header">
+        <p class="fr-eyebrow">Commercial · White-label proposition</p>
+        <p class="fr-title">Legacy loyalty scheme vs Refueler white-label — franchise cost / benefit</p>
+        <table class="fr-preview">
+          <thead>
+            <tr>
+              <th style="width:16%"></th>
+              <th>Legacy proprietary loyalty</th>
+              <th class="th-rfr">Refueler white-label</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="td-dim">Setup &amp;<br>build</td>
+              <td>£500k–£2m+ for proprietary app build, loyalty engine, and payment integration. Ongoing rebuild cycles.</td>
+              <td class="td-rfr">White-label onboarding. No proprietary build cost. Integration at venue level.</td>
+            </tr>
+            <tr>
+              <td class="td-dim">Ongoing<br>ops</td>
+              <td>Internal engineering, third-party analytics vendors, data broker relationships, consent management platform.</td>
+              <td class="td-rfr">Per-transaction commission only. No data vendor relationships. No consent management infrastructure required.</td>
+            </tr>
+            <tr>
+              <td class="td-dim">Regulatory<br>compliance</td>
+              <td>FCA registration, daily reconciliation, annual safeguarding audit, winding-down plan. Significant legal cost.</td>
+              <td class="td-rfr">No float held. No FCA safeguarding obligation. No registration required.<br><span class="fr-pill">Structurally outside perimeter</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="fr-trigger-row">
+        <span class="fr-trigger-note"><strong>8 more dimensions</strong> — GDPR, float income, breakage, data monetisation, regulatory timing, customer segment</span>
+        <button class="fr-open-btn" onclick="frModalOpen()" aria-expanded="false" id="fr-open-btn">View full comparison ›</button>
+      </div>
+
+      <!-- Mobile accordion -->
+      <div class="fr-accordion">
+        <div class="fr-section-divider">Costs</div>
+        <details class="fr-item">
+          <summary><span class="fr-summary-label">Setup &amp; build</span><span class="fr-chevron">›</span></summary>
+          <div class="fr-acc-pair">
+            <div class="fr-acc-panel"><div class="fr-acc-label">Legacy loyalty</div><div class="fr-acc-val">£500k–£2m+ for proprietary app build, loyalty engine, and payment integration. Ongoing rebuild cycles.</div></div>
+            <div class="fr-acc-panel"><div class="fr-acc-label fr-acc-label--rfr">Refueler</div><div class="fr-acc-val fr-acc-val--rfr">White-label onboarding. No proprietary build cost. Integration at venue level.</div></div>
+          </div>
+        </details>
+        <details class="fr-item">
+          <summary><span class="fr-summary-label">Ongoing ops</span><span class="fr-chevron">›</span></summary>
+          <div class="fr-acc-pair">
+            <div class="fr-acc-panel"><div class="fr-acc-label">Legacy loyalty</div><div class="fr-acc-val">Internal engineering, third-party analytics vendors, data broker relationships, consent management platform.</div></div>
+            <div class="fr-acc-panel"><div class="fr-acc-label fr-acc-label--rfr">Refueler</div><div class="fr-acc-val fr-acc-val--rfr">Per-transaction commission only. No data vendor relationships. No consent management infrastructure.</div></div>
+          </div>
+        </details>
+        <details class="fr-item">
+          <summary><span class="fr-summary-label">Regulatory compliance</span><span class="fr-chevron">›</span></summary>
+          <div class="fr-acc-pair">
+            <div class="fr-acc-panel"><div class="fr-acc-label">Legacy loyalty</div><div class="fr-acc-val">FCA registration, daily reconciliation, annual safeguarding audit, winding-down plan. Significant legal and compliance cost.</div></div>
+            <div class="fr-acc-panel"><div class="fr-acc-label fr-acc-label--rfr">Refueler</div><div class="fr-acc-val fr-acc-val--rfr">No float held. No FCA safeguarding obligation. No registration required. Structurally outside perimeter.</div></div>
+          </div>
+        </details>
+        <details class="fr-item">
+          <summary><span class="fr-summary-label">ICO / GDPR exposure</span><span class="fr-chevron">›</span></summary>
+          <div class="fr-acc-pair">
+            <div class="fr-acc-panel"><div class="fr-acc-label">Legacy loyalty</div><div class="fr-acc-val">Ongoing. Location data, third-party sharing, consent chains. Fine exposure up to £17.5m or 4% global turnover.</div></div>
+            <div class="fr-acc-panel"><div class="fr-acc-label fr-acc-label--rfr">Refueler</div><div class="fr-acc-val fr-acc-val--rfr">Structurally minimal. No location data. No third-party pixel. No behavioural profile.</div></div>
+          </div>
+        </details>
+        <div class="fr-section-divider">Revenue &amp; margin</div>
+        <details class="fr-item">
+          <summary><span class="fr-summary-label">Float income</span><span class="fr-chevron">›</span></summary>
+          <div class="fr-acc-pair">
+            <div class="fr-acc-panel"><div class="fr-acc-label">Legacy loyalty</div><div class="fr-acc-val">Preloaded customer balances earn interest. Material at scale — Starbucks reported $155m breakage revenue (2018).</div></div>
+            <div class="fr-acc-panel"><div class="fr-acc-label fr-acc-label--rfr">Refueler</div><div class="fr-acc-val fr-acc-val--rfr">None. No preloaded balance model. Acknowledged trade-off.</div></div>
+          </div>
+        </details>
+        <details class="fr-item">
+          <summary><span class="fr-summary-label">Breakage income</span><span class="fr-chevron">›</span></summary>
+          <div class="fr-acc-pair">
+            <div class="fr-acc-panel"><div class="fr-acc-label">Legacy loyalty</div><div class="fr-acc-val">Unspent balances and expired points captured as revenue. Industry average 10–15% of issued loyalty value.</div></div>
+            <div class="fr-acc-panel"><div class="fr-acc-label fr-acc-label--rfr">Refueler</div><div class="fr-acc-val fr-acc-val--rfr">None. Sats issued at point of earning, held on-device. Cannot be expired or reclaimed.</div></div>
+          </div>
+        </details>
+        <details class="fr-item">
+          <summary><span class="fr-summary-label">Data monetisation</span><span class="fr-chevron">›</span></summary>
+          <div class="fr-acc-pair">
+            <div class="fr-acc-panel"><div class="fr-acc-label">Legacy loyalty</div><div class="fr-acc-val">Behavioural segments licensed to ad networks and data brokers. Est. £18–43/user/yr.</div></div>
+            <div class="fr-acc-panel"><div class="fr-acc-label fr-acc-label--rfr">Refueler</div><div class="fr-acc-val fr-acc-val--rfr">Zero. No data to license. This is what the privacy architecture costs the merchant — and gains the customer.</div></div>
+          </div>
+        </details>
+        <div class="fr-section-divider">Strategic position</div>
+        <details class="fr-item">
+          <summary><span class="fr-summary-label">Regulatory timing</span><span class="fr-chevron">›</span></summary>
+          <div class="fr-acc-pair">
+            <div class="fr-acc-panel"><div class="fr-acc-label">Legacy loyalty</div><div class="fr-acc-val">PS25/12 in force May 2026. ICO enforcement priority: location data and online tracking. Compliance cost rising.</div></div>
+            <div class="fr-acc-panel"><div class="fr-acc-label fr-acc-label--rfr">Refueler</div><div class="fr-acc-val fr-acc-val--rfr">Architecture predates the filing. Regulatory clean hands from day one — not retrofitted.</div></div>
+          </div>
+        </details>
+        <details class="fr-item">
+          <summary><span class="fr-summary-label">Customer segment</span><span class="fr-chevron">›</span></summary>
+          <div class="fr-acc-pair">
+            <div class="fr-acc-panel"><div class="fr-acc-label">Legacy loyalty</div><div class="fr-acc-val">Broad. Includes loyalty-sceptics and data-aware users increasingly restricting permissions.</div></div>
+            <div class="fr-acc-panel"><div class="fr-acc-label fr-acc-label--rfr">Refueler</div><div class="fr-acc-val fr-acc-val--rfr">Bitcoin-native City commuter. High spend, low churn. Not currently served by any competing app.</div></div>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <p>The costs to a major franchise chain of the Refueler white-label model are real and worth stating without euphemism. The chain loses its data operation — location history, behavioural profiles, purchase patterns. As the previous section makes clear, that is not a marginal commercial asset. It is what the $63 million was for.</p>
+
+    <p>It loses breakage. It loses float. It pays a per-transaction commission it does not currently pay.</p>
+
+    <p>What it gains is regulatory clean hands at precisely the moment the filing has arrived. Zero ICO exposure on loyalty data in a market where enforcement moves in one direction. A customer segment that has spent several years watching institutions treat its data as inventory — and adjusted its behaviour accordingly.</p>
+
+    <p>That segment does not redeem points. It does not forget to collect stamps. It does not leave a balance sitting long enough to become someone else's breakage income. It uses Bitcoin. It understands exactly what its data is worth. And it spends — consistently, daily, at the kind of per-transaction value that makes a City coffee unit's rent-to-revenue ratio considerably less alarming.</p>
+
+    <p>The proposition is not that Refueler is better. The proposition is that the regulatory environment has changed — and what was previously merely convenient is now, for the first time, also necessary.</p>
+
+    <h2>What the filing confirmed, without meaning to</h2>
+
+<div class="widget widget--fscs" style="margin:2.5rem 0;">
+      <style>
+        .widget--fscs {
+          border: 1px solid var(--border);
+          border-left: 2px solid var(--blockquote-rule);
+          background: var(--bg);
+          transition: background 0.3s, border-color 0.3s;
+        }
+        .fscs-header { padding: 1rem 1.25rem 0.875rem; border-bottom: 1px solid var(--border); }
+        .fscs-header .widget__eyebrow { font-family: var(--font-heading); font-size: 0.575rem; letter-spacing: 0.13em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 0.3rem; }
+        .fscs-header .widget__title { font-family: var(--font-heading); font-size: 0.8125rem; font-weight: 600; color: var(--text-primary); letter-spacing: -0.01em; }
+        .fscs-standout {
+          border-bottom: 1px solid var(--border);
+          padding: 0.875rem 1.25rem;
+          display: flex;
+          align-items: baseline;
+          gap: 0.75rem;
+          flex-wrap: wrap;
+        }
+        .fscs-standout__num { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700; letter-spacing: -0.03em; color: var(--text-primary); }
+        .fscs-standout__desc { font-family: var(--font-heading); font-size: 0.6875rem; color: var(--text-secondary); line-height: 1.45; flex: 1; min-width: 160px; }
+        .fscs-cols { display: grid; grid-template-columns: 1fr 1fr 1fr; border-bottom: 1px solid var(--border); }
+        .fscs-col { padding: 1.25rem 1.125rem 1.25rem; border-right: 1px solid var(--border); }
+        .fscs-col:last-child {
+          border-right: none;
+          background: rgba(0,0,0,0.02);
+        }
+        [data-theme="carbon"] .fscs-col:last-child { background: rgba(255,255,255,0.025); }
+        .fscs-col__label { font-family: var(--font-heading); font-size: 0.575rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 0.75rem; padding-bottom: 0.625rem; border-bottom: 1px solid var(--border); }
+        .fscs-col__rows { display: flex; flex-direction: column; gap: 0.75rem; }
+        .fscs-col__row-label { font-family: var(--font-heading); font-size: 0.575rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 0.2rem; }
+        .fscs-col__row-val { font-family: var(--font-heading); font-size: 0.7rem; color: var(--text-secondary); line-height: 1.4; }
+        .fscs-col__row-val--strong { font-weight: 600; color: var(--text-primary); font-size: 0.75rem; }
+        .fscs-col__row-val--muted { color: var(--text-tertiary); font-size: 0.6375rem; }
+        .fscs-col:last-child .fscs-col__row-val { color: var(--text-primary); font-weight: 500; }
+        .fscs-col:last-child .fscs-col__row-val--strong { font-size: 0.75rem; }
+        .fscs-footnote { padding: 0.625rem 1.25rem 0.875rem; font-family: var(--font-heading); font-size: 0.6375rem; color: var(--text-tertiary); line-height: 1.55; }
+        @media(max-width:580px){
+          .fscs-cols { grid-template-columns: 1fr; }
+          .fscs-col { border-right: none; border-bottom: 1px solid var(--border); }
+          .fscs-col:last-child { border-bottom: none; }
+        }
+      </style>
+      <div class="fscs-header">
+        <p class="widget__eyebrow">Consumer protection · FSCS</p>
+        <p class="widget__title">What happens to your money if the operator fails</p>
+      </div>
+      <div class="fscs-standout">
+        <span class="fscs-standout__num">35p</span>
+        <span class="fscs-standout__desc">Average recovery in the pound for customers of failed payment and e-money firms, Q1 2018 – Q2 2023, after significant delay. Source: Payment Systems Regulator.</span>
+      </div>
+      <div class="fscs-cols">
+        <div class="fscs-col">
+          <div class="fscs-col__label">Bank / savings account</div>
+          <div class="fscs-col__rows">
+            <div><div class="fscs-col__row-label">FSCS protection</div><div class="fscs-col__row-val fscs-col__row-val--strong">Up to £85,000 per person</div></div>
+            <div><div class="fscs-col__row-label">Speed of recovery</div><div class="fscs-col__row-val">7 business days (statutory target)</div></div>
+            <div><div class="fscs-col__row-label">Regulatory framework</div><div class="fscs-col__row-val">Prudential Regulation Authority · FSCS-backed deposit guarantee</div></div>
+            <div><div class="fscs-col__row-label">Practical reality</div><div class="fscs-col__row-val">Protected. Guaranteed. Insured by statutory scheme.</div></div>
+          </div>
+        </div>
+        <div class="fscs-col">
+          <div class="fscs-col__label">Loyalty app preloaded balance</div>
+          <div class="fscs-col__rows">
+            <div><div class="fscs-col__row-label">FSCS protection</div><div class="fscs-col__row-val fscs-col__row-val--strong">None</div></div>
+            <div><div class="fscs-col__row-label">Speed of recovery</div><div class="fscs-col__row-val">Months to years via insolvency process — if recovered at all</div></div>
+            <div><div class="fscs-col__row-label">Regulatory framework</div><div class="fscs-col__row-val">PS25/12 now requires ring-fencing for registered firms. Unregistered operators: unsecured creditor position.</div></div>
+            <div><div class="fscs-col__row-label">Practical reality</div><div class="fscs-col__row-val">35p in the pound, historically. No statutory guarantee scheme.</div></div>
+          </div>
+        </div>
+        <div class="fscs-col">
+          <div class="fscs-col__label">Refueler sats reward</div>
+          <div class="fscs-col__rows">
+            <div><div class="fscs-col__row-label">Custody model</div><div class="fscs-col__row-val fscs-col__row-val--strong">On-device ecash. User holds the token.</div></div>
+            <div><div class="fscs-col__row-label">Operator failure impact</div><div class="fscs-col__row-val">None. Ecash is bearer instrument. Refueler cannot freeze, reverse, or access user balances.</div></div>
+            <div><div class="fscs-col__row-label">Regulatory framework</div><div class="fscs-col__row-val">No float held by Refueler. No safeguarding obligation arises. FCA perimeter question under active review.</div></div>
+            <div><div class="fscs-col__row-label">Practical reality</div><div class="fscs-col__row-val">Yours from the moment of issuance. Not a promise — a technical fact.</div></div>
+          </div>
+        </div>
+      </div>
+      <p class="fscs-footnote">† Average recovery figure: PSR Review of failed payment and e-money firms, 2018–2023. FSCS limit correct as at May 2026 (£85,000 per eligible depositor per authorised firm). PS25/12 statutory priority claim applies only to correctly ring-fenced, registered firms. Refueler ecash model subject to ongoing FCA perimeter review.</p>
+    </div>
+
+    <p>There is an unintentional honesty in what PS25/12 reveals about the existing model. Regulators do not create safeguarding requirements for industries in which customer money is not at risk. The supplementary regime exists because the previous framework was, in the FCA's own assessment, insufficient. The thing it was insufficient to protect is customer money — the same customer money that was, in the interim, earning float, generating breakage, and attracting eight-figure investment rounds from organisations with a professional interest in knowing where you buy your coffee and how often.</p>
+
+    <p>For most loyalty app users, none of this has been presented in plain English. The app works. The stamps accumulate. The coffee is the right temperature. It has not occurred to them — why would it? — that their preloaded balance sits structurally closer to an unsecured creditor position than a deposit account.</p>
+
+    <p>Refueler's architecture was in place before 7 May 2026. It was not built in response to the filing. It was built because holding customer money creates liability, and because the better architecture was to not hold it at all. No float. No breakage. No dossier.</p>
+
+    <p>The Consortium built the dossier. The filing found it.</p>
+
+    <!-- DEV NOTE: Widget 4 — FAQ block with Schema FAQ markup (JSON-LD) for Google rich results.
+         Build separately and embed here before publishing.
+         See editorial spec: the-float-spec.md -->
+
+  </article>
+
+  <div class="sources" id="sources-block">
+    <p class="sources-label">Sources</p>
+    <ul class="sources-list">
+      <li>FCA — PS25/12: Changes to the safeguarding regime for payments and e-money firms: fca.org.uk</li>
+      <li>Financial Conduct Authority — Payment Services Regulations 2017 and Electronic Money Regulations 2011</li>
+      <li>Funds (Use and Access) Act 2025</li>
+      <li>Starbucks Corporation — Annual Report 2018: investor.starbucks.com</li>
+      <li>Payment Systems Regulator — Review of failed payment and e-money firms, 2018–2023</li>
+      <li>Tracxn — funding and investor data (on file)</li>
+      <li>Langham Estate / CBRE — Central London F&B retail rental benchmarks 2025</li>
+      <li>Rise Accounting — Coffee shop break-even analysis, UK: riseaccounting.co.uk</li>
+      <li>Cashu protocol — github.com/cashubtc/cashu</li>
+      <li>Electronic Money Regulations 2011 (SI 2011/99)</li>
+      <li>Zuboff, Shoshana — The Age of Surveillance Capitalism, 2019 (PublicAffairs)</li>
+    </ul>
+
+  </div>
+
+</div><!-- /article-wrap -->
+
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span class="footer-note">© 2026 Refueler Ltd (incorporating) · refueler.io/editorial/the-float</span>
+    <div class="footer-links">
+      <a href="nothing-to-collect-nothing-to-hide.html">← Article 1</a>
+      <a href="refueler-editorial-index.html">Editorial</a>
+      <a href="../privacy/privacy_v1_3.html">Privacy</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  /* THEME FIX — rfTheme localStorage persistence */
+  const THEME_KEY = 'rfTheme';
+
+  function applyTheme(theme) {
+    const root = document.documentElement;
+    const pill = document.getElementById('themePill') || document.getElementById('theme-btn');
+    if (theme === 'carbon') {
+      root.classList.add('carbon-mode');
+      root.setAttribute('data-theme', 'carbon');
+      if (pill) pill.textContent = 'Carbon / Paper';
+    } else {
+      root.classList.remove('carbon-mode');
+      root.removeAttribute('data-theme');
+      if (pill) pill.textContent = 'Paper / Carbon';
+    }
+  }
+
+  function toggleTheme() {
+    const current = localStorage.getItem(THEME_KEY) || 'paper';
+    const next = current === 'paper' ? 'carbon' : 'paper';
+    localStorage.setItem(THEME_KEY, next);
+    applyTheme(next);
+  }
+
+  (function () { applyTheme(localStorage.getItem(THEME_KEY) || 'paper'); })();
+</script>
+    <!-- Modal: FCA safeguarding widget -->
+    <div class="fca-modal" id="fca-modal" role="dialog" aria-modal="true" aria-label="FCA safeguarding requirements">
+      <div class="fca-scrim" onclick="fcaModalClose()" aria-hidden="true"></div>
+      <div class="fca-modal-panel" id="fca-modal-panel">
+        <div class="fca-modal-header">
+          <div class="fca-modal-header-left">
+            <span class="fca-modal-eyebrow">Regulation · PS25/12 · 7 requirements · Full table</span>
+            <span class="fca-modal-title">FCA Supplementary Safeguarding Regime</span>
+          </div>
+          <button class="fca-close-btn" onclick="fcaModalClose()" aria-label="Close">Close ✕</button>
+        </div>
+        <div class="fca-modal-table-wrap">
+          <table class="fca-modal-table">
+            <colgroup><col class="col-req"><col class="col-desc"><col class="col-app"></colgroup>
+            <thead>
+              <tr><th>Requirement</th><th>What it means in practice</th><th>Applies when</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="td-req">Mandatory registration</td>
+                <td>Any firm holding customer funds in a loyalty or prepayment context above de minimis thresholds must register as an e-money or payment institution with the FCA before accepting funds.</td>
+                <td class="td-applies">Customer balance held &gt;£0 at scale</td>
+              </tr>
+              <tr>
+                <td class="td-req">Ring-fencing &amp; segregation</td>
+                <td>Relevant funds must be held in a designated safeguarding account at an approved credit institution, strictly separated from the firm's own operational funds at all times.</td>
+                <td class="td-applies">Immediately upon receipt of customer funds</td>
+              </tr>
+              <tr>
+                <td class="td-req">Daily reconciliation</td>
+                <td>Firms must reconcile safeguarded funds against outstanding customer liabilities daily. Any shortfall must be remedied within one business day.</td>
+                <td class="td-applies">Ongoing · every business day</td>
+              </tr>
+              <tr>
+                <td class="td-req">Independent audit</td>
+                <td>Annual independent audit of safeguarding compliance is mandatory unless the firm held less than £100,000 across all relevant funds in any 53-week period — an exemption that will not apply to major chains.</td>
+                <td class="td-applies">Annual<span class="fca-applies-threshold">Exempt only if &lt;£100k held in 53-week period</span></td>
+              </tr>
+              <tr>
+                <td class="td-req">Winding-down plan</td>
+                <td>Firms must maintain a documented resolution plan setting out how customer funds would be returned in an insolvency or wind-down scenario, reviewed annually and on material change.</td>
+                <td class="td-applies">All in-scope firms</td>
+              </tr>
+              <tr>
+                <td class="td-req">Return of funds on failure</td>
+                <td>PS25/12 introduces a statutory priority claim for e-money holders in insolvency — but only for firms that have correctly ring-fenced. Unregistered or non-compliant operators provide no statutory protection.</td>
+                <td class="td-applies">Registered &amp; compliant firms only<span class="fca-applies-threshold">No protection if unregistered</span></td>
+              </tr>
+              <tr>
+                <td class="td-req">Refueler position</td>
+                <td>Refueler holds no customer float. Rewards are issued as ecash to the user's device at point of earning. No preloaded balance model. No safeguarding obligation arises.</td>
+                <td class="td-applies"><span class="fca-tag">Outside perimeter by architecture</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="fca-modal-footer">Source: FCA PS25/12 — Changes to the safeguarding regime for payments and e-money firms, effective 7 May 2026. Payment Services Regulations 2017; Electronic Money Regulations 2011. This widget is editorial summary, not legal advice.</p>
+      </div>
+    </div>
+    <script>
+      function fcaModalOpen() {
+        var modal = document.getElementById('fca-modal');
+        var btn = document.getElementById('fca-open-btn');
+        modal.classList.add('is-open');
+        btn.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+        modal.querySelector('.fca-close-btn').focus();
+      }
+      function fcaModalClose() {
+        var modal = document.getElementById('fca-modal');
+        var panel = document.getElementById('fca-modal-panel');
+        var btn = document.getElementById('fca-open-btn');
+        panel.classList.add('is-closing');
+        setTimeout(function() {
+          modal.classList.remove('is-open');
+          panel.classList.remove('is-closing');
+          btn.setAttribute('aria-expanded', 'false');
+          document.body.style.overflow = '';
+          btn.focus();
+        }, 150);
+      }
+    </script>
+
+
+    <!-- Modal: franchise cost/benefit widget -->
+    <div class="fr-modal" id="fr-modal" role="dialog" aria-modal="true" aria-label="Franchise cost benefit comparison">
+      <div class="fr-scrim" onclick="frModalClose()" aria-hidden="true"></div>
+      <div class="fr-modal-panel" id="fr-modal-panel">
+        <div class="fr-modal-header">
+          <div class="fr-modal-header-left">
+            <span class="fr-modal-eyebrow">Commercial · 11 dimensions · Full comparison</span>
+            <span class="fr-modal-title">Legacy loyalty scheme vs Refueler white-label</span>
+          </div>
+          <button class="fr-close-btn" onclick="frModalClose()" aria-label="Close">Close ✕</button>
+        </div>
+        <div class="fr-modal-table-wrap">
+          <table class="fr-modal-table">
+            <colgroup><col class="col-dim"><col class="col-leg"><col class="col-rfr"></colgroup>
+            <thead>
+              <tr><th></th><th>Legacy proprietary loyalty</th><th class="th-rfr">Refueler white-label</th></tr>
+            </thead>
+            <tbody>
+              <tr class="fr-divider-row"><td colspan="3"><span class="fr-divider-label">Costs</span></td></tr>
+              <tr>
+                <td class="td-dim">Setup &amp;<br>build</td>
+                <td>£500k–£2m+ for proprietary app build, loyalty engine, and payment integration. Ongoing rebuild cycles every 3–5 years.</td>
+                <td class="td-rfr">White-label onboarding. No proprietary build cost. Integration at venue level.</td>
+              </tr>
+              <tr>
+                <td class="td-dim">Ongoing<br>ops</td>
+                <td>Internal engineering, third-party analytics vendors, data broker relationships, consent management platform — significant ongoing overhead.</td>
+                <td class="td-rfr">Per-transaction commission only. No data vendor relationships. No consent management infrastructure required.</td>
+              </tr>
+              <tr>
+                <td class="td-dim">Regulatory<br>compliance</td>
+                <td>FCA registration (if in-scope), daily reconciliation, annual safeguarding audit, winding-down plan. Significant legal and compliance cost.</td>
+                <td class="td-rfr">No float held. No FCA safeguarding obligation. No registration required for loyalty model.<br><span class="fr-pill">Structurally outside perimeter</span></td>
+              </tr>
+              <tr>
+                <td class="td-dim">ICO / GDPR<br>exposure</td>
+                <td>Ongoing. Location data, third-party sharing, consent chains, subject access requests. Fine exposure up to £17.5m or 4% global turnover.</td>
+                <td class="td-rfr">Structurally minimal. No location data collected. No third-party pixel. No behavioural profile constructed or licensed.</td>
+              </tr>
+              <tr class="fr-divider-row"><td colspan="3"><span class="fr-divider-label">Revenue &amp; margin</span></td></tr>
+              <tr>
+                <td class="td-dim">Float<br>income</td>
+                <td>Preloaded customer balances earn interest for the operator. Material at scale — Starbucks reported $155m breakage revenue (2018).</td>
+                <td class="td-rfr">None. No preloaded balance model. This is a cost, not a benefit, of switching.<br><span class="fr-pill">Acknowledged trade-off</span></td>
+              </tr>
+              <tr>
+                <td class="td-dim">Breakage<br>income</td>
+                <td>Unspent balances and expired points captured as revenue. Industry average 10–15% of issued loyalty value.</td>
+                <td class="td-rfr">None. Sats are issued to user at point of earning and held on-device. Cannot be expired or reclaimed.</td>
+              </tr>
+              <tr>
+                <td class="td-dim">Data<br>monetisation</td>
+                <td>Behavioural segments licensed to ad networks, data brokers, and "partner" platforms. Revenue per user estimated £18–43/yr.</td>
+                <td class="td-rfr">Zero. No data to license. This is structurally what the privacy architecture costs the merchant — and gains the customer.</td>
+              </tr>
+              <tr class="fr-divider-row"><td colspan="3"><span class="fr-divider-label">Strategic position</span></td></tr>
+              <tr>
+                <td class="td-dim">Regulatory<br>timing</td>
+                <td>PS25/12 in force May 2026. ICO enforcement priority: location data and online tracking. Compliance cost rising.</td>
+                <td class="td-rfr">Architecture predates the filing. Regulatory clean hands from day one — not retrofitted.</td>
+              </tr>
+              <tr>
+                <td class="td-dim">Customer<br>segment</td>
+                <td>Broad. Includes loyalty-programme sceptics and data-aware users increasingly opting out or restricting permissions.</td>
+                <td class="td-rfr">Bitcoin-native City commuter. High spend, low churn, loyalty-averse to points. Not currently served by any competing app.</td>
+              </tr>
+              <tr>
+                <td class="td-dim">Verdict</td>
+                <td>Defensible while regulatory environment was permissive. Increasingly a liability in compliance, data protection, and reputational dimensions simultaneously.</td>
+                <td class="td-rfr">The trade-off is real. The question is whether the regulatory environment has changed the calculation. As of 7 May 2026, it has.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="fr-modal-footer">Breakage and float income estimates sourced from Starbucks Annual Report 2018 and industry commentary. Setup cost ranges from published case studies and agency benchmarks. Regulatory obligations per PS25/12 effective 7 May 2026. Commission and per-transaction economics available on request to verified merchant partners.</p>
+      </div>
+    </div>
+    <script>
+      function frModalOpen() {
+        var modal = document.getElementById('fr-modal');
+        var btn = document.getElementById('fr-open-btn');
+        modal.classList.add('is-open');
+        btn.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+        modal.querySelector('.fr-close-btn').focus();
+      }
+      function frModalClose() {
+        var modal = document.getElementById('fr-modal');
+        var panel = document.getElementById('fr-modal-panel');
+        var btn = document.getElementById('fr-open-btn');
+        panel.classList.add('is-closing');
+        setTimeout(function() {
+          modal.classList.remove('is-open');
+          panel.classList.remove('is-closing');
+          btn.setAttribute('aria-expanded', 'false');
+          document.body.style.overflow = '';
+          btn.focus();
+        }, 150);
+      }
+    </script>
+
+
+    <script>
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') { if(typeof fcaModalClose==='function')fcaModalClose(); if(typeof frModalClose==='function')frModalClose(); }
+      });
+    </script>
+</body>
+</html>

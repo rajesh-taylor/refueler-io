@@ -136,7 +136,7 @@ const screens = [
       <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;margin-bottom:8px">
         <div style="font-size:10px;color:var(--color-text-secondary);margin-bottom:2px">Active order</div>
         <div style="font-size:12px;font-weight:500;color:var(--color-text-primary)">Flat white · Costa Fenchurch St</div>
-        <div style="font-size:10px;font-family:var(--font-mono);color:#D4690A">Being prepared for you</div>
+        <div style="font-size:10px;font-family:var(--font-mono);color:#D4690A">Your flat white medium is being prepared</div>
       </div>`,
     purpose:"Sub-second return to authenticated state. Active order surfaced immediately.",
     detail:"Passkey / Face ID prompt on open. If an order is in progress, a status banner shows before auth completes — the user sees their order is moving before they've done anything. Sats balance visible post-auth. Zero friction.",
@@ -200,7 +200,7 @@ const screens = [
       </ul>
       <button class="s-ghost">Skip for now</button>`,
     purpose:"Progressive disclosure. Permissions earned in context, not demanded upfront.",
-    detail:"Five steps. Sign-in pre-ticked. Notifications fires OS prompt in context — user has already seen the product's value. Geofence explained before asking: 'Your phone detects your train is moving. We never see where you are.' Reward choice (sats or loyalty stamps) comes last — sets expectations before first order. All steps dismissible.",
+    detail:"Five steps. Sign-in pre-ticked. Notifications fires OS prompt in context — user has already seen the product's value. Geofence explained before asking: 'Your phone detects your train is moving. We never see where you are.' Reward choice (sats or loyalty stamps) comes last — sets expectations before first order. All steps dismissible. ⚑ TBD: toggle slider control on reward selection step may become a button — revisit in dedicated session before shipping.",
     next:"→ Step by step, or dismiss to Screen 06"
   },
   {
@@ -326,16 +326,19 @@ const screens = [
         <div class="eta-carbon" style="flex:1">
           <div class="eta-item-row">Flat white · medium</div>
           <div class="eta-time" style="margin-top:16px">4:22</div>
-          <div class="eta-status">Being prepared for you</div>
+          <div class="eta-status">Your flat white medium is being prepared</div>
           <div style="width:100%;height:0.5px;background:rgba(255,255,255,0.08);margin-bottom:10px"></div>
           <div style="display:flex;justify-content:space-between;width:100%;align-items:flex-end">
-            <div class="eta-sats">⚡ 186 sats on collection</div>
-            <div style="font-size:10px;font-family:var(--font-mono);color:rgba(240,237,232,0.28)">3 / 9</div>
+            <div>
+              <div class="eta-sats" style="margin-top:0;margin-bottom:2px">1/9 · £0.40 saved</div>
+              <div style="font-size:9px;font-family:var(--font-mono);color:rgba(240,237,232,0.22)">⚡ 186 sats this order</div>
+            </div>
+            <div style="font-size:10px;font-family:var(--font-mono);color:rgba(240,237,232,0.28)">est. ready</div>
           </div>
         </div>
       </div>`,
-    purpose:"Liquid Glass venue strip + carbon base. Status phrase. Sats whisper.",
-    detail:"Venue strip: brand primary colour, frosted glass effect, logo chip, venue name, address. Carbon base below: ETA numeral in DM Mono, status phrase in DM Sans italic at low opacity. Sats whisper bottom-left. Loyalty progress bottom-right. Arc treatment under review — not built to production. ETA countdown has zero animation, ever.",
+    purpose:"Liquid Glass venue strip + carbon base. Personalised status phrase. Reward progress bottom-left.",
+    detail:"Venue strip: brand primary colour, frosted glass effect, logo chip, venue name, address. Carbon base below: ETA numeral in DM Mono, status phrase personalised to item ('Your flat white medium is being prepared'). Bottom-left: stamp progress '1/9 · £0.40 saved' + quiet sats nudge for loyalty-track users. Arc treatment under review. ETA countdown has zero animation, ever.",
     next:"→ Push notification: 'Waiting at the counter' → Screen 11 (collection)"
   },
   {

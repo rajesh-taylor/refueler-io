@@ -1,0 +1,305 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap');
+
+  .rf-phone {
+    width: 320px;
+    min-height: 640px;
+    background: #0D0D0D;
+    border-radius: 40px;
+    margin: 1.5rem auto;
+    border: 1px solid #2a2a2a;
+    overflow: hidden;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rf-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #555;
+    letter-spacing: 0.04em;
+  }
+
+  .rf-pill { width: 80px; height: 5px; background: #1e1e1e; border-radius: 3px; }
+
+  .rf-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0 24px 36px;
+  }
+
+  .rf-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: #F5820A;
+    text-transform: uppercase;
+    margin-top: 36px;
+    margin-bottom: 14px;
+  }
+
+  .rf-headline {
+    font-size: 34px;
+    font-weight: 300;
+    color: #EFEFEF;
+    line-height: 1.12;
+    margin-bottom: 6px;
+  }
+
+  .rf-headline em { font-style: italic; color: #b8b8b8; }
+
+  .rf-rule { width: 32px; height: 1px; background: #F5820A; margin: 16px 0; opacity: 0.7; }
+
+  .rf-sub {
+    font-size: 15px;
+    font-weight: 300;
+    color: #666;
+    line-height: 1.55;
+    margin-bottom: 24px;
+  }
+
+  /* Stamp progress card */
+  .rf-card {
+    background: #111;
+    border: 0.5px solid #1e1e1e;
+    border-radius: 16px;
+    padding: 18px 18px 16px;
+    margin-bottom: 10px;
+  }
+
+  .rf-card-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #444;
+    margin-bottom: 14px;
+  }
+
+  .rf-stamp-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+
+  .rf-stamp {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 0.5px solid #2a2a2a;
+    background: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  .rf-stamp.filled {
+    background: #1e1e1e;
+    border-color: #3a3a3a;
+    font-size: 11px;
+  }
+
+  .rf-stamp.free {
+    border-color: #3a3a3a;
+    background: #1a1a18;
+    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    color: #444;
+    letter-spacing: -0.02em;
+  }
+
+  .rf-stamp-caption {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: #333;
+    letter-spacing: 0.06em;
+  }
+
+  .rf-stamp-caption span { color: #555; }
+
+  /* Sats nudge card */
+  .rf-nudge-card {
+    background: #0f0f0d;
+    border: 0.5px solid #2a2510;
+    border-radius: 16px;
+    padding: 18px 18px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .rf-nudge-card::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: 24px; right: 24px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #F5820A33, transparent);
+  }
+
+  .rf-nudge-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #3a3020;
+    margin-bottom: 10px;
+  }
+
+  .rf-nudge-headline {
+    font-size: 15px;
+    font-weight: 300;
+    color: #888;
+    line-height: 1.45;
+    margin-bottom: 12px;
+  }
+
+  .rf-nudge-headline strong { color: #bbb; font-weight: 400; }
+
+  .rf-sats-ghost-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+
+  .rf-sats-ghost-amount {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 300;
+    color: #3a3020;
+    letter-spacing: -0.02em;
+  }
+
+  .rf-sats-ghost-unit {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #F5820A;
+    opacity: 0.5;
+    letter-spacing: 0.08em;
+  }
+
+  .rf-nudge-caption {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: #2e2e20;
+    letter-spacing: 0.06em;
+    margin-bottom: 14px;
+  }
+
+  .rf-switch-link {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #5a4a20;
+    text-decoration: none;
+    border-bottom: 0.5px solid #3a3010;
+    cursor: pointer;
+  }
+
+  .rf-cta { margin-top: auto; padding-top: 20px; }
+
+  .rf-step-dots {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 18px;
+  }
+
+  .rf-dot { width: 18px; height: 3px; border-radius: 2px; background: #222; }
+  .rf-dot.active { background: #F5820A; width: 28px; }
+
+  .rf-btn-continue {
+    width: 100%;
+    padding: 15px;
+    background: #EFEFEF;
+    color: #0D0D0D;
+    border: none;
+    border-radius: 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    cursor: pointer;
+  }
+
+  .rf-change-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: #2e2e2e;
+    text-align: center;
+    margin-top: 10px;
+    text-transform: uppercase;
+  }
+</style>
+
+<div class="rf-phone">
+  <div class="rf-status">
+    <span>09:41</span>
+    <div class="rf-pill"></div>
+    <span>●●●</span>
+  </div>
+
+  <div class="rf-body">
+    <div class="rf-eyebrow">Your stamps · M·04</div>
+
+    <div class="rf-headline">Good choice.<br><em>Here's how</em><br>it works.</div>
+
+    <div class="rf-rule"></div>
+
+    <div class="rf-sub">Your stamp card, always in your pocket.</div>
+
+    <!-- Stamp progress -->
+    <div class="rf-card">
+      <div class="rf-card-label">Costa · stamp progress</div>
+      <div class="rf-stamp-row">
+        <div class="rf-stamp filled">☕</div>
+        <div class="rf-stamp">·</div>
+        <div class="rf-stamp">·</div>
+        <div class="rf-stamp">·</div>
+        <div class="rf-stamp">·</div>
+        <div class="rf-stamp">·</div>
+        <div class="rf-stamp">·</div>
+        <div class="rf-stamp">·</div>
+        <div class="rf-stamp">·</div>
+        <div class="rf-stamp free">free</div>
+      </div>
+      <div class="rf-stamp-caption"><span>1 of 9</span> · one more coffee earned</div>
+    </div>
+
+    <!-- Passive sats nudge -->
+    <div class="rf-nudge-card">
+      <div class="rf-nudge-label">meanwhile, on the sats track</div>
+      <div class="rf-nudge-headline">
+        That same order would have earned you <strong>42 sats</strong> — yours to keep, permanently.
+      </div>
+      <div class="rf-sats-ghost-row">
+        <span class="rf-sats-ghost-amount">42</span>
+        <span class="rf-sats-ghost-unit">sats</span>
+      </div>
+      <div class="rf-nudge-caption">unclaimed · this order</div>
+      <span class="rf-switch-link" onclick="sendPrompt('User tapped switch to sats from M·04 nudge — route to M·05 wallet setup')">switch to sats instead ↗</span>
+    </div>
+
+    <div class="rf-cta">
+      <div class="rf-step-dots">
+        <div class="rf-dot"></div>
+        <div class="rf-dot"></div>
+        <div class="rf-dot"></div>
+        <div class="rf-dot active"></div>
+        <div class="rf-dot"></div>
+        <div class="rf-dot"></div>
+      </div>
+      <button class="rf-btn-continue" onclick="sendPrompt('Confirm M·04 — build M·05 wallet setup')">· continue ·</button>
+      <div class="rf-change-note">switch tracks any time in settings</div>
+    </div>
+  </div>
+</div>
