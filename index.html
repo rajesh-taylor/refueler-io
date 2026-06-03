@@ -466,7 +466,7 @@
         <p class="signin-label">Early access</p>
         <h2 class="signin-headline">Order ahead.<br>Skip the queue.</h2>
 
-        <form class="magic-form" onsubmit="handleMagicLink(event)">
+        <form data-analytics="signup" class="magic-form" onsubmit="handleMagicLink(event)">
           <input
             type="email"
             name="email"
@@ -553,5 +553,6 @@
     }
   </script>
 
+<script src="/analytics.js" defer></script>
 </body>
 </html>
