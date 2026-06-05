@@ -501,6 +501,7 @@
   </footer>
 
   <!-- ─── Scripts ────────────────────────────────────────────────── -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script>
     /* ─────────────────────────────────────────────────────────────────
        PERSISTENT THEME — localStorage
@@ -538,19 +539,53 @@
     })();
 
     /* ─────────────────────────────────────────────────────────────────
-       MAGIC LINK — placeholder for backend integration
-       TODO: POST to /api/auth/magic-link with { email }
-       ───────────────────────────────────────────────────────────────── */
-    function handleMagicLink(e) {
-      e.preventDefault();
-      const email = e.target.email.value.trim();
-      if (!email) return;
-      const btn = e.target.querySelector('button[type="submit"]');
-      btn.textContent = 'Check your inbox ✓';
-      btn.style.opacity = '0.6';
-      btn.disabled = true;
-      // TODO: POST to /api/auth/magic-link with { email }
+   MAGIC LINK — Supabase Auth
+   Sends OTP magic link to entered email address.
+   On success: user receives the branded email we configured.
+   On failure: shows inline error, re-enables button.
+   ───────────────────────────────────────────────────────────────── */
+const _sb = supabase.createClient(
+  'https://tihgvdokeofnjxjkenmm.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpaGd2ZG9rZW9mbmp4amtlbm1tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTY2NDksImV4cCI6MjA5NDE5MjY0OX0.cRb94WeIP8yRfWd9s2XKmq2nqm1ov-sK1df6u8LNUbo'
+);
+
+async function handleMagicLink(e) {
+  e.preventDefault();
+  const email = e.target.email.value.trim();
+  if (!email) return;
+
+  const btn = e.target.querySelector('button[type="submit"]');
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+
+  const { error } = await _sb.auth.signInWithOtp({
+    email,
+    options: {
+      emailRedirectTo: 'https://refueler.io/',
+      shouldCreateUser: true
     }
+  });
+
+  if (error) {
+    btn.textContent = 'Try again';
+    btn.disabled = false;
+    console.error(error.message);
+  } else {
+    // Replace the form with a confirmation message
+    const panel = document.getElementById('signin');
+    panel.innerHTML = `
+      <p class="signin-label">Early access</p>
+      <h2 class="signin-headline" style="margin-bottom:16px;">Check your inbox.</h2>
+      <p style="font-size:15px;font-weight:300;line-height:1.65;color:var(--fg-muted);margin-bottom:0;">
+        We've sent a sign-in link to <strong style="font-weight:500;color:var(--fg);">${email}</strong>.<br>
+        It expires in 60 minutes.
+      </p>
+      <p style="font-size:12px;font-weight:300;color:var(--fg-subtle);margin-top:20px;line-height:1.5;">
+        Wrong address? <a href="/" style="color:var(--fg-muted);text-decoration:underline;">Start over</a>.
+      </p>
+    `;
+  }
+}
   </script>
 
 <script src="/analytics.js" defer></script>

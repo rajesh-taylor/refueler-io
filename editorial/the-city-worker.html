@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Least Loyal Customer in Britain · Refueler Editorial</title>
+<meta name="description" content="City of London commuters spend more on coffee than almost any demographic in Europe — and download fewer loyalty apps than almost any other. Why informed contempt killed the stamp card, and what the Corridor built instead.">
+<meta property="og:title" content="The Least Loyal Customer in Britain · Refueler Editorial">
+<meta property="og:description" content="The City worker isn't disloyal through laziness. They're disloyal through knowledge. Bitcoin sats rewards and the Corridor alliance are the first things built for someone who already knew the stamp card was a data operation.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://refueler.io/editorial/the-city-worker.html">
+<meta property="og:site_name" content="Refueler">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Least Loyal Customer in Britain · Refueler Editorial">
+<meta name="twitter:description" content="The City worker is Britain's biggest coffee spender and its least loyal customer. Sats change that.">
+<link rel="canonical" href="https://refueler.io/editorial/the-city-worker.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=Satoshi:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   REFUELER EDITORIAL — ARTICLE 3
+   The Least Loyal Customer in Britain
+   Token system matches nothing-to-collect-nothing-to-hide.html exactly
+   ============================================================ */
+
+  :root {
+    --paper:          #F7F4EF;
+    --carbon:         #1E1F22;
+    --carbon-soft:    #26282C;
+    --carbon-mid:     #2E3035;
+    --ink:            #3D3A36;
+    --ink-secondary:  #5A5751;
+    --ink-tertiary:   #9A948D;
+    --rule:           #D6D1C8;
+    --blockquote-rule:#8A8680;
+
+    --bg:             var(--paper);
+    --text-primary:   var(--ink);
+    --text-secondary: var(--ink-secondary);
+    --text-tertiary:  var(--ink-tertiary);
+    --border:         var(--rule);
+
+    --font-heading:   'Satoshi', 'DM Sans', sans-serif;
+    --font-serif:     'Source Serif 4', Georgia, serif;
+    --font-sans:      'DM Sans', system-ui, sans-serif;
+
+    --body-font:      var(--font-serif);
+    --body-size-d:    18px;
+    --body-size-m:    17px;
+    --body-lh-d:      1.8;
+    --body-lh-m:      1.75;
+    --para-spacing:   1.5em;
+
+    --article-max:    68ch;
+    --article-max-m:  48ch;
+
+    --max-w:          1200px;
+    --gutter:         clamp(1.25rem, 4vw, 3rem);
+  }
+
+  [data-theme="carbon"] {
+    --bg:             var(--carbon);
+    --text-primary:   #E4E2DC;
+    --text-secondary: #8A8680;
+    --text-tertiary:  #5A5751;
+    --border:         #35373B;
+    --blockquote-rule:#C8A96E;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-font-smoothing: antialiased; }
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--body-font);
+    font-size: var(--body-size-d);
+    line-height: var(--body-lh-d);
+    transition: background 0.3s, color 0.3s;
+    min-height: 100vh;
+  }
+
+  /* ============ SITE HEADER ============ */
+  .site-header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 var(--gutter);
+    position: sticky; top: 0;
+    background: var(--bg);
+    z-index: 100;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .header-inner {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .wordmark {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.06em;
+    text-transform: none;
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .wordmark-divider { font-weight: 300; opacity: 0.3; margin: 0 0.5rem; }
+  .wordmark-section { font-weight: 400; letter-spacing: 0.06em; opacity: 0.55; text-transform: none; }
+
+  nav { display: flex; align-items: center; gap: 2rem; }
+  nav a {
+    font-family: var(--font-heading);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  nav a:hover { color: var(--text-primary); }
+
+  .theme-pill {
+    font-family: var(--font-heading);
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 0.35rem 0.85rem;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    white-space: nowrap;
+  }
+  .theme-pill:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+
+  /* ============ ARTICLE LAYOUT ============ */
+  .article-wrap {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    padding: 0 var(--gutter);
+  }
+
+  .breadcrumb {
+    padding: 1.75rem 0 0;
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    letter-spacing: 0.07em;
+    color: var(--text-tertiary);
+  }
+  .breadcrumb a { color: inherit; text-decoration: none; }
+  .breadcrumb a:hover { color: var(--text-secondary); }
+  .breadcrumb-sep { margin: 0 0.4rem; opacity: 0.35; }
+
+  .article-header {
+    padding: 2.5rem 0 2.25rem;
+    max-width: var(--article-max);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+    transition: border-color 0.3s;
+  }
+
+  .article-eyebrow {
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 1.25rem;
+    display: flex;
+    gap: 0.625rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .dot { width: 2px; height: 2px; border-radius: 50%; background: currentColor; opacity: 0.3; flex-shrink: 0; }
+
+  .article-title {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 4.5vw, 3.25rem);
+    font-weight: 600;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    color: var(--text-primary);
+    margin-bottom: 1.25rem;
+  }
+
+  .article-standfirst {
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+  }
+
+  .article-dateline {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    letter-spacing: 0.06em;
+    color: var(--text-tertiary);
+  }
+
+  /* ============ BODY ============ */
+  .article-body {
+    max-width: var(--article-max);
+    font-family: var(--body-font);
+    font-size: var(--body-size-d);
+    line-height: var(--body-lh-d);
+    color: var(--text-primary);
+    overflow: visible;
+    transition: color 0.3s;
+  }
+
+  .article-body p { margin-bottom: var(--para-spacing); }
+
+  .article-body h2 {
+    font-family: var(--font-heading);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    margin-top: 3rem;
+    margin-bottom: 1.125rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .article-body hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2.5rem 0;
+  }
+
+  .article-body blockquote {
+    border-left: 2px solid var(--blockquote-rule);
+    margin: 2rem 0;
+    padding: 0.125rem 0 0.125rem 1.5rem;
+    font-style: italic;
+    color: var(--text-secondary);
+    font-size: 1.0625em;
+    line-height: 1.65;
+    transition: border-color 0.3s;
+  }
+  .article-body blockquote p { margin-bottom: 0; }
+
+  .article-body sup {
+    font-family: var(--font-heading);
+    font-size: 0.65em;
+    color: var(--text-tertiary);
+    vertical-align: super;
+    margin-left: 0.1em;
+  }
+
+  /* ============ DATA CALLOUT WIDGET ============ */
+  .widget--ltv {
+    margin: 3rem 0;
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--blockquote-rule);
+    background: var(--bg);
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .ltv-header {
+    padding: 1.125rem 1.5rem 0.875rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .ltv-eyebrow {
+    font-family: var(--font-heading);
+    font-size: 0.575rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 0.35rem;
+  }
+  .ltv-title {
+    font-family: var(--font-heading);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+  }
+  .ltv-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+  }
+  .ltv-grid-item {
+    padding: 1.25rem 1.5rem;
+    border-right: 1px solid var(--border);
+  }
+  .ltv-grid-item:last-child { border-right: none; }
+  .ltv-number {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+  .ltv-label {
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--text-tertiary);
+    line-height: 1.45;
+  }
+  .ltv-footnote {
+    grid-column: 1 / -1;
+    padding: 0.875rem 1.5rem;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-heading);
+    font-size: 0.6rem;
+    letter-spacing: 0.04em;
+    color: var(--text-tertiary);
+    line-height: 1.6;
+  }
+
+  [data-theme="carbon"] .widget--ltv {
+    border-left-color: #C8A96E;
+  }
+
+  /* ============ CHART WIDGET — FOOD WASTE (HORIZONTAL BAR) ============ */
+  .widget--chart {
+    margin: 3rem 0;
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--blockquote-rule);
+    background: var(--bg);
+    transition: background 0.3s, border-color 0.3s;
+  }
+  [data-theme="carbon"] .widget--chart { border-left-color: #C8A96E; }
+
+  .chart-header {
+    padding: 1.125rem 1.5rem 0.875rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .chart-eyebrow {
+    font-family: var(--font-heading);
+    font-size: 0.575rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 0.35rem;
+  }
+  .chart-title {
+    font-family: var(--font-heading);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+  }
+  .chart-body { padding: 1.375rem 1.5rem 0.75rem; }
+
+  /* Horizontal bar chart */
+  .hbar-group { margin-bottom: 1.375rem; }
+  .hbar-label {
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+    margin-bottom: 0.45rem;
+    display: flex;
+    justify-content: space-between;
+  }
+  .hbar-label span { color: var(--text-secondary); font-weight: 500; }
+  .hbar-track {
+    height: 8px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .hbar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.8s cubic-bezier(0.16,1,0.3,1);
+  }
+  .hbar-fill--baseline { background: var(--text-tertiary); }
+  .hbar-fill--signal   { background: #C8A96E; }
+
+  .hbar-label--signal { color: #C8A96E; font-weight: 600; }
+  .hbar-label--signal span { color: #C8A96E; font-weight: 600; }
+
+  .hbar-legend-dot--baseline { background: var(--text-tertiary); }
+  .hbar-legend-dot--signal   { background: #C8A96E; }
+
+  /* Trigger row + expand button — matches the-float.html pattern */
+  .chart-trigger-row {
+    padding: 0.875rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--border);
+    gap: 1rem;
+  }
+  .chart-trigger-note {
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    color: var(--text-tertiary);
+  }
+  .chart-open-btn {
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 0.4rem 0.875rem;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    white-space: nowrap;
+  }
+  .chart-open-btn:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+  [data-theme="carbon"] .chart-open-btn { border-color: var(--border); }
+  [data-theme="carbon"] .chart-open-btn:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+
+  /* Modal overlay */
+  .waste-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem var(--gutter, 1.5rem);
+  }
+  .waste-modal.is-open { display: flex; }
+  .waste-scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    cursor: pointer;
+    animation: waste-scrim-in 0.25s ease;
+  }
+  [data-theme="carbon"] .waste-scrim { background: rgba(0,0,0,0.72); }
+  @keyframes waste-scrim-in { from { opacity:0; } to { opacity:1; } }
+  .waste-modal-panel {
+    position: relative;
+    z-index: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--blockquote-rule);
+    width: min(780px, 100%);
+    max-height: min(88vh, 820px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: waste-panel-in 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+  [data-theme="carbon"] .waste-modal-panel { border-top-color: #C8A96E; }
+  @keyframes waste-panel-in {
+    from { opacity:0; transform: translateY(12px) scale(0.98); }
+    to   { opacity:1; transform: translateY(0) scale(1); }
+  }
+  .waste-modal-panel.is-closing { animation: waste-panel-out 0.15s ease forwards; }
+  @keyframes waste-panel-out { from { opacity:1; } to { opacity:0; } }
+  .waste-modal-header {
+    padding: 1.25rem 2rem 1.125rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-shrink: 0;
+  }
+  .waste-modal-header-left { display: flex; flex-direction: column; gap: 0.3rem; }
+  .waste-modal-eyebrow {
+    font-family: var(--font-heading);
+    font-size: 0.575rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+  .waste-modal-title {
+    font-family: var(--font-heading);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.015em;
+  }
+  .waste-close-btn {
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 0.4rem 0.75rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 0.2rem;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .waste-close-btn:hover { color: var(--text-primary); border-color: var(--text-secondary); }
+  .waste-modal-body {
+    padding: 2rem;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .waste-modal-body .hbar-group { margin-bottom: 1.75rem; }
+  .waste-modal-body .hbar-label { font-size: 0.75rem; margin-bottom: 0.55rem; }
+  .waste-modal-body .hbar-track { height: 12px; }
+  .waste-modal-footnote {
+    padding: 1.25rem 2rem;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    letter-spacing: 0.04em;
+    color: var(--text-tertiary);
+    line-height: 1.65;
+    flex-shrink: 0;
+  }
+
+  .chart-footnote {
+    padding: 0.875rem 1.5rem;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-heading);
+    font-size: 0.6rem;
+    letter-spacing: 0.04em;
+    color: var(--text-tertiary);
+    line-height: 1.6;
+  }
+
+  /* ============ SOURCES ============ */
+  .sources {
+    margin-top: 4.5rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--border);
+    max-width: var(--article-max);
+  }
+  .sources-label {
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 1rem;
+  }
+  .sources-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+  .sources-list li {
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    line-height: 1.55;
+    padding-left: 1.25em;
+    position: relative;
+  }
+  .sources-list li::before { content: '—'; position: absolute; left: 0; opacity: 0.3; }
+
+  /* ============ FOOTER ============ */
+  .site-footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem var(--gutter);
+    margin-top: 5rem;
+  }
+  .footer-inner {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .footer-note, .footer-links a {
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    letter-spacing: 0.06em;
+    color: var(--text-tertiary);
+    text-decoration: none;
+  }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-links a:hover { color: var(--text-secondary); }
+
+  /* ============ MOBILE ============ */
+  @media (max-width: 680px) {
+    :root { --gutter: 1.125rem; }
+    body { font-size: var(--body-size-m); line-height: var(--body-lh-m); }
+    .article-body { max-width: var(--article-max-m); }
+    .article-header { max-width: 100%; }
+    .article-body h2 { margin-top: 2rem; }
+    .ltv-grid { grid-template-columns: 1fr; }
+    .ltv-grid-item { border-right: none; border-bottom: 1px solid var(--border); }
+    .ltv-grid-item:last-child { border-bottom: none; }
+    nav a { display: none; }
+    nav a.active { display: inline; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/editorial/" class="wordmark">
+      Refueler
+      <span class="wordmark-divider">/</span>
+      <span class="wordmark-section">Editorial</span>
+    </a>
+    <nav>
+      <a href="/">App</a>
+      <a href="/editorial/" class="active">Editorial</a>
+      <a href="/privacy/">Privacy</a>
+      <button class="theme-pill" onclick="toggleTheme()" id="theme-btn">Paper / Carbon</button>
+    </nav>
+  </div>
+</header>
+
+<div class="article-wrap">
+
+  <p class="breadcrumb">
+    <a href="/editorial/">Editorial</a>
+    <span class="breadcrumb-sep">/</span>
+    Loyalty · City workers · Bitcoin rewards
+  </p>
+
+  <header class="article-header">
+    <div class="article-eyebrow">
+      <span>Loyalty</span><span class="dot"></span>
+      <span>City workers</span><span class="dot"></span>
+      <span>Bitcoin rewards</span><span class="dot"></span>
+      <span>Lightning Network</span><span class="dot"></span>
+      <span>Pre-order coffee</span>
+    </div>
+    <h1 class="article-title">The Least Loyal Customer in Britain</h1>
+    <p class="article-standfirst">City of London commuters are the most valuable loyalty target in Britain. They are also the least capturable. Most of them work in the buildings that invented the data operation behind the stamp card. They spotted it years ago.</p>
+    <div class="article-dateline">
+      <span>June 2026</span><span class="dot"></span>
+      <span>6 min read</span><span class="dot"></span>
+      <span>refueler.io/editorial/the-city-worker</span>
+    </div>
+  </header>
+
+  <article class="article-body">
+
+    <p>At 8:47 on a Tuesday morning, somewhere in the final minutes of a Fenchurch Street line service, a purchasing decision is being made with more financial sophistication than the merchant will ever know.</p>
+
+    <p>The commuter scanning the platform assesses queue depth, door proximity, and time-to-meeting in approximately the same time it takes most people to unlock their phone.</p>
+
+    <p>The coffee is ordered. The card is tapped. The loyalty stamp is not collected — not because they forgot. They never wanted it. They knew exactly what it costs…</p>
+
+    <p>Britain's loyalty card industrial complex has spent a decade misreading this customer. It assumed the problem was friction. It was not friction. It was contempt.</p>
+
+    <h2>A peculiar kind of spending</h2>
+
+    <p>The Square Mile and its commuter fringe — Canary Wharf, Aldgate, the streets threading between Fenchurch Street and Liverpool Street — represent some of the highest-density discretionary spend in Europe. At £4.50 per transaction across a five-day week, this is not a niche category. A customer visiting once weekly is worth £234 annually. At twice weekly, £468. At three visits, £702 — three times the lifetime value from the same customer, the same ticket, simply more often. The entire architecture of modern loyalty programmes exists to chase that frequency multiplier. In this postcode, they have failed consistently enough that failure has become the baseline assumption.</p>
+
+    <div class="widget--ltv" id="ltv-widget">
+      <div class="ltv-header">
+        <div class="ltv-eyebrow">Loyalty economics · Fenchurch St line commuter</div>
+        <div class="ltv-title">Why frequency is the only number that matters</div>
+      </div>
+      <div class="ltv-grid">
+        <div class="ltv-grid-item">
+          <span class="ltv-number">3×</span>
+          <span class="ltv-label">LTV delta<br>1× vs 3× weekly visits</span>
+        </div>
+        <div class="ltv-grid-item">
+          <span class="ltv-number">53%</span>
+          <span class="ltv-label">repeat purchase rate<br>sats reward customers<sup>†</sup></span>
+        </div>
+        <div class="ltv-grid-item">
+          <span class="ltv-number">5–15%</span>
+          <span class="ltv-label">typical adoption rate<br>dedicated loyalty apps</span>
+        </div>
+        <p class="ltv-footnote">† LTV delta modelled at £4.50 AOV across 48 working weeks. Repeat purchase rate and app adoption range from loyalty industry benchmark data 2024–25. Sats reward figure from Bitcoin merchant reward programme data.</p>
+      </div>
+    </div>
+
+    <p>The standard diagnosis has been time. City workers move fast, routes shift, queues are unforgiving. All true. But time is the surface explanation — the polite version that lets the loyalty industry off the hook. The more unsettling explanation is that this cohort has read the terms and conditions and drawn their own conclusions.</p>
+
+    <h2>The stamp card was always a data operation</h2>
+
+    <p>Here is a thing that is not widely discussed in coverage of London's coffee and loyalty market: a substantial portion of City commuters hold Bitcoin. Not dabbling. Self-custody. Hardware wallets. The kind of considered position that compounds quietly over a four-year holding period in a way that the 2-and-20 fee structures their own firms charge clients — to underperform the same asset — cannot approach.</p>
+
+    <p>They say nothing at work. Compliance reasons. But they know the arithmetic, and they apply it to everything. The stamp card and the loyalty app are the same instrument in different form — one asks for your signature, one asks for your location history. Both offer a free coffee in return. They declined both. The calculation took about as long as it does to assess a queue.</p>
+
+    <blockquote>
+      <p>The City worker isn't disloyal through distraction. They're disloyal through knowledge. There is a difference, and the loyalty industry has spent a decade refusing to see it.</p>
+    </blockquote>
+
+    <h2>Enter the Corridor</h2>
+
+    <p>Somewhere between the data-harvesting apparatus of the major franchise chains and the payment rails of the Lightning Network, a different arrangement has been taking shape. Call it the Corridor — the alliance of independent and smaller-chain merchants operating within the Fenchurch Street commuter catchment who have decided, collectively, that the data game is not one they can win, and not one they particularly want to play.</p>
+
+    <p>The Corridor's proposition is structurally different from anything the loyalty card industrial complex has offered. Where the franchise model extracts value from knowing who you are — your movements, your preferences, your commercial profile — the Corridor's model is built on knowing only one thing: when your train arrives. Every other piece of intelligence stays where it belongs. On your device. Off their servers.</p>
+
+    <p>What the Corridor gains in exchange is access to a shared intelligence layer that no individual merchant could build alone — aggregated, anonymised timing data that tells a venue not which customer is coming, but how many, and when, and with how much time before their next meeting. The superpower is not surveillance. It is choreography. Orders placed during the journey. Coffee ready at the door. The queue — the one mechanism the loyalty card industrial complex never thought to remove — simply gone.</p>
+
+    <blockquote>
+      <p>A single independent café offering Lightning rewards is a curiosity. A coordinated corridor of them, running on a shared pre-order rail with sats credited on every transaction, is infrastructure. The distinction is everything.</p>
+    </blockquote>
+
+    <p>The commercial infrastructure is ready. Square is rolling out Lightning Network payments across four million merchants. Minibits, Phoenix, and Zeus have each crossed the usability threshold in the past twelve months. Bitcoin sats rewards in the UK are no longer a technical experiment — they are a merchant acquisition strategy, available now, to anyone who chooses to deploy them. The Corridor is not waiting for the technology. It is waiting for the coordination. That is a much shorter wait.</p>
+
+    <!-- CHART 1: Food waste / fulfilment gap — horizontal bar -->
+    <div class="widget--chart" id="waste-chart">
+      <div class="chart-header">
+        <div class="chart-eyebrow">Station outlets · Morning peak · 07:00–09:30</div>
+        <div class="chart-title">The fulfilment gap: what gets prepared, what gets sold, what gets discarded</div>
+      </div>
+      <div class="chart-body">
+        <div class="hbar-group">
+          <div class="hbar-label">Hot drinks prepared for peak window <span>100%</span></div>
+          <div class="hbar-track"><div class="hbar-fill hbar-fill--baseline" style="width:100%"></div></div>
+        </div>
+        <div class="hbar-group">
+          <div class="hbar-label">Sold during peak (07:00–08:45) <span>~68%</span></div>
+          <div class="hbar-track"><div class="hbar-fill hbar-fill--baseline" style="width:68%"></div></div>
+        </div>
+        <div class="hbar-group">
+          <div class="hbar-label">Discarded post-peak (gone cold, 09:00–10:00) <span>~18%</span></div>
+          <div class="hbar-track"><div class="hbar-fill hbar-fill--baseline" style="width:18%"></div></div>
+        </div>
+        <div class="hbar-group">
+          <div class="hbar-label">Food items: prepared vs sold (pastries, wraps)<sup>†</sup> <span>~74% sold</span></div>
+          <div class="hbar-track"><div class="hbar-fill hbar-fill--baseline" style="width:74%"></div></div>
+        </div>
+        <div class="hbar-group" style="margin-bottom:0">
+          <div class="hbar-label hbar-label--signal">Waste window closed with pre-order signal<sup>‡</sup> <span>post-peak loss eliminated</span></div>
+          <div class="hbar-track"><div class="hbar-fill hbar-fill--signal" style="width:94%"></div></div>
+        </div>
+        <div class="hbar-legend">
+          <div class="hbar-legend-item"><div class="hbar-legend-dot hbar-legend-dot--baseline"></div>Industry baseline</div>
+          <div class="hbar-legend-item"><div class="hbar-legend-dot hbar-legend-dot--signal"></div>Pre-order signal — waste window closed</div>
+        </div>
+      </div>
+      <div class="chart-trigger-row">
+        <span class="chart-trigger-note">Prepared vs sold vs discarded — full window breakdown</span>
+        <button class="chart-open-btn" onclick="wasteChartOpen()" aria-expanded="false" id="waste-open-btn">View full chart ›</button>
+      </div>
+      <p class="chart-footnote">† Station outlet food waste estimates derived from UK hospitality industry figures (WRAP 2024; British Sandwich &amp; Food to Go Association). Hot drink preparation-to-sale ratios at transport hubs estimated from outlet operational data and industry benchmarks. ‡ Pre-order signal eliminates post-peak waste by matching preparation volume to confirmed demand — order placed during the final minutes of the journey, venue prepares to order. No field-validated fulfilment figures yet; bar reflects directional modelled gap, not an audited rate.</p>
+    </div>
+
+    <p>The question is not whether this demographic will adopt. It is whether they will find anything worth adopting.</p>
+
+    <h2>The demographic that was already there</h2>
+
+    <p>City workers are not a monolith. Graduate analysts to managing directors, passive index-fund investors to active Lightning node operators, people who have never thought about Bitcoin and people who have thought about little else since 2021. What they share is professional proximity to financial infrastructure and a finely calibrated sensitivity to anything — any product, any programme, any proposition — that wastes their morning or insults their intelligence.</p>
+
+    <p>This makes them the ideal first cohort. Not the easiest — the easiest would be the Bitcoin ideologue who downloads any wallet on principle. But the most valuable: the professionally sceptical, time-constrained, data-aware commuter who has refused every loyalty programme not because they didn't want the reward, but because the price was too high. When Refueler and the Corridor arrive in their morning, they are not being asked to try something new. They are being offered something they have been waiting for without quite knowing it existed.</p>
+
+    <p>The story is the customer who comes back three times a week because the order was ready before they arrived — who holds the rewards in self-custody, watches them compound, and tells the analyst two desks over that there is a coffee app on the Fenchurch Street line that actually understands how they think. Word of mouth, in this demographic, travels at a specific velocity. It moves through morning briefings and Bloomberg terminals and Signal threads and Bitcoin meetups in Essex and Battersea. It does not move through stamp cards.</p>
+
+    <p>It turns out the least loyal customer in Britain was loyal to something all along. Just not to anything that offered stamps.</p>
+
+  </article>
+
+  <div class="sources">
+    <p class="sources-label">Sources</p>
+    <ul class="sources-list">
+      <li>Food waste at transport hub outlets: WRAP UK Food Waste 2024; British Sandwich &amp; Food to Go Association annual trade data. Hot drink preparation-to-sale ratio at transport hubs estimated from industry benchmarks; field data pending.</li>
+      <li>Morning coffee spend by London demographic: Allegra World Coffee Portal 2024–25; British Coffee Association annual report. City of London office district indexed against national average spend.</li>
+      <li>LTV model: £4.50 AOV × 48 working weeks. Frequency delta at 1×, 2×, and 3× weekly visit cadence.</li>
+      <li>Repeat purchase rate (53%) and wallet-based adoption range (60–80%): loyalty industry benchmark data 2024–25. Dedicated loyalty app adoption (5–15%): industry benchmark 2024–25.</li>
+      <li>Square Lightning Network merchant rollout: Block Inc. announcements 2025–26. Merchant count: 4M.</li>
+      <li>Bitcoin four-year holding period performance vs managed fund benchmarks: publicly available on-chain data and fund performance disclosures. No specific fund named.</li>
+      <li>† Loyalty app data terms (location, device identifier, behavioural profiling): representative terms from major UK coffee chain app privacy policies, 2024–25.</li>
+      <li>Sats rewards repeat purchase data: Bitcoin merchant reward programme aggregates. Individual results vary with BTC/GBP rate at time of credit.</li>
+    </ul>
+  </div>
+
+</div><!-- /article-wrap -->
+
+<!-- Modal: food waste chart expanded view -->
+<div class="waste-modal" id="waste-modal" role="dialog" aria-modal="true" aria-label="Fulfilment gap chart expanded">
+  <div class="waste-scrim" onclick="wasteChartClose()" aria-hidden="true"></div>
+  <div class="waste-modal-panel" id="waste-modal-panel">
+    <div class="waste-modal-header">
+      <div class="waste-modal-header-left">
+        <span class="waste-modal-eyebrow">Station outlets · Morning peak · 07:00–09:30</span>
+        <span class="waste-modal-title">The fulfilment gap: what gets prepared, what gets sold, what gets discarded</span>
+      </div>
+      <button class="waste-close-btn" onclick="wasteChartClose()" aria-label="Close">Close ✕</button>
+    </div>
+    <div class="waste-modal-body">
+      <div class="hbar-group">
+        <div class="hbar-label">Hot drinks prepared for peak window <span>100%</span></div>
+        <div class="hbar-track"><div class="hbar-fill hbar-fill--baseline" style="width:100%"></div></div>
+      </div>
+      <div class="hbar-group">
+        <div class="hbar-label">Sold during peak (07:00–08:45) <span>~68%</span></div>
+        <div class="hbar-track"><div class="hbar-fill hbar-fill--baseline" style="width:68%"></div></div>
+      </div>
+      <div class="hbar-group">
+        <div class="hbar-label">Discarded post-peak (gone cold, 09:00–10:00) <span>~18%</span></div>
+        <div class="hbar-track"><div class="hbar-fill hbar-fill--baseline" style="width:18%"></div></div>
+      </div>
+      <div class="hbar-group">
+        <div class="hbar-label">Remaining sold / marked down (09:00–10:30) <span>~14%</span></div>
+        <div class="hbar-track"><div class="hbar-fill hbar-fill--baseline" style="width:14%"></div></div>
+      </div>
+      <div class="hbar-group">
+        <div class="hbar-label">Food items: prepared vs sold (pastries, wraps)<sup>†</sup> <span>~74% sold</span></div>
+        <div class="hbar-track"><div class="hbar-fill hbar-fill--baseline" style="width:74%"></div></div>
+      </div>
+      <div class="hbar-group">
+        <div class="hbar-label">Food items: discarded or donated post-peak <span>~26%</span></div>
+        <div class="hbar-track"><div class="hbar-fill hbar-fill--baseline" style="width:26%"></div></div>
+      </div>
+      <div class="hbar-group" style="margin-bottom:0">
+        <div class="hbar-label hbar-label--signal">Waste window closed with pre-order signal<sup>‡</sup> <span>post-peak loss eliminated</span></div>
+        <div class="hbar-track"><div class="hbar-fill hbar-fill--signal" style="width:94%"></div></div>
+      </div>
+      <div class="hbar-legend" style="margin-top:1.5rem">
+        <div class="hbar-legend-item"><div class="hbar-legend-dot hbar-legend-dot--baseline"></div>Industry baseline</div>
+        <div class="hbar-legend-item"><div class="hbar-legend-dot hbar-legend-dot--signal"></div>Pre-order signal — waste window closed</div>
+      </div>
+    </div>
+    <div class="waste-modal-footnote">
+      † Station outlet food waste estimates derived from UK hospitality industry figures (WRAP 2024; British Sandwich &amp; Food to Go Association). Hot drink preparation-to-sale ratios at transport hubs estimated from outlet operational data and industry benchmarks. ‡ Pre-order signal eliminates post-peak waste by matching preparation volume to confirmed demand — order placed during the final minutes of the journey, venue prepares to order. No field-validated fulfilment figures yet; bar reflects directional modelled gap, not an audited rate.
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span class="footer-note">© 2026 Refueler · refueler.io/editorial/the-city-worker</span>
+    <div class="footer-links">
+      <a href="/editorial/">← Editorial</a>
+      <a href="/editorial/the-float.html">Article 2 →</a>
+      <a href="/privacy/">Privacy</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const THEME_KEY = 'rfTheme';
+
+  function applyTheme(theme) {
+    const root = document.documentElement;
+    const pill = document.getElementById('theme-btn');
+    if (theme === 'carbon') {
+      root.setAttribute('data-theme', 'carbon');
+      if (pill) pill.textContent = 'Carbon / Paper';
+    } else {
+      root.removeAttribute('data-theme');
+      if (pill) pill.textContent = 'Paper / Carbon';
+    }
+  }
+
+  function toggleTheme() {
+    const current = localStorage.getItem(THEME_KEY) || 'paper';
+    const next = current === 'paper' ? 'carbon' : 'paper';
+    localStorage.setItem(THEME_KEY, next);
+    applyTheme(next);
+  }
+
+  (function () { applyTheme(localStorage.getItem(THEME_KEY) || 'paper'); })();
+
+  function wasteChartOpen() {
+    var modal = document.getElementById('waste-modal');
+    var btn = document.getElementById('waste-open-btn');
+    modal.classList.add('is-open');
+    btn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+    modal.querySelector('.waste-close-btn').focus();
+  }
+  function wasteChartClose() {
+    var modal = document.getElementById('waste-modal');
+    var panel = document.getElementById('waste-modal-panel');
+    var btn = document.getElementById('waste-open-btn');
+    panel.classList.add('is-closing');
+    setTimeout(function() {
+      modal.classList.remove('is-open');
+      panel.classList.remove('is-closing');
+      btn.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+      btn.focus();
+    }, 150);
+  }
+</script>
+
+</body>
+</html>
