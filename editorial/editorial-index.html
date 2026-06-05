@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editorial — Refueler</title>
+<meta name="description" content="Original research and close observations across Bitcoin privacy, UK regulations, and the payment infrastructure reshaping how money moves.">
+<meta property="og:title" content="Editorial · Refueler">
+<meta property="og:description" content="Original research and close observations across Bitcoin privacy, UK regulations, and the payment infrastructure reshaping how money moves.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://refueler.io/editorial/">
+<meta property="og:site_name" content="Refueler">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Editorial · Refueler">
+<meta name="twitter:description" content="Original research and close observations across Bitcoin privacy, UK regulations, and the payment infrastructure reshaping how money moves.">
+<link rel="canonical" href="https://refueler.io/editorial/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=Satoshi:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper:          #F7F4EF;
+    --carbon:         #1E1F22;
+    --carbon-soft:    #26282C;
+    --carbon-mid:     #2E3035;
+    --ink:            #3D3A36;
+    --ink-secondary:  #5A5751;
+    --ink-tertiary:   #9A948D;
+    --rule:           #D6D1C8;
+
+    --bg:             var(--paper);
+    --text-primary:   var(--ink);
+    --text-secondary: var(--ink-secondary);
+    --text-tertiary:  var(--ink-tertiary);
+    --border:         var(--rule);
+
+    --font-heading:   'Satoshi', 'DM Sans', sans-serif;
+    --font-serif:     'Source Serif 4', Georgia, serif;
+    --font-sans:      'DM Sans', system-ui, sans-serif;
+
+    --max-w:          1200px;
+    --gutter:         clamp(1.25rem, 4vw, 3rem);
+    --index-content-max: 760px;
+  }
+
+  [data-theme="carbon"] {
+    --bg:             var(--carbon);
+    --text-primary:   #E4E2DC;
+    --text-secondary: #8A8680;
+    --text-tertiary:  #5A5751;
+    --border:         #35373B;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-font-smoothing: antialiased; }
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    transition: background 0.3s ease, color 0.3s ease;
+    min-height: 100vh;
+  }
+
+  .site-header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 var(--gutter);
+    position: sticky; top: 0;
+    background: var(--bg);
+    z-index: 100;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .header-inner {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .wordmark {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.06em;
+    text-transform: none;
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .wordmark-divider { font-weight: 300; opacity: 0.3; margin: 0 0.5rem; }
+  .wordmark-section { font-weight: 400; letter-spacing: 0.06em; opacity: 0.55; text-transform: none; }
+
+  nav { display: flex; align-items: center; gap: 2rem; }
+  nav a {
+    font-family: var(--font-heading);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  nav a:hover { color: var(--text-primary); }
+  nav a.active { color: var(--text-primary); }
+
+  .theme-pill {
+    font-family: var(--font-heading);
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 0.35rem 0.85rem;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    white-space: nowrap;
+  }
+  .theme-pill:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+
+  .editorial-header {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    padding: 4.5rem var(--gutter) 3rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-eyebrow {
+    font-family: var(--font-heading);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 1.25rem;
+  }
+  .section-title {
+    font-family: var(--font-heading);
+    font-size: clamp(1.625rem, 3vw, 2.5rem);
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.875rem;
+    max-width: 28ch;
+  }
+  .section-standfirst {
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    max-width: 52ch;
+  }
+
+  .article-list-wrap {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    padding: 0 var(--gutter);
+  }
+  .article-list { max-width: var(--index-content-max); }
+
+  .article-card {
+    display: block;
+    padding: 2.5rem 0;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+  }
+  .article-card:last-child { border-bottom: none; }
+
+  .card-meta-top {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin-bottom: 0.875rem;
+    flex-wrap: wrap;
+  }
+  .card-eyebrow {
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+  .dot { width: 2px; height: 2px; border-radius: 50%; background: var(--text-tertiary); opacity: 0.35; flex-shrink: 0; }
+
+  .card-title {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: clamp(1.125rem, 2vw, 1.5rem);
+    line-height: 1.2;
+    letter-spacing: -0.018em;
+    color: var(--text-primary);
+    margin-bottom: 0.625rem;
+    transition: opacity 0.15s;
+  }
+  .article-card:hover .card-title { opacity: 0.7; }
+  .article-card.lead .card-title { font-size: clamp(1.3rem, 2.5vw, 1.875rem); }
+
+  .card-standfirst {
+    font-family: var(--font-serif);
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    max-width: 64ch;
+  }
+  .article-card.lead .card-standfirst { font-size: 1rem; max-width: 60ch; }
+
+  .card-meta-bottom {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    letter-spacing: 0.06em;
+    color: var(--text-tertiary);
+  }
+
+  .site-footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem var(--gutter);
+    margin-top: 2rem;
+  }
+  .footer-inner {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .footer-note, .footer-links a {
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    letter-spacing: 0.06em;
+    color: var(--text-tertiary);
+    text-decoration: none;
+  }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-links a:hover { color: var(--text-secondary); }
+
+  @media (max-width: 600px) {
+    nav a:not(.active) { display: none; }
+    .card-standfirst { display: none; }
+    .article-card.lead .card-standfirst { display: block; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="../" class="wordmark">
+      Refueler
+      <span class="wordmark-divider">/</span>
+      <span class="wordmark-section">Editorial</span>
+    </a>
+    <nav>
+      <a href="../">App</a>
+      <a href="/editorial/" class="active">Editorial</a>
+      <a href="/privacy/">Privacy</a>
+      <button class="theme-pill" onclick="toggleTheme()" id="theme-btn">Paper / Carbon</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="editorial-header">
+    <p class="section-eyebrow">Refueler / Editorial</p>
+    <h1 class="section-title">Sharp intelligence.<br>Quiet signal.</h1>
+    <p class="section-standfirst">Original research and close observations across Bitcoin privacy, UK regulations, and the payment infrastructure reshaping how money moves.</p>
+  </section>
+
+  <div class="article-list-wrap">
+    <div class="article-list" id="article-list">
+
+      <!-- Article 1 — lead -->
+      <a class="article-card lead" href="nothing-to-collect-nothing-to-hide.html">
+        <div class="card-meta-top">
+          <span class="card-eyebrow">Privacy</span>
+          <span class="dot"></span>
+          <span class="card-eyebrow">Data architecture</span>
+          <span class="dot"></span>
+          <span class="card-eyebrow">Loyalty apps</span>
+        </div>
+        <h2 class="card-title">Nothing to collect. Nothing to hide.</h2>
+        <p class="card-standfirst">Every major coffee-chain ordering app is quietly running a data operation alongside its coffee business. Most customers have never been told what it collects, what it is worth, or where it goes.</p>
+        <div class="card-meta-bottom">
+          <span>May 2026</span>
+          <span class="dot"></span>
+          <span>8 min</span>
+        </div>
+      </a>
+
+      <!-- Article 2 -->
+      <a class="article-card" href="the-float.html">
+        <div class="card-meta-top">
+          <span class="card-eyebrow">Regulation</span>
+          <span class="dot"></span>
+          <span class="card-eyebrow">FCA · PS25/12</span>
+          <span class="dot"></span>
+          <span class="card-eyebrow">Loyalty float</span>
+        </div>
+        <h2 class="card-title">The float</h2>
+        <p class="card-standfirst">Your morning coffee app knows more about you than your bank does. On 7 May 2026, the regulator finally noticed.</p>
+        <div class="card-meta-bottom">
+          <span>May 2026</span>
+          <span class="dot"></span>
+          <span>9 min</span>
+        </div>
+      </a>
+
+      <!-- Article 3 -->
+      <a class="article-card" href="the-city-worker.html">
+        <div class="card-meta-top">
+          <span class="card-eyebrow">Consumer behaviour</span>
+          <span class="dot"></span>
+          <span class="card-eyebrow">Bitcoin rewards</span>
+          <span class="dot"></span>
+          <span class="card-eyebrow">Fenchurch St line</span>
+        </div>
+        <h2 class="card-title">The least loyal customer in Britain</h2>
+        <p class="card-standfirst">The City worker is Britain's biggest coffee spender and its least loyal customer — until sats.</p>
+        <div class="card-meta-bottom">
+          <span>June 2026</span>
+          <span class="dot"></span>
+          <span>7 min</span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span class="footer-note">© 2026 Refueler Ltd (incorporating) · refueler.io/editorial</span>
+    <div class="footer-links">
+      <a href="/privacy/">Privacy</a>
+      <a href="/editorial/">Editorial</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const THEME_KEY = 'rfTheme';
+  function applyTheme(theme) {
+    const root = document.documentElement;
+    const pill = document.getElementById('theme-btn');
+    if (theme === 'carbon') {
+      root.setAttribute('data-theme', 'carbon');
+      if (pill) pill.textContent = 'Carbon / Paper';
+    } else {
+      root.removeAttribute('data-theme');
+      if (pill) pill.textContent = 'Paper / Carbon';
+    }
+  }
+  function toggleTheme() {
+    const current = localStorage.getItem(THEME_KEY) || 'paper';
+    const next = current === 'paper' ? 'carbon' : 'paper';
+    localStorage.setItem(THEME_KEY, next);
+    applyTheme(next);
+  }
+  (function () { applyTheme(localStorage.getItem(THEME_KEY) || 'paper'); })();
+</script>
+<script src="/analytics.js" defer></script>
+</body>
+</html>
