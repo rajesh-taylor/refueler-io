@@ -419,15 +419,15 @@
 
 <header class="site-header">
   <div class="header-inner">
-    <a href="refueler-editorial-index.html" class="wordmark">
+    <a href="/editorial/" class="wordmark">
       Refueler
       <span class="wordmark-divider">/</span>
       <span class="wordmark-section">Editorial</span>
     </a>
     <nav>
       <a href="../">App</a>
-      <a href="refueler-editorial-index.html" class="active">Editorial</a>
-      <a href="../privacy/privacy_v1_3.html">Privacy</a>
+      <a href="/editorial/" class="active">Editorial</a>
+      <a href="/privacy/">Privacy</a>
       <button class="theme-pill" onclick="toggleTheme()" id="theme-btn">Paper / Carbon</button>
     </nav>
   </div>
@@ -436,7 +436,7 @@
 <div class="article-wrap">
 
   <p class="breadcrumb">
-    <a href="refueler-editorial-index.html">Editorial</a>
+    <a href="/editorial/">Editorial</a>
     <span class="breadcrumb-sep">/</span>
     Regulation · FCA
   </p>
@@ -920,15 +920,15 @@
 
     <p>The question for the independent shop is not regulation. It is relevance.</p>
 
-    <h2>Three models for the mint — a note for the technically interested</h2>
+    <h2>The payment architecture — a note for the technically interested</h2>
 
-    <p>For the Bitcoin-native reader and the investor following the ecash landscape, the architecture question is the interesting one. Refueler's rewards are issued as sats via the Cashu ecash protocol. But who holds the ecash liability? The answer depends on which model is in operation.</p>
+    <p>For the Bitcoin-native reader and the investor following the Lightning Network landscape, the architecture question is the one worth lingering on. Refueler's rewards are settled via the Lightning Network, using BOLT 11 invoices as the current standard — the same invoice format that underpins the vast majority of Lightning payments in production today. It is well-supported, well-understood, and operationally proven across millions of daily transactions.</p>
 
-    <p><strong>Model (a) — Refueler operates its own mint.</strong> Full control over issuance and redemption of ecash tokens. Long-term, this is the direction of independent ecash infrastructure — particularly given work on enclave-based mint architecture, where the mint operator is structurally unable to access keys or inspect data processed inside it. This model is investor-attractive and architecturally elegant. FCA perimeter clarity is required before proceeding. <em>Status: roadmap.</em></p>
+    <p>The roadmap points toward BOLT 12. Where BOLT 11 requires a fresh invoice for each payment — a stateless, one-shot instrument — BOLT 12 introduces offers: reusable, static payment endpoints that support recurring payments, blinded paths for receiver privacy, and a significantly cleaner UX for the pre-order context. A commuter boarding at Limehouse and triggering a pre-order should not need to think about invoice expiry. BOLT 12 removes that friction entirely. <em>Status: roadmap, subject to wallet ecosystem readiness.</em></p>
 
-    <p><strong>Model (b) — Mint partner.</strong> Refueler routes rewards through a preferred ecash mint partner, currently in development. Custody of the ecash liability sits with the mint. Refueler takes no ecash liability and no mint infrastructure responsibility. This is the launch model. <em>Status: in development.</em></p>
+    <p>The longer-term picture, and the one that animates serious investor interest in this space, is the convergence of Lightning settlement with ecash token issuance. Cashu — the ecash protocol on which Refueler's rewards layer is built — allows for off-chain, privacy-preserving token redemption that inherits Lightning's speed without requiring an active channel for every redemption event. This is architecturally elegant and commercially attractive. It is also, in the UK, a question that requires a considered answer from the FCA before it can be pursued beyond the current mint-partner model.</p>
 
-    <p><strong>Model (c) — Shop-as-mint.</strong> The independent coffee shop issues its own Cashu tokens, redeemable in-store only. Closed loop. Fully private. No chain dependency. The paper stamp card, rebuilt in Bitcoin — and considerably harder to lose in a coat pocket. <em>Status: in development.</em></p>
+    <p>That answer is not a blocker — it is a sequencing decision. Refueler launches on Lightning. It earns the trust of regulators, merchants, and users on a well-understood rail. The ecash layer becomes available when the regulatory framework is sufficiently clear to support it responsibly. The FCA's engagement with this area is active and, by the standards of UK financial regulation, notably constructive. The window is not closed. It has not yet opened fully. That is a different thing.</p>
 
     <h2>The white-label proposition — stated honestly</h2>
 
@@ -1504,8 +1504,8 @@
     <span class="footer-note">© 2026 Refueler Ltd (incorporating) · refueler.io/editorial/the-float</span>
     <div class="footer-links">
       <a href="nothing-to-collect-nothing-to-hide.html">← Article 1</a>
-      <a href="refueler-editorial-index.html">Editorial</a>
-      <a href="../privacy/privacy_v1_3.html">Privacy</a>
+      <a href="/editorial/">Editorial</a>
+      <a href="/privacy/">Privacy</a>
     </div>
   </div>
 </footer>

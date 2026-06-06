@@ -396,15 +396,15 @@
 
 <header class="site-header">
   <div class="header-inner">
-    <a href="refueler-editorial-index.html" class="wordmark">
+    <a href="/editorial/" class="wordmark">
       Refueler
       <span class="wordmark-divider">/</span>
       <span class="wordmark-section">Editorial</span>
     </a>
     <nav>
       <a href="../">App</a>
-      <a href="refueler-editorial-index.html" class="active">Editorial</a>
-      <a href="../privacy/privacy_v1_3.html">Privacy</a>
+      <a href="/editorial/" class="active">Editorial</a>
+      <a href="/privacy/">Privacy</a>
       <button class="theme-pill" onclick="toggleTheme()" id="theme-btn">Paper / Carbon</button>
     </nav>
   </div>
@@ -413,7 +413,7 @@
 <div class="article-wrap">
 
   <p class="breadcrumb">
-    <a href="refueler-editorial-index.html">Editorial</a>
+    <a href="/editorial/">Editorial</a>
     <span class="breadcrumb-sep">/</span>
     Privacy · Data architecture
   </p>
@@ -803,10 +803,51 @@
         .ico-row__val--muted { font-weight:400; color:var(--text-tertiary); font-size:0.6375rem; }
         .ico-footnote { padding:0.625rem 1.25rem 0.875rem; font-family:var(--font-heading); font-size:0.6375rem; color:var(--text-tertiary); line-height:1.55; }
         @media(max-width:540px){ .ico-stats { grid-template-columns:1fr 1fr; } .ico-stats .ico-stat:nth-child(2) { border-right:none; } .ico-stats .ico-stat:nth-child(3) { border-top:1px solid var(--border); border-right:none; grid-column:1/-1; } }
+        .ico-trigger-row { display:flex; justify-content:space-between; align-items:center; padding:0.75rem 1.25rem; border-top:1px solid var(--border); }
+        .ico-trigger-note { font-family:var(--font-heading); font-size:0.6375rem; color:var(--text-tertiary); }
+        .ico-trigger-note strong { color:var(--text-secondary); font-weight:500; }
+        .ico-open-btn { font-family:var(--font-heading); font-size:0.6375rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-secondary); background:transparent; border:1px solid var(--border); border-radius:2px; padding:0.4rem 0.875rem; cursor:pointer; transition:border-color 0.2s,color 0.2s; white-space:nowrap; }
+        .ico-open-btn:hover { border-color:var(--text-secondary); color:var(--text-primary); }
+        [data-theme="carbon"] .ico-open-btn { border-color:var(--border); }
+        [data-theme="carbon"] .ico-open-btn:hover { border-color:var(--text-secondary); color:var(--text-primary); }
+        .ico-modal { display:none; position:fixed; inset:0; z-index:1000; align-items:center; justify-content:center; padding:2rem var(--gutter,1.5rem); }
+        .ico-modal.is-open { display:flex; }
+        .ico-scrim { position:absolute; inset:0; background:rgba(0,0,0,0.55); cursor:pointer; animation:ico-scrim-in 0.25s ease; }
+        [data-theme="carbon"] .ico-scrim { background:rgba(0,0,0,0.72); }
+        @keyframes ico-scrim-in { from{opacity:0} to{opacity:1} }
+        .ico-modal-panel { position:relative; z-index:1; background:var(--bg); border:1px solid var(--border); border-top:2px solid var(--blockquote-rule); width:min(720px,100%); max-height:min(88vh,800px); display:flex; flex-direction:column; overflow:hidden; animation:ico-panel-in 0.3s cubic-bezier(0.16,1,0.3,1); }
+        [data-theme="carbon"] .ico-modal-panel { border-top-color:#C8A96E; }
+        @keyframes ico-panel-in { from{opacity:0;transform:translateY(12px) scale(0.98)} to{opacity:1;transform:translateY(0) scale(1)} }
+        .ico-modal-panel.is-closing { animation:ico-panel-out 0.15s ease forwards; }
+        @keyframes ico-panel-out { from{opacity:1} to{opacity:0} }
+        .ico-modal-header { padding:1.25rem 2rem 1.125rem; border-bottom:1px solid var(--border); display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; flex-shrink:0; }
+        .ico-modal-header-left { display:flex; flex-direction:column; gap:0.3rem; }
+        .ico-modal-eyebrow { font-family:var(--font-heading); font-size:0.575rem; letter-spacing:0.13em; text-transform:uppercase; color:var(--text-tertiary); }
+        .ico-modal-title { font-family:var(--font-heading); font-size:1.0625rem; font-weight:600; color:var(--text-primary); letter-spacing:-0.015em; }
+        .ico-mclose-btn { font-family:var(--font-heading); font-size:0.6375rem; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-tertiary); background:transparent; border:1px solid var(--border); border-radius:2px; padding:0.4rem 0.75rem; cursor:pointer; flex-shrink:0; margin-top:0.2rem; transition:color 0.2s,border-color 0.2s; }
+        .ico-mclose-btn:hover { color:var(--text-primary); border-color:var(--text-secondary); }
+        .ico-modal-body { overflow-y:auto; flex:1; }
+        .ico-modal-stats { display:grid; grid-template-columns:repeat(3,1fr); border-bottom:1px solid var(--border); }
+        .ico-modal-stat { padding:1.5rem 2rem 1.25rem; border-right:1px solid var(--border); }
+        .ico-modal-stat:last-child { border-right:none; }
+        .ico-modal-stat__num { font-family:var(--font-heading); font-size:2rem; font-weight:700; letter-spacing:-0.03em; color:var(--text-primary); line-height:1; margin-bottom:0.4rem; }
+        .ico-modal-stat__label { font-family:var(--font-heading); font-size:0.6875rem; font-weight:500; color:var(--text-secondary); line-height:1.4; margin-bottom:0.25rem; }
+        .ico-modal-stat__note { font-family:var(--font-heading); font-size:0.6125rem; color:var(--text-tertiary); line-height:1.5; }
+        .ico-modal-rows {}
+        .ico-modal-row { display:flex; justify-content:space-between; align-items:baseline; gap:1.5rem; padding:0.875rem 2rem; border-bottom:1px solid var(--border); font-family:var(--font-heading); }
+        .ico-modal-row:last-child { border-bottom:none; }
+        .ico-modal-row__key { font-size:0.75rem; color:var(--text-secondary); flex:1; line-height:1.45; }
+        .ico-modal-row__val { font-size:0.8125rem; font-weight:600; color:var(--text-primary); white-space:nowrap; text-align:right; }
+        .ico-modal-row__val--muted { font-weight:400; color:var(--text-tertiary); font-size:0.6875rem; }
+        .ico-modal-footer { padding:0.75rem 2rem 1rem; border-top:1px solid var(--border); font-family:var(--font-heading); font-size:0.6875rem; color:var(--text-tertiary); line-height:1.55; flex-shrink:0; }
+        @media(max-width:560px){ .ico-modal-stats { grid-template-columns:1fr 1fr; } .ico-modal-stat:nth-child(2){ border-right:none; } .ico-modal-stat:nth-child(3){ border-top:1px solid var(--border); border-right:none; grid-column:1/-1; } .ico-modal-row { flex-direction:column; gap:0.25rem; } .ico-modal-row__val { text-align:left; } }
       </style>
-      <div class="ico-header">
-        <p class="widget__eyebrow">Regulatory · ICO</p>
-        <p class="widget__title">ICO Enforcement 2025 — key figures</p>
+      <div class="ico-header" style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem 0.875rem;">
+        <div>
+          <p class="widget__eyebrow">Regulatory · ICO</p>
+          <p class="widget__title">ICO Enforcement 2025 — key figures</p>
+        </div>
+        <button class="ico-open-btn" onclick="icoModalOpen()" aria-expanded="false" id="ico-open-btn">View full detail ›</button>
       </div>
       <div class="ico-stats">
         <div class="ico-stat">
@@ -833,6 +874,50 @@
         <div class="ico-row"><span class="ico-row__key">ICO stated enforcement priority, 2025–26</span><span class="ico-row__val">Location data &amp; online tracking</span></div>
       </div>
       <p class="ico-footnote">Sources: URM Consulting ICO enforcement analysis 2025; ICO Annual Report 2024–25; Clifford Chance briefing, October 2025; Skadden ICO enforcement review, February 2026. Fine quantum reflects concluded cases; investigations ongoing as at May 2026 not included.</p>
+    </div>
+
+    <!-- Modal: ICO enforcement widget -->
+    <div class="ico-modal" id="ico-modal" role="dialog" aria-modal="true" aria-label="ICO enforcement 2025 expanded">
+      <div class="ico-scrim" onclick="icoModalClose()"></div>
+      <div class="ico-modal-panel" id="ico-modal-panel">
+        <div class="ico-modal-header">
+          <div class="ico-modal-header-left">
+            <span class="ico-modal-eyebrow">Regulatory · ICO</span>
+            <span class="ico-modal-title">ICO Enforcement 2025 — full picture</span>
+          </div>
+          <button class="ico-mclose-btn" onclick="icoModalClose()" aria-label="Close">Close ✕</button>
+        </div>
+        <div class="ico-modal-body">
+          <div class="ico-modal-stats">
+            <div class="ico-modal-stat">
+              <div class="ico-modal-stat__num">£17.5m</div>
+              <div class="ico-modal-stat__label">Maximum fine per infringement</div>
+              <div class="ico-modal-stat__note">Or 4% of global annual turnover — whichever is higher</div>
+            </div>
+            <div class="ico-modal-stat">
+              <div class="ico-modal-stat__num">↓ 34%</div>
+              <div class="ico-modal-stat__label">Formal investigations opened vs prior year</div>
+              <div class="ico-modal-stat__note">Fewer cases — but larger, more concentrated enforcement action</div>
+            </div>
+            <div class="ico-modal-stat">
+              <div class="ico-modal-stat__num">↑ 2×</div>
+              <div class="ico-modal-stat__label">Average fine value for concluded cases</div>
+              <div class="ico-modal-stat__note">2025 settlements materially larger than 2023–24 comparators</div>
+            </div>
+          </div>
+          <div class="ico-modal-rows">
+            <div class="ico-modal-row"><span class="ico-modal-row__key">Largest single fine issued, 2025</span><span class="ico-modal-row__val">£3.07m — Capita plc <span class="ico-modal-row__val--muted">(Oct 2025)</span></span></div>
+            <div class="ico-modal-row"><span class="ico-modal-row__key">Primary enforcement trigger</span><span class="ico-modal-row__val">Inadequate technical &amp; organisational measures</span></div>
+            <div class="ico-modal-row"><span class="ico-modal-row__key">Sectors with active enforcement interest</span><span class="ico-modal-row__val">Financial services · Retail · AdTech</span></div>
+            <div class="ico-modal-row"><span class="ico-modal-row__key">Lawful basis most frequently contested</span><span class="ico-modal-row__val">Legitimate interests &amp; consent validity</span></div>
+            <div class="ico-modal-row"><span class="ico-modal-row__key">ICO stated enforcement priority, 2025–26</span><span class="ico-modal-row__val">Location data &amp; online tracking</span></div>
+            <div class="ico-modal-row"><span class="ico-modal-row__key">Typical timeline: investigation to penalty notice</span><span class="ico-modal-row__val">18–36 months <span class="ico-modal-row__val--muted">(complex data cases)</span></span></div>
+            <div class="ico-modal-row"><span class="ico-modal-row__key">Right of appeal</span><span class="ico-modal-row__val">First-tier Tribunal (General Regulatory Chamber) <span class="ico-modal-row__val--muted">— rarely successful on quantum</span></span></div>
+            <div class="ico-modal-row"><span class="ico-modal-row__key">Reputational exposure</span><span class="ico-modal-row__val">All penalty notices published in full on ICO register <span class="ico-modal-row__val--muted">(no anonymisation)</span></span></div>
+          </div>
+        </div>
+        <div class="ico-modal-footer">Sources: URM Consulting ICO enforcement analysis 2025; ICO Annual Report 2024–25; Clifford Chance briefing, October 2025; Skadden ICO enforcement review, February 2026. Fine quantum reflects concluded cases; investigations ongoing as at May 2026 not included. This widget is editorial summary, not legal advice.</div>
+      </div>
     </div>
 
     <p>The direction of travel is clear. Fewer investigations does not mean diminished risk — it means concentrated risk. When the ICO acts, the consequences are material. Companies whose business models depend on broad, permissive data collection face a period of genuine uncertainty as these powers mature. Companies whose architecture does not collect the data in the first place face something different: a structural competitive advantage, written into their codebase from day one.</p>
@@ -1432,9 +1517,9 @@
   <div class="footer-inner">
     <span class="footer-note">© 2026 Refueler Ltd (incorporating) · refueler.io/editorial/the-app-that-earns-your-trust</span>
     <div class="footer-links">
-      <a href="refueler-editorial-index.html">← Editorial</a>
+      <a href="/editorial/">← Editorial</a>
       <a href="the-float.html">Article 2 →</a>
-      <a href="../privacy/privacy_v1_3.html">Privacy</a>
+      <a href="/privacy/">Privacy</a>
     </div>
   </div>
 </footer>
@@ -1619,8 +1704,29 @@
           btn.focus();
         }, 150);
       }
+      function icoModalOpen() {
+        var modal = document.getElementById('ico-modal');
+        var btn = document.getElementById('ico-open-btn');
+        modal.classList.add('is-open');
+        btn.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+        modal.querySelector('.ico-mclose-btn').focus();
+      }
+      function icoModalClose() {
+        var modal = document.getElementById('ico-modal');
+        var panel = document.getElementById('ico-modal-panel');
+        var btn = document.getElementById('ico-open-btn');
+        panel.classList.add('is-closing');
+        setTimeout(function() {
+          modal.classList.remove('is-open');
+          panel.classList.remove('is-closing');
+          btn.setAttribute('aria-expanded', 'false');
+          document.body.style.overflow = '';
+          btn.focus();
+        }, 150);
+      }
       document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') { dvModalClose(); archModalClose(); }
+        if (e.key === 'Escape') { dvModalClose(); archModalClose(); icoModalClose(); }
       });
     </script>
 <script src="/analytics.js" defer></script>

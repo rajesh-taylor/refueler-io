@@ -270,7 +270,11 @@
   .ltv-header {
     padding: 1.125rem 1.5rem 0.875rem;
     border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
+  .ltv-header-text {}
   .ltv-eyebrow {
     font-family: var(--font-heading);
     font-size: 0.575rem;
@@ -286,6 +290,25 @@
     color: var(--text-primary);
     letter-spacing: -0.01em;
   }
+  .ltv-open-btn {
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 0.4rem 0.875rem;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .ltv-open-btn:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+  [data-theme="carbon"] .ltv-open-btn { border-color: var(--border); }
+  [data-theme="carbon"] .ltv-open-btn:hover { border-color: var(--text-secondary); color: var(--text-primary); }
   .ltv-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -324,6 +347,38 @@
     color: var(--text-tertiary);
     line-height: 1.6;
   }
+
+  /* LTV Modal */
+  .ltv-modal { display:none; position:fixed; inset:0; z-index:1000; align-items:center; justify-content:center; padding:2rem var(--gutter,1.5rem); }
+  .ltv-modal.is-open { display:flex; }
+  .ltv-scrim { position:absolute; inset:0; background:rgba(0,0,0,0.55); cursor:pointer; animation:ltv-scrim-in 0.25s ease; }
+  [data-theme="carbon"] .ltv-scrim { background:rgba(0,0,0,0.72); }
+  @keyframes ltv-scrim-in { from{opacity:0} to{opacity:1} }
+  .ltv-modal-panel { position:relative; z-index:1; background:var(--bg); border:1px solid var(--border); border-top:2px solid var(--blockquote-rule); width:min(720px,100%); max-height:min(88vh,800px); display:flex; flex-direction:column; overflow:hidden; animation:ltv-panel-in 0.3s cubic-bezier(0.16,1,0.3,1); }
+  [data-theme="carbon"] .ltv-modal-panel { border-top-color:#C8A96E; }
+  @keyframes ltv-panel-in { from{opacity:0;transform:translateY(12px) scale(0.98)} to{opacity:1;transform:translateY(0) scale(1)} }
+  .ltv-modal-panel.is-closing { animation:ltv-panel-out 0.15s ease forwards; }
+  @keyframes ltv-panel-out { from{opacity:1} to{opacity:0} }
+  .ltv-modal-header { padding:1.25rem 2rem 1.125rem; border-bottom:1px solid var(--border); display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; flex-shrink:0; }
+  .ltv-modal-header-left { display:flex; flex-direction:column; gap:0.3rem; }
+  .ltv-modal-eyebrow { font-family:var(--font-heading); font-size:0.575rem; letter-spacing:0.13em; text-transform:uppercase; color:var(--text-tertiary); }
+  .ltv-modal-title { font-family:var(--font-heading); font-size:1.0625rem; font-weight:600; color:var(--text-primary); letter-spacing:-0.015em; }
+  .ltv-mclose-btn { font-family:var(--font-heading); font-size:0.6375rem; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-tertiary); background:transparent; border:1px solid var(--border); border-radius:2px; padding:0.4rem 0.75rem; cursor:pointer; flex-shrink:0; margin-top:0.2rem; transition:color 0.2s,border-color 0.2s; }
+  .ltv-mclose-btn:hover { color:var(--text-primary); border-color:var(--text-secondary); }
+  .ltv-modal-body { overflow-y:auto; flex:1; }
+  .ltv-modal-table { width:100%; border-collapse:collapse; font-family:var(--font-heading); }
+  .ltv-modal-table thead { position:sticky; top:0; z-index:2; background:var(--bg); }
+  .ltv-modal-table thead tr { border-bottom:1px solid var(--border); }
+  .ltv-modal-table th { font-size:0.6375rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-tertiary); font-weight:500; padding:0.875rem 2rem; text-align:left; }
+  .ltv-modal-table th:not(:first-child) { text-align:right; }
+  .ltv-modal-table td { font-size:0.875rem; padding:1rem 2rem; border-bottom:1px solid var(--border); vertical-align:middle; font-family:var(--font-heading); }
+  .ltv-modal-table td:not(:first-child) { text-align:right; font-weight:600; color:var(--text-primary); }
+  .ltv-modal-table td:first-child { color:var(--text-secondary); }
+  .ltv-modal-table tbody tr:last-child td { border-bottom:none; }
+  .ltv-modal-table .row-highlight td { background:rgba(0,0,0,0.025); }
+  [data-theme="carbon"] .ltv-modal-table .row-highlight td { background:rgba(255,255,255,0.04); }
+  .ltv-modal-table .row-highlight td:not(:first-child) { color:var(--text-primary); }
+  .ltv-modal-footer { padding:0.75rem 2rem 1rem; border-top:1px solid var(--border); font-family:var(--font-heading); font-size:0.6875rem; color:var(--text-tertiary); line-height:1.55; flex-shrink:0; }
 
   [data-theme="carbon"] .widget--ltv {
     border-left-color: #C8A96E;
@@ -667,8 +722,11 @@
 
     <div class="widget--ltv" id="ltv-widget">
       <div class="ltv-header">
-        <div class="ltv-eyebrow">Loyalty economics · Fenchurch St line commuter</div>
-        <div class="ltv-title">Why frequency is the only number that matters</div>
+        <div class="ltv-header-text">
+          <div class="ltv-eyebrow">Loyalty economics · Fenchurch St line commuter</div>
+          <div class="ltv-title">Why frequency is the only number that matters</div>
+        </div>
+        <button class="ltv-open-btn" onclick="ltvModalOpen()" aria-expanded="false" id="ltv-open-btn">View full model ›</button>
       </div>
       <div class="ltv-grid">
         <div class="ltv-grid-item">
@@ -684,6 +742,79 @@
           <span class="ltv-label">typical adoption rate<br>dedicated loyalty apps</span>
         </div>
         <p class="ltv-footnote">† LTV delta modelled at £4.50 AOV across 48 working weeks. Repeat purchase rate and app adoption range from loyalty industry benchmark data 2024–25. Sats reward figure from Bitcoin merchant reward programme data.</p>
+      </div>
+    </div>
+
+    <!-- Modal: LTV / frequency expanded view -->
+    <div class="ltv-modal" id="ltv-modal" role="dialog" aria-modal="true" aria-label="LTV frequency model expanded">
+      <div class="ltv-scrim" onclick="ltvModalClose()"></div>
+      <div class="ltv-modal-panel" id="ltv-modal-panel">
+        <div class="ltv-modal-header">
+          <div class="ltv-modal-header-left">
+            <span class="ltv-modal-eyebrow">Loyalty economics · Fenchurch St line commuter</span>
+            <span class="ltv-modal-title">LTV by visit frequency — the full model</span>
+          </div>
+          <button class="ltv-mclose-btn" onclick="ltvModalClose()" aria-label="Close">Close ✕</button>
+        </div>
+        <div class="ltv-modal-body">
+          <table class="ltv-modal-table">
+            <colgroup>
+              <col style="width:32%">
+              <col style="width:17%">
+              <col style="width:17%">
+              <col style="width:17%">
+              <col style="width:17%">
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>1× weekly</th>
+                <th>2× weekly</th>
+                <th>3× weekly</th>
+                <th>5× weekly</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Annual visits (48 weeks)</td>
+                <td>48</td>
+                <td>96</td>
+                <td>144</td>
+                <td>240</td>
+              </tr>
+              <tr>
+                <td>Annual spend @ £4.50 AOV</td>
+                <td>£216</td>
+                <td>£432</td>
+                <td>£648</td>
+                <td>£1,080</td>
+              </tr>
+              <tr class="row-highlight">
+                <td>LTV delta vs 1× baseline</td>
+                <td>—</td>
+                <td>2×</td>
+                <td>3×</td>
+                <td>5×</td>
+              </tr>
+              <tr>
+                <td>Sats earned @ 2% reward rate</td>
+                <td>~£4.32</td>
+                <td>~£8.64</td>
+                <td>~£12.96</td>
+                <td>~£21.60</td>
+              </tr>
+              <tr>
+                <td>Repeat purchase rate uplift (sats users†)</td>
+                <td colspan="4" style="text-align:center;font-weight:400;color:var(--text-secondary);">+53% across all frequency bands vs non-reward baseline</td>
+              </tr>
+              <tr>
+                <td>Loyalty app adoption — franchise baseline</td>
+                <td colspan="4" style="text-align:center;font-weight:400;color:var(--text-secondary);">5–15% of eligible customers; City worker cohort below category average</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="ltv-modal-footer">† LTV delta modelled at £4.50 AOV across 48 working weeks. Repeat purchase rate and app adoption range from loyalty industry benchmark data 2024–25. Sats reward figure from Bitcoin merchant reward programme data. Model is illustrative; individual outcomes vary by outlet mix and commute pattern.</div>
       </div>
     </div>
 
@@ -705,7 +836,7 @@
 
     <p>The Corridor's proposition is structurally different from anything the loyalty card industrial complex has offered. Where the franchise model extracts value from knowing who you are — your movements, your preferences, your commercial profile — the Corridor's model is built on knowing only one thing: when your train arrives. Every other piece of intelligence stays where it belongs. On your device. Off their servers.</p>
 
-    <p>What the Corridor gains in exchange is access to a shared intelligence layer that no individual merchant could build alone — aggregated, anonymised timing data that tells a venue not which customer is coming, but how many, and when, and with how much time before their next meeting. The superpower is not surveillance. It is choreography. Orders placed during the journey. Coffee ready at the door. The queue — the one mechanism the loyalty card industrial complex never thought to remove — simply gone.</p>
+    <p>What the Corridor gains in exchange is access to a shared intelligence layer that no individual merchant could build alone — aggregated, anonymised timing data that tells a venue not which customer is coming, but how many, and when, and with how much time before their next meeting. The superpower is not surveillance. It is choreography. Orders placed during the journey. Coffee ready at the door. The queue — the one mechanism that legacy rewards programmes never thought to remove — simply gone.</p>
 
     <blockquote>
       <p>A single independent café offering Lightning rewards is a curiosity. A coordinated corridor of them, running on a shared pre-order rail with sats credited on every transaction, is infrastructure. The distinction is everything.</p>
@@ -838,7 +969,7 @@
     <span class="footer-note">© 2026 Refueler · refueler.io/editorial/the-city-worker</span>
     <div class="footer-links">
       <a href="/editorial/">← Editorial</a>
-      <a href="/editorial/the-float.html">Article 2 →</a>
+      <a href="/editorial/nothing-to-collect-nothing-to-hide.html">Article 2 →</a>
       <a href="/privacy/">Privacy</a>
     </div>
   </div>
@@ -889,6 +1020,30 @@
       btn.focus();
     }, 150);
   }
+  function ltvModalOpen() {
+    var modal = document.getElementById('ltv-modal');
+    var btn = document.getElementById('ltv-open-btn');
+    modal.classList.add('is-open');
+    btn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+    modal.querySelector('.ltv-mclose-btn').focus();
+  }
+  function ltvModalClose() {
+    var modal = document.getElementById('ltv-modal');
+    var panel = document.getElementById('ltv-modal-panel');
+    var btn = document.getElementById('ltv-open-btn');
+    panel.classList.add('is-closing');
+    setTimeout(function() {
+      modal.classList.remove('is-open');
+      panel.classList.remove('is-closing');
+      btn.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+      btn.focus();
+    }, 150);
+  }
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { wasteChartClose(); ltvModalClose(); }
+  });
 </script>
 
 </body>
