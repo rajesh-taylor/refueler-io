@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="carbon">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Refueler — Dev Console</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Satoshi:wght@400;600;700&family=DM+Sans:wght@300;400;600&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:wght@300;400&display=swap" rel="stylesheet" />
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* ─── Design Tokens ───────────────────────────────── */
+    :root {
+      --bg:              #F7F4EF;
+      --surface:         #EDEAE4;
+      --surface-raised:  #E4E1DA;
+      --text-primary:    #3D3A36;
+      --text-secondary:  #5A5751;
+      --text-tertiary:   #9A948D;
+      --border:          #D6D1C8;
+      --inset-rule:      var(--border);
+      --accent:          #C8A96E;
+      --accent-hover:    #E0C48A;
+      --orange:          #F5820A;
+      --danger:          #C0392B;
+      --success:         #27AE60;
+      --mono:            'IBM Plex Mono', monospace;
+      --heading:         'Satoshi', 'DM Sans', sans-serif;
+      --ui:              'DM Sans', system-ui, sans-serif;
+    }
+    [data-theme="carbon"] {
+      --bg:              #1E1F22;
+      --surface:         #26282C;
+      --surface-raised:  #2E3035;
+      --text-primary:    #E4E2DC;
+      --text-secondary:  #8A8680;
+      --text-tertiary:   #5A5751;
+      --border:          #35373B;
+      --inset-rule:      #C8A96E;
+    }
+
+    /* ─── Reset ──────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: var(--ui);
+      font-weight: 300;
+      background: var(--bg);
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: background 0.25s, color 0.25s;
+    }
+
+    /* ─── Auth Screen ─────────────────────────────────── */
+    #auth-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--accent);
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 380px;
+      border-radius: 2px;
+    }
+    .auth-card h1 {
+      font-family: var(--heading);
+      font-weight: 600;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+    }
+    .auth-card p {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+    }
+    .auth-label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 0.4rem;
+    }
+    .auth-input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      font-family: var(--ui);
+      font-size: 0.875rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: 2px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .auth-input:focus { border-color: var(--accent); }
+    .auth-btn {
+      margin-top: 1.25rem;
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--orange);
+      color: var(--orange);
+      font-family: var(--ui);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.65rem 1rem;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .auth-btn:hover { background: var(--orange); color: #fff; }
+    .auth-error {
+      margin-top: 0.75rem;
+      font-size: 0.75rem;
+      color: var(--danger);
+      min-height: 1rem;
+    }
+    .auth-notice {
+      margin-top: 1rem;
+      padding: 0.6rem 0.75rem;
+      border-left: 2px solid var(--accent);
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      background: var(--bg);
+      display: none;
+    }
+
+    /* ─── Layout ──────────────────────────────────────── */
+    #app { display: none; flex-direction: row; min-height: 100vh; }
+    #app.visible { display: flex; }
+
+    /* ─── Sidebar ─────────────────────────────────────── */
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+    }
+    .darwin-card {
+      background: var(--surface-raised);
+      border-bottom: 2px solid var(--accent);
+      padding: 1rem 1.25rem;
+    }
+    .darwin-eyebrow {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.2rem;
+    }
+    .darwin-title {
+      font-family: var(--heading);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .darwin-subtitle {
+      font-size: 0.65rem;
+      color: var(--text-secondary);
+      margin-top: 0.15rem;
+    }
+    .sidebar-nav {
+      padding: 1rem 0;
+      flex: 1;
+    }
+    .nav-section-label {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      padding: 0.25rem 1.25rem 0.5rem;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1.25rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      transition: background 0.15s, color 0.15s;
+      border-left: 2px solid transparent;
+    }
+    .nav-item:hover { background: var(--surface-raised); color: var(--text-primary); }
+    .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--surface-raised); }
+    .nav-icon { font-size: 0.9rem; width: 16px; text-align: center; }
+
+    .sidebar-footer {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+    .user-chip {
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+      font-family: var(--mono);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 0.5rem;
+    }
+    .theme-pill {
+      display: inline-flex;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      font-size: 0.65rem;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+    }
+    .theme-pill span {
+      padding: 0.3rem 0.5rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      transition: background 0.2s, color 0.2s;
+      color: var(--text-secondary);
+    }
+    [data-theme="carbon"] .theme-pill .carbon-opt,
+    :root:not([data-theme]) .theme-pill .paper-opt {
+      background: var(--border);
+      color: var(--text-primary);
+    }
+    .sign-out-btn {
+      display: block;
+      margin-top: 0.5rem;
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      text-align: left;
+      text-decoration: underline;
+    }
+    .sign-out-btn:hover { color: var(--danger); }
+
+    /* ─── Main ───────────────────────────────────────── */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* ─── Page Header ─────────────────────────────────── */
+    .page-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .page-title {
+      font-family: var(--heading);
+      font-size: 1.4rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+    .page-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-top: 0.2rem;
+    }
+    .header-actions {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .refresh-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-family: var(--ui);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.45rem 0.75rem;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .last-refresh {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--text-tertiary);
+    }
+
+    /* ─── Section Label ───────────────────────────────── */
+    .section-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 0.75rem;
+    }
+
+    /* ─── Telemetry Grid 2×3 ──────────────────────────── */
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+    .tel-tile {
+      background: var(--surface);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .tel-tile::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+    .tel-tile.status-ok::before    { background: var(--success); }
+    .tel-tile.status-warn::before  { background: var(--orange); }
+    .tel-tile.status-error::before { background: var(--danger); }
+    .tel-tile.status-neutral::before { background: var(--accent); }
+
+    .tel-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+    .tel-value {
+      font-family: var(--mono);
+      font-size: 1.6rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    .tel-value.loading {
+      color: var(--text-tertiary);
+      font-size: 1.2rem;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .tel-meta {
+      font-size: 0.68rem;
+      color: var(--text-secondary);
+    }
+    .tel-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.45rem;
+      border-radius: 2px;
+      align-self: flex-start;
+    }
+    .badge-ok    { background: rgba(39,174,96,0.15); color: var(--success); }
+    .badge-warn  { background: rgba(245,130,10,0.15); color: var(--orange); }
+    .badge-error { background: rgba(192,57,43,0.15); color: var(--danger); }
+    .badge-info  { background: rgba(200,169,110,0.12); color: var(--accent); }
+
+    /* ─── Log Stream ─────────────────────────────────── */
+    .log-stream-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+    .log-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .log-filter-btn {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      background: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .log-filter-btn.active { border-color: var(--accent); color: var(--accent); }
+    .log-filter-btn:hover  { border-color: var(--text-secondary); color: var(--text-primary); }
+    .log-search {
+      margin-left: auto;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 2px;
+      outline: none;
+      width: 180px;
+    }
+    .log-search:focus { border-color: var(--accent); }
+    .log-count {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--text-tertiary);
+      margin-left: 0.25rem;
+    }
+
+    .log-body {
+      height: 280px;
+      overflow-y: auto;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+    }
+    .log-row {
+      display: grid;
+      grid-template-columns: 140px 70px 1fr;
+      gap: 0.5rem;
+      align-items: start;
+      padding: 0.35rem 1rem;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+    .log-row:hover { background: var(--surface-raised); }
+    .log-row:last-child { border-bottom: none; }
+    .log-ts    { color: var(--text-tertiary); }
+    .log-type  {
+      font-weight: 500;
+      text-transform: uppercase;
+      font-size: 0.6rem;
+      letter-spacing: 0.05em;
+      padding: 0.1rem 0.3rem;
+      border-radius: 2px;
+      display: inline-block;
+      background: var(--surface-raised);
+    }
+    .log-type.auth    { color: var(--accent); }
+    .log-type.order   { color: var(--success); }
+    .log-type.error   { color: var(--danger); background: rgba(192,57,43,0.12); }
+    .log-type.system  { color: var(--text-secondary); }
+    .log-type.geofence{ color: var(--orange); }
+    .log-label { color: var(--text-primary); }
+    .log-empty {
+      padding: 2rem 1rem;
+      text-align: center;
+      color: var(--text-tertiary);
+      font-size: 0.75rem;
+    }
+
+    /* ─── Bottom Grid: Orders + Sessions ─────────────── */
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    /* ─── Data Table ─────────────────────────────────── */
+    .data-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+    .data-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-title {
+      font-family: var(--heading);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .panel-count {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--text-tertiary);
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.72rem;
+    }
+    .data-table th {
+      text-align: left;
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      padding: 0.4rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .data-table td {
+      padding: 0.4rem 1rem;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: var(--surface-raised); color: var(--text-primary); }
+    .status-pill {
+      display: inline-block;
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.1rem 0.35rem;
+      border-radius: 2px;
+    }
+    .pill-pending   { background: rgba(245,130,10,0.15); color: var(--orange); }
+    .pill-settled   { background: rgba(39,174,96,0.15); color: var(--success); }
+    .pill-failed    { background: rgba(192,57,43,0.15); color: var(--danger); }
+    .pill-active    { background: rgba(200,169,110,0.12); color: var(--accent); }
+
+    /* ─── JSON Import Panel ───────────────────────────── */
+    .json-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+    .json-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .json-badge-legacy {
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      padding: 0.15rem 0.4rem;
+      border-radius: 2px;
+      background: rgba(200,169,110,0.12);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+    .json-body { padding: 1rem; }
+    .json-textarea {
+      width: 100%;
+      height: 120px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: 2px;
+      outline: none;
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+    .json-textarea:focus { border-color: var(--accent); }
+    .json-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.6rem;
+    }
+    .json-btn {
+      font-family: var(--ui);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.45rem 0.75rem;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .json-btn-primary {
+      background: transparent;
+      border: 1px solid var(--orange);
+      color: var(--orange);
+    }
+    .json-btn-primary:hover { background: var(--orange); color: #fff; }
+    .json-btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .json-btn-secondary:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+    .json-output {
+      margin-top: 0.6rem;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--text-secondary);
+      min-height: 1.2rem;
+    }
+    .json-output.ok    { color: var(--success); }
+    .json-output.error { color: var(--danger); }
+
+    /* ─── Venues quick-view ─────────────────────────── */
+    .venue-count-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+    .venue-stat {
+      background: var(--surface);
+      padding: 0.8rem 1rem;
+      text-align: center;
+    }
+    .venue-stat-val {
+      font-family: var(--mono);
+      font-size: 1.4rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .venue-stat-lbl {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-top: 0.15rem;
+    }
+
+    /* ─── Standing item banner ───────────────────────── */
+    .standing-banner {
+      border-left: 2px solid var(--orange);
+      padding: 0.6rem 0.8rem;
+      background: rgba(245,130,10,0.06);
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+    }
+    .standing-banner strong { color: var(--orange); font-weight: 600; }
+
+    /* ─── Utility ──────────────────────────────────────── */
+    .mono { font-family: var(--mono); }
+    .hidden { display: none !important; }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<!-- ─── Auth Screen ──────────────────────────────────────────────────── -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <h1>Refueler Dev Console</h1>
+    <p>Restricted to <code>@refueler.io</code> accounts only.</p>
+    <label class="auth-label" for="auth-email">Email</label>
+    <input class="auth-input" type="email" id="auth-email" placeholder="you@refueler.io" autocomplete="email" />
+    <button class="auth-btn" id="auth-btn">Send Magic Link</button>
+    <div class="auth-error" id="auth-error"></div>
+    <div class="auth-notice" id="auth-notice">
+      Magic link sent. Check your inbox — link is valid for 30 minutes.
+    </div>
+  </div>
+</div>
+
+<!-- ─── App Shell ────────────────────────────────────────────────────── -->
+<div id="app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <!-- Darwin card — fixed top, all CC pages -->
+    <div class="darwin-card">
+      <div class="darwin-eyebrow">Live Operations</div>
+      <div class="darwin-title">Fenchurch St Line — Darwin</div>
+      <div class="darwin-subtitle" id="darwin-status">Connecting…</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Console</div>
+      <div class="nav-item active" data-section="telemetry">
+        <span class="nav-icon">⬡</span> Telemetry
+      </div>
+      <div class="nav-item" data-section="logs">
+        <span class="nav-icon">≡</span> Log Stream
+      </div>
+      <div class="nav-item" data-section="orders">
+        <span class="nav-icon">◈</span> Orders
+      </div>
+      <div class="nav-item" data-section="sessions">
+        <span class="nav-icon">◻</span> Sessions
+      </div>
+      <div class="nav-item" data-section="venues">
+        <span class="nav-icon">◈</span> Venues
+      </div>
+      <div class="nav-section-label" style="margin-top:0.75rem">Ops</div>
+      <div class="nav-item" data-section="json">
+        <span class="nav-icon">{ }</span> JSON Import
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-chip" id="user-chip">—</div>
+      <div class="theme-pill" id="theme-toggle">
+        <span class="paper-opt">Paper</span>
+        <span class="carbon-opt">Carbon</span>
+      </div>
+      <button class="sign-out-btn" id="sign-out">Sign out</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Standing item -->
+    <div class="standing-banner">
+      <strong>Standing item CC-05:</strong> Create separate <code>merchant_orders</code> table and migrate queue logic off <code>orders</code>. Fix venue resolution RLS on <code>merchant-tablet.html</code> first.
+    </div>
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div>
+        <div class="page-title" id="section-title">Telemetry</div>
+        <div class="page-subtitle" id="section-subtitle">Live platform health — Supabase project tihgvdokeofnjxjkenmm</div>
+      </div>
+      <div class="header-actions">
+        <span class="last-refresh" id="last-refresh">—</span>
+        <button class="refresh-btn" id="refresh-btn">↻ Refresh</button>
+      </div>
+    </div>
+
+    <!-- ── Telemetry ─────────────────────────────────────────── -->
+    <section id="section-telemetry">
+      <div class="section-label">Platform Telemetry — 2×3</div>
+      <div class="telemetry-grid">
+
+        <!-- Tile 1: ZBD Wallet Balance -->
+        <div class="tel-tile status-neutral" id="tile-zbd">
+          <div class="tel-label">ZBD Wallet</div>
+          <div class="tel-value loading" id="zbd-val">—</div>
+          <div class="tel-meta" id="zbd-meta">Initialising…</div>
+          <span class="tel-badge badge-info" id="zbd-badge">BOLT11</span>
+        </div>
+
+        <!-- Tile 2: BTC/GBP Spot -->
+        <div class="tel-tile status-neutral" id="tile-btc">
+          <div class="tel-label">BTC / GBP</div>
+          <div class="tel-value loading" id="btc-val">—</div>
+          <div class="tel-meta" id="btc-meta">Fetching…</div>
+          <span class="tel-badge badge-info" id="btc-badge">CoinGecko</span>
+        </div>
+
+        <!-- Tile 3: Geofence Hits -->
+        <div class="tel-tile status-ok" id="tile-geo">
+          <div class="tel-label">Geofence Hits</div>
+          <div class="tel-value" id="geo-val">0</div>
+          <div class="tel-meta">On-device only — aggregate count</div>
+          <span class="tel-badge badge-ok" id="geo-badge">ON-DEVICE</span>
+        </div>
+
+        <!-- Tile 4: Auth Events -->
+        <div class="tel-tile status-neutral" id="tile-auth">
+          <div class="tel-label">Auth Events</div>
+          <div class="tel-value loading" id="auth-val">—</div>
+          <div class="tel-meta" id="auth-meta">Magic link sessions</div>
+          <span class="tel-badge badge-info" id="auth-badge">SESSIONS</span>
+        </div>
+
+        <!-- Tile 5: Refueler Earnings -->
+        <div class="tel-tile status-neutral" id="tile-earn">
+          <div class="tel-label">Refueler Earnings</div>
+          <div class="tel-value loading" id="earn-val">—</div>
+          <div class="tel-meta" id="earn-meta">Commission accrued (GBP)</div>
+          <span class="tel-badge badge-info" id="earn-badge">COMMISSION</span>
+        </div>
+
+        <!-- Tile 6: Error Stack -->
+        <div class="tel-tile status-ok" id="tile-err">
+          <div class="tel-label">Error Stack</div>
+          <div class="tel-value" id="err-val">0</div>
+          <div class="tel-meta" id="err-meta">Voided log entries</div>
+          <span class="tel-badge badge-ok" id="err-badge">CLEAN</span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── Log Stream ─────────────────────────────────────────── -->
+    <section id="section-logs" class="hidden">
+      <div class="log-stream-wrap">
+        <div class="log-toolbar">
+          <button class="log-filter-btn active" data-filter="all">All</button>
+          <button class="log-filter-btn" data-filter="auth">Auth</button>
+          <button class="log-filter-btn" data-filter="order">Order</button>
+          <button class="log-filter-btn" data-filter="geofence">Geofence</button>
+          <button class="log-filter-btn" data-filter="error">Error</button>
+          <button class="log-filter-btn" data-filter="system">System</button>
+          <span class="log-count" id="log-count">0 entries</span>
+          <input class="log-search" type="text" id="log-search" placeholder="Search logs…" />
+        </div>
+        <div class="log-body" id="log-body">
+          <div class="log-empty">No log entries — run a refresh.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Orders ────────────────────────────────────────────── -->
+    <section id="section-orders" class="hidden">
+      <div class="data-panel">
+        <div class="data-panel-header">
+          <span class="panel-title">Orders</span>
+          <span class="panel-count" id="orders-count">—</span>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Partner</th>
+              <th>Item</th>
+              <th>£ Value</th>
+              <th>Commission</th>
+              <th>Processor</th>
+              <th>Status</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody id="orders-tbody">
+            <tr><td colspan="8" style="color:var(--text-tertiary);padding:1.5rem 1rem;font-family:var(--mono);font-size:0.72rem;">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── Sessions ──────────────────────────────────────────── -->
+    <section id="section-sessions" class="hidden">
+      <div class="data-panel">
+        <div class="data-panel-header">
+          <span class="panel-title">Sessions</span>
+          <span class="panel-count" id="sessions-count">—</span>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Session ID</th>
+              <th>Site</th>
+              <th>Notes</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody id="sessions-tbody">
+            <tr><td colspan="4" style="color:var(--text-tertiary);padding:1.5rem 1rem;font-family:var(--mono);font-size:0.72rem;">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── Venues ─────────────────────────────────────────────── -->
+    <section id="section-venues" class="hidden">
+      <div class="section-label">Venue Partners — venue_partners</div>
+      <div class="venue-count-grid" id="venue-count-grid">
+        <div class="venue-stat"><div class="venue-stat-val" id="v-total">—</div><div class="venue-stat-lbl">Total</div></div>
+        <div class="venue-stat"><div class="venue-stat-val" id="v-active">—</div><div class="venue-stat-lbl">Active</div></div>
+        <div class="venue-stat"><div class="venue-stat-val" id="v-inactive">—</div><div class="venue-stat-lbl">Inactive</div></div>
+        <div class="venue-stat"><div class="venue-stat-val" id="v-cats">—</div><div class="venue-stat-lbl">Categories</div></div>
+      </div>
+      <div style="margin-top:1rem">
+        <div class="data-panel">
+          <div class="data-panel-header">
+            <span class="panel-title">All Venues</span>
+            <span class="panel-count" id="venues-count">—</span>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Site</th>
+                <th>Contact Email</th>
+                <th>Active</th>
+                <th>Added Session</th>
+              </tr>
+            </thead>
+            <tbody id="venues-tbody">
+              <tr><td colspan="6" style="color:var(--text-tertiary);padding:1.5rem 1rem;font-family:var(--mono);font-size:0.72rem;">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── JSON Import ────────────────────────────────────────── -->
+    <section id="section-json" class="hidden">
+      <div class="json-panel">
+        <div class="json-panel-header">
+          <span class="panel-title">JSON Import</span>
+          <span class="json-badge-legacy">Legacy · Ops Use</span>
+        </div>
+        <div class="json-body">
+          <label class="auth-label">Paste JSON payload</label>
+          <textarea class="json-textarea" id="json-input" placeholder='{"session_id":"s001","entry_type":"order","label":"Test entry"}' spellcheck="false"></textarea>
+          <div class="json-actions">
+            <button class="json-btn json-btn-primary" id="json-validate-btn">Validate</button>
+            <button class="json-btn json-btn-primary" id="json-import-btn">Import to log_entries</button>
+            <button class="json-btn json-btn-secondary" id="json-clear-btn">Clear</button>
+          </div>
+          <div class="json-output" id="json-output"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+// ─── Supabase init ────────────────────────────────────────────────────
+const SUPABASE_URL  = 'https://tihgvdokeofnjxjkenmm.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpaGd2ZG9rZW9mbmp4amtlbm1tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcyMjgxODcsImV4cCI6MjA2MjgwNDE4N30.KcJdCYaTqZQREt9pFgAr5tMkiDVgIJuCJgHxBjHKIxk';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// ─── Auth ─────────────────────────────────────────────────────────────
+const authScreen = document.getElementById('auth-screen');
+const appEl      = document.getElementById('app');
+const authBtn    = document.getElementById('auth-btn');
+const authError  = document.getElementById('auth-error');
+const authNotice = document.getElementById('auth-notice');
+
+async function checkSession() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    const email = session.user.email || '';
+    if (!email.endsWith('@refueler.io')) {
+      await sb.auth.signOut();
+      showAuthError('Access restricted to @refueler.io accounts.');
+      return;
+    }
+    bootApp(session.user);
+  }
+}
+
+function bootApp(user) {
+  authScreen.style.display = 'none';
+  appEl.classList.add('visible');
+  document.getElementById('user-chip').textContent = user.email;
+  document.getElementById('darwin-status').textContent = 'Auth verified · ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+  loadAllData();
+}
+
+authBtn.addEventListener('click', async () => {
+  const email = document.getElementById('auth-email').value.trim().toLowerCase();
+  authError.textContent = '';
+  if (!email.endsWith('@refueler.io')) {
+    showAuthError('Only @refueler.io accounts may access this console.');
+    return;
+  }
+  authBtn.disabled = true;
+  authBtn.textContent = 'Sending…';
+  const { error } = await sb.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: window.location.href }
+  });
+  authBtn.disabled = false;
+  authBtn.textContent = 'Send Magic Link';
+  if (error) { showAuthError(error.message); return; }
+  authNotice.style.display = 'block';
+});
+
+function showAuthError(msg) {
+  authError.textContent = msg;
+}
+
+sb.auth.onAuthStateChange((_event, session) => {
+  if (session && session.user.email?.endsWith('@refueler.io')) {
+    bootApp(session.user);
+  }
+});
+
+document.getElementById('sign-out').addEventListener('click', async () => {
+  await sb.auth.signOut();
+  location.reload();
+});
+
+checkSession();
+
+// ─── Navigation ───────────────────────────────────────────────────────
+const sections = ['telemetry','logs','orders','sessions','venues','json'];
+const sectionTitles = {
+  telemetry:  ['Telemetry', 'Live platform health — Supabase project tihgvdokeofnjxjkenmm'],
+  logs:       ['Log Stream', 'log_entries table — latest 200 rows'],
+  orders:     ['Orders', 'orders table — latest 50 rows'],
+  sessions:   ['Sessions', 'sessions table — all rows'],
+  venues:     ['Venues', 'venue_partners table — all 13 entries'],
+  json:       ['JSON Import', 'Legacy ops utility — import JSON to log_entries'],
+};
+
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    item.classList.add('active');
+    const sec = item.dataset.section;
+    sections.forEach(s => {
+      const el = document.getElementById('section-' + s);
+      if (el) el.classList.toggle('hidden', s !== sec);
+    });
+    document.getElementById('section-title').textContent = sectionTitles[sec][0];
+    document.getElementById('section-subtitle').textContent = sectionTitles[sec][1];
+  });
+});
+
+// ─── Theme toggle ─────────────────────────────────────────────────────
+const themeToggle = document.getElementById('theme-toggle');
+themeToggle.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'carbon' ? '' : 'carbon';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('refueler-theme', next || 'paper');
+});
+// Restore saved (Carbon is default)
+const saved = localStorage.getItem('refueler-theme');
+if (saved && saved !== 'carbon') {
+  document.documentElement.setAttribute('data-theme', '');
+}
+
+// ─── Data loading ─────────────────────────────────────────────────────
+async function loadAllData() {
+  updateLastRefresh();
+  await Promise.allSettled([
+    loadTelemetry(),
+    loadLogs(),
+    loadOrders(),
+    loadSessions(),
+    loadVenues(),
+    fetchBTCPrice(),
+  ]);
+}
+
+document.getElementById('refresh-btn').addEventListener('click', loadAllData);
+
+function updateLastRefresh() {
+  document.getElementById('last-refresh').textContent =
+    'Refreshed ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+
+// ── Telemetry ──────────────────────────────────────────────────────────
+async function loadTelemetry() {
+  // Auth events = count of sessions
+  try {
+    const { data, error } = await sb.from('sessions').select('id', { count: 'exact', head: true });
+    const count = error ? '—' : (data?.length ?? 0);
+    const { count: sessCount, error: sessErr } = await sb.from('sessions').select('*', { count: 'exact', head: true });
+    setTile('auth', sessErr ? '—' : sessCount, 'Active sessions in DB', sessErr ? 'warn' : 'ok', sessErr ? 'warn' : 'ok', sessErr ? 'WARN' : 'OK');
+  } catch(e) { setTile('auth', 'ERR', e.message, 'error', 'error', 'ERR'); }
+
+  // Earnings from orders
+  try {
+    const { data, error } = await sb.from('orders').select('commission_gbp,status');
+    if (error) throw error;
+    const total = (data || []).reduce((s, r) => s + parseFloat(r.commission_gbp || 0), 0);
+    const settled = (data || []).filter(r => r.status === 'settled').length;
+    setTile('earn', '£' + total.toFixed(2), settled + ' settled orders', total > 0 ? 'ok' : 'neutral', total > 0 ? 'ok' : 'info', total > 0 ? 'ACCRUED' : 'PRE-REV');
+  } catch(e) { setTile('earn', '£0.00', 'No orders yet', 'neutral', 'info', 'PRE-REV'); }
+
+  // Error stack = voided log entries
+  try {
+    const { count, error } = await sb.from('log_entries').select('*', { count: 'exact', head: true }).eq('voided', true);
+    if (error) throw error;
+    const status = count > 0 ? 'warn' : 'ok';
+    setTile('err', count ?? 0, 'Voided log entries', status, status, count > 0 ? 'WARN' : 'CLEAN');
+  } catch(e) { setTile('err', '—', 'Could not fetch', 'error', 'error', 'ERR'); }
+
+  // Geofence hits — on-device only, always 0 in DB (by design)
+  setTile('geo', '0', 'On-device only — no server record', 'ok', 'ok', 'ON-DEVICE');
+}
+
+function setTile(id, val, meta, tileStatus, badgeType, badgeLabel) {
+  const tile = document.getElementById('tile-' + id);
+  const valEl = document.getElementById(id + '-val');
+  const metaEl = document.getElementById(id + '-meta');
+  const badgeEl = document.getElementById(id + '-badge');
+  if (tile) { tile.className = 'tel-tile status-' + tileStatus; }
+  if (valEl) { valEl.textContent = val; valEl.classList.remove('loading'); }
+  if (metaEl) { metaEl.textContent = meta; }
+  if (badgeEl) {
+    badgeEl.textContent = badgeLabel;
+    badgeEl.className = 'tel-badge badge-' + badgeType;
+  }
+}
+
+// ── BTC Price ──────────────────────────────────────────────────────────
+async function fetchBTCPrice() {
+  try {
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=gbp,usd');
+    const j = await r.json();
+    const gbp = j?.bitcoin?.gbp;
+    const usd = j?.bitcoin?.usd;
+    if (gbp) {
+      const satsPerGbp = Math.round(100_000_000 / gbp);
+      document.getElementById('btc-val').textContent = '£' + gbp.toLocaleString('en-GB');
+      document.getElementById('btc-val').classList.remove('loading');
+      document.getElementById('btc-meta').textContent = satsPerGbp.toLocaleString() + ' sats/£ · $' + (usd||'—').toLocaleString('en-US');
+      document.getElementById('btc-badge').textContent = 'LIVE';
+      document.getElementById('btc-badge').className = 'tel-badge badge-ok';
+      document.getElementById('tile-btc').className = 'tel-tile status-ok';
+    }
+    // ZBD tile: without real ZBD API key, show placeholder with honest state
+    document.getElementById('zbd-val').textContent = '—';
+    document.getElementById('zbd-val').classList.remove('loading');
+    document.getElementById('zbd-meta').textContent = 'ZBD API key required — see env config';
+    document.getElementById('zbd-badge').textContent = 'CONFIG';
+    document.getElementById('zbd-badge').className = 'tel-badge badge-warn';
+    document.getElementById('tile-zbd').className = 'tel-tile status-warn';
+  } catch(e) {
+    document.getElementById('btc-val').textContent = 'ERR';
+    document.getElementById('btc-val').classList.remove('loading');
+    document.getElementById('btc-meta').textContent = 'Network error: ' + e.message;
+    document.getElementById('tile-btc').className = 'tel-tile status-error';
+    // ZBD same
+    document.getElementById('zbd-val').textContent = '—';
+    document.getElementById('zbd-val').classList.remove('loading');
+  }
+}
+
+// ── Logs ──────────────────────────────────────────────────────────────
+let allLogs = [];
+let activeFilter = 'all';
+
+async function loadLogs() {
+  const { data, error } = await sb.from('log_entries')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(200);
+  allLogs = data || [];
+  renderLogs();
+}
+
+function renderLogs() {
+  const search = document.getElementById('log-search').value.toLowerCase();
+  const filtered = allLogs.filter(row => {
+    const typeMatch = activeFilter === 'all' || (row.entry_type || '').toLowerCase() === activeFilter;
+    const searchMatch = !search ||
+      (row.label || '').toLowerCase().includes(search) ||
+      (row.entry_type || '').toLowerCase().includes(search) ||
+      (row.session_id || '').toLowerCase().includes(search);
+    return typeMatch && searchMatch;
+  });
+
+  document.getElementById('log-count').textContent = filtered.length + ' entries';
+  const body = document.getElementById('log-body');
+  if (!filtered.length) {
+    body.innerHTML = '<div class="log-empty">No entries match the current filter.</div>';
+    return;
+  }
+  body.innerHTML = filtered.map(row => {
+    const ts = row.ts || (row.created_at ? new Date(row.created_at).toLocaleString('en-GB', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',second:'2-digit'}) : '—');
+    const type = (row.entry_type || 'system').toLowerCase();
+    const label = row.label || row.notes || '—';
+    return `<div class="log-row">
+      <span class="log-ts">${escHtml(ts)}</span>
+      <span class="log-type ${type}">${escHtml(type)}</span>
+      <span class="log-label">${escHtml(label)}${row.voided ? ' <span style="color:var(--danger)">[VOIDED]</span>' : ''}</span>
+    </div>`;
+  }).join('');
+}
+
+document.querySelectorAll('.log-filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.log-filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    renderLogs();
+  });
+});
+document.getElementById('log-search').addEventListener('input', renderLogs);
+
+// ── Orders ────────────────────────────────────────────────────────────
+async function loadOrders() {
+  const { data, error } = await sb.from('orders')
+    .select('id,partner,item_name,order_value_gbp,commission_gbp,payment_processor,status,created_at')
+    .order('created_at', { ascending: false })
+    .limit(50);
+  const rows = data || [];
+  document.getElementById('orders-count').textContent = rows.length + ' rows (last 50)';
+  const tbody = document.getElementById('orders-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="color:var(--text-tertiary);padding:1.5rem 1rem;font-family:var(--mono);font-size:0.72rem;">No orders yet — pre-revenue.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(r => {
+    const status = r.status || 'pending';
+    const pillClass = status === 'settled' ? 'pill-settled' : status === 'failed' ? 'pill-failed' : 'pill-pending';
+    const created = r.created_at ? new Date(r.created_at).toLocaleString('en-GB', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
+    return `<tr>
+      <td title="${escHtml(r.id)}">${escHtml((r.id||'').slice(0,8))}…</td>
+      <td>${escHtml(r.partner||'—')}</td>
+      <td>${escHtml(r.item_name||'—')}</td>
+      <td>£${parseFloat(r.order_value_gbp||0).toFixed(2)}</td>
+      <td>£${parseFloat(r.commission_gbp||0).toFixed(2)}</td>
+      <td>${escHtml(r.payment_processor||'—')}</td>
+      <td><span class="status-pill ${pillClass}">${escHtml(status)}</span></td>
+      <td>${created}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Sessions ──────────────────────────────────────────────────────────
+async function loadSessions() {
+  const { data, error } = await sb.from('sessions')
+    .select('*')
+    .order('created_at', { ascending: false });
+  const rows = data || [];
+  document.getElementById('sessions-count').textContent = rows.length + ' rows';
+  const tbody = document.getElementById('sessions-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--text-tertiary);padding:1.5rem 1rem;font-family:var(--mono);font-size:0.72rem;">No sessions recorded.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(r => {
+    const created = r.created_at ? new Date(r.created_at).toLocaleString('en-GB', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
+    return `<tr>
+      <td class="mono">${escHtml(r.session_id||r.id?.slice(0,12)||'—')}</td>
+      <td>${escHtml(r.site_name||'—')}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(r.notes||'—')}</td>
+      <td>${created}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Venues ────────────────────────────────────────────────────────────
+async function loadVenues() {
+  const { data, error } = await sb.from('venue_partners')
+    .select('*')
+    .order('name');
+  const rows = data || [];
+  const active = rows.filter(r => r.active).length;
+  const cats = [...new Set(rows.map(r => r.category).filter(Boolean))].length;
+  document.getElementById('v-total').textContent   = rows.length;
+  document.getElementById('v-active').textContent  = active;
+  document.getElementById('v-inactive').textContent= rows.length - active;
+  document.getElementById('v-cats').textContent    = cats;
+  document.getElementById('venues-count').textContent = rows.length + ' venues';
+  const tbody = document.getElementById('venues-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--text-tertiary);padding:1.5rem 1rem;">No venues.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(r => `<tr>
+    <td>${escHtml(r.name||'—')}</td>
+    <td>${escHtml(r.category||'—')}</td>
+    <td>${escHtml(r.site||'—')}</td>
+    <td class="mono" style="font-size:0.65rem">${escHtml(r.contact_email||'—')}</td>
+    <td><span class="status-pill ${r.active ? 'pill-settled' : 'pill-failed'}">${r.active ? 'YES' : 'NO'}</span></td>
+    <td>${r.session_added ?? '—'}</td>
+  </tr>`).join('');
+}
+
+// ── JSON Import ──────────────────────────────────────────────────────
+document.getElementById('json-validate-btn').addEventListener('click', () => {
+  const out = document.getElementById('json-output');
+  const raw = document.getElementById('json-input').value.trim();
+  if (!raw) { out.textContent = 'Empty input.'; out.className = 'json-output error'; return; }
+  try {
+    const parsed = JSON.parse(raw);
+    const keys = Object.keys(parsed).join(', ');
+    out.textContent = '✓ Valid JSON · Keys: ' + keys;
+    out.className = 'json-output ok';
+  } catch(e) {
+    out.textContent = '✗ Invalid JSON: ' + e.message;
+    out.className = 'json-output error';
+  }
+});
+
+document.getElementById('json-import-btn').addEventListener('click', async () => {
+  const out = document.getElementById('json-output');
+  const raw = document.getElementById('json-input').value.trim();
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch(e) {
+    out.textContent = '✗ Invalid JSON: ' + e.message;
+    out.className = 'json-output error';
+    return;
+  }
+  // Required: session_id + entry_type
+  if (!parsed.session_id || !parsed.entry_type) {
+    out.textContent = '✗ Missing required fields: session_id, entry_type';
+    out.className = 'json-output error';
+    return;
+  }
+  out.textContent = 'Inserting…';
+  out.className = 'json-output';
+  const { error } = await sb.from('log_entries').insert([parsed]);
+  if (error) {
+    out.textContent = '✗ Supabase error: ' + error.message;
+    out.className = 'json-output error';
+  } else {
+    out.textContent = '✓ Inserted to log_entries successfully.';
+    out.className = 'json-output ok';
+    await loadLogs();
+  }
+});
+
+document.getElementById('json-clear-btn').addEventListener('click', () => {
+  document.getElementById('json-input').value = '';
+  document.getElementById('json-output').textContent = '';
+  document.getElementById('json-output').className = 'json-output';
+});
+
+// ── Helpers ─────────────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
