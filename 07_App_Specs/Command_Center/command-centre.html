@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Command Centre — Refueler</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Satoshi:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* ─── DESIGN TOKENS ─────────────────────────────────── */
+    :root {
+      --bg:              #F7F4EF;
+      --surface:         #EDEAE4;
+      --surface-raised:  #E4E0D8;
+      --text-primary:    #3D3A36;
+      --text-secondary:  #5A5751;
+      --text-tertiary:   #9A948D;
+      --border:          #D6D1C8;
+      --accent:          #C8A96E;
+      --accent-hover:    #E0C48A;
+      --orange:          #F5820A;
+      --error-bg:        #FDF0EC;
+      --error-border:    #E8C4B8;
+      --error-text:      #8B3A2A;
+    }
+
+    [data-theme="carbon"] {
+      --bg:              #1E1F22;
+      --surface:         #26282C;
+      --surface-raised:  #2E3035;
+      --text-primary:    #E4E2DC;
+      --text-secondary:  #8A8680;
+      --text-tertiary:   #5A5751;
+      --border:          #35373B;
+      --accent:          #C8A96E;
+      --accent-hover:    #E0C48A;
+      --error-bg:        #2A1F1C;
+      --error-border:    #6B3328;
+      --error-text:      #E8A090;
+    }
+
+    /* ─── RESET & BASE ──────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    /* ─── LAYOUT ────────────────────────────────────────── */
+    .cc-shell {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── TOP BAR ───────────────────────────────────────── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .topbar-wordmark {
+      font-family: 'Satoshi', 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--text-primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .topbar-wordmark .slash {
+      color: var(--accent);
+      font-weight: 400;
+    }
+
+    .topbar-wordmark .cc-label {
+      font-weight: 400;
+      color: var(--text-secondary);
+      font-size: 13px;
+    }
+
+    /* Theme toggle */
+    .theme-pill {
+      display: inline-flex;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      cursor: pointer;
+      user-select: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+    }
+
+    .theme-pill span {
+      padding: 5px 12px;
+      color: var(--text-tertiary);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .theme-pill span.active {
+      background: var(--accent);
+      color: #1E1F22;
+    }
+
+    /* ─── DARWIN CARD ───────────────────────────────────── */
+    .darwin-card {
+      margin: 24px 24px 0;
+      padding: 12px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .darwin-badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      background: transparent;
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      padding: 2px 7px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .darwin-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .darwin-text strong {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    /* ─── MAIN CONTENT AREA ─────────────────────────────── */
+    .cc-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+    }
+
+    .gate-card {
+      width: 100%;
+      max-width: 440px;
+    }
+
+    /* ─── STATE CARDS ───────────────────────────────────── */
+
+    /* AUTH GATE */
+    .state-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 40px 36px;
+      text-align: center;
+    }
+
+    .state-icon {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 24px;
+      border-radius: 50%;
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .state-icon svg {
+      width: 22px;
+      height: 22px;
+      stroke: var(--accent);
+      fill: none;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .state-heading {
+      font-family: 'Satoshi', 'DM Sans', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+
+    .state-sub {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    /* Magic link form */
+    .magic-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .magic-input {
+      width: 100%;
+      padding: 11px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .magic-input:focus {
+      border-color: var(--accent);
+    }
+
+    .magic-input::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 11px 20px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      background: var(--orange);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      letter-spacing: 0.01em;
+    }
+
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .form-hint {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    /* Sent state */
+    .sent-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+
+    .sent-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ─── IDENTIFYING STATE ─────────────────────────────── */
+    .identifying-state {
+      text-align: center;
+      padding: 48px 0;
+    }
+
+    .id-spinner {
+      width: 40px;
+      height: 40px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      margin: 0 auto 24px;
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .id-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+    }
+
+    .id-sub {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-top: 8px;
+    }
+
+    /* Redirect progress */
+    .redirect-bar-wrap {
+      margin-top: 20px;
+      height: 2px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .redirect-bar {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.8s ease;
+    }
+
+    /* Role resolved */
+    .role-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface-raised);
+      border: 1px solid var(--accent);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      margin-bottom: 16px;
+    }
+
+    /* ─── ERROR STATE ───────────────────────────────────── */
+    .error-card {
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
+      border-radius: 12px;
+      padding: 28px 28px;
+      text-align: left;
+    }
+
+    .error-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      color: var(--error-text);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      opacity: 0.7;
+    }
+
+    .error-heading {
+      font-family: 'Satoshi', 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--error-text);
+      margin-bottom: 8px;
+    }
+
+    .error-body {
+      font-size: 13px;
+      color: var(--error-text);
+      line-height: 1.6;
+      opacity: 0.85;
+      margin-bottom: 20px;
+    }
+
+    .error-contact {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--error-text);
+      text-decoration: none;
+      border-bottom: 1px solid currentColor;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+
+    .error-contact:hover { opacity: 1; }
+
+    .error-restart {
+      margin-top: 16px;
+      display: block;
+      font-size: 12px;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      text-decoration: underline;
+    }
+
+    .error-restart:hover { color: var(--text-secondary); }
+
+    /* ─── FOOTER ────────────────────────────────────────── */
+    .cc-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-meta {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      color: var(--text-tertiary);
+      letter-spacing: 0.08em;
+    }
+
+    .footer-version {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      color: var(--text-tertiary);
+      letter-spacing: 0.06em;
+    }
+  </style>
+</head>
+<body>
+
+<div class="cc-shell">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <span class="topbar-wordmark">
+      Refueler <span class="slash">/</span> <span class="cc-label">Command Centre</span>
+    </span>
+    <button class="theme-pill" id="themePill" onclick="toggleTheme()" aria-label="Toggle theme">
+      <span id="pillPaper" class="active">PAPER</span>
+      <span id="pillCarbon">CARBON</span>
+    </button>
+  </header>
+
+  <!-- DARWIN CARD -->
+  <div class="darwin-card" id="darwinCard">
+    <span class="darwin-badge">DARWIN</span>
+    <span class="darwin-text">
+      <strong>Fenchurch St Line</strong> — real-time arrivals active
+    </span>
+  </div>
+
+  <!-- MAIN -->
+  <main class="cc-main">
+    <div class="gate-card">
+
+      <!-- STATE: AUTH GATE (default) -->
+      <div id="stateAuthGate" class="state-card">
+        <div class="state-icon">
+          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <h1 class="state-heading">Command Centre</h1>
+        <p class="state-sub">Enter your operator email to receive a sign-in link.</p>
+        <div class="magic-form">
+          <input
+            class="magic-input"
+            id="emailInput"
+            type="email"
+            placeholder="your@email.com"
+            autocomplete="email"
+            inputmode="email"
+          />
+          <button class="btn-primary" id="sendLinkBtn" onclick="sendMagicLink()">
+            Send sign-in link
+          </button>
+          <p class="form-hint">No password required. Link expires in 30 minutes.</p>
+        </div>
+      </div>
+
+      <!-- STATE: LINK SENT -->
+      <div id="stateLinkSent" class="state-card" style="display:none;">
+        <div class="state-icon">
+          <svg viewBox="0 0 24 24"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9l20-7z"/></svg>
+        </div>
+        <h1 class="state-heading">Check your inbox</h1>
+        <div class="sent-pill"><span class="sent-dot"></span> Link sent</div>
+        <p class="state-sub">A sign-in link has been sent to <strong id="sentEmail"></strong>. Open it on any device — you'll land straight in your dashboard.</p>
+        <p class="form-hint">Didn't receive it? Check spam, or <button style="background:none;border:none;cursor:pointer;font-size:11px;color:var(--text-tertiary);text-decoration:underline;padding:0;" onclick="resetToGate()">try again</button>.</p>
+      </div>
+
+      <!-- STATE: IDENTIFYING (post-auth, resolving role) -->
+      <div id="stateIdentifying" class="state-card" style="display:none;">
+        <div class="identifying-state">
+          <div class="id-spinner"></div>
+          <p class="id-label">Identifying access</p>
+          <p class="id-sub">Routing you to your dashboard…</p>
+          <div class="redirect-bar-wrap">
+            <div class="redirect-bar" id="redirectBar"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATE: ROLE RESOLVED (brief flash before redirect) -->
+      <div id="stateResolved" class="state-card" style="display:none;">
+        <div class="identifying-state">
+          <div class="id-spinner"></div>
+          <div class="role-chip" id="roleChip">—</div>
+          <p class="id-label">Access confirmed</p>
+          <p class="id-sub">Redirecting…</p>
+        </div>
+      </div>
+
+      <!-- STATE: ERROR / NO ROLE -->
+      <div id="stateError" style="display:none;">
+        <div class="error-card">
+          <p class="error-label">Access not configured</p>
+          <h2 class="error-heading">No operator account found</h2>
+          <p class="error-body">
+            Your email is authenticated, but hasn't been provisioned for Command Centre access. Contact Refueler support and we'll get you set up.
+          </p>
+          <a class="error-contact" href="mailto:support@refueler.io">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+            support@refueler.io
+          </a>
+          <button class="error-restart" onclick="resetToGate()">Sign in with a different email</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="cc-footer">
+    <span class="footer-meta">REFUELER · CC-05</span>
+    <span class="footer-version">v0.5.0</span>
+  </footer>
+
+</div>
+
+<!-- Supabase JS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+  /* ─── SUPABASE ─────────────────────────────────────────── */
+  const SUPABASE_URL  = 'https://tihgvdokeofnjxjkenmm.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpaGd2ZG9rZW9mbmp4amtlbm1tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTY2NDksImV4cCI6MjA5NDE5MjY0OX0.cRb94WeIP8yRfWd9s2XKmq2nqm1ov-sK1df6u8LNUbo'; // replace at deploy
+  const { createClient } = supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  /* ─── ROLE → DESTINATION MAP ───────────────────────────── */
+  const ROLE_DESTINATIONS = {
+    merchant:         'merchant-tablet.html',
+    franchise_branch: 'merchant-tablet.html',
+    franchise_hq:     'franchise-dashboard.html',
+    admin:            'dev-console.html',
+  };
+
+  const ROLE_LABELS = {
+    merchant:         'MERCHANT',
+    franchise_branch: 'BRANCH OPERATOR',
+    franchise_hq:     'FRANCHISE HQ',
+    admin:            'ADMIN',
+  };
+
+  /* ─── THEME ─────────────────────────────────────────────── */
+  const THEME_KEY = 'rfTheme';
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme === 'carbon' ? 'carbon' : '');
+    document.getElementById('pillPaper').classList.toggle('active', theme !== 'carbon');
+    document.getElementById('pillCarbon').classList.toggle('active', theme === 'carbon');
+    localStorage.setItem(THEME_KEY, theme);
+  }
+
+  function toggleTheme() {
+    const current = localStorage.getItem(THEME_KEY) || 'paper';
+    applyTheme(current === 'carbon' ? 'paper' : 'carbon');
+  }
+
+  // Carbon default for CC pages
+  applyTheme(localStorage.getItem(THEME_KEY) || 'carbon');
+
+  /* ─── STATE HELPERS ─────────────────────────────────────── */
+  const STATES = ['stateAuthGate','stateLinkSent','stateIdentifying','stateResolved','stateError'];
+
+  function showState(id) {
+    STATES.forEach(s => {
+      document.getElementById(s).style.display = s === id ? '' : 'none';
+    });
+  }
+
+  function resetToGate() {
+    document.getElementById('emailInput').value = '';
+    showState('stateAuthGate');
+  }
+
+  /* ─── MAGIC LINK ─────────────────────────────────────────── */
+  async function sendMagicLink() {
+    const email = document.getElementById('emailInput').value.trim();
+    if (!email || !email.includes('@')) {
+      document.getElementById('emailInput').focus();
+      return;
+    }
+
+    const btn = document.getElementById('sendLinkBtn');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    const { error } = await sb.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: 'https://refueler.io/command-centre',
+      },
+    });
+
+    btn.disabled = false;
+    btn.textContent = 'Send sign-in link';
+
+    if (error) {
+      console.error('Magic link error:', error.message);
+      // Non-destructive: keep form visible, show inline hint
+      const hint = document.querySelector('.form-hint');
+      hint.textContent = 'Something went wrong — please try again.';
+      hint.style.color = 'var(--error-text, #c0392b)';
+      return;
+    }
+
+    document.getElementById('sentEmail').textContent = email;
+    showState('stateLinkSent');
+  }
+
+  // Allow Enter key on email field
+  document.getElementById('emailInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendMagicLink();
+  });
+
+  /* ─── AUTH SESSION HANDLER ───────────────────────────────── */
+  async function resolveSession(session) {
+    if (!session) return; // no session — auth gate stays visible
+
+    showState('stateIdentifying');
+
+    // Animate progress bar over 2.5s max
+    const bar = document.getElementById('redirectBar');
+    let pct = 0;
+    const ticker = setInterval(() => {
+      pct = Math.min(pct + 4, 85); // stall at 85% until role resolved
+      bar.style.width = pct + '%';
+    }, 100);
+
+    // 3s timeout guard
+    const timeoutId = setTimeout(() => {
+      clearInterval(ticker);
+      showState('stateError');
+    }, 3000);
+
+    try {
+      const userEmail = session.user.email;
+
+      const { data, error } = await sb
+        .from('merchant_users')
+        .select('role, venue_id, franchise_group_id')
+        .eq('email', userEmail)
+        .maybeSingle();
+
+      clearTimeout(timeoutId);
+      clearInterval(ticker);
+
+      if (error || !data) {
+        showState('stateError');
+        return;
+      }
+
+      const { role } = data;
+      const destination = ROLE_DESTINATIONS[role];
+
+      if (!destination) {
+        showState('stateError');
+        return;
+      }
+
+      // Brief resolved flash
+      bar.style.width = '100%';
+      document.getElementById('roleChip').textContent = ROLE_LABELS[role] || role.toUpperCase();
+      showState('stateResolved');
+
+      // Redirect after short pause
+      setTimeout(() => {
+        window.location.href = destination;
+      }, 700);
+
+    } catch (err) {
+      clearTimeout(timeoutId);
+      clearInterval(ticker);
+      console.error('Role resolution error:', err);
+      showState('stateError');
+    }
+  }
+
+  /* ─── BOOT: check for existing session ─────────────────────── */
+  (async () => {
+    // Handle magic link token in URL hash (implicit flow for web)
+    const { data: sessionData } = await sb.auth.getSession();
+    if (sessionData?.session) {
+      await resolveSession(sessionData.session);
+    }
+    // Also listen for auth state changes (e.g., magic link click lands here)
+    sb.auth.onAuthStateChange(async (_event, session) => {
+      if (session) {
+        await resolveSession(session);
+      }
+    });
+  })();
+</script>
+
+</body>
+</html>
