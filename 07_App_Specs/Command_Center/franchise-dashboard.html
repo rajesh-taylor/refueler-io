@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="carbon">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Refueler — Franchise Dashboard</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Satoshi:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* ── Design tokens ── */
+    :root {
+      --bg:             #1E1F22;
+      --surface:        #26282C;
+      --surface-raised: #2E3035;
+      --text-primary:   #E4E2DC;
+      --text-secondary: #8A8680;
+      --text-tertiary:  #5A5751;
+      --border:         #35373B;
+      --accent:         #C8A96E;
+      --accent-hover:   #E0C48A;
+      --orange:         #F5820A;
+      --green:          #4CAF7A;
+      --red:            #CF4747;
+      --font-head:      'Satoshi', 'DM Sans', sans-serif;
+      --font-ui:        'DM Sans', system-ui, sans-serif;
+      --font-mono:      'IBM Plex Mono', monospace;
+    }
+    [data-theme="paper"] {
+      --bg:             #F7F4EF;
+      --surface:        #EDEAE4;
+      --surface-raised: #E4E0D9;
+      --text-primary:   #3D3A36;
+      --text-secondary: #5A5751;
+      --text-tertiary:  #9A948D;
+      --border:         #D6D1C8;
+      --accent:         #A07C3A;
+      --accent-hover:   #C8A96E;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: var(--font-ui);
+      font-weight: 300;
+      font-size: 14px;
+      line-height: 1.5;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    /* ── Layout ── */
+    .app { display: flex; height: 100vh; overflow: hidden; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 260px;
+      min-width: 260px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Darwin card — fixed top */
+    .darwin-card {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .darwin-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .darwin-title {
+      font-family: var(--font-head);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+    .darwin-sub {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-secondary);
+    }
+    .darwin-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 8px;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--text-tertiary);
+    }
+    .darwin-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    /* Sidebar nav */
+    .sidebar-nav {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 0;
+    }
+    .nav-section-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      padding: 8px 20px 4px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 20px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-weight: 400;
+      font-size: 13px;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .nav-item:hover { color: var(--text-primary); background: var(--surface-raised); }
+    .nav-item.active {
+      color: var(--text-primary);
+      border-left-color: var(--accent);
+      background: var(--surface-raised);
+    }
+    .nav-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
+
+    /* Sidebar footer */
+    .sidebar-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .franchise-chip {
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      margin-bottom: 10px;
+    }
+    .franchise-chip-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 3px;
+    }
+    .franchise-chip-value {
+      font-family: var(--font-head);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    /* Theme pill */
+    .theme-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+    }
+    .theme-pill span {
+      padding: 4px 10px;
+      color: var(--text-tertiary);
+      transition: all 0.15s;
+    }
+    .theme-pill span.active {
+      background: var(--accent);
+      color: #1A1A1A;
+      font-weight: 500;
+    }
+
+    /* ── Main ── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Topbar */
+    .topbar {
+      height: 56px;
+      min-height: 56px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .page-title {
+      font-family: var(--font-head);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .role-badge {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .user-email {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-secondary);
+    }
+    .btn-signout {
+      font-family: var(--font-ui);
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text-tertiary);
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-signout:hover { color: var(--text-primary); border-color: var(--text-tertiary); }
+
+    /* Content area */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px;
+    }
+
+    /* ── Auth gate ── */
+    #auth-gate {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .auth-box {
+      width: 360px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 36px 32px;
+    }
+    .auth-wordmark {
+      font-family: var(--font-head);
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .auth-wordmark span { color: var(--accent); }
+    .auth-subtitle {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 28px;
+    }
+    .auth-field label {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-tertiary);
+      margin-bottom: 6px;
+    }
+    .auth-field input {
+      width: 100%;
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .auth-field input:focus { border-color: var(--accent); }
+    .auth-field input::placeholder { color: var(--text-tertiary); }
+    .auth-note {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      margin: 8px 0 20px;
+    }
+    .auth-note em { color: var(--accent); font-style: normal; }
+    .btn-primary {
+      width: 100%;
+      background: var(--orange);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 11px 16px;
+      font-family: var(--font-ui);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .auth-msg {
+      margin-top: 14px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-align: center;
+      min-height: 18px;
+    }
+    .auth-msg.error { color: var(--red); }
+
+    /* ── Section heading ── */
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: var(--font-head);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .section-badge {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--text-tertiary);
+      letter-spacing: 0.08em;
+    }
+
+    /* ── KPI strip ── */
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 18px;
+      border-left: 2px solid var(--accent);
+    }
+    .kpi-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-tertiary);
+      margin-bottom: 8px;
+    }
+    .kpi-value {
+      font-family: var(--font-mono);
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--text-primary);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .kpi-sub {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    /* ── Panels ── */
+    .panel-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .panel-full { grid-column: 1 / -1; }
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .panel-header-title {
+      font-family: var(--font-head);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .panel-header-meta {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--text-tertiary);
+    }
+
+    /* ── Table ── */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .data-table th {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-tertiary);
+      padding: 8px 18px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .data-table td {
+      padding: 11px 18px;
+      color: var(--text-primary);
+      font-size: 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .data-table tbody tr:last-child td { border-bottom: none; }
+    .data-table tbody tr:hover td { background: var(--surface-raised); }
+
+    /* Mono cells */
+    .mono { font-family: var(--font-mono); font-size: 11px; }
+    .text-sec { color: var(--text-secondary); }
+    .text-acc { color: var(--accent); }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      padding: 3px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .status-active {
+      background: rgba(76,175,122,0.12);
+      color: var(--green);
+      border: 1px solid rgba(76,175,122,0.25);
+    }
+    .status-inactive {
+      background: rgba(207,71,71,0.10);
+      color: var(--red);
+      border: 1px solid rgba(207,71,71,0.2);
+    }
+
+    /* Toggle switch */
+    .toggle-wrap { display: flex; align-items: center; }
+    .toggle {
+      position: relative;
+      width: 32px; height: 17px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: var(--border);
+      border-radius: 17px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle-track::before {
+      content: '';
+      position: absolute;
+      height: 11px; width: 11px;
+      left: 3px; bottom: 3px;
+      background: var(--text-tertiary);
+      border-radius: 50%;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .toggle input:checked + .toggle-track { background: rgba(76,175,122,0.35); }
+    .toggle input:checked + .toggle-track::before {
+      transform: translateX(15px);
+      background: var(--green);
+    }
+
+    /* Inline edit */
+    .editable-cell {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .editable-cell span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .btn-edit {
+      background: none;
+      border: none;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      font-size: 11px;
+      padding: 2px 4px;
+      border-radius: 3px;
+      opacity: 0;
+      transition: opacity 0.15s, color 0.15s;
+      flex-shrink: 0;
+    }
+    .data-table tbody tr:hover .btn-edit { opacity: 1; }
+    .btn-edit:hover { color: var(--accent); }
+
+    /* Edit input inline */
+    .inline-input {
+      background: var(--surface-raised);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      padding: 3px 7px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-primary);
+      width: 180px;
+      outline: none;
+    }
+    .btn-save-inline {
+      background: var(--accent);
+      color: #1A1A1A;
+      border: none;
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 10px;
+      font-weight: 500;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .btn-cancel-inline {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 10px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* Commission breakdown bar */
+    .commission-bar-wrap { padding: 14px 18px; }
+    .commission-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .commission-label {
+      width: 140px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+    .commission-bar-outer {
+      flex: 1;
+      height: 6px;
+      background: var(--surface-raised);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .commission-bar-inner {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 0.5s ease;
+    }
+    .bar-refueler { background: var(--accent); }
+    .bar-venue { background: var(--green); }
+    .commission-val {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-primary);
+      width: 56px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* Empty / loading states */
+    .empty-state {
+      padding: 32px 18px;
+      text-align: center;
+      color: var(--text-tertiary);
+      font-size: 12px;
+    }
+    .loading-shimmer {
+      padding: 24px 18px;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-tertiary);
+      letter-spacing: 0.08em;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    /* Date filter */
+    .date-filter {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .filter-btn {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: all 0.15s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 2px solid var(--accent);
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--text-primary);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 200;
+      white-space: nowrap;
+      font-family: var(--font-mono);
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Pending badge */
+    .pending-notice {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(200,169,110,0.1);
+      border: 1px solid rgba(200,169,110,0.25);
+      color: var(--accent);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<!-- Auth Gate -->
+<div id="auth-gate">
+  <div class="auth-box">
+    <div class="auth-wordmark">Refueler <span>/</span> Franchise</div>
+    <div class="auth-subtitle">Head office access · @refueler.io only</div>
+    <div id="login-form">
+      <div class="auth-field" style="margin-bottom:6px">
+        <label>Email address</label>
+        <input type="email" id="auth-email" placeholder="you@refueler.io" autocomplete="email">
+      </div>
+      <div class="auth-note">Access restricted to <em>@refueler.io</em> accounts.</div>
+      <button class="btn-primary" id="btn-magic-link" onclick="sendMagicLink()">Send magic link</button>
+      <div class="auth-msg" id="auth-msg"></div>
+    </div>
+    <div id="check-email-state" style="display:none; text-align:center; padding-top:8px;">
+      <div style="font-size:28px; margin-bottom:12px;">✉️</div>
+      <div style="font-family:var(--font-head); font-weight:600; margin-bottom:6px;">Check your inbox</div>
+      <div style="font-size:12px; color:var(--text-secondary);">Magic link sent. Click the link in your email to continue.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Main app (hidden until auth) -->
+<div class="app" id="app" style="display:none">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <!-- Darwin card -->
+    <div class="darwin-card">
+      <div class="darwin-eyebrow">Live Rail Data</div>
+      <div class="darwin-title">Fenchurch St Line</div>
+      <div class="darwin-sub">Darwin · National Rail</div>
+      <div class="darwin-status">
+        <span class="darwin-dot"></span>
+        <span id="darwin-status-text">CONNECTING…</span>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Overview</div>
+      <div class="nav-item active" data-section="overview" onclick="showSection('overview', this)">
+        <span class="nav-icon">◈</span> Dashboard
+      </div>
+      <div class="nav-section-label">Operations</div>
+      <div class="nav-item" data-section="venues" onclick="showSection('venues', this)">
+        <span class="nav-icon">⬡</span> Venue Roster
+      </div>
+      <div class="nav-item" data-section="orders" onclick="showSection('orders', this)">
+        <span class="nav-icon">◳</span> Order Summary
+      </div>
+      <div class="nav-item" data-section="commission" onclick="showSection('commission', this)">
+        <span class="nav-icon">◎</span> Commission
+      </div>
+      <div class="nav-section-label">Admin</div>
+      <div class="nav-item" data-section="controls" onclick="showSection('controls', this)">
+        <span class="nav-icon">⊞</span> Operator Controls
+      </div>
+    </nav>
+
+    <!-- Footer -->
+    <div class="sidebar-footer">
+      <div class="franchise-chip">
+        <div class="franchise-chip-label">Franchise Group</div>
+        <div class="franchise-chip-value" id="sidebar-group-id">— loading</div>
+      </div>
+      <div class="theme-pill" onclick="toggleTheme()">
+        <span id="pill-paper" class="active">PAPER</span>
+        <span id="pill-carbon">CARBON</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="page-title" id="topbar-title">Dashboard</div>
+        <div class="role-badge">Franchise HQ</div>
+      </div>
+      <div class="topbar-right">
+        <div class="user-email" id="user-email-display">—</div>
+        <button class="btn-signout" onclick="signOut()">Sign out</button>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="content" id="content">
+      <!-- Sections injected by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  /* ── Supabase ── */
+  const SUPA_URL = 'https://tihgvdokeofnjxjkenmm.supabase.co';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpaGd2ZG9rZW9mbmp4amtlbm1tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcwNTIxNDMsImV4cCI6MjA2MjYyODE0M30.Q7M2EVKK2XjdO9mD3rlV_3hbfQEZDzYJZuMjLxLsq0w';
+  const { createClient } = supabase;
+  const sb = createClient(SUPA_URL, SUPA_KEY);
+
+  let currentUser = null;
+  let franchiseGroupId = null; // null = column absent, treat as admin sees all
+  let venueData = [];
+  let orderData = [];
+  let activeSection = 'overview';
+  let activeDateFilter = '30d';
+
+  /* ── Auth ── */
+  async function sendMagicLink() {
+    const email = document.getElementById('auth-email').value.trim().toLowerCase();
+    const msg = document.getElementById('auth-msg');
+    const btn = document.getElementById('btn-magic-link');
+
+    if (!email) { msg.textContent = 'Enter your email address.'; msg.className = 'auth-msg error'; return; }
+    if (!email.endsWith('@refueler.io')) {
+      msg.textContent = 'Access restricted to @refueler.io accounts.';
+      msg.className = 'auth-msg error';
+      return;
+    }
+    btn.disabled = true;
+    msg.textContent = 'Sending…';
+    msg.className = 'auth-msg';
+
+    const { error } = await sb.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: window.location.href }
+    });
+
+    if (error) {
+      msg.textContent = error.message;
+      msg.className = 'auth-msg error';
+      btn.disabled = false;
+    } else {
+      document.getElementById('login-form').style.display = 'none';
+      document.getElementById('check-email-state').style.display = 'block';
+    }
+  }
+
+  async function signOut() {
+    await sb.auth.signOut();
+    location.reload();
+  }
+
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (session?.user) {
+      const email = session.user.email || '';
+      if (!email.endsWith('@refueler.io')) {
+        await sb.auth.signOut();
+        showAuthError('Access restricted to @refueler.io accounts.');
+        return;
+      }
+      currentUser = session.user;
+      document.getElementById('user-email-display').textContent = email;
+      document.getElementById('auth-gate').style.display = 'none';
+      document.getElementById('app').style.display = 'flex';
+      await initDashboard();
+    }
+  });
+
+  function showAuthError(msg) {
+    document.getElementById('auth-gate').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+    const el = document.getElementById('auth-msg');
+    el.textContent = msg;
+    el.className = 'auth-msg error';
+    document.getElementById('login-form').style.display = 'block';
+    document.getElementById('check-email-state').style.display = 'none';
+  }
+
+  /* ── Init ── */
+  async function initDashboard() {
+    await loadVenues();
+    await loadOrders();
+    updateDarwinStatus();
+    showSection('overview', document.querySelector('.nav-item[data-section="overview"]'));
+    syncThemePill();
+  }
+
+  /* ── Data fetching ── */
+  async function loadVenues() {
+    // franchise_group_id column may not exist yet — handle gracefully
+    let query = sb.from('venue_partners').select('*').order('name');
+    const { data, error } = await query;
+    if (error) { console.warn('venue_partners error:', error.message); venueData = []; return; }
+    venueData = data || [];
+
+    // Try to detect franchise_group_id on first record
+    const hasGroupId = venueData.length > 0 && 'franchise_group_id' in venueData[0];
+    if (hasGroupId) {
+      // In production: filter to own group. Here we note what groups exist.
+      const groups = [...new Set(venueData.map(v => v.franchise_group_id).filter(Boolean))];
+      franchiseGroupId = groups[0] || 'ALL';
+    } else {
+      franchiseGroupId = null;
+    }
+
+    // Sidebar chip
+    document.getElementById('sidebar-group-id').textContent =
+      franchiseGroupId ? franchiseGroupId.toUpperCase().slice(0, 12) : 'ALL VENUES';
+  }
+
+  async function loadOrders() {
+    // Date filter
+    const since = dateFilterSince(activeDateFilter);
+    let query = sb.from('orders')
+      .select('id, venue_id, partner, order_value_gbp, commission_gbp, commission_pct, status, created_at, item_name, reward_type')
+      .order('created_at', { ascending: false });
+    if (since) query = query.gte('created_at', since.toISOString());
+    const { data, error } = await query;
+    if (error) { console.warn('orders error:', error.message); orderData = []; return; }
+    orderData = data || [];
+  }
+
+  function dateFilterSince(filter) {
+    const now = new Date();
+    if (filter === '7d') return new Date(now - 7 * 86400000);
+    if (filter === '30d') return new Date(now - 30 * 86400000);
+    if (filter === '90d') return new Date(now - 90 * 86400000);
+    return null; // all time
+  }
+
+  /* ── Section routing ── */
+  const SECTION_TITLES = {
+    overview: 'Dashboard',
+    venues: 'Venue Roster',
+    orders: 'Order Summary',
+    commission: 'Commission',
+    controls: 'Operator Controls'
+  };
+
+  function showSection(section, el) {
+    activeSection = section;
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    if (el) el.classList.add('active');
+    document.getElementById('topbar-title').textContent = SECTION_TITLES[section] || section;
+    renderSection(section);
+  }
+
+  function renderSection(section) {
+    const content = document.getElementById('content');
+    switch (section) {
+      case 'overview':   content.innerHTML = renderOverview(); break;
+      case 'venues':     content.innerHTML = renderVenues(); break;
+      case 'orders':     content.innerHTML = renderOrders(); break;
+      case 'commission': content.innerHTML = renderCommission(); break;
+      case 'controls':   content.innerHTML = renderControls(); break;
+    }
+  }
+
+  /* ── Overview ── */
+  function renderOverview() {
+    const totalOrders = orderData.length;
+    const totalGMV = orderData.reduce((s, o) => s + parseFloat(o.order_value_gbp || 0), 0);
+    const totalComm = orderData.reduce((s, o) => s + parseFloat(o.commission_gbp || 0), 0);
+    const activeVenues = venueData.filter(v => v.active !== false).length;
+
+    return `
+      <div class="kpi-strip">
+        <div class="kpi-card">
+          <div class="kpi-label">Active Venues</div>
+          <div class="kpi-value">${activeVenues}</div>
+          <div class="kpi-sub">${venueData.length} total registered</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Orders (${activeDateFilter})</div>
+          <div class="kpi-value">${totalOrders}</div>
+          <div class="kpi-sub">${activeDateFilter === 'all' ? 'all time' : `last ${activeDateFilter}`}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">GMV (${activeDateFilter})</div>
+          <div class="kpi-value">£${totalGMV.toFixed(2)}</div>
+          <div class="kpi-sub">gross order value</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Commission (${activeDateFilter})</div>
+          <div class="kpi-value">£${totalComm.toFixed(2)}</div>
+          <div class="kpi-sub">Refueler earned</div>
+        </div>
+      </div>
+
+      <div class="panel-grid">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-header-title">Venues by Category</div>
+          </div>
+          ${renderCategoryBreakdown()}
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-header-title">Recent Orders</div>
+            <div class="panel-header-meta">Last 5</div>
+          </div>
+          ${renderRecentOrders()}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderCategoryBreakdown() {
+    const cats = {};
+    venueData.forEach(v => {
+      const c = v.category || 'Uncategorised';
+      cats[c] = (cats[c] || 0) + 1;
+    });
+    if (Object.keys(cats).length === 0) return '<div class="empty-state">No venues registered.</div>';
+    const rows = Object.entries(cats).map(([cat, count]) => `
+      <tr>
+        <td>${cat}</td>
+        <td class="mono text-acc">${count}</td>
+        <td class="mono text-sec">${Math.round(count / venueData.length * 100)}%</td>
+      </tr>
+    `).join('');
+    return `<table class="data-table"><thead><tr><th>Category</th><th>Venues</th><th>Share</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+
+  function renderRecentOrders() {
+    const recent = orderData.slice(0, 5);
+    if (recent.length === 0) return '<div class="empty-state">No orders in range.</div>';
+    const rows = recent.map(o => {
+      const venue = venueData.find(v => v.id === o.venue_id);
+      return `<tr>
+        <td style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${venue ? venue.name : (o.partner || '—')}</td>
+        <td class="mono">£${parseFloat(o.order_value_gbp || 0).toFixed(2)}</td>
+        <td><span class="status-badge ${o.status === 'settled' || o.status === 'completed' ? 'status-active' : 'status-inactive'}">${o.status || 'pending'}</span></td>
+      </tr>`;
+    }).join('');
+    return `<table class="data-table"><thead><tr><th>Venue</th><th>Value</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+
+  /* ── Venues ── */
+  function renderVenues() {
+    const hasFranchiseCol = venueData.length > 0 && 'franchise_group_id' in venueData[0];
+    const hasVenueType = venueData.length > 0 && 'venue_type' in venueData[0];
+
+    const rows = venueData.map(v => {
+      const isActive = v.active !== false;
+      return `<tr id="venue-row-${v.id}">
+        <td><span class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">${isActive ? 'Active' : 'Inactive'}</span></td>
+        <td style="font-weight:500">${escHtml(v.name)}</td>
+        <td class="text-sec">${escHtml(v.category || '—')}</td>
+        <td class="text-sec">${escHtml(v.site || '—')}</td>
+        ${hasVenueType ? `<td class="mono text-sec" style="font-size:10px">${escHtml(v.venue_type || '—')}</td>` : ''}
+        ${hasFranchiseCol ? `<td class="mono text-sec" style="font-size:10px">${escHtml(v.franchise_group_id || '—')}</td>` : ''}
+      </tr>`;
+    }).join('');
+
+    const pendingNotice = (!hasFranchiseCol || !hasVenueType) ? `
+      <div style="padding:10px 18px; border-bottom:1px solid var(--border); display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        ${!hasFranchiseCol ? '<span class="pending-notice">⏳ franchise_group_id column pending</span>' : ''}
+        ${!hasVenueType ? '<span class="pending-notice">⏳ venue_type column pending</span>' : ''}
+      </div>
+    ` : '';
+
+    return `
+      <div class="panel panel-full">
+        <div class="panel-header">
+          <div class="panel-header-title">Venue Roster</div>
+          <div class="panel-header-meta">${venueData.length} venues · ${venueData.filter(v => v.active !== false).length} active</div>
+        </div>
+        ${pendingNotice}
+        ${venueData.length === 0
+          ? '<div class="empty-state">No venues found for this franchise group.</div>'
+          : `<table class="data-table">
+              <thead>
+                <tr>
+                  <th>Status</th><th>Name</th><th>Category</th><th>Site</th>
+                  ${hasVenueType ? '<th>Type</th>' : ''}
+                  ${hasFranchiseCol ? '<th>Group ID</th>' : ''}
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>`
+        }
+      </div>
+    `;
+  }
+
+  /* ── Orders ── */
+  function renderOrders() {
+    return `
+      <div style="margin-bottom:16px; display:flex; align-items:center; justify-content:space-between;">
+        <div class="section-title">Order Summary</div>
+        <div class="date-filter">
+          ${['7d','30d','90d','all'].map(f =>
+            `<button class="filter-btn ${activeDateFilter===f?'active':''}" onclick="setDateFilter('${f}')">${f.toUpperCase()}</button>`
+          ).join('')}
+        </div>
+      </div>
+      <div class="panel panel-full">
+        <div class="panel-header">
+          <div class="panel-header-title">Orders by Venue</div>
+          <div class="panel-header-meta">${orderData.length} orders</div>
+        </div>
+        ${renderOrdersByVenue()}
+      </div>
+    `;
+  }
+
+  function renderOrdersByVenue() {
+    // Aggregate by venue_id
+    const agg = {};
+    orderData.forEach(o => {
+      const key = o.venue_id || o.partner || 'unknown';
+      if (!agg[key]) agg[key] = { orders: 0, gmv: 0, commission: 0, venue_id: o.venue_id, partner: o.partner };
+      agg[key].orders++;
+      agg[key].gmv += parseFloat(o.order_value_gbp || 0);
+      agg[key].commission += parseFloat(o.commission_gbp || 0);
+    });
+
+    const rows = Object.entries(agg).map(([key, a]) => {
+      const venue = venueData.find(v => v.id === a.venue_id);
+      const name = venue ? venue.name : (a.partner || key);
+      return `<tr>
+        <td style="font-weight:500">${escHtml(name)}</td>
+        <td class="mono">${a.orders}</td>
+        <td class="mono">£${a.gmv.toFixed(2)}</td>
+        <td class="mono text-acc">£${a.commission.toFixed(2)}</td>
+        <td class="mono text-sec">${a.gmv > 0 ? (a.commission/a.gmv*100).toFixed(1) : '—'}%</td>
+      </tr>`;
+    }).join('');
+
+    if (!rows) return '<div class="empty-state">No orders in the selected period.</div>';
+    return `<table class="data-table">
+      <thead><tr><th>Venue</th><th>Orders</th><th>GMV</th><th>Commission</th><th>Eff. Rate</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  }
+
+  async function setDateFilter(filter) {
+    activeDateFilter = filter;
+    await loadOrders();
+    if (activeSection === 'orders') renderSection('orders');
+    if (activeSection === 'overview') renderSection('overview');
+    if (activeSection === 'commission') renderSection('commission');
+  }
+
+  /* ── Commission ── */
+  function renderCommission() {
+    const totalGMV = orderData.reduce((s, o) => s + parseFloat(o.order_value_gbp || 0), 0);
+    const totalComm = orderData.reduce((s, o) => s + parseFloat(o.commission_gbp || 0), 0);
+    const venuePayout = totalGMV - totalComm;
+    const maxVal = Math.max(totalComm, venuePayout, 0.01);
+
+    // Per-venue commission table
+    const agg = {};
+    orderData.forEach(o => {
+      const key = o.venue_id || o.partner || 'unknown';
+      if (!agg[key]) agg[key] = { gmv: 0, commission: 0, venue_id: o.venue_id, partner: o.partner };
+      agg[key].gmv += parseFloat(o.order_value_gbp || 0);
+      agg[key].commission += parseFloat(o.commission_gbp || 0);
+    });
+
+    const rows = Object.entries(agg).map(([key, a]) => {
+      const venue = venueData.find(v => v.id === a.venue_id);
+      const name = venue ? venue.name : (a.partner || key);
+      const payout = a.gmv - a.commission;
+      return `<tr>
+        <td style="font-weight:500">${escHtml(name)}</td>
+        <td class="mono">£${a.gmv.toFixed(2)}</td>
+        <td class="mono text-acc">£${a.commission.toFixed(2)}</td>
+        <td class="mono text-sec">£${payout.toFixed(2)}</td>
+        <td class="mono">${a.gmv > 0 ? (a.commission/a.gmv*100).toFixed(1) : '—'}%</td>
+      </tr>`;
+    }).join('');
+
+    return `
+      <div class="panel-grid">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-header-title">Revenue Split (${activeDateFilter})</div></div>
+          <div class="commission-bar-wrap">
+            <div class="commission-row">
+              <div class="commission-label">Refueler Commission</div>
+              <div class="commission-bar-outer"><div class="commission-bar-inner bar-refueler" style="width:${Math.min(100, totalComm/maxVal*100)}%"></div></div>
+              <div class="commission-val">£${totalComm.toFixed(2)}</div>
+            </div>
+            <div class="commission-row">
+              <div class="commission-label">Venue Payout</div>
+              <div class="commission-bar-outer"><div class="commission-bar-inner bar-venue" style="width:${Math.min(100, venuePayout/maxVal*100)}%"></div></div>
+              <div class="commission-val">£${venuePayout.toFixed(2)}</div>
+            </div>
+            <div style="padding-top:10px; border-top:1px solid var(--border); margin-top:6px; font-family:var(--font-mono); font-size:10px; color:var(--text-tertiary); display:flex; justify-content:space-between;">
+              <span>Total GMV</span><span style="color:var(--text-primary)">£${totalGMV.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-header-title">Commission Rate Summary</div></div>
+          <div style="padding:16px 18px;">
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:10px; border-bottom:1px solid var(--border)">
+                <span class="text-sec" style="font-size:12px">Orders processed</span>
+                <span class="mono">${orderData.length}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:10px; border-bottom:1px solid var(--border)">
+                <span class="text-sec" style="font-size:12px">Avg order value</span>
+                <span class="mono">£${orderData.length ? (totalGMV/orderData.length).toFixed(2) : '0.00'}</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:10px; border-bottom:1px solid var(--border)">
+                <span class="text-sec" style="font-size:12px">Avg commission rate</span>
+                <span class="mono text-acc">${totalGMV > 0 ? (totalComm/totalGMV*100).toFixed(1) : '0.0'}%</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center">
+                <span class="text-sec" style="font-size:12px">Reward type split</span>
+                <span class="mono" style="font-size:10px">${rewardTypeSplit()}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel panel-full">
+        <div class="panel-header">
+          <div class="panel-header-title">Per-Venue Breakdown</div>
+          <div class="panel-header-meta">${activeDateFilter}</div>
+        </div>
+        ${rows ? `<table class="data-table">
+          <thead><tr><th>Venue</th><th>GMV</th><th>Commission</th><th>Payout</th><th>Rate</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>` : '<div class="empty-state">No order data in selected period.</div>'}
+      </div>
+    `;
+  }
+
+  function rewardTypeSplit() {
+    const sats = orderData.filter(o => o.reward_type === 'sats').length;
+    const stamp = orderData.filter(o => o.reward_type === 'stamp').length;
+    const other = orderData.length - sats - stamp;
+    const parts = [];
+    if (sats) parts.push(`${sats}× sats`);
+    if (stamp) parts.push(`${stamp}× stamp`);
+    if (other) parts.push(`${other}× other`);
+    return parts.join(' · ') || '—';
+  }
+
+  /* ── Operator Controls ── */
+  function renderControls() {
+    const hasFranchiseCol = venueData.length > 0 && 'franchise_group_id' in venueData[0];
+
+    const rows = venueData.map(v => {
+      const isActive = v.active !== false;
+      return `<tr id="ctrl-row-${v.id}">
+        <td style="font-weight:500">${escHtml(v.name)}</td>
+        <td class="text-sec">${escHtml(v.site || '—')}</td>
+        <td>
+          <div class="toggle-wrap">
+            <label class="toggle">
+              <input type="checkbox" ${isActive ? 'checked' : ''} onchange="toggleVenueActive('${v.id}', this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+          </div>
+        </td>
+        <td>
+          <div class="editable-cell" id="email-cell-${v.id}">
+            <span id="email-val-${v.id}">${escHtml(v.contact_email || '—')}</span>
+            <button class="btn-edit" onclick="editEmail('${v.id}', '${escHtml(v.contact_email || '')}')">✎</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+
+    return `
+      <div class="panel panel-full">
+        <div class="panel-header">
+          <div class="panel-header-title">Operator Controls</div>
+          <div class="panel-header-meta">Toggle active status · Update contact email</div>
+        </div>
+        ${!hasFranchiseCol ? `<div style="padding:10px 18px; border-bottom:1px solid var(--border)"><span class="pending-notice">⏳ franchise_group_id column pending — showing all venues</span></div>` : ''}
+        ${venueData.length === 0
+          ? '<div class="empty-state">No venues available.</div>'
+          : `<table class="data-table">
+              <thead><tr><th>Venue</th><th>Site</th><th>Active</th><th>Contact Email</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table>`
+        }
+      </div>
+    `;
+  }
+
+  async function toggleVenueActive(venueId, newState) {
+    const { error } = await sb.from('venue_partners').update({ active: newState }).eq('id', venueId);
+    if (error) {
+      toast(`Error: ${error.message}`, true);
+      return;
+    }
+    // Update local cache
+    const v = venueData.find(x => x.id === venueId);
+    if (v) v.active = newState;
+    toast(`Venue ${newState ? 'activated' : 'deactivated'}`);
+  }
+
+  function editEmail(venueId, current) {
+    const cell = document.getElementById(`email-cell-${venueId}`);
+    cell.innerHTML = `
+      <input class="inline-input" id="email-input-${venueId}" value="${escHtml(current)}" type="email" placeholder="contact@venue.com">
+      <button class="btn-save-inline" onclick="saveEmail('${venueId}')">Save</button>
+      <button class="btn-cancel-inline" onclick="cancelEmail('${venueId}', '${escHtml(current)}')">✕</button>
+    `;
+    document.getElementById(`email-input-${venueId}`).focus();
+  }
+
+  function cancelEmail(venueId, original) {
+    const cell = document.getElementById(`email-cell-${venueId}`);
+    cell.innerHTML = `
+      <span id="email-val-${venueId}">${escHtml(original)}</span>
+      <button class="btn-edit" onclick="editEmail('${venueId}', '${escHtml(original)}')">✎</button>
+    `;
+  }
+
+  async function saveEmail(venueId) {
+    const input = document.getElementById(`email-input-${venueId}`);
+    const newEmail = input.value.trim();
+    const { error } = await sb.from('venue_partners').update({ contact_email: newEmail }).eq('id', venueId);
+    if (error) { toast(`Error: ${error.message}`, true); return; }
+    const v = venueData.find(x => x.id === venueId);
+    if (v) v.contact_email = newEmail;
+    const cell = document.getElementById(`email-cell-${venueId}`);
+    cell.innerHTML = `
+      <span id="email-val-${venueId}">${escHtml(newEmail || '—')}</span>
+      <button class="btn-edit" onclick="editEmail('${venueId}', '${escHtml(newEmail)}')">✎</button>
+    `;
+    toast('Contact email updated');
+  }
+
+  /* ── Darwin status (mock — real integration requires STOMP/proxy) ── */
+  function updateDarwinStatus() {
+    const el = document.getElementById('darwin-status-text');
+    if (!el) return;
+    // Real Darwin STOMP would connect here. Showing live timestamp as indicator.
+    el.textContent = `LIVE · ${new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'})}`;
+    setInterval(() => {
+      if (el) el.textContent = `LIVE · ${new Date().toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'})}`;
+    }, 60000);
+  }
+
+  /* ── Theme ── */
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'carbon' ? 'paper' : 'carbon';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('rfTheme', next);
+    syncThemePill();
+  }
+
+  function syncThemePill() {
+    const current = document.documentElement.getAttribute('data-theme') || 'carbon';
+    document.getElementById('pill-paper').className = current === 'paper' ? 'active' : '';
+    document.getElementById('pill-carbon').className = current === 'carbon' ? 'active' : '';
+  }
+
+  // Restore saved theme
+  const savedTheme = localStorage.getItem('rfTheme');
+  if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+  syncThemePill();
+
+  /* ── Toast ── */
+  let toastTimer;
+  function toast(msg, isError = false) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.style.borderLeftColor = isError ? 'var(--red)' : 'var(--accent)';
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+  }
+
+  /* ── Helpers ── */
+  function escHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  // Allow Enter key on auth
+  document.addEventListener('DOMContentLoaded', () => {
+    const emailInput = document.getElementById('auth-email');
+    if (emailInput) {
+      emailInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') sendMagicLink();
+      });
+    }
+  });
+</script>
+</body>
+</html>
