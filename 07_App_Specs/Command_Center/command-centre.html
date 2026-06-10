@@ -20,7 +20,6 @@
       --border:          #D6D1C8;
       --accent:          #C8A96E;
       --accent-hover:    #E0C48A;
-      --orange:          #F5820A;
       --error-bg:        #FDF0EC;
       --error-border:    #E8C4B8;
       --error-text:      #8B3A2A;
@@ -95,31 +94,6 @@
       font-size: 13px;
     }
 
-    /* Theme toggle */
-    .theme-pill {
-      display: inline-flex;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      overflow: hidden;
-      cursor: pointer;
-      user-select: none;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.08em;
-    }
-
-    .theme-pill span {
-      padding: 5px 12px;
-      color: var(--text-tertiary);
-      transition: background 0.2s, color 0.2s;
-    }
-
-    .theme-pill span.active {
-      background: var(--accent);
-      color: #1E1F22;
-    }
-
     /* ─── DARWIN CARD ───────────────────────────────────── */
     .darwin-card {
       margin: 24px 24px 0;
@@ -132,6 +106,8 @@
       align-items: center;
       gap: 12px;
     }
+
+    .darwin-card.hidden { display: none; }
 
     .darwin-badge {
       font-family: 'IBM Plex Mono', monospace;
@@ -255,16 +231,16 @@
       font-family: 'DM Sans', sans-serif;
       font-size: 14px;
       font-weight: 500;
-      background: var(--orange);
-      color: #fff;
-      border: none;
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
       border-radius: 8px;
       cursor: pointer;
-      transition: opacity 0.2s;
+      transition: background 0.2s, color 0.2s;
       letter-spacing: 0.01em;
     }
 
-    .btn-primary:hover { opacity: 0.88; }
+    .btn-primary:hover { background: var(--accent); color: #1A1A1A; }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .form-hint {
@@ -465,14 +441,10 @@
     <span class="topbar-wordmark">
       Refueler <span class="slash">/</span> <span class="cc-label">Command Centre</span>
     </span>
-    <button class="theme-pill" id="themePill" onclick="toggleTheme()" aria-label="Toggle theme">
-      <span id="pillPaper" class="active">PAPER</span>
-      <span id="pillCarbon">CARBON</span>
-    </button>
   </header>
 
-  <!-- DARWIN CARD -->
-  <div class="darwin-card" id="darwinCard">
+  <!-- DARWIN CARD — hidden until authenticated -->
+  <div class="darwin-card hidden" id="darwinCard">
     <span class="darwin-badge">DARWIN</span>
     <span class="darwin-text">
       <strong>Fenchurch St Line</strong> — real-time arrivals active
@@ -560,8 +532,8 @@
 
   <!-- FOOTER -->
   <footer class="cc-footer">
-    <span class="footer-meta">REFUELER · CC-05</span>
-    <span class="footer-version">v0.5.0</span>
+    <span class="footer-meta">REFUELER · CC-09a</span>
+    <span class="footer-version">v0.6.0</span>
   </footer>
 
 </div>
@@ -569,12 +541,14 @@
 <!-- Supabase JS -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<!-- SUPABASE_ANON_KEY: replace before deploy — load from environment or use Cloudflare Pages secrets -->
 <script>
-  /* ─── SUPABASE ─────────────────────────────────────────── */
-  const SUPABASE_URL  = 'https://tihgvdokeofnjxjkenmm.supabase.co';
-  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpaGd2ZG9rZW9mbmp4amtlbm1tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTY2NDksImV4cCI6MjA5NDE5MjY0OX0.cRb94WeIP8yRfWd9s2XKmq2nqm1ov-sK1df6u8LNUbo'; // replace at deploy
-  const { createClient } = supabase;
-  const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+  const SUPABASE_URL = 'https://tihgvdokeofnjxjkenmm.supabase.co';
+  const SUPABASE_ANON_KEY = window.__SUPABASE_ANON_KEY__ || 'REPLACE_BEFORE_DEPLOY';
+</script>
+
+<script>
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   /* ─── ROLE → DESTINATION MAP ───────────────────────────── */
   const ROLE_DESTINATIONS = {
@@ -590,24 +564,6 @@
     franchise_hq:     'FRANCHISE HQ',
     admin:            'ADMIN',
   };
-
-  /* ─── THEME ─────────────────────────────────────────────── */
-  const THEME_KEY = 'rfTheme';
-
-  function applyTheme(theme) {
-    document.documentElement.setAttribute('data-theme', theme === 'carbon' ? 'carbon' : '');
-    document.getElementById('pillPaper').classList.toggle('active', theme !== 'carbon');
-    document.getElementById('pillCarbon').classList.toggle('active', theme === 'carbon');
-    localStorage.setItem(THEME_KEY, theme);
-  }
-
-  function toggleTheme() {
-    const current = localStorage.getItem(THEME_KEY) || 'paper';
-    applyTheme(current === 'carbon' ? 'paper' : 'carbon');
-  }
-
-  // Carbon default for CC pages
-  applyTheme(localStorage.getItem(THEME_KEY) || 'carbon');
 
   /* ─── STATE HELPERS ─────────────────────────────────────── */
   const STATES = ['stateAuthGate','stateLinkSent','stateIdentifying','stateResolved','stateError'];
@@ -647,7 +603,6 @@
 
     if (error) {
       console.error('Magic link error:', error.message);
-      // Non-destructive: keep form visible, show inline hint
       const hint = document.querySelector('.form-hint');
       hint.textContent = 'Something went wrong — please try again.';
       hint.style.color = 'var(--error-text, #c0392b)';
@@ -665,19 +620,17 @@
 
   /* ─── AUTH SESSION HANDLER ───────────────────────────────── */
   async function resolveSession(session) {
-    if (!session) return; // no session — auth gate stays visible
+    if (!session) return;
 
     showState('stateIdentifying');
 
-    // Animate progress bar over 2.5s max
     const bar = document.getElementById('redirectBar');
     let pct = 0;
     const ticker = setInterval(() => {
-      pct = Math.min(pct + 4, 85); // stall at 85% until role resolved
+      pct = Math.min(pct + 4, 85);
       bar.style.width = pct + '%';
     }, 100);
 
-    // 3s timeout guard
     const timeoutId = setTimeout(() => {
       clearInterval(ticker);
       showState('stateError');
@@ -708,12 +661,11 @@
         return;
       }
 
-      // Brief resolved flash
       bar.style.width = '100%';
       document.getElementById('roleChip').textContent = ROLE_LABELS[role] || role.toUpperCase();
+      document.getElementById('darwinCard').classList.remove('hidden');
       showState('stateResolved');
 
-      // Redirect after short pause
       setTimeout(() => {
         window.location.href = destination;
       }, 700);
@@ -726,14 +678,12 @@
     }
   }
 
-  /* ─── BOOT: check for existing session ─────────────────────── */
+  /* ─── BOOT ───────────────────────────────────────────────── */
   (async () => {
-    // Handle magic link token in URL hash (implicit flow for web)
     const { data: sessionData } = await sb.auth.getSession();
     if (sessionData?.session) {
       await resolveSession(sessionData.session);
     }
-    // Also listen for auth state changes (e.g., magic link click lands here)
     sb.auth.onAuthStateChange(async (_event, session) => {
       if (session) {
         await resolveSession(session);
