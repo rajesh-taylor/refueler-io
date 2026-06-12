@@ -20,7 +20,7 @@
   4. Flash layer: now pulses venue secondary colour instead of flat primary
   5. Sats display: badge removed → whisper treatment (small, muted, no pill/border)
   6. Copy alignment: "Order delivered!" → concierge register throughout
-  7. Confirm screen: sats line uses whisper style, not large orange badge
+  7. Confirm screen: sats line uses whisper style, not large gold badge
   8. All flash / NFC / battery / crowd mode logic: UNCHANGED
 
   PRESERVED FROM v1:
@@ -48,7 +48,7 @@
     --venue-tertiary:  #004a27;   /* venue brand_colour_tertiary  */
 
     /* Refueler system colours — never overridden */
-    --orange:    #F5820A;         /* Refueler orange — used sparingly */
+    --accent:    #C8A96E;         /* Refueler gold — used sparingly */
     --green:     #2ECC71;         /* success / collected state        */
     --calm-blue: #0EA5C9;         /* delay / calm-warning             */
 
@@ -261,7 +261,7 @@
   /* ── SATS WHISPER ──────────────────────────────────────────────────────────
      Intentionally quiet. No pill, no badge, no border.
      Present for the user who is looking. Invisible to those who aren't.
-     Refueler orange used at 30% opacity — just enough to be findable.
+     Refueler gold used at 30% opacity — just enough to be findable.
   ── */
   .sats-whisper {
     display:inline-flex;
@@ -269,7 +269,7 @@
     gap:4px;
     margin-top:5px;
   }
-  .sw-bolt  { font-size:10px; color:var(--orange); opacity:0.30; }
+  .sw-bolt  { font-size:10px; color:var(--accent); opacity:0.30; }
   .sw-val   { font-family:var(--mono); font-size:11px; font-weight:400; color:rgba(255,255,255,0.38); letter-spacing:0.03em; }
   .sw-lbl   { font-size:10px; font-weight:300; color:rgba(255,255,255,0.24); }
 
@@ -404,7 +404,7 @@
     gap:5px;
     margin-top:4px;
   }
-  .csw-bolt { font-size:13px; color:var(--orange); opacity:0.45; }
+  .csw-bolt { font-size:13px; color:var(--accent); opacity:0.45; }
   .csw-val  { font-family:var(--mono); font-size:15px; font-weight:400; color:rgba(255,255,255,0.55); letter-spacing:0.03em; }
   .csw-lbl  { font-size:12px; font-weight:300; color:rgba(255,255,255,0.32); }
 
@@ -793,5 +793,6 @@ window.addEventListener('DOMContentLoaded', () => {
   initNFC();
 });
 </script>
+<script src="/analytics.js" defer></script>
 </body>
 </html>

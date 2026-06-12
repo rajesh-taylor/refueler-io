@@ -15,8 +15,8 @@
   --carbon-2: #1C1C19;
   --carbon-3: #252520;
   --paper:    #F5F0E8;
-  --orange:   #F5820A;
-  --orange-d: #D4690A;
+  --accent:   #C8A96E;
+  --accent-d: #B8935A;
   --green:    #2ECC71;
   --blue:     #0EA5C9;
 
@@ -28,7 +28,7 @@
   --fg-subtle:    rgba(245,240,232,0.30);
   --border:       rgba(245,240,232,0.08);
   --border-med:   rgba(245,240,232,0.14);
-  --orange-tint:  rgba(245,130,10,0.10);
+  --accent-tint:  rgba(200,169,110,0.10);
   --green-tint:   rgba(46,204,113,0.08);
 }
 
@@ -63,7 +63,7 @@ body {
   text-transform: uppercase;
   color: var(--fg-muted);
 }
-.session-wordmark em { color: var(--orange-d); font-style: normal; }
+.session-wordmark em { color: var(--accent-d); font-style: normal; }
 .session-meta {
   font-family: 'DM Mono', monospace;
   font-size: 10px;
@@ -108,9 +108,9 @@ body {
   padding: 2px 6px;
   border-radius: 999px;
   margin-left: 5px;
-  background: var(--orange-tint);
-  color: var(--orange);
-  border: 0.5px solid rgba(245,130,10,0.2);
+  background: var(--accent-tint);
+  color: var(--accent);
+  border: 0.5px solid rgba(200,169,110,0.2);
   vertical-align: middle;
 }
 
@@ -160,7 +160,7 @@ body {
   transition: background 0.3s ease;
   max-width: 40px;
 }
-.pill.active { background: var(--orange); }
+.pill.active { background: var(--accent); }
 .pill.done   { background: rgba(245,240,232,0.25); }
 
 /* ─── Phone shell ─── */
@@ -220,7 +220,7 @@ body {
   border: 0.5px solid var(--border-med);
   color: var(--fg-subtle);
 }
-.s-id-track.track-a { border-color: rgba(245,130,10,0.3); color: var(--orange-d); }
+.s-id-track.track-a { border-color: rgba(200,169,110,0.3); color: var(--accent-d); }
 .s-id-track.track-b { border-color: rgba(14,165,201,0.3); color: var(--blue); }
 .s-id-track.shared  { border-color: var(--border-med); color: var(--fg-subtle); }
 
@@ -230,7 +230,7 @@ body {
   font-weight: 400;
   letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: var(--orange-d);
+  color: var(--accent-d);
   margin-bottom: 10px;
 }
 .s-headline {
@@ -297,7 +297,7 @@ body {
   text-align: left;
 }
 .wallet-option:hover { border-color: rgba(245,240,232,0.22); background: var(--bg-2); }
-.wallet-option.selected { border-color: var(--orange); background: var(--orange-tint); }
+.wallet-option.selected { border-color: var(--accent); background: var(--accent-tint); }
 .wallet-icon {
   width: 28px;
   height: 28px;
@@ -354,7 +354,7 @@ body {
   font-family: 'DM Mono', monospace;
   font-size: 48px;
   font-weight: 500;
-  color: var(--orange);
+  color: var(--accent);
   letter-spacing: -0.02em;
   line-height: 1;
   margin-bottom: 6px;
@@ -383,7 +383,7 @@ body {
   margin-bottom: 9px;
   position: relative;
 }
-.earn-block.active { border-color: var(--orange); background: var(--orange-tint); }
+.earn-block.active { border-color: var(--accent); background: var(--accent-tint); }
 .earn-block.secondary { background: var(--bg-2); }
 .earn-block-label {
   font-family: 'DM Mono', monospace;
@@ -393,7 +393,7 @@ body {
   margin-bottom: 5px;
   color: var(--fg-subtle);
 }
-.earn-block.active .earn-block-label { color: var(--orange); }
+.earn-block.active .earn-block-label { color: var(--accent); }
 .earn-block-headline { font-size: 13px; font-weight: 400; color: var(--fg); margin-bottom: 3px; }
 .earn-block-body { font-size: 11px; color: var(--fg-muted); line-height: 1.5; }
 .earn-nudge {
@@ -405,7 +405,7 @@ body {
   align-items: center;
   gap: 5px;
 }
-.earn-nudge .nudge-sats { color: var(--orange); font-style: normal; font-family: 'DM Mono', monospace; }
+.earn-nudge .nudge-sats { color: var(--accent); font-style: normal; font-family: 'DM Mono', monospace; }
 
 /* ─── Privacy block ─── */
 .privacy-visual {
@@ -424,7 +424,7 @@ body {
   letter-spacing: -0.01em;
   margin-bottom: 14px;
 }
-.privacy-statement em { color: var(--orange-d); font-style: italic; }
+.privacy-statement em { color: var(--accent-d); font-style: italic; }
 .privacy-detail-row {
   display: flex;
   align-items: center;
@@ -477,10 +477,10 @@ body {
   gap: 7px;
   padding: 8px 16px;
   border-radius: 999px;
-  background: var(--orange-tint);
-  border: 0.5px solid rgba(245,130,10,0.25);
+  background: var(--accent-tint);
+  border: 0.5px solid rgba(200,169,110,0.25);
   font-size: 12px;
-  color: var(--orange);
+  color: var(--accent);
   font-family: 'DM Mono', monospace;
   margin-bottom: 14px;
 }
@@ -504,7 +504,7 @@ body {
   color: var(--fg-subtle);
   background: var(--bg-2);
 }
-.stamp.filled { background: var(--orange); border-color: var(--orange); color: var(--bg); }
+.stamp.filled { background: var(--accent); border-color: var(--accent); color: var(--bg); }
 
 /* ─── CTA buttons ─── */
 .s-cta {
@@ -563,7 +563,7 @@ body {
   font-size: 9px;
   letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: var(--orange-d);
+  color: var(--accent-d);
   margin-bottom: 5px;
 }
 .meta-purpose { font-size: 13px; font-weight: 400; color: var(--fg); margin-bottom: 5px; line-height: 1.35; }
@@ -587,7 +587,7 @@ body {
   font-family: 'DM Mono', monospace;
   line-height: 1.5;
 }
-.track-flag.flag-a { background: var(--orange-tint); color: var(--orange-d); border: 0.5px solid rgba(245,130,10,0.2); }
+.track-flag.flag-a { background: var(--accent-tint); color: var(--accent-d); border: 0.5px solid rgba(200,169,110,0.2); }
 .track-flag.flag-b { background: rgba(14,165,201,0.06); color: var(--blue); border: 0.5px solid rgba(14,165,201,0.2); }
 .track-flag.flag-shared { background: var(--bg-3); color: var(--fg-subtle); border: 0.5px solid var(--border); }
 
@@ -1031,7 +1031,7 @@ const screens = [
             <div style="font-size:10px;color:var(--fg-subtle)">1 / 9 · free coffee at 10</div>
           </div>
           <div style="font-size:11px;color:var(--fg-subtle);text-align:center;line-height:1.6;max-width:220px">
-            You would have earned <span style="color:var(--orange);font-family:'DM Mono',monospace">⚡ 186 sats</span> on that order.<br>Switch in Settings whenever you like.
+            You would have earned <span style="color:var(--accent);font-family:'DM Mono',monospace">⚡ 186 sats</span> on that order.<br>Switch in Settings whenever you like.
           </div>
         </div>
         <button class="s-cta" style="margin-top:0">Place your first order</button>
@@ -1056,7 +1056,7 @@ const screens = [
           </div>
           <div style="background:var(--bg-2);border:0.5px solid var(--border-med);border-radius:8px;padding:12px;margin-bottom:4px;text-align:left;width:100%">
             <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--fg-subtle);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Minibits wallet</div>
-            <div style="font-size:24px;font-family:'DM Mono',monospace;color:var(--orange);letter-spacing:-0.02em">21 sats</div>
+            <div style="font-size:24px;font-family:'DM Mono',monospace;color:var(--accent);letter-spacing:-0.02em">21 sats</div>
             <div style="font-size:10px;color:var(--fg-subtle);margin-top:2px">welcome gift · more on every order</div>
           </div>
         </div>
@@ -1114,5 +1114,6 @@ function renderScreen() {
 renderScreen();
 </script>
 
+<script src="/analytics.js" defer></script>
 </body>
 </html>

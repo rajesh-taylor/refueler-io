@@ -1,7 +1,7 @@
 
 <style>
 :root {
-  --orange: #D4690A;
+  --accent: #C8A96E;
   --bg-card: var(--color-background-primary);
   --bg-surface: var(--color-background-secondary);
   --border: var(--color-border-tertiary);
@@ -61,7 +61,7 @@ p:last-child { margin-bottom: 0; }
   display: inline-block; font-size: 11px; font-weight: 500;
   padding: 2px 8px; border-radius: 4px; margin-right: 4px; margin-bottom: 4px;
 }
-.tag-orange { background: #FFF0E0; color: #9A4800; }
+.tag-accent { background: #F5F0E8; color: #8A6A3A; }
 .tag-green { background: var(--color-background-success); color: var(--color-text-success); }
 .tag-blue { background: var(--color-background-info); color: var(--color-text-info); }
 .tag-red { background: var(--color-background-danger); color: var(--color-text-danger); }
@@ -76,7 +76,7 @@ tr:last-child td { border-bottom: none; }
 .mono { font-family: var(--font-mono); font-size: 12px; background: var(--bg-surface); padding: 2px 6px; border-radius: 4px; }
 .disclosure-box {
   background: var(--bg-surface);
-  border-left: 3px solid var(--orange);
+  border-left: 3px solid var(--accent);
   border-radius: 0 var(--r-sm) var(--r-sm) 0;
   padding: 1rem 1.25rem;
   font-size: 14px; line-height: 1.7;
@@ -241,11 +241,11 @@ tr:last-child td { border-bottom: none; }
     <p>The issuance moment is important for both UX design and HMRC records. There are two distinct events, and they must not be conflated.</p>
     <hr class="divider">
     <div class="step-row">
-      <div class="step-num" style="background:#FFF0E0;color:#9A4800">A</div>
+      <div class="step-num" style="background:#F5F0E8;color:#8A6A3A">A</div>
       <div class="step-text"><span class="step-label">Reward committed (Refueler's obligation created)</span><br><span class="step-sub">This happens at collection confirmation — when the user taps to collect and the order status transitions to "collected." At this point Refueler's ledger records: order ID, sats amount, timestamp. The token does not yet exist in the user's wallet. This is the HMRC-recordable event.</span></div>
     </div>
     <div class="step-row">
-      <div class="step-num" style="background:#FFF0E0;color:#9A4800">B</div>
+      <div class="step-num" style="background:#F5F0E8;color:#8A6A3A">B</div>
       <div class="step-text"><span class="step-label">Token minted and delivered (user's possession)</span><br><span class="step-sub">This happens when the blind-signature exchange completes — either synchronously at collection (if the user has Minibits open and linked) or asynchronously (the token is queued and delivered when the user next opens the app). The token lands in the user's device storage. Refueler no longer holds or knows the token value.</span></div>
     </div>
     <hr class="divider">
@@ -360,15 +360,15 @@ tr:last-child td { border-bottom: none; }
     <hr class="divider">
     <h3 style="margin-bottom:0.75rem">Why this matters for Refueler — three implications</h3>
     <div class="step-row">
-      <div class="step-num" style="background:#FFF0E0;color:#9A4800">1</div>
+      <div class="step-num" style="background:#F5F0E8;color:#8A6A3A">1</div>
       <div class="step-text"><span class="step-label">Regulatory / custodial status</span><br><span class="step-sub">Calle's argument: if the operator cannot access the Bitcoin, they are not a custodian under existing law. If this holds, Refueler could operate its own mint without Money Transmitter or e-money licence exposure. This requires UK-specific legal analysis — the FCA's perimeter guidance on crypto assets is different from US law. Flag for the CTO and CPO/DPO to investigate with external counsel.</span></div>
     </div>
     <div class="step-row">
-      <div class="step-num" style="background:#FFF0E0;color:#9A4800">2</div>
+      <div class="step-num" style="background:#F5F0E8;color:#8A6A3A">2</div>
       <div class="step-text"><span class="step-label">Security model</span><br><span class="step-sub">Even if Refueler's backend is fully compromised, the user's sats cannot be stolen. This is a material security improvement over the current model (mint on a regular server). The architecture is the same approach ACINQ uses for Phoenix Wallet — battle-tested at scale.</span></div>
     </div>
     <div class="step-row">
-      <div class="step-num" style="background:#FFF0E0;color:#9A4800">3</div>
+      <div class="step-num" style="background:#F5F0E8;color:#8A6A3A">3</div>
       <div class="step-text"><span class="step-label">Brand and investor narrative</span><br><span class="step-sub">Refueler's mint, built on enclave architecture, is verifiably non-custodial. This is a legitimate differentiator from every ad-tech loyalty scheme and every crypto rewards product that holds user funds. It is also the final answer to the trust model question that Bitcoin-native users will ask. The copy writes itself: "We cannot steal your sats. The hardware makes it impossible."</span></div>
     </div>
     <hr class="divider">
@@ -427,7 +427,7 @@ You have read and ratified all decisions in Brand Session v1.0 and all Session 1
 LOCKED DECISIONS ENTERING THIS SESSION:
 - Paper theme everywhere as default. Carbon is a user toggle only (Settings / top-right web).
 - ETA widget: Apple Liquid Glass venue strip (venue name + items) on top. Carbon base below for arc / status / reward. NOT full-colour venue hex bleed.
-- Orange (#F5820A / #D4690A Paper): once per screen maximum. Sats/reward figure only. Never dominant.
+- Orange (#C8A96E / #C8A96E Paper): once per screen maximum. Sats/reward figure only. Never dominant.
 - Arc treatment: still under review. Do not finalise or build to production.
 - Hero metric: NOT 4:22. Time saved not waiting in queue. Directional placeholder until field data.
 - "c2c": do not use in public copy without written consent. "Fenchurch Street" is safe.

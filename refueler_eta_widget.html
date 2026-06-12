@@ -38,7 +38,7 @@
     transition: all 0.15s ease;
   }
   .ctrl-btn:hover { border-color: rgba(255,255,255,0.24); color: #F0EDE8; }
-  .ctrl-btn.active { border-color: #F5820A; color: #F5820A; background: rgba(245,130,10,0.08); }
+  .ctrl-btn.active { border-color: #C8A96E; color: #C8A96E; background: rgba(200,169,110,0.08); }
 
   .widget {
     width: 100%;
@@ -65,7 +65,7 @@
     transition: background 0.6s ease;
     pointer-events: none;
   }
-  .widget.state-progress::before  { background: #F5820A; }
+  .widget.state-progress::before  { background: #C8A96E; }
   .widget.state-ready::before     { background: #2ECC71; }
   .widget.state-delay::before     { background: #0EA5C9; }
 
@@ -187,7 +187,7 @@
     font-family: 'DM Mono', monospace;
     font-size: 14px;
     font-weight: 500;
-    color: #F5820A;
+    color: #C8A96E;
     margin-top: 2px;
   }
 
@@ -233,7 +233,7 @@
     margin-bottom: 20px;
     transition: background 0.5s, color 0.5s, border-color 0.5s;
   }
-  .state-badge.progress { background: rgba(245,130,10,0.1); color: #F5820A; border: 0.5px solid rgba(245,130,10,0.25); }
+  .state-badge.progress { background: rgba(200,169,110,0.1); color: #C8A96E; border: 0.5px solid rgba(200,169,110,0.25); }
   .state-badge.ready    { background: rgba(46,204,113,0.1); color: #2ECC71; border: 0.5px solid rgba(46,204,113,0.25); }
   .state-badge.delay    { background: rgba(14,165,201,0.1); color: #0EA5C9; border: 0.5px solid rgba(14,165,201,0.25); }
 
@@ -313,13 +313,13 @@
         class="arc-fill"
         id="arc-fill"
         d=""
-        stroke="#F5820A"
+        stroke="#C8A96E"
         stroke-dasharray="1"
         stroke-dashoffset="0"
       />
     </svg>
     <div class="arc-center">
-      <div class="time-value" id="time-value" style="color:#F5820A">4:22</div>
+      <div class="time-value" id="time-value" style="color:#C8A96E">4:22</div>
       <div class="time-label" id="time-label">estimated</div>
     </div>
   </div>
@@ -375,10 +375,10 @@ const arcLength = r * sweepAngle; // ~276
 const states = {
   progress: {
     fillPct: 0.45,
-    strokeColor: '#F5820A',
+    strokeColor: '#C8A96E',
     timeValue: '4:22',
     timeLabel: 'estimated',
-    timeColor: '#F5820A',
+    timeColor: '#C8A96E',
     badgeClass: 'progress',
     badgeLabel: 'Being made',
     pulse: true,
@@ -471,5 +471,6 @@ function setState(name) {
 // Init arc fill
 setState('progress');
 </script>
+<script src="/analytics.js" defer></script>
 </body>
 </html>
