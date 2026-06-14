@@ -263,9 +263,17 @@ async function sendGateMagicLink() {
   const btn = document.getElementById('gate-btn');
   btn.textContent = 'Sending…'; btn.disabled = true;
   try {
+    // emailRedirectTo must resolve to a valid https:// URL that exactly matches
+    // an entry in Supabase Auth → URL Configuration → Redirect URLs.
+    // When opened as a local file, window.location.origin is 'null' or 'file://'
+    // — Supabase rejects both and silently falls back to Site URL (the homepage).
+    // Always hard-fall to the production URL when not running on https.
+    const redirectTo = window.location.origin.startsWith('https://')
+      ? window.location.origin + '/merchant-tablet.html'
+      : 'https://refueler.io/merchant-tablet.html';
     const { error } = await client.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: window.location.href }
+      options: { emailRedirectTo: redirectTo }
     });
     btn.textContent = 'Send Sign-in Link'; btn.disabled = false;
     if (error) {
@@ -321,58 +329,65 @@ function renderAuthNav(user) {
 }
 
 // ─── VENUE RESOLUTION & PIN LOADING ─────────────────────────
+// Resolution path (locked §4g / CC-06):
+//   auth.users (session user.id) → merchant_users.user_id → merchant_users.venue_id → venue_partners
+// Direct venue_partners.contact_email lookup is DEPRECATED — do not restore.
 async function resolveVenueAndPins(user) {
+  if (!user?.id) {
+    console.error('[resolveVenueAndPins] No authenticated user id — cannot resolve venue');
+    return;
+  }
   try {
+    // Step 1: look up merchant_users by user_id (auth.users UUID), not email
     const res = await fetch(
-      `${SB_URL}/rest/v1/merchant_users?email=eq.${encodeURIComponent(user.email)}&select=venue_id,role,staff_pin_hash,owner_pin_hash&limit=1`,
+      `${SB_URL}/rest/v1/merchant_users?user_id=eq.${encodeURIComponent(user.id)}&select=venue_id,role,staff_pin_hash,owner_pin_hash&limit=1`,
       { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } }
     );
-    if (res.ok) {
-      const rows = await res.json();
-      if (rows && rows.length > 0) {
-        _venueId      = rows[0].venue_id;
-        _userRole     = rows[0].role || null;
-        _staffPinHash = rows[0].staff_pin_hash || null;
-        _ownerPinHash = rows[0].owner_pin_hash || null;
-        await loadVenueDetails(_venueId);
-        return;
-      }
+    if (!res.ok) {
+      console.error('[resolveVenueAndPins] merchant_users fetch failed — HTTP', res.status);
+      return;
     }
-  } catch(e) { console.warn('merchant_users lookup failed:', e); }
+    const rows = await res.json();
+    if (!rows || rows.length === 0) {
+      console.error('[resolveVenueAndPins] No merchant_users row found for user_id:', user.id);
+      return;
+    }
+    // Step 2: populate module state from merchant_users row
+    _venueId      = rows[0].venue_id   || null;
+    _userRole     = rows[0].role       || null;
+    _staffPinHash = rows[0].staff_pin_hash || null;
+    _ownerPinHash = rows[0].owner_pin_hash || null;
 
-  // Fallback to venue_partners
-  try {
-    const res = await fetch(
-      `${SB_URL}/rest/v1/venue_partners?contact_email=eq.${encodeURIComponent(user.email)}&select=id,name,address,lat,lng,active&limit=1`,
-      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } }
-    );
-    if (res.ok) {
-      const rows = await res.json();
-      if (rows && rows.length > 0) {
-        _venueId = rows[0].id;
-        _venueName = rows[0].name;
-        _venueData = rows[0];
-        renderVenueCard(rows[0]);
-      }
+    if (!_venueId) {
+      console.error('[resolveVenueAndPins] merchant_users row has no venue_id for user_id:', user.id);
+      return;
     }
-  } catch(e) { console.warn('venue_partners fallback failed:', e); }
+    // Step 3: fetch full venue_partners row via venue_id
+    await loadVenueDetails(_venueId);
+  } catch(e) {
+    console.error('[resolveVenueAndPins] Unexpected error:', e);
+  }
 }
 
 async function loadVenueDetails(venueId) {
   if (!venueId) return;
   try {
+    // Include brand_primary + brand_secondary for ETA widget accent colours
     const res = await fetch(
-      `${SB_URL}/rest/v1/venue_partners?id=eq.${venueId}&select=id,name,address,lat,lng,active&limit=1`,
+      `${SB_URL}/rest/v1/venue_partners?id=eq.${venueId}&select=id,name,address,lat,lng,active,brand_primary,brand_secondary,venue_type,franchise_group_id&limit=1`,
       { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } }
     );
-    if (!res.ok) return;
+    if (!res.ok) {
+      console.error('[loadVenueDetails] venue_partners fetch failed — HTTP', res.status);
+      return;
+    }
     const rows = await res.json();
     if (rows && rows.length > 0) {
       _venueName = rows[0].name;
       _venueData = rows[0];
       renderVenueCard(rows[0]);
     }
-  } catch(e) { console.warn('loadVenueDetails error:', e); }
+  } catch(e) { console.warn('[loadVenueDetails] error:', e); }
 }
 
 function renderVenueCard(venue) {
