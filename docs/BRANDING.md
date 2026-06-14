@@ -72,12 +72,11 @@ These are global. They never change per venue or per theme.
 
 | Token | Value | Usage |
 |---|---|---|
-| `--orange` | `#F5820A` | **Used sparingly — once per screen, on the single element most deserving attention.** Sats reward figures. Primary CTA on Paper theme only. Never dominant on venue-branded screens. |
 | `--green` | `#2ECC71` | Success, connected states, Collect button (ready state) |
 | `--calm-blue` | `#0EA5C9` | Delay/calm-warning state only. Overrides venue secondary on arc when delay. |
+| `--accent` | `#C8A96E` | Gold — CTAs, borders, auth buttons, dividers. Primary attention token. |
 
-### Orange restraint rule ✅ LOCKED
-Orange (`#F5820A`) must not be the dominant colour on any screen that has a venue brand background. It appears **once** — on the sats reward figure. Nowhere else. This is the James Bond principle: one thing draws the eye. One.
+**Orange `#F5820A` is abolished.** It does not exist in this codebase. Do not use, reference, or propose it on any surface.
 
 ### Carbon theme (dark) ✅ LOCKED
 
@@ -101,11 +100,11 @@ Carbon is a user toggle in Settings. It is never the default.
 | `--bg2` | `#EDEAE4` | Cards |
 | `--bg3` | `#E4E1DB` | Elevated surfaces |
 | `--text` | `#1A1A18` | Primary text |
-| `--orange` | `#D4690A` | CTA (slightly deeper for Paper legibility) |
+| `--accent` | `#C8A96E` | CTA, gold accent |
 | `--green` | `#1E8A4A` | Success states |
 
 ### England skin
-Activates automatically on match days for English-locale devices. Red + white palette. Orange used sparingly. To be designed as a dedicated skin — not a colour override on existing screens.
+Activates automatically on match days for English-locale devices. Red + white palette. To be designed as a dedicated skin — not a colour override on existing screens.
 
 ### Venue brand colour system ✅ LOCKED
 Every venue in Supabase has three brand colour columns. These drive: ETA screen background, arc accent, logo chip, qty badges, locate.html flash layer, and EV collection flash screen.
@@ -147,7 +146,7 @@ All new franchise partners: colours required before venue can go live on the ETA
 
 ## Sats display — whisper principle ✅ LOCKED
 
-Sats reward figures must never shout. No pill, no badge, no border, no large orange block. The treatment:
+Sats reward figures must never shout. No pill, no badge, no border, no large coloured block. The treatment:
 - DM Mono, ~12px, colour `rgba(255,255,255,0.40)` on dark / `rgba(0,0,0,0.35)` on Paper
 - Lightning bolt `⚡` at 28–30% opacity
 - Label text ("on collection") at 22–24% opacity

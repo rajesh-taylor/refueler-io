@@ -1,201 +1,114 @@
-/**
- * Refueler — Mint Interface (NUT-14 HTLC extension)
- * Session 18 · lib/mintInterface.ts
- *
- * Extends Session 14 mintInterface.ts with NUT-14 HTLC support.
- * Wallet-side enforcement model: the user's Minibits wallet monitors
- * the HTLC and claims the refund after expiry. Refueler is passive.
- *
- * Changes from Session 14:
- *   - buildNUT18Request() now accepts optional htlcParams
- *   - generateHTLCSecret() — cryptographically secure preimage
- *   - buildNUT14HTLCParams() — constructs the NUT-14 lock conditions
- *   - markOrderExpired() — transitions order to expired in Supabase
- *
- * Open: confirm with Minibits:
- *   1. Does ippon NUT-14 support wallet-side refund claiming post-expiry?
- *   2. What is the claim window after HTLC timeout fires?
- *   3. NUT-18 send endpoint path + response format (existing open question)
- */
+/** mintInterface.ts — Payment provider abstraction layer. Routes payment
+instructions to active provider (currently Blink/BOLT11). Cashu/NUT-18 and
+BOLT12 slot in behind this interface without touching the order layer.
+"Mint" = generic value endpoint, not Cashu-specific. */
 
-import 'react-native-get-random-values'; // must be first for crypto.getRandomValues
-import { createClient } from '@supabase/supabase-js';
+// =============================================================
+// Refueler · mintInterface.ts — CC-11
+// Updated: provider label → 'blink/bolt11' (replaces 'zebedee/bolt11')
+// =============================================================
 
-// ---------------------------------------------------------------------------
-// Types (NUT-14 additions)
-// ---------------------------------------------------------------------------
+export type PaymentProvider = 'blink/bolt11' | 'cashu/nut18' | 'bolt12'
 
-export interface NUT14HTLCParams {
-  /** SHA-256 preimage hash — this is what goes in the token lock */
-  lockHash:        string;
-  /** UNIX timestamp (seconds) when the HTLC expires */
-  expiryUnix:      number;
-  /** ISO 8601 — stored in Supabase for readability */
-  expiryISO:       string;
-  /** Raw preimage (hex) — kept in memory only, never persisted by Refueler */
-  preimage:        string;
+export interface InvoiceRequest {
+  orderId: string
+  amountSats: number
+  memo?: string
+  sandbox?: boolean
 }
 
-export interface NUT18RequestParams {
-  orderId:      string;
-  venueId:      string;
-  amountSats:   number;
-  itemLabel:    string;
-  /** Provide to enable NUT-14 HTLC escrow */
-  htlc?:        NUT14HTLCParams;
+export interface InvoiceResult {
+  paymentRequest: string
+  paymentHash: string
+  expiresAt: string
+  satoshis: number
+  provider: PaymentProvider
 }
 
-export interface NUT18RequestPayload {
-  // Session 14 fields — unchanged
-  order_ref:    string;
-  venue_id:     string;
-  amount:       number;
-  unit:         'sat';
-  description:  string;
-  // NUT-14 extension — present only when htlc provided
-  htlc_lock?:   {
-    lock_hash:  string;
-    expiry:     number;   // UNIX seconds
-  };
+export interface MintInterfaceConfig {
+  activeProvider: PaymentProvider
+  supabaseUrl: string
+  supabaseAnonKey: string
 }
 
-// ---------------------------------------------------------------------------
-// HTLC helpers
-// ---------------------------------------------------------------------------
+// ─── Active provider ─────────────────────────────────────────
+// Change this single value to swap the payment backend.
+// All order-layer code is insulated from provider details.
 
-/**
- * Generates a cryptographically secure 32-byte preimage.
- * The preimage is held in memory only.
- * The SHA-256 hash of this value is sent to the mint as the lock condition.
- */
-export async function generateHTLCPreimage(): Promise<string> {
-  const bytes = new Uint8Array(32);
-  crypto.getRandomValues(bytes);
-  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
-}
+export const ACTIVE_PROVIDER: PaymentProvider = 'blink/bolt11'
 
-/**
- * SHA-256 of a hex string, returned as hex.
- * Used to derive the lock_hash from the preimage.
- */
-export async function sha256Hex(hexInput: string): Promise<string> {
-  const bytes = hexInput.match(/.{2}/g)!.map(h => parseInt(h, 16));
-  const buffer = new Uint8Array(bytes);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
-  return Array.from(new Uint8Array(hashBuffer))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
-}
+// ─── Invoice creation ─────────────────────────────────────────
 
-/**
- * Builds NUT-14 HTLC parameters for a given venue.
- * htlcTimeoutSeconds sourced from venues.htlc_timeout_seconds (default 480).
- *
- * Returns the full NUT14HTLCParams — caller stores lockHash + expiry in
- * Supabase; preimage is returned for in-memory use by the wallet layer only.
- */
-export async function buildNUT14HTLCParams(
-  htlcTimeoutSeconds: number = 480
-): Promise<NUT14HTLCParams> {
-  const preimage   = await generateHTLCPreimage();
-  const lockHash   = await sha256Hex(preimage);
-  const nowUnix    = Math.floor(Date.now() / 1000);
-  const expiryUnix = nowUnix + htlcTimeoutSeconds;
-  const expiryISO  = new Date(expiryUnix * 1000).toISOString();
+export async function createInvoice(
+  req: InvoiceRequest,
+  config: MintInterfaceConfig
+): Promise<InvoiceResult> {
+  switch (config.activeProvider) {
+    case 'blink/bolt11':
+      return createBlinkBolt11Invoice(req, config)
 
-  return { lockHash, expiryUnix, expiryISO, preimage };
-}
+    case 'cashu/nut18':
+      // Slot in NUT-18 provider here without touching order layer
+      throw new Error('cashu/nut18 provider not yet wired in this build')
 
-// ---------------------------------------------------------------------------
-// NUT-18 request builder (extended)
-// ---------------------------------------------------------------------------
+    case 'bolt12':
+      // BOLT12 assessed and abandoned for beta — do not reopen
+      throw new Error('bolt12 abandoned for beta — use blink/bolt11')
 
-/**
- * Builds the NUT-18 payment request payload.
- * Unchanged from Session 14 when htlc is omitted.
- * Adds htlc_lock when NUT-14 params are provided.
- *
- * NOTE: The actual send endpoint path is pending Minibits confirmation.
- * Update MINT_URL + endpoint path in nut18-request Edge Function only.
- */
-export function buildNUT18Request(params: NUT18RequestParams): NUT18RequestPayload {
-  const payload: NUT18RequestPayload = {
-    order_ref:   params.orderId,
-    venue_id:    params.venueId,
-    amount:      params.amountSats,
-    unit:        'sat',
-    description: params.itemLabel,
-  };
-
-  if (params.htlc) {
-    payload.htlc_lock = {
-      lock_hash: params.htlc.lockHash,
-      expiry:    params.htlc.expiryUnix,
-    };
-  }
-
-  return payload;
-}
-
-// ---------------------------------------------------------------------------
-// NUT-02 keyset rotation guard (unchanged from Session 14)
-// ---------------------------------------------------------------------------
-
-export function isKeysetRotationError(err: unknown): boolean {
-  if (err instanceof Error) {
-    return err.message.includes('keyset') || err.message.includes('NUT-02');
-  }
-  return false;
-}
-
-// ---------------------------------------------------------------------------
-// Order expiry — Supabase transition (wallet-side model)
-// ---------------------------------------------------------------------------
-
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
-/**
- * Transitions an order to expired status.
- *
- * Called from the UI layer when the local HTLC expiry timestamp passes
- * and fulfilment has not been confirmed. Refueler does not arbitrate —
- * this is a UI state transition only. The actual sats refund is claimed
- * wallet-side by Minibits.
- *
- * Does NOT fire if order is already fulfilled or collected.
- */
-export async function markOrderExpired(orderId: string): Promise<void> {
-  const { error } = await supabase
-    .from('nut18_orders')
-    .update({
-      status:      'expired',
-      htlc_status: 'expired',
-    })
-    .eq('order_ref', orderId)
-    .in('status', ['pending', 'paid']); // guard — never overwrite fulfilled/collected
-
-  if (error) {
-    console.error('[mintInterface] markOrderExpired failed', { orderId, error });
-    throw new Error(`Failed to mark order expired: ${error.message}`);
+    default:
+      throw new Error(`Unknown payment provider: ${config.activeProvider}`)
   }
 }
 
-/**
- * Marks an order as refunded — optional signal.
- * Only relevant if Minibits provides a callback confirming wallet-side
- * refund claim. Currently unused pending Minibits dev call confirmation.
- */
-export async function markOrderRefunded(orderId: string): Promise<void> {
-  const { error } = await supabase
-    .from('nut18_orders')
-    .update({ htlc_status: 'refunded' })
-    .eq('order_ref', orderId)
-    .eq('htlc_status', 'expired'); // only transition from expired
+// ─── Blink / BOLT11 implementation ───────────────────────────
 
-  if (error) {
-    throw new Error(`Failed to mark order refunded: ${error.message}`);
+async function createBlinkBolt11Invoice(
+  req: InvoiceRequest,
+  config: MintInterfaceConfig
+): Promise<InvoiceResult> {
+  const endpoint = `${config.supabaseUrl}/functions/v1/bolt11-create-invoice`
+
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${config.supabaseAnonKey}`,
+    },
+    body: JSON.stringify({
+      order_id: req.orderId,
+      amount_sats: req.amountSats,
+      memo: req.memo,
+      sandbox: req.sandbox ?? false,
+    }),
+  })
+
+  if (!res.ok) {
+    const errText = await res.text()
+    throw new Error(`bolt11-create-invoice error ${res.status}: ${errText}`)
   }
+
+  const data = await res.json()
+
+  return {
+    paymentRequest: data.payment_request,
+    paymentHash: data.payment_hash,
+    expiresAt: data.expires_at,
+    satoshis: data.satoshis,
+    provider: 'blink/bolt11',
+  }
+}
+
+// ─── Provider metadata ────────────────────────────────────────
+
+export function providerLabel(provider: PaymentProvider): string {
+  const labels: Record<PaymentProvider, string> = {
+    'blink/bolt11': 'Blink · BOLT11',
+    'cashu/nut18':  'Cashu · NUT-18',
+    'bolt12':       'BOLT12',
+  }
+  return labels[provider] ?? provider
+}
+
+export function isProviderActive(provider: PaymentProvider): boolean {
+  return provider === ACTIVE_PROVIDER
 }

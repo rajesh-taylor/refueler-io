@@ -1,0 +1,24 @@
+name = "refueler-analytics"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Analytics Engine binding — create dataset named refueler_analytics
+# in Cloudflare dashboard before deploying
+[[analytics_engine_datasets]]
+binding = "ANALYTICS"
+dataset = "refueler_analytics"
+
+# Environment variables (non-secret)
+[vars]
+ALLOWED_ORIGIN = "https://refueler.io"
+
+# Routes — Worker serves on analytics.refueler.io
+# Add CNAME analytics.refueler.io → refueler-analytics.workers.dev in Cloudflare DNS
+[[routes]]
+pattern = "analytics.refueler.io/event"
+zone_name = "refueler.io"
+
+[observability]
+enabled = true
+head_sampling_rate = 1

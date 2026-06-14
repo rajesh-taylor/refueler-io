@@ -26,8 +26,8 @@ England skin activates automatically on match days for English-locale devices. I
 
 ## Section B — Colour system updates (extends v1.0)
 
-### Orange restraint rule (new — supersedes any prior liberal use of orange)
-`#F5820A` (Carbon) / `#D4690A` (Paper) appears **once per screen** on the single element most deserving attention. On venue-branded screens (ETA, locate), that is the sats/reward figure only. On Paper screens, that is the primary CTA only.
+### Orange — abolished (supersedes any prior usage guidance)
+`#F5820A` and `#D4690A` are permanently removed from the Refueler design system. They do not appear on any surface. Gold (`#C8A96E`) is the primary attention token for CTAs and accents.
 
 ### Venue brand colour schema (new)
 Three columns per venue in Supabase `venues` table:

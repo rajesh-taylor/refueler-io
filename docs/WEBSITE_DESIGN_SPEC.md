@@ -24,7 +24,7 @@
 **Suave · Discreet · Refined — James Bond, not fintech neon.**
 
 - One thing draws the eye per screen. One.
-- Orange appears once. On the element most deserving attention.
+- Gold (`#C8A96E`) is the primary attention token — CTAs, accents, auth buttons.
 - The venue brand colour bleeds through a Liquid Glass surface — it does not own the screen.
 - Paper is the default. Always. Flag any deviation.
 
@@ -48,11 +48,11 @@
 
 | Token | Value | Rule |
 |---|---|---|
-| `--orange` | `#F5820A` (Carbon) / `#D4690A` (Paper) | Once per screen. Sats/reward figures only on venue-branded screens. |
+| `--accent` | `#C8A96E` | Gold — CTAs, auth buttons, accents. Primary attention token. |
 | `--green` | `#2ECC71` (Carbon) / `#1E8A4A` (Paper) | Success, connected, Collect button (ready state) |
 | `--calm-blue` | `#0EA5C9` | Delay state only. Overrides venue secondary on arc. |
 
-Orange #F5820A — BANNED from all editorial surfaces, article pages, complaints, privacy, and footer links. Permitted only: ETA screen sats/reward figures. No exceptions without CMO + Head of Design sign-off.
+**Orange `#F5820A` / `#D4690A` — abolished. Does not exist in this codebase. No exceptions.**
 
 ### Carbon theme
 
@@ -173,7 +173,7 @@ Variant A locked across all article pages: Source Serif 4, 68ch column, 18px/1.8
 
 **Subhead:** Direction — "We start your order at the right time so it's ready when you arrive." (Refueler handles the timing — user does not need to order at a specific stop.)
 
-**CTA:** "Get early access" (Paper, orange)
+**CTA:** "Get early access" (Paper, gold `#C8A96E`)
 **Secondary:** "See how it works"
 
 **Sign-in component:** Identical to Command Centre sign-in. Shared component — merchant users and general users use the same sign-in surface.
@@ -291,9 +291,8 @@ Apply to: index, all article pages. Complaints page: same token for consistency.
 **Colour — Carbon body text:**
 `#E4E2DC` confirmed correct for Carbon mode body text. Do not change.
 
-**Orange (#F5820A) — banned from all pages except ETA screen sats/reward figures.**
-No exceptions without CMO + Head of Design sign-off.
-Confirmed absent: complaints, editorial index, all article pages.
+**Orange (#F5820A / #D4690A) — abolished. Does not exist in this codebase.**
+Confirmed absent: complaints, editorial index, all article pages, all Command Centre pages.
 
 **Drop cap — removed from all article pages.**
 Opening paragraph renders as clean body text. No float, no oversized first letter.

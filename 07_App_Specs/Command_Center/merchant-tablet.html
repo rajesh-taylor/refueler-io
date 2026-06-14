@@ -11,914 +11,180 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
-<style>
-/* ─── DESIGN TOKENS — Paper (default on load) ─── */
-:root {
-  --bg:            #F7F4EF;
-  --surface:       #EDEAE4;
-  --text-primary:  #3D3A36;
-  --text-secondary:#5A5751;
-  --text-tertiary: #9A948D;
-  --border:        #D6D1C8;
-  --inset-rule:    var(--border);
-  --accent-carbon: #C8A96E;
-
-  --c-green:       #1C7C4A;
-  --c-green-bg:    #EBF7F0;
-  --c-green-dim:   #8FC9A8;
-  --c-amber:       #B85C00;
-  --c-amber-bg:    #FEF3E6;
-  --c-red:         #C0392B;
-  --c-red-bg:      #FDF0EE;
-  --c-console:     #111316;
-  --c-console-t:   #C8FFD4;
-  --c-console-dim: #3A4A5A;
-
-  --c-bg:       var(--bg);
-  --c-surface:  var(--surface);
-  --c-border:   var(--border);
-  --c-border-m: #B8B2A8;
-  --c-text-1:   var(--text-primary);
-  --c-text-2:   var(--text-secondary);
-  --c-text-3:   var(--text-tertiary);
-
-  --mono:    'IBM Plex Mono', monospace;
-  --sans:    'DM Sans', sans-serif;
-  --serif:   'Source Serif 4', Georgia, serif;
-  --heading: 'Satoshi', 'DM Sans', sans-serif;
-  --sidebar-w: 340px;
-}
-
-[data-theme="carbon"] {
-  --bg:            #1E1F22;
-  --surface:       #26282C;
-  --text-primary:  #E4E2DC;
-  --text-secondary:#8A8680;
-  --text-tertiary: #5A5751;
-  --border:        #35373B;
-  --inset-rule:    #C8A96E;
-  --accent-carbon: #C8A96E;
-
-  --c-green:       #3DCA7A;
-  --c-green-bg:    #0D2B1A;
-  --c-green-dim:   #2A6644;
-  --c-amber:       #E8A23A;
-  --c-amber-bg:    #2B1D08;
-  --c-red:         #E05050;
-  --c-red-bg:      #2B1010;
-  --c-console:     #111316;
-  --c-console-t:   #C8FFD4;
-  --c-console-dim: #3A4A5A;
-
-  --c-bg:       var(--bg);
-  --c-surface:  var(--surface);
-  --c-border:   var(--border);
-  --c-border-m: #4A4D52;
-  --c-text-1:   var(--text-primary);
-  --c-text-2:   var(--text-secondary);
-  --c-text-3:   var(--text-tertiary);
-}
-
-/* ─── RESET & BASE ─── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; overflow: hidden; -webkit-text-size-adjust: 100%; }
-
-body {
-  font-family: var(--sans);
-  background: var(--bg);
-  color: var(--text-primary);
-  transition: background 0.35s, color 0.35s;
-  display: flex;
-  flex-direction: column;
-}
-
-/* ─── NAV ─── */
-.nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  height: 52px;
-  background: var(--surface);
-  border-bottom: 0.5px solid var(--border);
-  flex-shrink: 0;
-  transition: background 0.35s, border-color 0.35s;
-}
-.nav-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.nav-logo {
-  font-family: var(--heading);
-  font-weight: 700;
-  font-size: 16px;
-  letter-spacing: -0.02em;
-  color: var(--text-primary);
-}
-.nav-logo span {
-  color: var(--accent-carbon);
-}
-.nav-divider {
-  width: 0.5px;
-  height: 18px;
-  background: var(--border);
-}
-.nav-page-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
-}
-.nav-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* Theme pill */
-.theme-pill {
-  display: flex;
-  border: 0.5px solid var(--border);
-  border-radius: 20px;
-  overflow: hidden;
-  transition: border-color 0.35s;
-}
-.theme-pill-opt {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: var(--mono);
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  color: var(--text-tertiary);
-  padding: 4px 10px;
-  transition: background 0.2s, color 0.2s;
-}
-.theme-pill-opt.active {
-  background: var(--border);
-  color: var(--text-primary);
-}
-.theme-pill-opt:hover:not(.active) {
-  color: var(--text-secondary);
-}
-
-/* Auth nav */
-.nav-auth-btn {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  background: none;
-  border: 0.5px solid var(--border);
-  border-radius: 4px;
-  color: var(--text-secondary);
-  padding: 5px 12px;
-  cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
-}
-.nav-auth-btn:hover { border-color: var(--c-green); color: var(--c-green); }
-.nav-auth-chip {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  border: 0.5px solid var(--border);
-  border-radius: 4px;
-  padding: 4px 10px;
-  cursor: pointer;
-  transition: border-color 0.2s;
-}
-.nav-auth-chip:hover { border-color: var(--c-red); }
-.nav-auth-name {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--text-primary);
-  letter-spacing: 0.06em;
-}
-.nav-auth-logout {
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--text-tertiary);
-}
-.venue-badge {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  border: 0.5px solid var(--accent-carbon);
-  color: var(--accent-carbon);
-  border-radius: 3px;
-  padding: 3px 8px;
-}
-
-/* ─── LAYOUT ─── */
-.app {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-}
-
-/* ─── SIDEBAR ─── */
-.sidebar {
-  width: var(--sidebar-w);
-  flex-shrink: 0;
-  background: var(--surface);
-  border-right: 0.5px solid var(--border);
-  overflow-y: auto;
-  overflow-x: hidden;
-  display: flex;
-  flex-direction: column;
-  transition: background 0.35s, border-color 0.35s;
-}
-.sidebar::-webkit-scrollbar { width: 3px; }
-.sidebar::-webkit-scrollbar-track { background: transparent; }
-.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-/* ─── CARDS ─── */
-.card {
-  padding: 14px 16px;
-  border-bottom: 0.5px solid var(--border);
-  transition: border-color 0.35s;
-}
-.card-label {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
-  margin-bottom: 10px;
-}
-.card-title {
-  font-family: var(--heading);
-  font-weight: 700;
-  font-size: 15px;
-  color: var(--text-primary);
-  letter-spacing: -0.01em;
-}
-.card-sub {
-  font-family: var(--sans);
-  font-size: 11px;
-  color: var(--text-secondary);
-  margin-top: 2px;
-  line-height: 1.4;
-}
-
-/* Darwin card */
-.darwin-status-bar {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 5px 0 8px;
-  margin-bottom: 4px;
-}
-.darwin-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--c-green);
-  flex-shrink: 0;
-  transition: background 0.3s;
-}
-.darwin-dot.offline { background: var(--c-red); }
-.darwin-status-text {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
-}
-.darwin-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 0;
-  border-top: 0.5px solid var(--border);
-  font-size: 11px;
-}
-.darwin-crs {
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  color: var(--text-tertiary);
-  width: 28px;
-  flex-shrink: 0;
-}
-.darwin-name {
-  flex: 1;
-  color: var(--text-primary);
-  font-size: 11px;
-}
-.darwin-eta {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--accent-carbon);
-  white-space: nowrap;
-}
-.darwin-ontime {
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--c-green);
-}
-.darwin-late {
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--c-amber);
-}
-
-/* Site card */
-.site-status-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 6px;
-}
-.site-status-dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--c-green);
-  flex-shrink: 0;
-}
-.site-status-dot.closed { background: var(--c-red); }
-.site-status-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-}
-.site-address {
-  font-family: var(--sans);
-  font-size: 11px;
-  color: var(--text-tertiary);
-  margin-top: 5px;
-  line-height: 1.5;
-  border-left: 2px solid var(--inset-rule);
-  padding-left: 8px;
-}
-
-/* Venue map */
-#venue-map {
-  width: 100%;
-  height: 130px;
-  border-radius: 8px;
-  overflow: hidden;
-  margin-top: 10px;
-  border: 0.5px solid var(--border);
-}
-
-/* Queue stats strip */
-.queue-stats {
-  display: flex;
-  gap: 0;
-  border-bottom: 0.5px solid var(--border);
-  flex-shrink: 0;
-  background: var(--surface);
-  transition: background 0.35s;
-}
-.queue-stat {
-  flex: 1;
-  padding: 10px 14px;
-  border-right: 0.5px solid var(--border);
-  transition: border-color 0.35s;
-}
-.queue-stat:last-child { border-right: none; }
-.queue-stat-label {
-  font-family: var(--mono);
-  font-size: 8px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
-  margin-bottom: 3px;
-}
-.queue-stat-value {
-  font-family: var(--mono);
-  font-size: 18px;
-  font-weight: 500;
-  color: var(--text-primary);
-  line-height: 1;
-}
-.queue-stat-sub {
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--text-tertiary);
-  margin-top: 2px;
-}
-.queue-stat-value.amber { color: var(--c-amber); }
-.queue-stat-value.green { color: var(--c-green); }
-
-/* ─── MAIN CONTENT ─── */
-.main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: var(--bg);
-  transition: background 0.35s;
-}
-
-/* Queue header */
-.queue-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 20px;
-  border-bottom: 0.5px solid var(--border);
-  flex-shrink: 0;
-  transition: border-color 0.35s;
-}
-.queue-title {
-  font-family: var(--heading);
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--text-primary);
-}
-.queue-refresh-btn {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  background: none;
-  border: 0.5px solid var(--border);
-  border-radius: 3px;
-  color: var(--text-tertiary);
-  padding: 4px 10px;
-  cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
-}
-.queue-refresh-btn:hover { border-color: var(--accent-carbon); color: var(--accent-carbon); }
-.queue-poll-status {
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--text-tertiary);
-  letter-spacing: 0.06em;
-}
-
-/* ─── ORDER QUEUE ─── */
-.order-queue {
-  flex: 1;
-  overflow-y: auto;
-  padding: 12px 16px;
-}
-.order-queue::-webkit-scrollbar { width: 3px; }
-.order-queue::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-/* Order tile */
-.order-tile {
-  background: var(--surface);
-  border: 0.5px solid var(--border);
-  border-radius: 10px;
-  padding: 14px 16px;
-  margin-bottom: 10px;
-  transition: background 0.2s, border-color 0.2s, transform 0.15s;
-  position: relative;
-  overflow: hidden;
-}
-.order-tile::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 3px;
-  background: var(--accent-carbon);
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-.order-tile.pending::before { opacity: 1; background: var(--c-amber); }
-.order-tile.ready::before { opacity: 1; background: var(--c-green); }
-.order-tile.urgent::before { opacity: 1; background: var(--c-red); animation: urgentPulse 1.2s ease-in-out infinite; }
-
-@keyframes urgentPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-
-.order-tile-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-.order-item-name {
-  font-family: var(--heading);
-  font-weight: 600;
-  font-size: 16px;
-  color: var(--text-primary);
-  letter-spacing: -0.01em;
-  line-height: 1.2;
-}
-.order-item-mods {
-  font-family: var(--sans);
-  font-size: 11px;
-  color: var(--text-secondary);
-  margin-top: 2px;
-}
-.order-status-badge {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  border-radius: 3px;
-  padding: 3px 8px;
-  flex-shrink: 0;
-  margin-left: 10px;
-}
-.badge-pending {
-  background: var(--c-amber-bg);
-  color: var(--c-amber);
-  border: 0.5px solid var(--c-amber);
-}
-.badge-ready {
-  background: var(--c-green-bg);
-  color: var(--c-green);
-  border: 0.5px solid var(--c-green);
-}
-.badge-urgent {
-  background: var(--c-red-bg);
-  color: var(--c-red);
-  border: 0.5px solid var(--c-red);
-}
-
-.order-meta {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 12px;
-}
-.order-ref {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--text-tertiary);
-  letter-spacing: 0.08em;
-}
-.order-time {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.06em;
-}
-.order-time.normal { color: var(--text-tertiary); }
-.order-time.warning { color: var(--c-amber); }
-.order-time.urgent { color: var(--c-red); font-weight: 500; }
-
-.order-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* MARK READY — primary CTA */
-.btn-mark-ready {
-  flex: 1;
-  font-family: var(--heading);
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  background: var(--accent-carbon);
-  color: #1A1200;
-  border: none;
-  border-radius: 7px;
-  padding: 13px 20px;
-  cursor: pointer;
-  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
-  min-height: 48px;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-}
-.btn-mark-ready:hover {
-  background: #E0C48A;
-  box-shadow: 0 2px 12px rgba(200,169,110,0.4);
-}
-.btn-mark-ready:active {
-  transform: scale(0.97);
-  background: #B8962A;
-}
-.btn-mark-ready:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  transform: none;
-}
-[data-theme="carbon"] .btn-mark-ready {
-  color: #0D0D0B;
-}
-
-/* Already-ready state */
-.btn-mark-ready.already-ready {
-  background: var(--c-green);
-  color: #fff;
-}
-.btn-mark-ready.already-ready:hover { background: #2ECC71; }
-
-/* Dismiss (for ready orders) */
-.btn-dismiss {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  background: none;
-  border: 0.5px solid var(--border);
-  border-radius: 5px;
-  color: var(--text-tertiary);
-  padding: 8px 14px;
-  cursor: pointer;
-  min-height: 48px;
-  transition: border-color 0.15s, color 0.15s;
-  touch-action: manipulation;
-}
-.btn-dismiss:hover { border-color: var(--text-secondary); color: var(--text-secondary); }
-
-/* Empty queue */
-.queue-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  text-align: center;
-  gap: 12px;
-  color: var(--text-tertiary);
-}
-.queue-empty-icon {
-  width: 44px; height: 44px;
-  border: 0.5px solid var(--border);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  opacity: 0.5;
-}
-.queue-empty-title {
-  font-family: var(--heading);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
-.queue-empty-sub {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-}
-
-/* Signed-out state */
-.queue-signed-out {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  text-align: center;
-  gap: 12px;
-}
-.queue-signed-out-title {
-  font-family: var(--heading);
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-.queue-signed-out-sub {
-  font-family: var(--sans);
-  font-size: 12px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-  max-width: 280px;
-}
-.btn-signin-queue {
-  font-family: var(--heading);
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  background: var(--accent-carbon);
-  color: #1A1200;
-  border: none;
-  border-radius: 7px;
-  padding: 13px 28px;
-  cursor: pointer;
-  margin-top: 8px;
-  transition: background 0.15s;
-  touch-action: manipulation;
-}
-.btn-signin-queue:hover { background: #E0C48A; }
-[data-theme="carbon"] .btn-signin-queue { color: #0D0D0B; }
-
-/* ─── TOAST ─── */
-.toast {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: var(--surface);
-  border: 0.5px solid var(--border);
-  border-radius: 6px;
-  padding: 10px 18px;
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  color: var(--text-primary);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s, transform 0.2s;
-  z-index: 9999;
-  white-space: nowrap;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-}
-.toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-.toast.ok  { border-color: var(--c-green); color: var(--c-green); }
-.toast.err { border-color: var(--c-red); color: var(--c-red); }
-.toast.warn { border-color: var(--c-amber); color: var(--c-amber); }
-
-/* ─── AUTH MODAL ─── */
-.auth-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(4px);
-  z-index: 8000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s;
-}
-.auth-overlay.open {
-  opacity: 1;
-  pointer-events: all;
-}
-
-/* Gate — full-screen sign-in for unauthenticated state */
-.auth-gate {
-  position: fixed;
-  inset: 0;
-  background: var(--bg);
-  z-index: 7000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 0;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s;
-}
-.auth-gate.visible {
-  opacity: 1;
-  pointer-events: all;
-}
-.auth-gate-inner {
-  width: 100%;
-  max-width: 400px;
-  padding: 40px 32px;
-  background: var(--surface);
-  border: 0.5px solid var(--border);
-  border-radius: 12px;
-  margin: 0 20px;
-}
-.auth-gate-logo {
-  font-family: var(--heading);
-  font-weight: 700;
-  font-size: 22px;
-  letter-spacing: -0.02em;
-  color: var(--text-primary);
-  margin-bottom: 4px;
-}
-.auth-gate-logo span { color: var(--accent-carbon); }
-.auth-gate-subtitle {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
-  margin-bottom: 28px;
-}
-.auth-gate-label {
-  font-family: var(--sans);
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
-}
-.auth-gate-input {
-  width: 100%;
-  font-family: var(--mono);
-  font-size: 13px;
-  background: var(--bg);
-  border: 0.5px solid var(--border);
-  border-radius: 6px;
-  color: var(--text-primary);
-  padding: 12px 14px;
-  outline: none;
-  transition: border-color 0.2s;
-  margin-bottom: 12px;
-  letter-spacing: 0.02em;
-}
-.auth-gate-input:focus { border-color: var(--accent-carbon); }
-.auth-gate-input::placeholder { color: var(--text-tertiary); }
-.auth-gate-btn {
-  width: 100%;
-  font-family: var(--heading);
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  background: var(--accent-carbon);
-  color: #1A1200;
-  border: none;
-  border-radius: 7px;
-  padding: 14px;
-  cursor: pointer;
-  transition: background 0.15s;
-  touch-action: manipulation;
-}
-.auth-gate-btn:hover { background: #E0C48A; }
-.auth-gate-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-[data-theme="carbon"] .auth-gate-btn,
-[data-theme="carbon"] .auth-gate-btn:hover { color: #0D0D0B; }
-.auth-gate-sent {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  text-align: center;
-  margin-top: 10px;
-  min-height: 16px;
-  opacity: 0;
-  transition: opacity 0.3s;
-  color: var(--c-green);
-}
-.auth-gate-sent.show { opacity: 1; }
-.auth-gate-footer {
-  font-family: var(--sans);
-  font-size: 11px;
-  color: var(--text-tertiary);
-  text-align: center;
-  margin-top: 20px;
-  line-height: 1.5;
-}
-
-/* ─── MAPBOX popup ─── */
-.mapboxgl-popup-content {
-  background: var(--surface) !important;
-  border: 0.5px solid var(--accent-carbon) !important;
-  border-radius: 6px !important;
-  font-family: var(--mono) !important;
-  font-size: 11px !important;
-  color: var(--text-primary) !important;
-  padding: 8px 12px !important;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.3) !important;
-}
-.mapboxgl-popup-tip { border-top-color: var(--accent-carbon) !important; }
-
-/* ─── LOADING SHIMMER ─── */
-.shimmer {
-  background: linear-gradient(90deg, var(--surface) 25%, var(--border) 50%, var(--surface) 75%);
-  background-size: 400px 100%;
-  animation: shimmer 1.4s ease-in-out infinite;
-  border-radius: 4px;
-  height: 12px;
-}
-@keyframes shimmer {
-  0% { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
-}
-
-/* Poll indicator */
-.poll-dot {
-  display: inline-block;
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--c-green);
-  margin-right: 5px;
-  animation: pollPulse 2s ease-in-out infinite;
-}
-@keyframes pollPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
-}
-</style>
+<link rel="stylesheet" href="merchant-tablet-styles.css">
 </head>
 <body>
 
-<!-- Auth gate — shown on load until session confirmed -->
+<!-- ─── STAFF PIN GATE ─── -->
+<div class="pin-gate" id="pin-gate">
+  <div class="pin-gate-inner">
+    <div class="pin-gate-eyebrow">Staff Sign In</div>
+    <div class="pin-gate-wordmark">Refueler<span> ⚡</span></div>
+
+    <!-- 4-dot indicator -->
+    <div class="pin-dots" id="pin-dots">
+      <div class="pin-dot-indicator" id="pd0"></div>
+      <div class="pin-dot-indicator" id="pd1"></div>
+      <div class="pin-dot-indicator" id="pd2"></div>
+      <div class="pin-dot-indicator" id="pd3"></div>
+    </div>
+
+    <!-- PIN pad -->
+    <div class="pin-pad">
+      <button class="pin-key" onclick="pinKey('1')">1</button>
+      <button class="pin-key" onclick="pinKey('2')">2</button>
+      <button class="pin-key" onclick="pinKey('3')">3</button>
+      <button class="pin-key" onclick="pinKey('4')">4</button>
+      <button class="pin-key" onclick="pinKey('5')">5</button>
+      <button class="pin-key" onclick="pinKey('6')">6</button>
+      <button class="pin-key" onclick="pinKey('7')">7</button>
+      <button class="pin-key" onclick="pinKey('8')">8</button>
+      <button class="pin-key" onclick="pinKey('9')">9</button>
+      <button class="pin-key" onclick="pinKey('clear')" style="grid-column:1;">CLR</button>
+      <button class="pin-key" onclick="pinKey('0')">0</button>
+      <button class="pin-key del" onclick="pinKey('del')">⌫</button>
+    </div>
+
+    <div class="pin-error" id="pin-error">Incorrect PIN. Try again.</div>
+  </div>
+</div>
+
+<!-- ─── MAGIC LINK GATE (owner only — first login / expiry / explicit sign-out) ─── -->
 <div class="auth-gate" id="auth-gate">
   <div class="auth-gate-inner">
     <div class="auth-gate-logo">Refueler<span> ⚡</span></div>
-    <div class="auth-gate-subtitle">Merchant Tablet — Staff Sign In</div>
-    <div class="auth-gate-label">Email address</div>
+    <div class="auth-gate-subtitle">Refueler Command Centre</div>
+    <div class="auth-gate-label">Owner email address</div>
     <input class="auth-gate-input" type="email" id="gate-email"
       placeholder="your@email.com"
       onkeydown="if(event.key==='Enter') sendGateMagicLink()">
     <button class="auth-gate-btn" id="gate-btn" onclick="sendGateMagicLink()">
-      Send Magic Link
+      Send Sign-in Link
     </button>
     <div class="auth-gate-sent" id="gate-sent"></div>
     <div class="auth-gate-footer">
-      A sign-in link will be emailed to you.<br>
+      Magic link auth is for venue owners only. Staff use the PIN pad.<br>
       Contact <strong>support@refueler.io</strong> if you need access.
     </div>
   </div>
 </div>
+
+<!-- ─── OWNER PIN OVERLAY ─── -->
+<div class="owner-overlay" id="owner-overlay">
+  <div class="owner-pin-box">
+    <div class="owner-pin-eyebrow">Owner Access</div>
+    <div class="owner-pin-heading">Enter owner PIN</div>
+
+    <div class="pin-dots" id="owner-pin-dots">
+      <div class="pin-dot-indicator" id="opd0"></div>
+      <div class="pin-dot-indicator" id="opd1"></div>
+      <div class="pin-dot-indicator" id="opd2"></div>
+      <div class="pin-dot-indicator" id="opd3"></div>
+    </div>
+
+    <div class="pin-pad">
+      <button class="pin-key" onclick="ownerPinKey('1')">1</button>
+      <button class="pin-key" onclick="ownerPinKey('2')">2</button>
+      <button class="pin-key" onclick="ownerPinKey('3')">3</button>
+      <button class="pin-key" onclick="ownerPinKey('4')">4</button>
+      <button class="pin-key" onclick="ownerPinKey('5')">5</button>
+      <button class="pin-key" onclick="ownerPinKey('6')">6</button>
+      <button class="pin-key" onclick="ownerPinKey('7')">7</button>
+      <button class="pin-key" onclick="ownerPinKey('8')">8</button>
+      <button class="pin-key" onclick="ownerPinKey('9')">9</button>
+      <button class="pin-key" onclick="ownerPinKey('clear')" style="grid-column:1;">CLR</button>
+      <button class="pin-key" onclick="ownerPinKey('0')">0</button>
+      <button class="pin-key del" onclick="ownerPinKey('del')">⌫</button>
+    </div>
+
+    <div class="pin-error" id="owner-pin-error">Incorrect PIN.</div>
+    <button class="owner-pin-cancel" onclick="closeOwnerOverlay()">Cancel</button>
+  </div>
+</div>
+
+<!-- ─── OWNER PANEL ─── -->
+<div class="owner-panel" id="owner-panel">
+  <div class="owner-panel-header">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="owner-panel-title">Owner View</div>
+      <div class="owner-panel-badge" id="owner-venue-badge">—</div>
+    </div>
+    <button class="owner-panel-close" onclick="closeOwnerPanel()">← Back to Queue</button>
+  </div>
+
+  <div class="owner-stats-grid">
+    <div class="owner-stat-card">
+      <div class="owner-stat-label">Orders Today</div>
+      <div class="owner-stat-value" id="owner-stat-orders">—</div>
+      <div class="owner-stat-sub">total placed</div>
+    </div>
+    <div class="owner-stat-card">
+      <div class="owner-stat-label">Revenue Today</div>
+      <div class="owner-stat-value" style="font-size:20px;" id="owner-stat-revenue">—</div>
+      <div class="owner-stat-sub">GBP excl. commission</div>
+    </div>
+    <div class="owner-stat-card">
+      <div class="owner-stat-label">Avg Order Value</div>
+      <div class="owner-stat-value" style="font-size:20px;" id="owner-stat-aov">—</div>
+      <div class="owner-stat-sub">today's average</div>
+    </div>
+  </div>
+
+  <div class="owner-section">
+    <div class="owner-section-label">Settings</div>
+    <div class="owner-menu-row">
+      <div>
+        <div class="owner-menu-label">Staff PIN reset</div>
+        <div class="owner-menu-sub">Change the PIN staff use to access the queue</div>
+      </div>
+      <div class="owner-menu-chip">Beta — coming soon</div>
+    </div>
+    <div class="owner-menu-row">
+      <div>
+        <div class="owner-menu-label">Owner PIN reset</div>
+        <div class="owner-menu-sub">Change your personal owner PIN</div>
+      </div>
+      <div class="owner-menu-chip">Beta — coming soon</div>
+    </div>
+    <div class="owner-menu-row">
+      <div>
+        <div class="owner-menu-label">Menu management</div>
+        <div class="owner-menu-sub">Edit items, prices, and availability</div>
+      </div>
+      <div class="owner-menu-chip">Beta — coming soon</div>
+    </div>
+  </div>
+
+  <div class="owner-section">
+    <div class="owner-section-label">Account</div>
+    <div class="owner-menu-row">
+      <div>
+        <div class="owner-menu-label">Sign out</div>
+        <div class="owner-menu-sub">Ends this owner session — returns to Command Centre</div>
+      </div>
+      <button class="btn-owner-signout" onclick="ownerSignOut()">Sign Out</button>
+    </div>
+  </div>
+</div>
+
+<!-- View-switch confirmation overlay (independent_owner only) -->
+<div class="view-confirm-overlay" id="view-confirm-overlay">
+  <div class="view-confirm-box">
+    <div class="view-confirm-title" id="view-confirm-title">Switch to OPS view?</div>
+    <div class="view-confirm-sub" id="view-confirm-sub">
+      OPS view shows operational controls. Your queue will pause while you're here.
+    </div>
+    <div class="view-confirm-actions">
+      <button class="btn-confirm-switch" id="btn-confirm-switch" onclick="confirmViewSwitch()">Switch View</button>
+      <button class="btn-confirm-cancel" onclick="cancelViewSwitch()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Back to Queue — always visible in OPS view -->
+<button class="btn-back-queue" id="btn-back-queue" onclick="switchToQueueView()">
+  ← Back to Queue
+</button>
 
 <!-- Nav -->
 <nav class="nav">
@@ -934,10 +200,71 @@ body {
       <button class="theme-pill-opt" id="pill-carbon" onclick="setTheme('carbon')">CARBON</button>
     </div>
     <div id="nav-auth-slot">
-      <button class="nav-auth-btn" onclick="openAuthModal()">⬡ SIGN IN</button>
+      <!-- populated by JS after PIN/magic-link auth -->
     </div>
   </div>
 </nav>
+
+<!-- ─── HORIZON BAND — Darwin intelligence + Passenger arrival windows ─── -->
+<!--
+  Always-on operational instrument. Carbon dark in both Paper and Carbon themes.
+  Darwin section (LEFT): next arrival station + ETA. Landscape adds second window.
+  Horizon section (RIGHT): passenger count by arrival window (mock until real aggregation).
+  Beck gold node markers used as station/divider motif.
+-->
+<div class="horizon-band" id="horizon-band">
+
+  <!-- LEFT: Darwin live arrival -->
+  <div class="hb-darwin" id="hb-darwin">
+    <!-- Beck motif: gold node marker as station indicator -->
+    <div class="hb-beck-node" id="hb-beck-node"></div>
+
+    <div class="hb-darwin-inner">
+      <!-- Primary station window (portrait + landscape) -->
+      <div class="hb-station-primary">
+        <span class="hb-station-name" id="hb-station-name">—</span>
+        <span class="hb-station-eta" id="hb-station-eta">—</span>
+      </div>
+      <!-- Secondary station window (landscape only) -->
+      <div class="hb-station-secondary" id="hb-station-secondary">
+        <span class="hb-station-name-2" id="hb-station-name-2">—</span>
+        <span class="hb-station-eta-2" id="hb-station-eta-2">—</span>
+      </div>
+      <div class="hb-darwin-label" id="hb-darwin-label">DARWIN · LIVE</div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Horizon passenger arrival windows -->
+  <div class="hb-horizon">
+    <div class="hb-horizon-label">ARRIVALS</div>
+
+    <!-- 0–3 min window -->
+    <div class="hb-window" id="hb-win-0" title="Passengers arriving in 0–3 min">
+      <div class="hb-window-count" id="hb-count-0">12</div>
+      <div class="hb-window-label">0–3 min</div>
+      <div class="hb-window-unit">imminent</div>
+    </div>
+
+    <div class="hb-window-sep"></div>
+
+    <!-- 3–7 min window -->
+    <div class="hb-window" id="hb-win-3" title="Passengers arriving in 3–7 min">
+      <div class="hb-window-count" id="hb-count-3">34</div>
+      <div class="hb-window-label">3–7 min</div>
+      <div class="hb-window-unit">inbound</div>
+    </div>
+
+    <div class="hb-window-sep"></div>
+
+    <!-- 7–15 min window -->
+    <div class="hb-window" id="hb-win-7" title="Passengers arriving in 7–15 min">
+      <div class="hb-window-count" id="hb-count-7">67</div>
+      <div class="hb-window-label">7–15 min</div>
+      <div class="hb-window-unit">horizon</div>
+    </div>
+  </div>
+
+</div>
 
 <!-- App layout -->
 <div class="app">
@@ -1033,7 +360,7 @@ body {
     </div>
 
     <!-- Queue header -->
-    <div class="queue-header">
+    <div class="queue-header" id="queue-header">
       <div class="queue-title">
         <span class="poll-dot" id="poll-dot" style="display:none;"></span>
         Order Queue
@@ -1044,789 +371,80 @@ body {
       </div>
     </div>
 
-    <!-- Order queue -->
+    <!-- Order queue (QUEUE view) -->
     <div class="order-queue" id="order-queue">
       <!-- Signed-out state -->
       <div class="queue-signed-out" id="queue-signin-prompt">
         <div class="queue-empty-icon">⚡</div>
-        <div class="queue-signed-out-title">Sign in to see your queue</div>
-        <div class="queue-signed-out-sub">Use your registered email to receive a magic link. Orders for your venue will appear here.</div>
-        <button class="btn-signin-queue" onclick="openAuthModal()">Sign In</button>
+        <div class="queue-signed-out-title">Awaiting staff sign-in</div>
+        <div class="queue-signed-out-sub">Enter the staff PIN on the lock screen to begin your shift.</div>
       </div>
       <!-- Order tiles injected here by JS -->
     </div>
 
+    <!-- OPS panel (independent_owner only — hidden by default) -->
+    <div class="ops-panel" id="ops-panel">
+
+      <div class="ops-section">
+        <div class="ops-section-label">Venue Status</div>
+        <div class="ops-toggle-row">
+          <div>
+            <div class="ops-toggle-label">Accepting orders</div>
+            <div class="ops-toggle-sub">Toggle to open or close your venue</div>
+          </div>
+          <label class="ops-toggle">
+            <input type="checkbox" id="ops-toggle-open" onchange="opsToggleVenueOpen(this.checked)">
+            <span class="ops-toggle-track"></span>
+          </label>
+        </div>
+        <div class="ops-toggle-row">
+          <div>
+            <div class="ops-toggle-label">Pre-orders only</div>
+            <div class="ops-toggle-sub">Disable walk-up orders during rush periods</div>
+          </div>
+          <label class="ops-toggle">
+            <input type="checkbox" id="ops-toggle-preorder" onchange="opsTogglePreorder(this.checked)">
+            <span class="ops-toggle-track"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="ops-section">
+        <div class="ops-section-label">Queue Controls</div>
+        <div class="ops-toggle-row">
+          <div>
+            <div class="ops-toggle-label">Pause new orders</div>
+            <div class="ops-toggle-sub">Existing queue continues; no new orders accepted</div>
+          </div>
+          <label class="ops-toggle">
+            <input type="checkbox" id="ops-toggle-pause" onchange="opsTogglePause(this.checked)">
+            <span class="ops-toggle-track"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="ops-section">
+        <div class="ops-section-label">Account</div>
+        <div class="ops-toggle-row">
+          <div>
+            <div class="ops-toggle-label">Sign out</div>
+            <div class="ops-toggle-sub">Returns to sign-in screen</div>
+          </div>
+          <button class="btn-dismiss" style="min-height:36px;padding:6px 14px;" onclick="signOut()">SIGN OUT</button>
+        </div>
+      </div>
+
+    </div><!-- /ops-panel -->
+
   </main>
 </div>
 
-<!-- Auth modal (secondary — for re-auth or sign-in from queue) -->
-<div class="auth-overlay" id="auth-modal">
-  <div class="auth-gate-inner">
-    <div class="auth-gate-logo">Refueler<span> ⚡</span></div>
-    <div class="auth-gate-subtitle">Sign In</div>
-    <div class="auth-gate-label">Email address</div>
-    <input class="auth-gate-input" type="email" id="auth-email"
-      placeholder="your@email.com"
-      onkeydown="if(event.key==='Enter') sendMagicLink()">
-    <button class="auth-gate-btn" id="auth-send-btn" onclick="sendMagicLink()">
-      Send Magic Link
-    </button>
-    <div class="auth-gate-sent" id="auth-sent"></div>
-    <div class="auth-gate-footer" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px;" onclick="closeAuthModal()">Cancel</div>
-  </div>
-</div>
+<!-- Owner affordance — discreet bottom-left, visible when signed in as owner -->
+<button class="owner-affordance" id="owner-affordance" onclick="openOwnerOverlay()">Owner</button>
 
 <div class="toast" id="toast"></div>
 
-<script>
-// ─── CONSTANTS ────────────────────────────────────────────
-const SB_URL = 'https://tihgvdokeofnjxjkenmm.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpaGd2ZG9rZW9mbmp4amtlbm1tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTY2NDksImV4cCI6MjA5NDE5MjY0OX0.cRb94WeIP8yRfWd9s2XKmq2nqm1ov-sK1df6u8LNUbo';
-const POLL_INTERVAL_MS = 15000; // 15s order poll
-const DARWIN_INTERVAL_MS = 15000; // 15s Darwin poll
 
-// ─── STATE ────────────────────────────────────────────────
-let _sbClient = null;
-let _currentUser = null;
-let _venueId = null;
-let _venueName = null;
-let _venueData = null; // full venue_partners row
-let _orders = [];
-let _orderPollTimer = null;
-let _darwinTimer = null;
-let _venueMap = null;
-let _lastPollTime = null;
-
-// ─── THEME ────────────────────────────────────────────────
-function setTheme(t) {
-  document.documentElement.setAttribute('data-theme', t === 'carbon' ? 'carbon' : '');
-  localStorage.setItem('rfTheme', t);
-  document.getElementById('pill-paper').classList.toggle('active', t === 'paper');
-  document.getElementById('pill-carbon').classList.toggle('active', t === 'carbon');
-  if (_venueMap) {
-    _venueMap.setStyle(t === 'carbon'
-      ? 'mapbox://styles/mapbox/dark-v11'
-      : 'mapbox://styles/mapbox/light-v11');
-  }
-}
-
-// Boot: load theme from localStorage, default Paper
-(function initTheme() {
-  const stored = localStorage.getItem('rfTheme');
-  const t = stored || 'paper';
-  document.documentElement.setAttribute('data-theme', t === 'carbon' ? 'carbon' : '');
-  document.getElementById('pill-paper').classList.toggle('active', t === 'paper');
-  document.getElementById('pill-carbon').classList.toggle('active', t === 'carbon');
-})();
-
-// ─── SUPABASE CLIENT ──────────────────────────────────────
-function getSbClient() {
-  if (_sbClient) return _sbClient;
-  try {
-    _sbClient = supabase.createClient(SB_URL, SB_KEY);
-  } catch(e) {
-    console.error('Supabase init error:', e);
-  }
-  return _sbClient;
-}
-
-// ─── TOAST ────────────────────────────────────────────────
-let _toastTimer = null;
-function showToast(msg, type = '') {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast show' + (type ? ' ' + type : '');
-  if (_toastTimer) clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => {
-    el.classList.remove('show');
-  }, 3000);
-}
-
-// ─── AUTH ─────────────────────────────────────────────────
-function openAuthModal() {
-  document.getElementById('auth-modal').classList.add('open');
-  setTimeout(() => document.getElementById('auth-email').focus(), 150);
-}
-function closeAuthModal() {
-  document.getElementById('auth-modal').classList.remove('open');
-  document.getElementById('auth-sent').classList.remove('show');
-  document.getElementById('auth-email').value = '';
-}
-
-async function sendMagicLink() {
-  const email = document.getElementById('auth-email').value.trim();
-  if (!email || !email.includes('@')) { showToast('Enter a valid email', 'err'); return; }
-  const client = getSbClient();
-  const btn = document.getElementById('auth-send-btn');
-  btn.textContent = 'Sending…'; btn.disabled = true;
-  try {
-    const { error } = await client.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.href }
-    });
-    btn.textContent = 'Send Magic Link'; btn.disabled = false;
-    if (error) {
-      showToast('Error: ' + error.message, 'err');
-    } else {
-      const el = document.getElementById('auth-sent');
-      el.textContent = '✓ Magic link sent — check your inbox';
-      el.style.color = 'var(--c-green)';
-      el.classList.add('show');
-      setTimeout(closeAuthModal, 3500);
-    }
-  } catch(e) {
-    btn.textContent = 'Send Magic Link'; btn.disabled = false;
-    showToast('Network error', 'err');
-  }
-}
-
-async function sendGateMagicLink() {
-  const email = document.getElementById('gate-email').value.trim();
-  if (!email || !email.includes('@')) { showToast('Enter a valid email', 'err'); return; }
-  const client = getSbClient();
-  const btn = document.getElementById('gate-btn');
-  btn.textContent = 'Sending…'; btn.disabled = true;
-  try {
-    const { error } = await client.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.href }
-    });
-    btn.textContent = 'Send Magic Link'; btn.disabled = false;
-    if (error) {
-      showToast('Error: ' + error.message, 'err');
-    } else {
-      const el = document.getElementById('gate-sent');
-      el.textContent = '✓ Check your inbox for a sign-in link';
-      el.style.color = 'var(--c-green)';
-      el.classList.add('show');
-    }
-  } catch(e) {
-    btn.textContent = 'Send Magic Link'; btn.disabled = false;
-    showToast('Network error', 'err');
-  }
-}
-
-async function signOut() {
-  const client = getSbClient();
-  if (client) await client.auth.signOut();
-  _currentUser = null;
-  _venueId = null;
-  _venueName = null;
-  _venueData = null;
-  renderAuthNav(null);
-  showSignedOutState();
-  stopOrderPoll();
-  showToast('Signed out', 'ok');
-}
-
-function renderAuthNav(user) {
-  const slot = document.getElementById('nav-auth-slot');
-  const badgeSlot = document.getElementById('venue-badge-slot');
-  if (user) {
-    const name = user.user_metadata?.display_name || user.email.split('@')[0];
-    slot.innerHTML = `
-      <div class="nav-auth-chip" onclick="signOut()" title="Click to sign out">
-        <span class="nav-auth-name">${name.toUpperCase()}</span>
-        <span class="nav-auth-logout">SIGN OUT</span>
-      </div>`;
-    if (_venueName) {
-      badgeSlot.innerHTML = `<div class="venue-badge">${_venueName.toUpperCase()}</div>`;
-    }
-  } else {
-    slot.innerHTML = `<button class="nav-auth-btn" onclick="openAuthModal()">⬡ SIGN IN</button>`;
-    badgeSlot.innerHTML = '';
-  }
-}
-
-// ─── VENUE RESOLUTION ─────────────────────────────────────
-async function resolveMerchantVenue(user) {
-  // First try merchant_users table (production path)
-  try {
-    const res = await fetch(
-      `${SB_URL}/rest/v1/merchant_users?email=eq.${encodeURIComponent(user.email)}&select=venue_id,role&limit=1`,
-      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } }
-    );
-    if (res.ok) {
-      const rows = await res.json();
-      if (rows && rows.length > 0) {
-        _venueId = rows[0].venue_id;
-        // Then load venue details
-        await loadVenueDetails(_venueId);
-        return;
-      }
-    }
-  } catch(e) {
-    console.warn('merchant_users lookup failed:', e);
-  }
-
-  // Fallback: match contact_email in venue_partners
-  try {
-    const res = await fetch(
-      `${SB_URL}/rest/v1/venue_partners?contact_email=eq.${encodeURIComponent(user.email)}&select=id,name,address,lat,lng,active&limit=1`,
-      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } }
-    );
-    if (res.ok) {
-      const rows = await res.json();
-      if (rows && rows.length > 0) {
-        _venueId = rows[0].id;
-        _venueName = rows[0].name;
-        _venueData = rows[0];
-        renderVenueCard(rows[0]);
-        return;
-      }
-    }
-  } catch(e) {
-    console.warn('venue_partners lookup failed:', e);
-  }
-
-  // No venue found — show graceful error
-  document.getElementById('site-name').textContent = 'No venue assigned';
-  document.getElementById('site-address').textContent = 'Contact support@refueler.io to link your account to a venue.';
-  document.getElementById('site-status-label').textContent = 'Unlinked';
-  showToast('No venue found for this account', 'warn');
-}
-
-async function loadVenueDetails(venueId) {
-  try {
-    const res = await fetch(
-      `${SB_URL}/rest/v1/venue_partners?id=eq.${venueId}&select=id,name,address,lat,lng,active&limit=1`,
-      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } }
-    );
-    if (!res.ok) return;
-    const rows = await res.json();
-    if (rows && rows.length > 0) {
-      _venueName = rows[0].name;
-      _venueData = rows[0];
-      renderVenueCard(rows[0]);
-    }
-  } catch(e) {
-    console.warn('loadVenueDetails error:', e);
-  }
-}
-
-function renderVenueCard(venue) {
-  document.getElementById('site-name').textContent = venue.name || '—';
-  document.getElementById('site-address').textContent = venue.address || '—';
-
-  const dot = document.getElementById('site-status-dot');
-  const label = document.getElementById('site-status-label');
-  if (venue.active) {
-    dot.className = 'site-status-dot';
-    label.textContent = 'Open — accepting orders';
-    label.style.color = 'var(--c-green)';
-  } else {
-    dot.className = 'site-status-dot closed';
-    label.textContent = 'Closed';
-    label.style.color = 'var(--c-red)';
-  }
-
-  // Badge in nav
-  const badgeSlot = document.getElementById('venue-badge-slot');
-  badgeSlot.innerHTML = `<div class="venue-badge">${venue.name.toUpperCase()}</div>`;
-
-  // Venue map
-  if (venue.lat && venue.lng) {
-    initVenueMap(venue.lng, venue.lat, venue.name);
-  }
-}
-
-// ─── VENUE MAP ────────────────────────────────────────────
-function initVenueMap(lng, lat, name) {
-  const theme = document.documentElement.getAttribute('data-theme') === 'carbon'
-    ? 'mapbox://styles/mapbox/dark-v11'
-    : 'mapbox://styles/mapbox/light-v11';
-
-  // mapboxgl.accessToken is set at bottom of script
-  if (typeof mapboxgl === 'undefined') return;
-
-  _venueMap = new mapboxgl.Map({
-    container: 'venue-map',
-    style: theme,
-    center: [lng, lat],
-    zoom: 16,
-    pitch: 0,
-    bearing: 0,
-    interactive: false, // static — no pan/zoom on staff tablet
-    attributionControl: false
-  });
-
-  _venueMap.on('load', () => {
-    new mapboxgl.Marker({
-      color: '#C8A96E'
-    })
-      .setLngLat([lng, lat])
-      .setPopup(new mapboxgl.Popup({ offset: 10 }).setHTML(
-        `<strong>${name}</strong>`
-      ))
-      .addTo(_venueMap);
-  });
-}
-
-// ─── ORDER QUEUE ──────────────────────────────────────────
-function minutesAgo(isoString) {
-  const diff = Math.floor((Date.now() - new Date(isoString).getTime()) / 60000);
-  if (diff < 1) return 'just now';
-  if (diff === 1) return '1 min ago';
-  return diff + ' mins ago';
-}
-
-function orderTimeClass(isoString) {
-  const diff = Math.floor((Date.now() - new Date(isoString).getTime()) / 60000);
-  if (diff >= 8) return 'urgent';
-  if (diff >= 4) return 'warning';
-  return 'normal';
-}
-
-function badgeForStatus(status, createdAt) {
-  const diff = Math.floor((Date.now() - new Date(createdAt).getTime()) / 60000);
-  if (status === 'ready') return ['badge-ready', 'READY'];
-  if (diff >= 8) return ['badge-urgent', 'URGENT'];
-  return ['badge-pending', 'PENDING'];
-}
-
-function renderOrderTile(order) {
-  const tile = document.createElement('div');
-  const diff = Math.floor((Date.now() - new Date(order.created_at).getTime()) / 60000);
-  const isUrgent = diff >= 8 && order.status === 'pending';
-  const isReady  = order.status === 'ready';
-
-  const tileClass = isReady ? 'ready' : (isUrgent ? 'urgent' : 'pending');
-  const [badgeClass, badgeText] = badgeForStatus(order.status, order.created_at);
-  const timeClass = orderTimeClass(order.created_at);
-
-  // anonymous ref: first 8 chars of UUID
-  const ref = '#' + (order.id || '').slice(0, 8).toUpperCase();
-  const itemName = order.item_name || order.product_name || 'Order';
-  const itemMods = order.modifiers || order.notes || '';
-
-  tile.className = `order-tile ${tileClass}`;
-  tile.id = 'order-' + order.id;
-  tile.innerHTML = `
-    <div class="order-tile-head">
-      <div>
-        <div class="order-item-name">${itemName}</div>
-        ${itemMods ? `<div class="order-item-mods">${itemMods}</div>` : ''}
-      </div>
-      <div class="order-status-badge ${badgeClass}">${badgeText}</div>
-    </div>
-    <div class="order-meta">
-      <div class="order-ref">${ref}</div>
-      <div class="order-time ${timeClass}">${minutesAgo(order.created_at)}</div>
-    </div>
-    <div class="order-actions">
-      ${isReady
-        ? `<button class="btn-mark-ready already-ready" disabled>✓ READY FOR COLLECTION</button>`
-        : `<button class="btn-mark-ready" onclick="markOrderReady('${order.id}', this)">✓ MARK READY</button>`
-      }
-      ${isReady
-        ? `<button class="btn-dismiss" onclick="dismissOrder('${order.id}')">DISMISS</button>`
-        : ''
-      }
-    </div>
-  `;
-  return tile;
-}
-
-function renderOrders(orders) {
-  const queue = document.getElementById('order-queue');
-
-  // Remove old tiles (keep signin-prompt hidden)
-  const existing = queue.querySelectorAll('.order-tile');
-  existing.forEach(el => el.remove());
-
-  const signInPrompt = document.getElementById('queue-signin-prompt');
-  if (signInPrompt) signInPrompt.style.display = 'none';
-
-  if (!orders || orders.length === 0) {
-    // Empty state
-    let emptyEl = queue.querySelector('.queue-empty');
-    if (!emptyEl) {
-      emptyEl = document.createElement('div');
-      emptyEl.className = 'queue-empty';
-      emptyEl.innerHTML = `
-        <div class="queue-empty-icon">✓</div>
-        <div class="queue-empty-title">Queue is clear</div>
-        <div class="queue-empty-sub">No pending or ready orders</div>
-      `;
-      queue.appendChild(emptyEl);
-    }
-    emptyEl.style.display = '';
-    return;
-  }
-
-  // Remove empty state if present
-  const emptyEl = queue.querySelector('.queue-empty');
-  if (emptyEl) emptyEl.style.display = 'none';
-
-  // Sort: urgent first, then pending, then ready
-  const sorted = [...orders].sort((a, b) => {
-    const rank = o => o.status === 'pending' ? 0 : 1;
-    return rank(a) - rank(b);
-  });
-
-  sorted.forEach(order => {
-    queue.appendChild(renderOrderTile(order));
-  });
-
-  // Update stats
-  const pending = orders.filter(o => o.status === 'pending').length;
-  const ready   = orders.filter(o => o.status === 'ready').length;
-  updateQueueStats(pending, ready, null);
-}
-
-function updateQueueStats(pending, ready, today) {
-  const qs_pending = document.getElementById('qs-pending');
-  const qs_ready   = document.getElementById('qs-ready');
-  const sb_pending = document.getElementById('sb-pending-count');
-  const sb_ready   = document.getElementById('sb-ready-count');
-
-  if (qs_pending) qs_pending.textContent = pending !== null ? pending : '—';
-  if (qs_ready)   qs_ready.textContent   = ready   !== null ? ready   : '—';
-  if (sb_pending) sb_pending.textContent = pending !== null ? pending : '—';
-  if (sb_ready)   sb_ready.textContent   = ready   !== null ? ready   : '—';
-  if (today !== null) {
-    const qs_today = document.getElementById('qs-today');
-    const sb_today = document.getElementById('sb-today-count');
-    if (qs_today) qs_today.textContent = today;
-    if (sb_today) sb_today.textContent = today;
-  }
-}
-
-async function refreshOrders() {
-  if (!_currentUser || !_venueId) return;
-
-  const pollStatus = document.getElementById('queue-poll-status');
-  if (pollStatus) pollStatus.textContent = 'Refreshing…';
-
-  try {
-    const session = await getSbClient().auth.getSession();
-    const token = session?.data?.session?.access_token || SB_KEY;
-
-    // Fetch pending + ready orders for this venue
-    const res = await fetch(
-      `${SB_URL}/rest/v1/orders?venue_id=eq.${_venueId}&status=in.(pending,ready)&order=created_at.asc&limit=50`,
-      {
-        headers: {
-          'apikey': SB_KEY,
-          'Authorization': 'Bearer ' + token
-        }
-      }
-    );
-
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const orders = await res.json();
-    _orders = orders;
-    renderOrders(orders);
-
-    // Today count
-    const todayStart = new Date();
-    todayStart.setHours(0,0,0,0);
-    const todayRes = await fetch(
-      `${SB_URL}/rest/v1/orders?venue_id=eq.${_venueId}&created_at=gte.${todayStart.toISOString()}&select=id`,
-      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token } }
-    );
-    if (todayRes.ok) {
-      const todayOrders = await todayRes.json();
-      const pending = orders.filter(o => o.status === 'pending').length;
-      const ready   = orders.filter(o => o.status === 'ready').length;
-      updateQueueStats(pending, ready, todayOrders.length);
-      document.getElementById('sb-today-count').textContent = todayOrders.length;
-      document.getElementById('qs-today').textContent = todayOrders.length;
-    }
-
-    _lastPollTime = new Date();
-    const timeStr = _lastPollTime.toLocaleTimeString('en-GB', { hour12: false });
-    if (pollStatus) pollStatus.textContent = 'Polled ' + timeStr;
-    document.getElementById('sb-last-refresh').textContent = timeStr;
-
-  } catch(e) {
-    if (pollStatus) pollStatus.textContent = 'Poll error';
-    showToast('Could not load orders: ' + e.message, 'err');
-    console.error('refreshOrders error:', e);
-  }
-}
-
-function startOrderPoll() {
-  refreshOrders();
-  _orderPollTimer = setInterval(refreshOrders, POLL_INTERVAL_MS);
-  document.getElementById('poll-dot').style.display = 'inline-block';
-}
-
-function stopOrderPoll() {
-  if (_orderPollTimer) { clearInterval(_orderPollTimer); _orderPollTimer = null; }
-  document.getElementById('poll-dot').style.display = 'none';
-}
-
-// ─── MARK ORDER READY ─────────────────────────────────────
-async function markOrderReady(orderId, btn) {
-  if (btn) { btn.disabled = true; btn.textContent = 'UPDATING…'; }
-
-  try {
-    const session = await getSbClient().auth.getSession();
-    const token = session?.data?.session?.access_token || SB_KEY;
-
-    const res = await fetch(
-      `${SB_URL}/rest/v1/orders?id=eq.${orderId}`,
-      {
-        method: 'PATCH',
-        headers: {
-          'apikey': SB_KEY,
-          'Authorization': 'Bearer ' + token,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({
-          status: 'ready',
-          updated_at: new Date().toISOString()
-        })
-      }
-    );
-
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-
-    const ref = '#' + orderId.slice(0, 8).toUpperCase();
-    showToast('Order ' + ref + ' marked ready', 'ok');
-
-    // Update tile immediately
-    const tile = document.getElementById('order-' + orderId);
-    if (tile) {
-      tile.className = 'order-tile ready';
-      const badge = tile.querySelector('.order-status-badge');
-      if (badge) { badge.className = 'order-status-badge badge-ready'; badge.textContent = 'READY'; }
-      const actions = tile.querySelector('.order-actions');
-      if (actions) {
-        actions.innerHTML = `
-          <button class="btn-mark-ready already-ready" disabled>✓ READY FOR COLLECTION</button>
-          <button class="btn-dismiss" onclick="dismissOrder('${orderId}')">DISMISS</button>
-        `;
-      }
-    }
-
-    // Refresh stats
-    await refreshOrders();
-
-  } catch(e) {
-    showToast('Error: ' + e.message, 'err');
-    if (btn) { btn.disabled = false; btn.textContent = '✓ MARK READY'; }
-  }
-}
-
-// ─── DISMISS (READY) ORDER ────────────────────────────────
-async function dismissOrder(orderId) {
-  try {
-    const session = await getSbClient().auth.getSession();
-    const token = session?.data?.session?.access_token || SB_KEY;
-
-    await fetch(
-      `${SB_URL}/rest/v1/orders?id=eq.${orderId}`,
-      {
-        method: 'PATCH',
-        headers: {
-          'apikey': SB_KEY,
-          'Authorization': 'Bearer ' + token,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({
-          status: 'collected',
-          updated_at: new Date().toISOString()
-        })
-      }
-    );
-
-    const tile = document.getElementById('order-' + orderId);
-    if (tile) {
-      tile.style.opacity = '0';
-      tile.style.transform = 'translateX(20px)';
-      tile.style.transition = 'opacity 0.3s, transform 0.3s';
-      setTimeout(() => tile.remove(), 300);
-    }
-    showToast('Order dismissed', 'ok');
-    await refreshOrders();
-  } catch(e) {
-    showToast('Dismiss error: ' + e.message, 'err');
-  }
-}
-
-// ─── SIGNED OUT STATE ─────────────────────────────────────
-function showSignedOutState() {
-  // Hide signed-in UI
-  document.getElementById('queue-stats-strip').style.display = 'none';
-  document.getElementById('card-queue-summary').style.display = 'none';
-  document.getElementById('poll-dot').style.display = 'none';
-
-  // Clear order tiles
-  const queue = document.getElementById('order-queue');
-  const tiles = queue.querySelectorAll('.order-tile, .queue-empty');
-  tiles.forEach(el => el.remove());
-
-  // Show sign-in prompt
-  const prompt = document.getElementById('queue-signin-prompt');
-  if (prompt) prompt.style.display = '';
-
-  // Reset site card
-  document.getElementById('site-name').textContent = '—';
-  document.getElementById('site-address').textContent = 'Sign in to load your venue';
-  document.getElementById('site-status-label').textContent = '—';
-  document.getElementById('site-status-dot').className = 'site-status-dot';
-}
-
-function showSignedInState() {
-  document.getElementById('queue-stats-strip').style.display = '';
-  document.getElementById('card-queue-summary').style.display = '';
-  const prompt = document.getElementById('queue-signin-prompt');
-  if (prompt) prompt.style.display = 'none';
-}
-
-// ─── DARWIN FEED ──────────────────────────────────────────
-const DARWIN_STATION_LABELS = {
-  'FST': 'Fenchurch Street',
-  'LIM': 'Limehouse',
-  'WHA': 'West Ham',
-  'BFR': 'Barking',
-  'UPM': 'Upminster',
-  'SHO': 'Shoeburyness',
-  'PFL': 'Pitsea',
-  'GRY': 'Grays',
-};
-
-async function pollDarwin() {
-  try {
-    const res = await fetch(
-      `${SB_URL}/rest/v1/rail_movement_log?select=crs,event_type,actual_timestamp,planned_timestamp,delay_minutes&order=actual_timestamp.desc&limit=6`,
-      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } }
-    );
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const rows = await res.json();
-
-    if (rows && rows.length > 0) {
-      setDarwinConnected(true);
-      renderDarwinRows(rows.slice(0, 3));
-    } else {
-      setDarwinConnected(false);
-    }
-  } catch(e) {
-    setDarwinConnected(false);
-  }
-}
-
-function setDarwinConnected(connected) {
-  const dot = document.getElementById('darwin-dot');
-  const text = document.getElementById('darwin-status-text');
-  if (connected) {
-    dot.className = 'darwin-dot';
-    text.textContent = 'Bridge connected · live movements';
-  } else {
-    dot.className = 'darwin-dot offline';
-    text.textContent = 'Bridge offline';
-  }
-}
-
-function renderDarwinRows(rows) {
-  const container = document.getElementById('darwin-rows');
-  container.innerHTML = '';
-
-  rows.forEach(row => {
-    const stationName = DARWIN_STATION_LABELS[row.crs] || row.crs;
-    const ts = row.actual_timestamp ? new Date(row.actual_timestamp) : null;
-    const timeStr = ts ? ts.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }) : '—';
-    const delay = row.delay_minutes || 0;
-    const ontime = delay <= 1;
-
-    const div = document.createElement('div');
-    div.className = 'darwin-row';
-    div.innerHTML = `
-      <div class="darwin-crs">${row.crs}</div>
-      <div class="darwin-name">${stationName}</div>
-      <div class="darwin-eta">${timeStr}</div>
-      <div class="${ontime ? 'darwin-ontime' : 'darwin-late'}">${ontime ? 'ON TIME' : '+' + delay + 'm'}</div>
-    `;
-    container.appendChild(div);
-  });
-
-  // Update next train in stats strip
-  if (rows.length > 0) {
-    const next = rows[0];
-    const ts = next.actual_timestamp ? new Date(next.actual_timestamp) : null;
-    const timeStr = ts ? ts.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }) : '—';
-    const nextEl = document.getElementById('qs-next-train');
-    if (nextEl) nextEl.textContent = timeStr;
-    const stEl = document.getElementById('qs-next-station');
-    if (stEl) stEl.textContent = DARWIN_STATION_LABELS[next.crs] || next.crs;
-  }
-}
-
-// ─── INIT AUTH ────────────────────────────────────────────
-async function initAuth() {
-  const client = getSbClient();
-  if (!client) return;
-
-  // Handle PKCE code= callback
-  const urlParams = new URLSearchParams(window.location.search);
-  const code = urlParams.get('code');
-  if (code) {
-    try {
-      await client.auth.exchangeCodeForSession(code);
-      history.replaceState({}, '', window.location.pathname);
-    } catch(e) {
-      console.warn('PKCE exchange error:', e);
-    }
-  }
-
-  // Auth state change handler
-  client.auth.onAuthStateChange(async (event, session) => {
-    const user = session?.user || null;
-    _currentUser = user;
-
-    if (user) {
-      // Hide gate
-      const gate = document.getElementById('auth-gate');
-      gate.classList.remove('visible');
-      setTimeout(() => { gate.style.display = 'none'; }, 400);
-
-      // Render nav
-      renderAuthNav(user);
-      showSignedInState();
-
-      // Resolve venue
-      await resolveMerchantVenue(user);
-      renderAuthNav(user); // re-render with venue badge
-
-      // Start polls
-      startOrderPoll();
-      _darwinTimer = setInterval(pollDarwin, DARWIN_INTERVAL_MS);
-      pollDarwin();
-
-    } else {
-      // Show gate
-      const gate = document.getElementById('auth-gate');
-      gate.style.display = '';
-      setTimeout(() => gate.classList.add('visible'), 50);
-      renderAuthNav(null);
-      showSignedOutState();
-      stopOrderPoll();
-      if (_darwinTimer) { clearInterval(_darwinTimer); _darwinTimer = null; }
-    }
-  });
-
-  // Check existing session
-  const { data } = await client.auth.getSession();
-  if (!data?.session) {
-    // No session — show gate
-    const gate = document.getElementById('auth-gate');
-    gate.style.display = '';
-    setTimeout(() => gate.classList.add('visible'), 50);
-  }
-}
-
-// ─── MAPBOX TOKEN ─────────────────────────────────────────
-// Production: replace with your Mapbox public token
-// mapboxgl.accessToken is checked before initVenueMap() — 
-// if not set, map silently skipped (no error shown to staff)
-mapboxgl.accessToken = 'pk.eyJ1IjoicmFqZXNodGF5bG9yIiwiYSI6ImNtcDM3cXZhZjA2anYycHNnNWRsZDQ2MHAifQ.ZSJ06D0jSp-YwwN-IqPtTg';
-
-// ─── BOOT ────────────────────────────────────────────────
-initAuth();
-</script>
+<script src="merchant-tablet-logic.js"></script>
 </body>
 </html>

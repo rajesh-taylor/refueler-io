@@ -539,5 +539,6 @@ document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' '){e.
 setInterval(()=>{const n=new Date();const s=n.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});g('clock').textContent=s;g('cpClock').textContent=s;g('cpTime').textContent=s.replace(':','꞉')},1000);
 applyLocale();renderStep(0);
 </script>
+<script src="/analytics.js" defer></script>
 </body>
 </html>
