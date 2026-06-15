@@ -341,7 +341,7 @@ async function resolveVenueAndPins(user) {
     // Step 1: look up merchant_users by user_id (auth.users UUID), not email
     const res = await fetch(
       `${SB_URL}/rest/v1/merchant_users?user_id=eq.${encodeURIComponent(user.id)}&select=venue_id,role,staff_pin_hash,owner_pin_hash&limit=1`,
-      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } }
+      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + (window._supabaseSession?.access_token || SB_KEY) } }
     );
     if (!res.ok) {
       console.error('[resolveVenueAndPins] merchant_users fetch failed — HTTP', res.status);
@@ -375,7 +375,7 @@ async function loadVenueDetails(venueId) {
     // Include brand_primary + brand_secondary for ETA widget accent colours
     const res = await fetch(
       `${SB_URL}/rest/v1/venue_partners?id=eq.${venueId}&select=id,name,address,lat,lng,active,brand_primary,brand_secondary,venue_type,franchise_group_id&limit=1`,
-      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } }
+      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + (window._supabaseSession?.access_token || SB_KEY) } }
     );
     if (!res.ok) {
       console.error('[loadVenueDetails] venue_partners fetch failed — HTTP', res.status);
@@ -682,7 +682,7 @@ async function pollDarwin() {
   try {
     const res = await fetch(
       `${SB_URL}/rest/v1/rail_movement_log?select=crs,event_type,actual_timestamp,planned_timestamp,delay_minutes&order=actual_timestamp.desc&limit=6`,
-      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } }
+      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + (window._supabaseSession?.access_token || SB_KEY) } }
     );
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const rows = await res.json();
