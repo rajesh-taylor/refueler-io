@@ -1326,7 +1326,7 @@ body {
 }
 .owner-stat-value {
   font-family: var(--mono);
-  font-size: 26px;
+  font-size: 2.5rem;   /* ~40px — legible at arm's length on tablet */
   font-weight: 500;
   color: var(--text-primary);
   line-height: 1;
