@@ -338,10 +338,18 @@ async function resolveVenueAndPins(user) {
     return;
   }
   try {
+    // Use the authenticated session JWT so RLS policies evaluate correctly.
+    // Falling back to SB_KEY (anon) would bypass row-level security — never do that here.
+    const { data: sessionData } = await getSbClient().auth.getSession();
+    const token = sessionData?.session?.access_token;
+    if (!token) {
+      console.error('[resolveVenueAndPins] No active session token — cannot proceed with RLS');
+      return;
+    }
     // Step 1: look up merchant_users by user_id (auth.users UUID), not email
     const res = await fetch(
       `${SB_URL}/rest/v1/merchant_users?user_id=eq.${encodeURIComponent(user.id)}&select=venue_id,role,staff_pin_hash,owner_pin_hash&limit=1`,
-      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } }
+      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token } }
     );
     if (!res.ok) {
       console.error('[resolveVenueAndPins] merchant_users fetch failed — HTTP', res.status);
@@ -372,10 +380,12 @@ async function resolveVenueAndPins(user) {
 async function loadVenueDetails(venueId) {
   if (!venueId) return;
   try {
+    const { data: sessionData } = await getSbClient().auth.getSession();
+    const token = sessionData?.session?.access_token || SB_KEY;
     // Include brand_primary + brand_secondary for ETA widget accent colours
     const res = await fetch(
       `${SB_URL}/rest/v1/venue_partners?id=eq.${venueId}&select=id,name,address,lat,lng,active,brand_primary,brand_secondary,venue_type,franchise_group_id&limit=1`,
-      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } }
+      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token } }
     );
     if (!res.ok) {
       console.error('[loadVenueDetails] venue_partners fetch failed — HTTP', res.status);
@@ -544,8 +554,9 @@ async function refreshOrders() {
   try {
     const session = await getSbClient().auth.getSession();
     const token = session?.data?.session?.access_token || SB_KEY;
+    // CC-20: merchants read from merchant_orders only — never the orders table directly
     const res = await fetch(
-      `${SB_URL}/rest/v1/orders?venue_id=eq.${_venueId}&status=in.(pending,ready)&order=created_at.asc&limit=50`,
+      `${SB_URL}/rest/v1/merchant_orders?venue_id=eq.${_venueId}&status=in.(pending,ready)&order=created_at.asc&limit=50`,
       { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token } }
     );
     if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -555,7 +566,7 @@ async function refreshOrders() {
 
     const todayStart = new Date(); todayStart.setHours(0,0,0,0);
     const todayRes = await fetch(
-      `${SB_URL}/rest/v1/orders?venue_id=eq.${_venueId}&created_at=gte.${todayStart.toISOString()}&select=id`,
+      `${SB_URL}/rest/v1/merchant_orders?venue_id=eq.${_venueId}&created_at=gte.${todayStart.toISOString()}&select=id`,
       { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token } }
     );
     if (todayRes.ok) {
@@ -592,7 +603,8 @@ async function markOrderReady(orderId, btn) {
   try {
     const session = await getSbClient().auth.getSession();
     const token = session?.data?.session?.access_token || SB_KEY;
-    const res = await fetch(`${SB_URL}/rest/v1/orders?id=eq.${orderId}`, {
+    // CC-20: write status to merchant_orders — never orders directly
+    const res = await fetch(`${SB_URL}/rest/v1/merchant_orders?id=eq.${orderId}`, {
       method: 'PATCH',
       headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token,
                  'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
@@ -624,7 +636,8 @@ async function dismissOrder(orderId) {
   try {
     const session = await getSbClient().auth.getSession();
     const token = session?.data?.session?.access_token || SB_KEY;
-    await fetch(`${SB_URL}/rest/v1/orders?id=eq.${orderId}`, {
+    // CC-20: write status to merchant_orders — never orders directly
+    await fetch(`${SB_URL}/rest/v1/merchant_orders?id=eq.${orderId}`, {
       method: 'PATCH',
       headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token,
                  'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
@@ -680,9 +693,11 @@ const DARWIN_STATION_LABELS = {
 
 async function pollDarwin() {
   try {
+    const { data: sessionData } = await getSbClient().auth.getSession();
+    const token = sessionData?.session?.access_token || SB_KEY;
     const res = await fetch(
       `${SB_URL}/rest/v1/rail_movement_log?select=crs,event_type,actual_timestamp,planned_timestamp,delay_minutes&order=actual_timestamp.desc&limit=6`,
-      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } }
+      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token } }
     );
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const rows = await res.json();
@@ -913,8 +928,10 @@ async function opsToggleVenueOpen(checked) {
     if (t) t.checked = !checked;
   }
 }
+// opsTogglePreorder: removed from OPS UI in CC-21 pending CPO decision.
+// Function retained as no-op to avoid runtime errors if called externally.
 async function opsTogglePreorder(checked) {
-  showToast(checked ? 'Pre-orders only mode on' : 'Pre-orders only mode off', 'ok');
+  console.info('[CC-21] opsTogglePreorder called but toggle removed from UI — CPO decision pending');
 }
 async function opsTogglePause(checked) {
   showToast(checked ? 'New orders paused' : 'Accepting new orders', checked ? 'warn' : 'ok');

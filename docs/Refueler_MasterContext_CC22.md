@@ -11,7 +11,7 @@ Refueler is a Bitcoin-native mobile pre-order platform for commuters on the Fenc
 **Webhook URL:** `https://tihgvdokeofnjxjkenmm.supabase.co/functions/v1/blink-webhook`
 **Transactional email:** `noreply@refueler.io`
 **GitHub:** `rajesh-taylor/refueler-io` (note: hyphen, not underscore). Large HTML files committed via Terminal git, not GitHub MCP.
-**Latest commit:** `3df6771` (CC-21c — merchant_orders migration) — CC-22 pending commit
+**Latest commit:** `1741be0` (CC-22 — vault key replaced, blink-webhook HMAC verification live)
 
 ---
 

@@ -278,7 +278,7 @@ Investor closer: *"Nothing stops this train."* — Lyn Alden thesis reference, o
 | CC-21a | Horizon Strip built on `merchant-tablet.html` (persistent header, Option A); Darwin live feed wired; Beck corridor motif; landscape CSS |
 | CC-21b | `owner_pin_hash` set for `dev@refueler.io` (SHA-256 of `8888`); `merchant_users` SQL fixes; all 62 files committed (`8c36b03`) |
 | CC-21c | PIN hash alignment confirmed; `contact_email` path confirmed clean; redirect URLs confirmed on allowlist; `refreshOrders()` / `markOrderReady()` / `dismissOrder()` migrated from `orders` → `merchant_orders`; commit `3df6771` |
-| CC-22 | Security closure. `bolt11_encryption_key` replaced with secure key (openssl rand -base64 32) via Vault Dashboard. `blink-webhook` v4 deployed — HMAC-SHA256 signature verification implemented and live-verified: bad sig → 401, missing header → 401, valid sig passes auth gate. DB fetch error on settlement logged as standing item. |
+| CC-22 | Security closure. `bolt11_encryption_key` replaced with secure key (openssl rand -base64 32) via Vault Dashboard. `blink-webhook` v4 deployed — HMAC-SHA256 signature verification implemented and live-verified: bad sig → 401, missing header → 401, valid sig passes auth gate. DB fetch error on settlement logged as standing item. Commit `1741be0`. |
 
 ---
 

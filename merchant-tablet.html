@@ -120,12 +120,12 @@
     </div>
     <div class="owner-stat-card">
       <div class="owner-stat-label">Revenue Today</div>
-      <div class="owner-stat-value" style="font-size:20px;" id="owner-stat-revenue">—</div>
+      <div class="owner-stat-value" id="owner-stat-revenue">—</div>
       <div class="owner-stat-sub">GBP excl. commission</div>
     </div>
     <div class="owner-stat-card">
       <div class="owner-stat-label">Avg Order Value</div>
-      <div class="owner-stat-value" style="font-size:20px;" id="owner-stat-aov">—</div>
+      <div class="owner-stat-value" id="owner-stat-aov">—</div>
       <div class="owner-stat-sub">today's average</div>
     </div>
   </div>
@@ -397,16 +397,7 @@
             <span class="ops-toggle-track"></span>
           </label>
         </div>
-        <div class="ops-toggle-row">
-          <div>
-            <div class="ops-toggle-label">Pre-orders only</div>
-            <div class="ops-toggle-sub">Disable walk-up orders during rush periods</div>
-          </div>
-          <label class="ops-toggle">
-            <input type="checkbox" id="ops-toggle-preorder" onchange="opsTogglePreorder(this.checked)">
-            <span class="ops-toggle-track"></span>
-          </label>
-        </div>
+        <!-- Pre-orders only toggle: removed CC-21 pending CPO decision -->
       </div>
 
       <div class="ops-section">
