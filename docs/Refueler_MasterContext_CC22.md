@@ -1,5 +1,5 @@
-# Refueler Master Context — CC-21
-*Updated: 2026-06-15 (CC-21c)*
+# Refueler Master Context — CC-22
+*Updated: 2026-06-16 (CC-22)*
 
 ---
 
@@ -11,7 +11,7 @@ Refueler is a Bitcoin-native mobile pre-order platform for commuters on the Fenc
 **Webhook URL:** `https://tihgvdokeofnjxjkenmm.supabase.co/functions/v1/blink-webhook`
 **Transactional email:** `noreply@refueler.io`
 **GitHub:** `rajesh-taylor/refueler-io` (note: hyphen, not underscore). Large HTML files committed via Terminal git, not GitHub MCP.
-**Latest commit:** `3df6771` (CC-21c — merchant_orders migration)
+**Latest commit:** `3df6771` (CC-21c — merchant_orders migration) — CC-22 pending commit
 
 ---
 
@@ -30,7 +30,7 @@ Refueler is a Bitcoin-native mobile pre-order platform for commuters on the Fenc
 | Function | Status | Notes |
 |---|---|---|
 | `bolt11-create-invoice` | ACTIVE | Blink `lnInvoiceCreate` GraphQL mutation |
-| `blink-webhook` | ACTIVE | Svix verification outstanding — known fix needed |
+| `blink-webhook` | ACTIVE | ✅ CC-22 — HMAC-SHA256 verification live (v4). Verified: bad sig → 401, missing header → 401, valid sig → passes auth gate. |
 
 ## Supabase secrets
 
@@ -40,7 +40,7 @@ Refueler is a Bitcoin-native mobile pre-order platform for commuters on the Fenc
 | `BLINK_GRAPHQL_URL` | ✅ |
 | `BLINK_WEBHOOK_SECRET` | ✅ (whsec_ format) |
 | `BLINK_SANDBOX_GRAPHQL_URL` | Not added — non-critical |
-| `bolt11_encryption_key` | ⚠️ PLACEHOLDER — replace via Dashboard before any live invoice processing |
+| `bolt11_encryption_key` | ✅ REPLACED CC-22 — openssl rand -base64 32 key, set via Vault Dashboard 2026-06-16 |
 | `SUPABASE_URL` | Auto-injected |
 | `SUPABASE_SERVICE_ROLE_KEY` | Auto-injected |
 
@@ -224,6 +224,7 @@ Terminal adapters live inside `refueler.io/terminals/` (numo/, future Block etc 
 | CC-21a | Horizon Strip built (persistent header); Darwin live feed; Beck motif; landscape CSS |
 | CC-21b | `owner_pin_hash` set for `dev@refueler.io`; `merchant_users` SQL fixes; 62 files committed (`8c36b03`) |
 | CC-21c | PIN hash confirmed aligned; `contact_email` path confirmed clean; redirect URLs confirmed; `merchant_orders` migration complete; commit `3df6771` |
+| CC-22 | Security closure. `bolt11_encryption_key` replaced with cryptographically secure key via Vault Dashboard (openssl rand -base64 32). `blink-webhook` v4 deployed — HMAC-SHA256 signature verification live and verified: invalid sig → 401, missing header → 401, valid sig passes auth gate. Test 1 DB fetch error logged as standing item (`bolt11_payment_hash` column lookup — non-blocking). |
 
 ---
 
@@ -231,8 +232,9 @@ Terminal adapters live inside `refueler.io/terminals/` (numo/, future Block etc 
 
 | Item | Priority | Notes |
 |---|---|---|
-| **Vault key replacement** | 🔴 | Replace `bolt11_encryption_key` via Dashboard before any live invoice processing |
-| **Svix webhook verification** | 🔴 | `blink-webhook` signature verification — outstanding fix |
+| ~~**Vault key replacement**~~ | ✅ CLOSED CC-22 | `bolt11_encryption_key` replaced 2026-06-16 via Vault Dashboard |
+| ~~**Webhook signature verification**~~ | ✅ CLOSED CC-22 | `blink-webhook` v4 — HMAC-SHA256 verified live |
+| **`blink-webhook` DB fetch on settlement** | 🟡 | Test 1 returned `DB fetch error` — verify `bolt11_payment_hash` column exists on `merchant_orders` and is queryable; test with a real payment hash at next live payment session |
 | **Browser E2E PIN test** | 🟡 | Magic link → PIN gate → queue, live `dev@refueler.io` session |
 | **`dev-console.html` / `franchise-dashboard.html` auth buttons** | 🟡 | Replace orange fill with outlined `#C8A96E` gold |
 | **ICO registration** | 🟡 | Must complete before beta (£40/year) |

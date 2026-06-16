@@ -1,7 +1,7 @@
 # claude.md — Refueler Project DNA
-> **Version:** 2.6 | **Last updated:** CC-21c · 15 June 2026 | **Status:** Pre-TestFlight / Infrastructure Live
+> **Version:** 2.7 | **Last updated:** CC-22 · 16 June 2026 | **Status:** Pre-TestFlight / Infrastructure Live
 > This file is the single source of truth for Claude session context. Read it in full before any session begins.
-> **Operational detail** (DNS, file registry, session history, SMTP config, full schema) lives in `Refueler_MasterContext_CC21.md` — load that file alongside this one every session.
+> **Operational detail** (DNS, file registry, session history, SMTP config, full schema) lives in `Refueler_MasterContext_CC22.md` — load that file alongside this one every session.
 
 ---
 
@@ -237,6 +237,9 @@ Investor closer: *"Nothing stops this train."* — Lyn Alden thesis reference, o
 | **Browser end-to-end PIN test** | 🟡 Full flow: magic link → PIN gate → queue — test against live `dev@refueler.io` session |
 | **`dev-console.html` / `franchise-dashboard.html` auth buttons** | 🟡 Replace orange fill with outlined `#C8A96E` gold |
 | **ICO registration** | 🟡 Must complete before beta (£40/year) |
+| ~~**Vault key replacement**~~ | ✅ CLOSED CC-22 — `bolt11_encryption_key` replaced 2026-06-16 |
+| ~~**Webhook signature verification**~~ | ✅ CLOSED CC-22 — `blink-webhook` v4 HMAC-SHA256 live and verified |
+| **`blink-webhook` settlement DB fetch** | 🟡 Test returned `DB fetch error` on `bolt11_payment_hash` lookup — verify column exists on `merchant_orders` at next live payment session |
 | **`orders.payment_processor` default** | 🟡 Still `'zebedee'` — update default to `'blink'` in a future migration |
 | **Ben Cousins message** | 🟡 Cleared to send from `hello@refueler.io` |
 | **Costa Coffee partnership** | 🟡 Head of Partnerships to initiate |
@@ -275,6 +278,7 @@ Investor closer: *"Nothing stops this train."* — Lyn Alden thesis reference, o
 | CC-21a | Horizon Strip built on `merchant-tablet.html` (persistent header, Option A); Darwin live feed wired; Beck corridor motif; landscape CSS |
 | CC-21b | `owner_pin_hash` set for `dev@refueler.io` (SHA-256 of `8888`); `merchant_users` SQL fixes; all 62 files committed (`8c36b03`) |
 | CC-21c | PIN hash alignment confirmed; `contact_email` path confirmed clean; redirect URLs confirmed on allowlist; `refreshOrders()` / `markOrderReady()` / `dismissOrder()` migrated from `orders` → `merchant_orders`; commit `3df6771` |
+| CC-22 | Security closure. `bolt11_encryption_key` replaced with secure key (openssl rand -base64 32) via Vault Dashboard. `blink-webhook` v4 deployed — HMAC-SHA256 signature verification implemented and live-verified: bad sig → 401, missing header → 401, valid sig passes auth gate. DB fetch error on settlement logged as standing item. |
 
 ---
 
