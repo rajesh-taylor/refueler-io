@@ -382,6 +382,12 @@
       font-size: 0.68rem;
       color: var(--text-secondary);
     }
+    .tel-micro {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      color: var(--text-tertiary);
+      letter-spacing: 0.04em;
+    }
     .tel-badge {
       display: inline-flex;
       align-items: center;
@@ -766,9 +772,9 @@
       <div class="section-label">Platform Telemetry — 2×3</div>
       <div class="telemetry-grid">
 
-        <!-- Tile 1: ZBD Wallet Balance -->
+        <!-- Tile 1: Blink Wallet Balance -->
         <div class="tel-tile status-neutral" id="tile-zbd">
-          <div class="tel-label">ZBD Wallet</div>
+          <div class="tel-label">Blink Wallet</div>
           <div class="tel-value loading" id="zbd-val">—</div>
           <div class="tel-meta" id="zbd-meta">Initialising…</div>
           <span class="tel-badge badge-info" id="zbd-badge">BOLT11</span>
@@ -779,6 +785,7 @@
           <div class="tel-label">BTC / GBP</div>
           <div class="tel-value loading" id="btc-val">—</div>
           <div class="tel-meta" id="btc-meta">Fetching…</div>
+          <div class="tel-micro" id="btc-micro"></div>
           <span class="tel-badge badge-info" id="btc-badge">CoinGecko</span>
         </div>
 
@@ -1062,6 +1069,7 @@ async function loadAllData() {
     loadSessions(),
     loadVenues(),
     fetchBTCPrice(),
+    fetchBlinkBalance(),
   ]);
 }
 
@@ -1117,37 +1125,104 @@ function setTile(id, val, meta, tileStatus, badgeType, badgeLabel) {
   }
 }
 
-// ── BTC Price ──────────────────────────────────────────────────────────
+// ── BTC Price + Mempool Fee Rate ───────────────────────────────────────
 async function fetchBTCPrice() {
+  // Fetch BTC/GBP price and mempool fee rate in parallel
   try {
-    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=gbp,usd');
-    const j = await r.json();
-    const gbp = j?.bitcoin?.gbp;
-    const usd = j?.bitcoin?.usd;
-    if (gbp) {
-      const satsPerGbp = Math.round(100_000_000 / gbp);
-      document.getElementById('btc-val').textContent = '£' + gbp.toLocaleString('en-GB');
+    const [priceRes, feeRes] = await Promise.allSettled([
+      fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=gbp'),
+      fetch('https://mempool.space/api/v1/fees/recommended')
+    ]);
+
+    // ── BTC/GBP tile ──
+    if (priceRes.status === 'fulfilled' && priceRes.value.ok) {
+      const j = await priceRes.value.json();
+      const gbp = j?.bitcoin?.gbp;
+      if (gbp) {
+        const satsPerGbp = Math.round(100_000_000 / gbp);
+        document.getElementById('btc-val').textContent = '£' + gbp.toLocaleString('en-GB');
+        document.getElementById('btc-val').classList.remove('loading');
+        // Clark Moody style: "£1 = x,xxx sats"
+        document.getElementById('btc-meta').textContent = '£1 = ' + satsPerGbp.toLocaleString('en-GB') + ' sats';
+        document.getElementById('btc-badge').textContent = 'LIVE';
+        document.getElementById('btc-badge').className = 'tel-badge badge-ok';
+        document.getElementById('tile-btc').className = 'tel-tile status-ok';
+      }
+    } else {
+      document.getElementById('btc-val').textContent = 'ERR';
       document.getElementById('btc-val').classList.remove('loading');
-      document.getElementById('btc-meta').textContent = satsPerGbp.toLocaleString() + ' sats/£ · $' + (usd||'—').toLocaleString('en-US');
-      document.getElementById('btc-badge').textContent = 'LIVE';
-      document.getElementById('btc-badge').className = 'tel-badge badge-ok';
-      document.getElementById('tile-btc').className = 'tel-tile status-ok';
+      document.getElementById('btc-meta').textContent = 'Price unavailable';
+      document.getElementById('tile-btc').className = 'tel-tile status-error';
     }
-    // ZBD tile: without real ZBD API key, show placeholder with honest state
-    document.getElementById('zbd-val').textContent = '—';
-    document.getElementById('zbd-val').classList.remove('loading');
-    document.getElementById('zbd-meta').textContent = 'ZBD API key required — see env config';
-    document.getElementById('zbd-badge').textContent = 'CONFIG';
-    document.getElementById('zbd-badge').className = 'tel-badge badge-warn';
-    document.getElementById('tile-zbd').className = 'tel-tile status-warn';
+
+    // ── sat/vB micro line ──
+    if (feeRes.status === 'fulfilled' && feeRes.value.ok) {
+      const fees = await feeRes.value.json();
+      const fastest = fees?.fastestFee;
+      if (fastest != null) {
+        document.getElementById('btc-micro').textContent = 'sat/vB  ' + fastest;
+      }
+    }
   } catch(e) {
     document.getElementById('btc-val').textContent = 'ERR';
     document.getElementById('btc-val').classList.remove('loading');
     document.getElementById('btc-meta').textContent = 'Network error: ' + e.message;
     document.getElementById('tile-btc').className = 'tel-tile status-error';
-    // ZBD same
+  }
+}
+
+// ── Blink Wallet Balance ───────────────────────────────────────────────
+// Calls Blink GraphQL via a Supabase edge function proxy to avoid
+// exposing the BLINK_API_KEY in client-side HTML.
+// Edge function: blink-balance (to be deployed — see CC-24 notes).
+// Falls back to a clear CONFIG state if the function is not yet deployed.
+async function fetchBlinkBalance() {
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) return;
+
+    const res = await fetch(
+      'https://tihgvdokeofnjxjkenmm.supabase.co/functions/v1/blink-balance',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + session.access_token
+        }
+      }
+    );
+
+    if (!res.ok) {
+      // Function not yet deployed — show honest pending state
+      document.getElementById('zbd-val').textContent = '—';
+      document.getElementById('zbd-val').classList.remove('loading');
+      document.getElementById('zbd-meta').textContent = 'blink-balance function not deployed';
+      document.getElementById('zbd-badge').textContent = 'PENDING';
+      document.getElementById('zbd-badge').className = 'tel-badge badge-warn';
+      document.getElementById('tile-zbd').className = 'tel-tile status-warn';
+      return;
+    }
+
+    const j = await res.json();
+    // Expected response: { balanceSats: number, balanceGbp: string }
+    const sats = j?.balanceSats;
+    const gbp  = j?.balanceGbp;
+
+    if (sats != null) {
+      document.getElementById('zbd-val').textContent = sats.toLocaleString('en-GB') + ' sats';
+      document.getElementById('zbd-val').classList.remove('loading');
+      document.getElementById('zbd-meta').textContent = gbp ? '≈ £' + gbp : 'Blink custodial balance';
+      document.getElementById('zbd-badge').textContent = 'LIVE';
+      document.getElementById('zbd-badge').className = 'tel-badge badge-ok';
+      document.getElementById('tile-zbd').className = 'tel-tile status-ok';
+    }
+  } catch(e) {
     document.getElementById('zbd-val').textContent = '—';
     document.getElementById('zbd-val').classList.remove('loading');
+    document.getElementById('zbd-meta').textContent = 'Balance fetch error: ' + e.message;
+    document.getElementById('zbd-badge').textContent = 'ERR';
+    document.getElementById('zbd-badge').className = 'tel-badge badge-error';
+    document.getElementById('tile-zbd').className = 'tel-tile status-error';
   }
 }
 
