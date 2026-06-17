@@ -532,8 +532,8 @@
 
   <!-- FOOTER -->
   <footer class="cc-footer">
-    <span class="footer-meta">REFUELER · CC-23</span>
-    <span class="footer-version">v0.7.1</span>
+    <span class="footer-meta">REFUELER · CC-13</span>
+    <span class="footer-version">v0.7.0</span>
   </footer>
 
 </div>
@@ -544,7 +544,7 @@
 <!-- SUPABASE_ANON_KEY: replace before deploy — load from environment or use Cloudflare Pages secrets -->
 <script>
   const SUPABASE_URL = 'https://tihgvdokeofnjxjkenmm.supabase.co';
-  const SUPABASE_ANON_KEY = window.__SUPABASE_ANON_KEY__ || 'REPLACE_BEFORE_DEPLOY';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpaGd2ZG9rZW9mbmp4amtlbm1tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTY2NDksImV4cCI6MjA5NDE5MjY0OX0.cRb94WeIP8yRfWd9s2XKmq2nqm1ov-sK1df6u8LNUbo';
 </script>
 
 <script>
@@ -596,7 +596,7 @@
     const { error } = await sb.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: 'https://refueler.io/command-centre.html',
+        emailRedirectTo: 'https://refueler.io/command-centre',
       },
     });
 
