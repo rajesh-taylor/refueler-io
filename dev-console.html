@@ -382,12 +382,7 @@
       font-size: 0.68rem;
       color: var(--text-secondary);
     }
-    .tel-micro {
-      font-family: var(--mono);
-      font-size: 0.6rem;
-      color: var(--text-tertiary);
-      letter-spacing: 0.04em;
-    }
+
     .tel-badge {
       display: inline-flex;
       align-items: center;
@@ -785,7 +780,6 @@
           <div class="tel-label">BTC / GBP</div>
           <div class="tel-value loading" id="btc-val">—</div>
           <div class="tel-meta" id="btc-meta">Fetching…</div>
-          <div class="tel-micro" id="btc-micro"></div>
           <span class="tel-badge badge-info" id="btc-badge">CoinGecko</span>
         </div>
 
@@ -1127,11 +1121,10 @@ function setTile(id, val, meta, tileStatus, badgeType, badgeLabel) {
 
 // ── BTC Price + Mempool Fee Rate ───────────────────────────────────────
 async function fetchBTCPrice() {
-  // Fetch BTC/GBP price and mempool fee rate in parallel
+  // Fetch BTC/GBP price
   try {
-    const [priceRes, feeRes] = await Promise.allSettled([
-      fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=gbp'),
-      fetch('https://mempool.space/api/v1/fees/recommended')
+    const [priceRes] = await Promise.allSettled([
+      fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=gbp')
     ]);
 
     // ── BTC/GBP tile ──
@@ -1155,14 +1148,6 @@ async function fetchBTCPrice() {
       document.getElementById('tile-btc').className = 'tel-tile status-error';
     }
 
-    // ── sat/vB micro line ──
-    if (feeRes.status === 'fulfilled' && feeRes.value.ok) {
-      const fees = await feeRes.value.json();
-      const fastest = fees?.fastestFee;
-      if (fastest != null) {
-        document.getElementById('btc-micro').textContent = 'sat/vB  ' + fastest;
-      }
-    }
   } catch(e) {
     document.getElementById('btc-val').textContent = 'ERR';
     document.getElementById('btc-val').classList.remove('loading');
