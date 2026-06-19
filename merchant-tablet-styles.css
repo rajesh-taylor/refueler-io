@@ -1164,28 +1164,27 @@ body {
   line-height: 1.5;
 }
 
-/* ─── OWNER AFFORDANCE ─── */
-.owner-affordance {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
+/* ─── OWNER BUTTON (nav-level) ─── */
+.nav-owner-btn {
   font-family: var(--mono);
   font-size: 9px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--text-tertiary);
+  color: var(--accent-carbon);
   background: none;
-  border: 0.5px solid var(--border);
+  border: 0.5px solid var(--accent-carbon);
   border-radius: 4px;
-  padding: 6px 12px;
+  padding: 5px 12px;
   cursor: pointer;
-  z-index: 400;
-  display: none;
-  transition: border-color 0.2s, color 0.2s;
+  display: none;              /* hidden until staff authenticated */
+  transition: background 0.2s, color 0.2s;
   touch-action: manipulation;
 }
-.owner-affordance.visible { display: block; }
-.owner-affordance:hover { border-color: var(--accent-carbon); color: var(--accent-carbon); }
+.nav-owner-btn.visible { display: block; }
+.nav-owner-btn:hover {
+  background: var(--accent-carbon);
+  color: var(--bg);
+}
 
 /* Owner PIN overlay */
 .owner-overlay {

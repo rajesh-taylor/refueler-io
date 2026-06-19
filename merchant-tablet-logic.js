@@ -22,6 +22,7 @@ let _ownerPinHash    = null;    // bcrypt/sha256 hash stored in merchant_users.o
 let _staffPinBuffer  = '';      // current tap buffer (plain, never stored)
 let _ownerPinBuffer  = '';
 let _darwinRowsCache = [];      // last Darwin poll result — read by updateHorizonBand()
+let _staffAuthenticated = false; // true once staff PIN accepted — prevents gate re-show on fullscreen/visibility events
 
 // ─── PIN HASHING (SHA-256, browser native) ─────────────────
 async function sha256(str) {
@@ -33,8 +34,15 @@ async function sha256(str) {
 function setTheme(t) {
   document.documentElement.setAttribute('data-theme', t === 'carbon' ? 'carbon' : '');
   localStorage.setItem('rfTheme', t);
-  document.getElementById('pill-paper').classList.toggle('active', t === 'paper');
-  document.getElementById('pill-carbon').classList.toggle('active', t === 'carbon');
+  // Sync all theme pill instances (main nav + owner panel)
+  ['pill-paper', 'owner-pill-paper'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active', t === 'paper');
+  });
+  ['pill-carbon', 'owner-pill-carbon'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active', t === 'carbon');
+  });
   if (_venueMap) {
     _venueMap.setStyle(t === 'carbon'
       ? 'mapbox://styles/mapbox/dark-v11'
@@ -44,8 +52,10 @@ function setTheme(t) {
 (function initTheme() {
   const t = localStorage.getItem('rfTheme') || 'paper';
   document.documentElement.setAttribute('data-theme', t === 'carbon' ? 'carbon' : '');
-  document.getElementById('pill-paper').classList.toggle('active', t === 'paper');
-  document.getElementById('pill-carbon').classList.toggle('active', t === 'carbon');
+  const pp = document.getElementById('pill-paper');
+  const pc = document.getElementById('pill-carbon');
+  if (pp) pp.classList.toggle('active', t === 'paper');
+  if (pc) pc.classList.toggle('active', t === 'carbon');
 })();
 
 // ─── SUPABASE CLIENT ────────────────────────────────────────
@@ -75,7 +85,10 @@ async function routeGate() {
   if (data?.session) {
     _currentUser = data.session.user;
     await resolveVenueAndPins(_currentUser);
-    showPinGate();
+    // If staff have already authenticated this session, don't re-show the PIN gate
+    if (!_staffAuthenticated) {
+      showPinGate();
+    }
   } else {
     showMagicLinkGate();
   }
@@ -137,6 +150,7 @@ async function verifyStaffPin(pin) {
   const hash = await sha256(pin);
   if (_staffPinHash && hash === _staffPinHash) {
     // Correct — unlock
+    _staffAuthenticated = true; // guard against fullscreen/visibility re-trigger
     hidePinGate();
     onStaffAuthenticated();
   } else {
@@ -212,6 +226,10 @@ async function openOwnerPanel() {
   // Venue badge
   const badge = document.getElementById('owner-venue-badge');
   if (badge && _venueName) badge.textContent = _venueName.toUpperCase();
+  // Sync theme pills to current theme
+  const t = localStorage.getItem('rfTheme') || 'paper';
+  ['owner-pill-paper'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.toggle('active', t === 'paper'); });
+  ['owner-pill-carbon'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.toggle('active', t === 'carbon'); });
   document.getElementById('owner-panel').classList.add('open');
 }
 
@@ -249,9 +267,9 @@ async function loadOwnerStats() {
 }
 
 async function ownerSignOut() {
+  _staffAuthenticated = false;
   const client = getSbClient();
   if (client) await client.auth.signOut();
-  // Full reset — redirect to Command Centre
   window.location.href = 'command-centre.html';
 }
 
@@ -293,6 +311,7 @@ async function sendGateMagicLink() {
 // ─── SIGN OUT (from nav / OPS panel) ─────────────────────────
 // Full sign-out → back to Command Centre
 async function signOut() {
+  _staffAuthenticated = false;
   const client = getSbClient();
   if (client) await client.auth.signOut();
   window.location.href = 'command-centre.html';
@@ -957,9 +976,12 @@ async function initAuth() {
     if (session) {
       _currentUser = session.user;
       // Owner just clicked magic link — resolve venue + pins, then show PIN gate
+      // Guard: if staff already authenticated (e.g. fullscreen triggered re-fire), skip gate
       await resolveVenueAndPins(_currentUser);
-      hideMagicLinkGate();
-      showPinGate();
+      if (!_staffAuthenticated) {
+        hideMagicLinkGate();
+        showPinGate();
+      }
     }
   });
 
