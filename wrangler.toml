@@ -4,3 +4,4 @@ compatibility_date = "2026-05-20"
 [[analytics_engine_datasets]]
 binding = "ANALYTICS"
 dataset = "refueler_pageviews"
+pages_build_output_dir = "."
