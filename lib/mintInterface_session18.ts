@@ -1,4 +1,24 @@
-/** mintInterface.ts — Payment provider abstraction layer. Routes payment
+/**
+ * mintInterface.ts
+ *
+ * Payment provider abstraction layer for Refueler's Lightning/ecash payment rail.
+ *
+ * Routes payment instructions to the active provider without coupling the order
+ * lifecycle layer (`merchant_orders`, order state machine) to any single payment
+ * implementation. Today this routes exclusively to Blink (BOLT11 Lightning).
+ *
+ * Locked architecture decisions (see claude.md §4a):
+ * - BOLT11 via Blink is the sole beta payment path. ZBD permanently retired (CC-11).
+ * - BOLT12 abandoned (CC-07) — not implemented behind this interface.
+ * - Cashu / NUT-18 ecash is a planned future provider, designed to slot in behind
+ *   this interface without requiring changes to the order layer above it.
+ *
+ * Callers should depend only on this interface's exported functions/types —
+ * never import a provider SDK (e.g. Blink GraphQL client) directly outside
+ * this file's implementation.
+ *
+ * @module mintInterface
+ *//** mintInterface.ts — Payment provider abstraction layer. Routes payment
 instructions to active provider (currently Blink/BOLT11). Cashu/NUT-18 and
 BOLT12 slot in behind this interface without touching the order layer.
 "Mint" = generic value endpoint, not Cashu-specific. */
