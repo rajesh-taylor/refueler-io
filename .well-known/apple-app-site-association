@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "GF23GF53WS.io.refueler.app",
+        "paths": ["/auth/callback"]
+      }
+    ]
+  }
+}
