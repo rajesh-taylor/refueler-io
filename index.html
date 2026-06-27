@@ -588,6 +588,27 @@ async function handleMagicLink(e) {
 }
   </script>
 
+<script>
+(function () {
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('mobileAuth') !== '1') return; // not a mobile auth handoff, ignore
+
+  var code = params.get('code');
+  var errorDescription = params.get('error_description');
+
+  if (errorDescription) {
+    document.body.innerHTML = '<p style="font-family:sans-serif;padding:40px;text-align:center;">Sign-in failed: ' + errorDescription + '</p>';
+    return;
+  }
+  if (!code) {
+    document.body.innerHTML = '<p style="font-family:sans-serif;padding:40px;text-align:center;">Missing sign-in code. Please request a new link.</p>';
+    return;
+  }
+
+  window.location.href = 'refuelerapp://login-callback?code=' + encodeURIComponent(code);
+})();
+</script>
+
 <script src="/analytics.js" defer></script>
 </body>
 </html>
