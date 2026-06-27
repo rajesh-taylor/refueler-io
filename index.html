@@ -605,7 +605,25 @@ async function handleMagicLink(e) {
     return;
   }
 
-  window.location.href = 'refuelerapp://login-callback?code=' + encodeURIComponent(code);
+  // Safari silently blocks custom-scheme navigation (refuelerapp://) unless it's
+  // triggered directly by a user gesture (tap/click). An automatic redirect fired
+  // from page-load script does not count as a gesture, so we show a button instead
+  // and fire the redirect from its onclick handler.
+  var deepLink = 'refuelerapp://login-callback?code=' + encodeURIComponent(code);
+
+  document.body.innerHTML =
+    '<div style="font-family:sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;background:#1A1A1A;color:#F5F0E8;">' +
+      '<p style="font-size:16px;margin-bottom:24px;">You\'re signed in.</p>' +
+      '<button id="rfContinueBtn" style="font-family:sans-serif;font-size:16px;font-weight:600;padding:14px 32px;border-radius:999px;border:none;background:#C8A96E;color:#1A1A1A;cursor:pointer;">Continue to Refueler</button>' +
+    '</div>';
+
+  document.getElementById('rfContinueBtn').addEventListener('click', function () {
+    window.location.href = deepLink;
+  });
+
+  // Attempt an immediate auto-tap fallback for browsers that do allow it,
+  // without blocking the visible button as the reliable path.
+  try { window.location.href = deepLink; } catch (e) {}
 })();
 </script>
 
