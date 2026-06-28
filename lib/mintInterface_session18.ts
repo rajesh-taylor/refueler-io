@@ -18,10 +18,7 @@
  * this file's implementation.
  *
  * @module mintInterface
- *//** mintInterface.ts — Payment provider abstraction layer. Routes payment
-instructions to active provider (currently Blink/BOLT11). Cashu/NUT-18 and
-BOLT12 slot in behind this interface without touching the order layer.
-"Mint" = generic value endpoint, not Cashu-specific. */
+ */
 
 // =============================================================
 // Refueler · mintInterface.ts — CC-11

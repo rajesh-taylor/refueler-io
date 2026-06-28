@@ -710,17 +710,57 @@ const DARWIN_STATION_LABELS = {
   'PFL': 'Pitsea', 'GRY': 'Grays'
 };
 
+/**
+ * pollDarwin()
+ * Real data source as of CC-48: rail_signal_current holds ONE row per
+ * (feed, feed_key) — for us, feed='departure_board_staff', feed_key='FST'.
+ * That row's `details` column is a JSONB array of upcoming c2c service
+ * events at Fenchurch Street (std/etd/atd/platform/operator/is_cancelled).
+ * There is no rail_movement_log table — that was a stale/never-built
+ * reference. There is also no per-row `crs` (this feed is FST-only, not
+ * multi-station), so every row here is labelled 'FST'.
+ */
 async function pollDarwin() {
   try {
     const { data: sessionData } = await getSbClient().auth.getSession();
     const token = sessionData?.session?.access_token || SB_KEY;
     const res = await fetch(
-      `${SB_URL}/rest/v1/rail_movement_log?select=crs,event_type,actual_timestamp,planned_timestamp,delay_minutes&order=actual_timestamp.desc&limit=6`,
+      `${SB_URL}/rest/v1/rail_signal_current?select=details&feed=eq.departure_board_staff&feed_key=eq.FST&limit=1`,
       { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token } }
     );
     if (!res.ok) throw new Error('HTTP ' + res.status);
-    const rows = await res.json();
-    if (rows && rows.length > 0) {
+    const data = await res.json();
+    const details = (data && data[0] && Array.isArray(data[0].details)) ? data[0].details : [];
+
+    const nowMs = Date.now();
+    const rows = details
+      .filter(svc => !svc.is_cancelled && svc.std)
+      .map(svc => {
+        // Best-known time: actual > estimated > scheduled.
+        const bestTimestamp = svc.atd || svc.etd || svc.std;
+        const stdMs = new Date(svc.std).getTime();
+        const bestMs = new Date(bestTimestamp).getTime();
+        const delayMinutes = (Number.isFinite(stdMs) && Number.isFinite(bestMs))
+          ? Math.round((bestMs - stdMs) / 60000)
+          : 0;
+        return {
+          crs: 'FST',
+          actual_timestamp: bestTimestamp,
+          planned_timestamp: svc.std,
+          delay_minutes: delayMinutes,
+          platform: svc.platform || null
+        };
+      })
+      // Only services still ahead of us in time — guards against showing
+      // already-departed trains if the underlying feed snapshot is stale.
+      .filter(row => {
+        const t = new Date(row.actual_timestamp).getTime();
+        return Number.isFinite(t) && t >= nowMs;
+      })
+      .sort((a, b) => new Date(a.actual_timestamp) - new Date(b.actual_timestamp))
+      .slice(0, 6);
+
+    if (rows.length > 0) {
       setDarwinConnected(true);
       renderDarwinRows(rows.slice(0, 3));
     } else {
@@ -778,16 +818,12 @@ function renderDarwinRows(rows) {
  * Updates:
  *   - Darwin section: next train station name + ETA (primary window)
  *     Landscape: also shows second arrival (hb-station-secondary)
- *   - Horizon section: passenger count per arrival window (mock values until
- *     real aggregation is wired in a future session)
+ *   - Horizon section: passenger count per arrival window — NOT YET
+ *     AVAILABLE (renders '—'); see inline comment in this function for why
+ *     rail_reference_loadings can't be joined to the live feed (CC-48).
  *   - Active window highlight: gold accent on 0–3 min window if a train is
  *     within 3 minutes, otherwise highlights the soonest non-zero window.
  *   - Offline state: dims Darwin section if no data available.
- *
- * Mock passenger counts (realistic shape for beta):
- *   0–3 min:  12  (imminent — commuters already at platform)
- *   3–7 min:  34  (inbound — on train, preparing to disembark)
- *   7–15 min: 67  (horizon — still boarding or on earlier segments)
  */
 function updateHorizonBand() {
   const rows = _darwinRowsCache;
@@ -833,13 +869,24 @@ function updateHorizonBand() {
     document.getElementById('hb-station-eta-2').textContent  = secondaryEta;
   }
 
-  // ── Horizon passenger windows (mock values until real aggregation) ──
-  // These values are intentionally realistic shape for the merchant's UX.
-  // Real aggregation from Supabase / Darwin passenger counts wired in a future session.
-  const mockCounts = { w0: 12, w3: 34, w7: 67 };
-  document.getElementById('hb-count-0').textContent = mockCounts.w0;
-  document.getElementById('hb-count-3').textContent = mockCounts.w3;
-  document.getElementById('hb-count-7').textContent = mockCounts.w7;
+  // ── Horizon passenger windows ──
+  // CC-48 investigation: rail_reference_loadings (historical c2c loading
+  // data, keyed on tiploc_code + route_number + departure_time + day_name)
+  // does NOT join cleanly against the live departure_board_staff feed.
+  // The live feed's service entries carry no route_number/service_id/
+  // destination (all null in practice), and their std times don't line up
+  // with the loadings table's scheduled departure_time values for FENCHRS
+  // even to the nearest several minutes — the two appear to reflect
+  // different timetable structures. Forcing a time-proximity match would
+  // produce numbers that look precise but aren't actually tied to the
+  // train arriving. Honest "not available" until a real join key
+  // (e.g. matching by service/headcode) is found or a different data
+  // source is wired in.
+  ['hb-count-0', 'hb-count-3', 'hb-count-7'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '—';
+  });
+  document.querySelector('.hb-horizon-label')?.setAttribute('title', 'Passenger estimates not yet available — live train times only');
 
   // ── Active window highlight logic ──
   // If primary arrival is within 3 minutes → highlight 0–3 window.
