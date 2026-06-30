@@ -79,14 +79,24 @@ Deployed as Supabase edge function. Idempotency key = `eventId`.
 
 ---
 
-## Security hardening (required before production)
+## Security hardening — event/pop-up scope (CC-53 spec)
 
-| Item | Requirement |
-|------|-------------|
-| Mint credentials | Android Keystore (not SharedPreferences) |
-| Webhook HMAC | HMAC-SHA256 per `webhookSecurity.ts` — secret in Android Keystore |
-| Certificate pinning | OkHttp `CertificatePinner` for Refueler Supabase endpoint |
-| Token logging | Never log token strings — log order reference + outcome only |
+Status as of CC-53 spec session. Franchise terminals are NOT covered — separate future session.
+
+| Item | Event/pop-up status | Detail |
+|------|---------------------|--------|
+| Mint credentials (mnemonic) | Spec'd — not yet built | `EncryptedSharedPreferences` (Jetpack Security, AES256-GCM, Keystore-backed key) wraps `PreferenceStore.wallet()`. Drop-in at the store layer; `CashuWalletManager` untouched. |
+| Nostr mint backup broadcast | Spec'd — disable for event mode | `eventMode` flag short-circuits `MintManager.kt:525` before `NostrMintBackup.publishMintBackup` fires. Not a "fix," a deliberate disable — no restore scenario justifies the relay metadata exposure for a one-night device. |
+| Webhook auth (bearer → HMAC) | Spec'd — not yet built | `WebhookEndpointConfig.authKey` becomes an HMAC-SHA256 secret (`whsec_`-prefixed). Verification logic mirrors `blink-webhook/index.ts`'s `verifySvixSignature()` exactly (confirmed against real source, not a shared module — there is no separate `webhookSecurity.ts`). Secret stored via the same `EncryptedSharedPreferences` wrapper as mint credentials. |
+| Certificate pinning | Not covered this session | Franchise-grade item, not assessed for event/pop-up necessity yet. |
+| Token logging | Not covered this session | Carried over from original table, unchanged — still applies regardless of scope. |
+
+Full detail: `numo-hardening-spec-CC53.md`.
+
+### Deferred to franchise-grade (explicitly out of scope here)
+- Hardware-backed StrongBox keys, key rotation policy, biometric/PIN gating, remote wipe
+- Private/paid Nostr relay or NIP-65 customization (if backup is ever needed for franchise devices)
+- Per-venue secret rotation schedule, webhook replay-window enforcement, delivery retry/backoff
 
 ---
 
@@ -99,12 +109,15 @@ Blocked on: `cdk-kotlin` NUT-14 support confirmation (open question to Numo main
 
 ---
 
-## Open questions (unresolved)
+## Open questions
 
 1. Does `cdk-kotlin` expose NUT-14 HTLC claim methods on the merchant/receiver side?
+   *Still unresolved — not assessed in CC-53 (out of scope, didn't block any of the three hardening gaps).*
 2. Is NUT-17 WebSocket implemented, or redemption confirmation polling-only?
-3. How are mint credentials stored? (`grep -r "SharedPreferences\|Keystore" app/src/main/`)
+   *Still unresolved — not assessed in CC-53.*
+3. ~~How are mint credentials stored?~~ **Resolved (CC-53):** plain `SharedPreferences` (`MODE_PRIVATE`) via `core/prefs/PreferenceStore.kt`, no encryption. The wallet mnemonic (`KEY_MNEMONIC` in `CashuWalletManager.kt:602-610`) is stored this way — confirmed in upstream source. Fix spec'd: `EncryptedSharedPreferences` wrapper, see hardening table above.
 4. Is payment history in Room/SQLite or in-memory only?
+   *Still unresolved — not assessed in CC-53.*
 5. Block/Square Terminal Bitcoin support — monitor for BOLT11/ecash webhook compatibility.
 
 ---
