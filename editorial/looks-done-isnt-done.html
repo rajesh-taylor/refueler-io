@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Looks Done Isn't Done · Refueler Editorial</title>
+<meta name="description" content="Why isn't the app available yet? Two pieces of infrastructure — HMAC webhook verification and a PKCE authentication chain — pass every test I've written. Neither has been proven against reality.">
+<meta property="og:title" content="Looks Done Isn't Done · Refueler Editorial">
+<meta property="og:description" content="Why isn't the app available yet? HMAC webhook verification and a PKCE authentication chain both pass every test I've written. Neither has been proven against reality. The honest engineering answer.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://refueler.io/editorial/looks-done-isnt-done.html">
+<meta property="og:site_name" content="Refueler">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://refueler.io/editorial/looks-done-isnt-done.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper:         #F7F4EF;
+    --carbon:        #1E1F22;
+    --ink:           #3D3A36;
+    --ink-2:         #5A5751;
+    --ink-3:         #9A948D;
+    --rule:          #D6D1C8;
+    --gold:          #C8A96E;
+
+    --bg:            var(--paper);
+    --fg:            var(--ink);
+    --fg-2:          var(--ink-2);
+    --fg-3:          var(--ink-3);
+    --bd:            var(--rule);
+    --ac:            var(--gold);
+
+    --pass:          #3A6B4A;
+    --open:          #8B4A28;
+    --code-bg:       #E8E4DC;
+
+    --hed:           'DM Sans', system-ui, sans-serif;
+    --ser:           'Source Serif 4', Georgia, serif;
+    --mono:          'DM Mono','Fira Mono','Courier New',monospace;
+
+    --max:           1200px;
+    --col:           68ch;
+    --g:             clamp(1.25rem,4vw,3rem);
+    --body-sz:       18px;
+    --lh:            1.8;
+    --ps:            1.5em;
+  }
+
+  [data-theme="carbon"] {
+    --bg:    #1E1F22;
+    --fg:    #E4E2DC;
+    --fg-2:  #8A8680;
+    --fg-3:  #5A5751;
+    --bd:    #35373B;
+    --pass:  #6BAF7F;
+    --open:  #C8845A;
+    --code-bg: #26282C;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{-webkit-font-smoothing:antialiased;}
+  body{background:var(--bg);color:var(--fg);font-family:var(--ser);
+       font-size:var(--body-sz);line-height:var(--lh);
+       transition:background .3s,color .3s;min-height:100vh;}
+
+  /* ── HEADER ── */
+  .sh{border-bottom:1px solid var(--bd);padding:0 var(--g);
+      position:sticky;top:0;background:var(--bg);z-index:100;
+      transition:background .3s,border-color .3s;}
+  .shi{max-width:var(--max);margin:0 auto;height:56px;
+       display:flex;align-items:center;justify-content:space-between;}
+  .wm{font-family:var(--hed);font-weight:600;font-size:.875rem;
+      letter-spacing:.06em;color:var(--fg);text-decoration:none;}
+  .wmd{font-weight:300;opacity:.3;margin:0 .5rem;}
+  .wms{font-weight:400;opacity:.55;}
+  nav{display:flex;align-items:center;gap:2rem;}
+  nav a{font-family:var(--hed);font-size:.7rem;font-weight:500;
+        letter-spacing:.1em;text-transform:uppercase;color:var(--fg-2);
+        text-decoration:none;transition:color .2s;}
+  nav a:hover{color:var(--fg);}
+  .pill{font-family:var(--hed);font-size:.65rem;font-weight:500;
+        letter-spacing:.1em;text-transform:uppercase;
+        border:1px solid var(--bd);border-radius:100px;
+        padding:.35rem .85rem;background:transparent;color:var(--fg-2);
+        cursor:pointer;transition:border-color .2s,color .2s;}
+  .pill:hover{border-color:var(--fg-2);color:var(--fg);}
+
+  /* ── WRAP / BREADCRUMB ── */
+  .aw{max-width:var(--max);margin:0 auto;padding:0 var(--g);}
+  .bc{padding:1.75rem 0 0;font-family:var(--hed);font-size:.6375rem;
+      letter-spacing:.07em;color:var(--fg-3);}
+  .bc a{color:inherit;text-decoration:none;}
+  .bc a:hover{color:var(--fg-2);}
+  .bcs{margin:0 .4rem;opacity:.35;}
+
+  /* ── ARTICLE HEADER ── */
+  .ah{padding:2.5rem 0 2.25rem;max-width:var(--col);
+      border-bottom:1px solid var(--bd);margin-bottom:3rem;
+      transition:border-color .3s;}
+  .ey{font-family:var(--hed);font-size:.6375rem;font-weight:500;
+      letter-spacing:.1em;text-transform:uppercase;color:var(--fg-3);
+      margin-bottom:1.25rem;display:flex;gap:.625rem;align-items:center;flex-wrap:wrap;}
+  .dot{width:2px;height:2px;border-radius:50%;background:currentColor;opacity:.3;flex-shrink:0;}
+  h1{font-family:var(--hed);font-size:clamp(2rem,4.5vw,3.25rem);
+     font-weight:600;line-height:1.08;letter-spacing:-.025em;
+     color:var(--fg);margin-bottom:1.25rem;}
+  .sf{font-family:var(--ser);font-size:1.0625rem;line-height:1.65;
+      color:var(--fg-2);margin-bottom:1.5rem;}
+  .dl{font-family:var(--hed);font-size:.6375rem;color:var(--fg-3);
+      display:flex;align-items:center;gap:.625rem;flex-wrap:wrap;}
+
+  /* ── ARTICLE BODY ── */
+  .ab{max-width:var(--col);font-family:var(--ser);
+      font-size:var(--body-sz);line-height:var(--lh);color:var(--fg);}
+  .ab p{margin-bottom:var(--ps);}
+  .ab p:last-child{margin-bottom:0;}
+  .ab h2{font-family:var(--hed);font-size:1.0625rem;font-weight:600;
+         letter-spacing:-.01em;color:var(--fg);
+         margin-top:3rem;margin-bottom:1.125rem;
+         padding-top:2.5rem;border-top:1px solid var(--bd);
+         transition:border-color .3s;}
+  .ab blockquote{border-left:2px solid var(--ac);margin:2rem 0;
+                 padding:.125rem 0 .125rem 1.5rem;font-style:italic;
+                 color:var(--fg-2);font-size:1.0625em;line-height:1.65;}
+  .ab blockquote p{margin-bottom:0;}
+  .ab a{color:var(--fg);text-decoration:underline;
+        text-decoration-color:var(--ac);text-underline-offset:3px;}
+  .ab a:hover{color:var(--ac);}
+
+  /* ── SHARED WIDGET SHELL ── */
+  .wg{margin:2.5rem 0;border:1px solid var(--bd);
+      border-top:2px solid var(--ac);transition:border-color .3s;overflow:hidden;}
+  .wg-hd{padding:.875rem 1.375rem;border-bottom:1px solid var(--bd);
+         display:flex;align-items:baseline;justify-content:space-between;
+         gap:1rem;flex-wrap:wrap;transition:border-color .3s;}
+  .wg-ey{font-family:var(--hed);font-size:.575rem;letter-spacing:.13em;
+         text-transform:uppercase;color:var(--fg-3);}
+  .wg-ti{font-family:var(--hed);font-size:.8125rem;font-weight:600;color:var(--fg);}
+  .wg-ft{padding:.75rem 1.375rem;border-top:1px solid var(--bd);
+         display:flex;justify-content:space-between;align-items:center;
+         gap:1rem;flex-wrap:wrap;transition:border-color .3s;}
+  .wg-note{font-family:var(--hed);font-size:.6rem;color:var(--fg-3);line-height:1.5;}
+  .exp-btn{font-family:var(--hed);font-size:.6375rem;font-weight:600;
+           letter-spacing:.08em;text-transform:uppercase;
+           border:1px solid var(--bd);padding:.45rem .9rem;
+           background:transparent;color:var(--fg-2);cursor:pointer;
+           transition:border-color .2s,color .2s;white-space:nowrap;}
+  .exp-btn:hover{border-color:var(--ac);color:var(--fg);}
+
+  /* ── FLOW DIAGRAM WIDGET ── */
+  .wg-flow{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+  .flow-col{padding:1.25rem 1.5rem;}
+  .flow-col+.flow-col{border-left:1px solid var(--bd);transition:border-color .3s;}
+  .flow-col-label{font-family:var(--hed);font-size:.625rem;font-weight:600;
+                  letter-spacing:.1em;text-transform:uppercase;margin-bottom:1rem;}
+  .flow-col-label--pass{color:var(--pass);}
+  .flow-col-label--open{color:var(--open);}
+
+  /* ASCII flow */
+  .flow-ascii{font-family:var(--mono);font-size:.72rem;line-height:1.9;
+              color:var(--fg-2);white-space:pre;}
+  .flow-ascii .fa-node{color:var(--fg);font-weight:600;}
+  .flow-ascii .fa-arrow{color:var(--fg-3);}
+  .flow-ascii .fa-fail{color:var(--open);font-weight:700;}
+  .flow-ascii .fa-pass{color:var(--pass);font-weight:700;}
+  .flow-ascii .fa-q{color:var(--open);}
+
+  /* checklist */
+  .checklist{list-style:none;margin-top:1.125rem;}
+  .checklist li{font-family:var(--hed);font-size:.75rem;line-height:1.65;
+                color:var(--fg-2);display:flex;gap:.6rem;align-items:baseline;
+                margin-bottom:.3rem;}
+  .ch-pass{color:var(--pass);font-weight:700;flex-shrink:0;}
+  .ch-open{color:var(--open);font-weight:700;flex-shrink:0;}
+  .ch-label{color:var(--fg-3);}
+
+  @media(max-width:580px){
+    .wg-flow{grid-template-columns:1fr;}
+    .flow-col+.flow-col{border-left:none;border-top:1px solid var(--bd);}
+  }
+
+  /* ── DONE CRITERIA ── */
+  .done-wg-body{padding:0;}
+  .done-row{padding:1.125rem 1.5rem;border-bottom:1px solid var(--bd);
+            transition:border-color .3s;}
+  .done-row:last-child{border-bottom:none;}
+  .done-track{font-family:var(--hed);font-size:.6875rem;font-weight:600;
+              color:var(--fg);margin-bottom:.625rem;
+              display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;}
+  .tag-open{font-family:var(--hed);font-size:.55rem;font-weight:700;
+            letter-spacing:.09em;text-transform:uppercase;
+            color:var(--open);border:1px solid var(--open);
+            padding:.15rem .5rem;border-radius:2px;}
+  .done-motif{font-family:var(--mono);font-size:.7rem;color:var(--fg-3);
+              margin-bottom:.75rem;line-height:1.5;}
+  .done-motif .dm-pass{color:var(--pass);}
+  .done-motif .dm-open{color:var(--open);}
+  .done-list{list-style:none;}
+  .done-list li{font-family:var(--hed);font-size:.75rem;line-height:1.7;
+                color:var(--fg-2);margin-bottom:.2rem;
+                display:flex;gap:.6rem;align-items:baseline;}
+  .done-list .di{color:var(--open);flex-shrink:0;}
+
+  /* ── MODAL ── */
+  .mo{display:none;position:fixed;inset:0;background:rgba(30,31,34,.78);
+      z-index:200;align-items:flex-start;justify-content:center;
+      padding:3rem var(--g) 2rem;overflow-y:auto;}
+  .mo.open{display:flex;}
+  .mo-box{background:var(--bg);border:1px solid var(--bd);
+          max-width:900px;width:100%;transition:background .3s,border-color .3s;}
+  .mo-top{padding:.875rem 1.5rem;border-bottom:1px solid var(--bd);
+          display:flex;justify-content:space-between;align-items:center;
+          transition:border-color .3s;}
+  .mo-ey{font-family:var(--hed);font-size:.575rem;letter-spacing:.13em;
+         text-transform:uppercase;color:var(--fg-3);}
+  .mo-close{font-family:var(--hed);font-size:.65rem;font-weight:600;
+            letter-spacing:.1em;text-transform:uppercase;
+            border:1px solid var(--bd);padding:.35rem .85rem;
+            background:transparent;color:var(--fg-2);cursor:pointer;
+            transition:border-color .2s,color .2s;}
+  .mo-close:hover{border-color:var(--fg-2);color:var(--fg);}
+  .mo-ti{font-family:var(--hed);font-size:1.0625rem;font-weight:600;
+         color:var(--fg);padding:1.25rem 1.5rem 0;}
+  .mo-cols{display:grid;grid-template-columns:1fr 1fr;
+           border-top:1px solid var(--bd);margin-top:1.25rem;
+           transition:border-color .3s;}
+  .mo-col{padding:1.25rem 1.5rem;}
+  .mo-col+.mo-col{border-left:1px solid var(--bd);transition:border-color .3s;}
+  .mo-col-label{font-family:var(--hed);font-size:.625rem;font-weight:600;
+                letter-spacing:.1em;text-transform:uppercase;margin-bottom:.875rem;}
+  .mo-col-label--pass{color:var(--pass);}
+  .mo-col-label--open{color:var(--open);}
+  .mo-col-desc{font-family:var(--hed);font-size:.75rem;line-height:1.6;
+               color:var(--fg-2);margin-bottom:1rem;}
+  .mo-flow{font-family:var(--mono);font-size:.7375rem;line-height:1.9;
+           white-space:pre;color:var(--fg-2);
+           background:var(--code-bg);padding:1rem 1.125rem;
+           overflow-x:auto;transition:background .3s;}
+  .mo-flow .mf-node{color:var(--fg);font-weight:600;}
+  .mo-flow .mf-pass{color:var(--pass);font-weight:700;}
+  .mo-flow .mf-fail{color:var(--open);font-weight:700;}
+  .mo-flow .mf-q{color:var(--open);}
+  .mo-flow .mf-note{color:var(--fg-3);font-style:italic;}
+  .mo-ft{padding:1rem 1.5rem;border-top:1px solid var(--bd);
+         font-family:var(--hed);font-size:.6125rem;
+         color:var(--fg-3);line-height:1.6;transition:border-color .3s;}
+  @media(max-width:640px){
+    .mo-cols{grid-template-columns:1fr;}
+    .mo-col+.mo-col{border-left:none;border-top:1px solid var(--bd);}
+  }
+
+  /* ── SERIES NAV ── */
+  .series{max-width:var(--col);margin:3.5rem 0 0;
+          padding-top:1.75rem;border-top:1px solid var(--bd);
+          transition:border-color .3s;}
+  .series-label{font-family:var(--hed);font-size:.575rem;letter-spacing:.13em;
+                text-transform:uppercase;color:var(--fg-3);margin-bottom:1rem;}
+  .series-list{list-style:none;}
+  .series-item{display:flex;gap:1rem;align-items:baseline;
+               padding:.5rem 0;border-bottom:1px solid var(--bd);
+               transition:border-color .3s;}
+  .series-item:last-child{border-bottom:none;}
+  .series-n{font-family:var(--hed);font-size:.625rem;color:var(--fg-3);
+            flex-shrink:0;width:1.5rem;}
+  .series-inner{flex:1;}
+  .series-ti{font-family:var(--hed);font-size:.8125rem;font-weight:600;
+             color:var(--fg);text-decoration:none;display:block;margin-bottom:.1rem;}
+  .series-ti:hover{color:var(--ac);}
+  .series-q{font-family:var(--hed);font-size:.6875rem;color:var(--fg-3);font-style:italic;}
+  .series-item--cur .series-ti{color:var(--ac);}
+
+  /* ── NOTES / SOURCES ── */
+  .notes{max-width:var(--col);margin:3rem 0 4rem;
+         padding-top:2rem;border-top:1px solid var(--bd);
+         transition:border-color .3s;}
+  .notes-label{font-family:var(--hed);font-size:.6375rem;font-weight:600;
+               letter-spacing:.1em;text-transform:uppercase;
+               color:var(--fg-3);margin-bottom:1rem;}
+  .notes-list{list-style:none;}
+  .notes-list li{font-family:var(--hed);font-size:.75rem;line-height:1.7;
+                 color:var(--fg-3);margin-bottom:.625rem;}
+
+  /* ── FOOTER ── */
+  .sf-wrap{border-top:1px solid var(--bd);padding:0 var(--g);
+           transition:border-color .3s;}
+  .sf-inner{max-width:var(--max);margin:0 auto;padding:1.5rem 0;
+            display:flex;justify-content:space-between;align-items:center;
+            flex-wrap:wrap;gap:1rem;}
+  .sf-note{font-family:var(--hed);font-size:.6375rem;color:var(--fg-3);}
+  .sf-links{display:flex;gap:1.5rem;}
+  .sf-links a{font-family:var(--hed);font-size:.6375rem;letter-spacing:.05em;
+              color:var(--fg-2);text-decoration:none;}
+  .sf-links a:hover{color:var(--fg);}
+
+  @media(max-width:680px){:root{--g:1.125rem;} .ab{font-size:17px;}}
+</style>
+</head>
+<body>
+
+<header class="sh">
+  <div class="shi">
+    <a href="/editorial/" class="wm">Refueler<span class="wmd">/</span><span class="wms">Editorial</span></a>
+    <nav>
+      <a href="/">App</a>
+      <a href="/editorial/">Editorial</a>
+      <a href="/privacy/">Privacy</a>
+      <button class="pill" onclick="toggleTheme()" id="theme-btn">Paper / Carbon</button>
+    </nav>
+  </div>
+</header>
+
+<div class="aw">
+
+  <p class="bc"><a href="/editorial/">Editorial</a><span class="bcs">/</span>Engineering · Trust</p>
+
+  <header class="ah">
+    <div class="ey">
+      <span>Engineering</span><span class="dot"></span>
+      <span>Trust</span><span class="dot"></span>
+      <span>Build notes</span>
+    </div>
+    <h1>Looks Done Isn't Done</h1>
+    <p class="sf">Two pieces of infrastructure — HMAC webhook verification and a PKCE authentication chain — pass every test I've written. Neither has been proven against reality. This is the honest answer to why the app isn't available yet.</p>
+    <div class="dl">
+      <span>June 2026</span><span class="dot"></span>
+      <span>5 min read</span><span class="dot"></span>
+      <span>refueler.io/editorial/looks-done-isnt-done</span>
+    </div>
+  </header>
+
+  <article class="ab">
+
+    <p>There's a particular feeling familiar to anyone who has shipped software: the moment something looks finished. The endpoint responds. The tests pass. Everything suggests it's ready.</p>
+
+    <p>Sometimes that's true. Sometimes you've only proved your own assumptions.</p>
+
+    <p>The payment integration is built. The privacy layer is built — your phone knows where you are; Refueler doesn't. The order routing is built. What isn't built, in the sense of having been proven against something other than my own expectations, are the two components described below. They are the remaining blockers before the first user touches this.</p>
+
+    <h2>A handshake that hasn't shaken</h2>
+
+    <p>Part of how Refueler stays out of the payment layer is a webhook verification step. When a payment provider sends a notification — order settled, payment failed, retry needed — that notification arrives as an HTTP request signed with an HMAC derived from a shared secret. My implementation reproduces the same digest locally and compares. If they match, the request is genuine. If they don't, it's discarded.</p>
+
+    <p>The check exists. It's been in the codebase for a while now, passing every test I've thrown at it — and every one of those tests was written by me, using payloads I constructed and signed myself. Which is a bit like marking your own homework and being delighted to discover you got full marks. What it has not done is verify a single notification that actually arrived from the provider's infrastructure, signed by their system, with their canonicalisation of the request body and their timing on the timestamp. Until it does, I don't know whether my digest matches theirs, whether my replay window is correctly sized, or whether the implementation survives a production retry sequence.</p>
+
+    <!-- WIDGET 1: HMAC FLOW -->
+    <div class="wg" id="w1">
+      <div class="wg-hd">
+        <div>
+          <div class="wg-ey">HMAC webhook verification · Flow diagram · Open issue</div>
+          <div class="wg-ti">How the check works — and where the gap is</div>
+        </div>
+      </div>
+      <div class="wg-flow">
+        <div class="flow-col">
+          <div class="flow-col-label flow-col-label--pass">Expected flow</div>
+          <pre class="flow-ascii"><span class="fa-node">PAYMENT PROVIDER</span>
+<span class="fa-arrow">        │</span>
+<span class="fa-arrow">        │  POST /webhook</span>
+<span class="fa-arrow">        ▼</span>
+<span class="fa-node">  Receive request</span>
+<span class="fa-arrow">        │</span>
+<span class="fa-arrow">        ▼</span>
+<span class="fa-node">Recreate HMAC digest</span>
+<span class="fa-arrow">        │</span>
+<span class="fa-arrow">        ▼</span>
+<span class="fa-node">Compare signatures</span>
+<span class="fa-arrow">       / \</span>
+<span class="fa-pass">   Match</span>  <span class="fa-fail">Reject</span>
+<span class="fa-arrow">     │</span>
+<span class="fa-pass">  Process</span></pre>
+        </div>
+        <div class="flow-col">
+          <div class="flow-col-label flow-col-label--open">Today vs. still missing</div>
+          <ul class="checklist">
+            <li><span class="ch-pass">✓</span> Payload generated by me</li>
+            <li><span class="ch-pass">✓</span> Signature generated by me</li>
+            <li><span class="ch-pass">✓</span> Verification logic written</li>
+            <li><span class="ch-pass">✓</span> Unit tests passing</li>
+          </ul>
+          <ul class="checklist" style="margin-top:1.25rem;">
+            <li><span class="ch-open">□</span> Live provider payload</li>
+            <li><span class="ch-open">□</span> Live provider signature</li>
+            <li><span class="ch-open">□</span> Provider canonicalisation confirmed</li>
+            <li><span class="ch-open">□</span> Replay attacks tested</li>
+            <li><span class="ch-open">□</span> Production retries under jitter</li>
+          </ul>
+        </div>
+      </div>
+      <div class="wg-ft">
+        <span class="wg-note">Flow is illustrative — architecture accurate, labels simplified.</span>
+        <button class="exp-btn" onclick="openModal('m1')">VIEW FULL CONTEXT ›</button>
+      </div>
+    </div>
+
+    <h2>The same lesson, a different track</h2>
+
+    <p>The second piece is a PKCE authentication chain — the mechanism that gets a commuter from "I want to log in" to "I am logged in" on their phone, when the login itself happens in a browser rather than inside the app. PKCE was chosen specifically because it doesn't require a client secret stored on the device, which matters when the device can be lost, jailbroken, or inspected. The right choice on paper. The right choice in the simulator.</p>
+
+    <p>On a physical device, the OAuth callback occasionally arrives before the PKCE verifier can be recovered from Keychain. Whether that's a race condition between the browser returning control and the Keychain write completing, a persistence issue specific to how the item was stored, or something else entirely is exactly what still needs investigation. What surfaces is a login that appears to complete, and then doesn't. The simulator never shows this. Physical hardware does.</p>
+
+    <!-- WIDGET 2: PKCE FLOW -->
+    <div class="wg" id="w2">
+      <div class="wg-hd">
+        <div>
+          <div class="wg-ey">PKCE authentication chain · Flow diagram · Open issue</div>
+          <div class="wg-ti">Where the login flow breaks on a physical device</div>
+        </div>
+      </div>
+      <div class="wg-flow">
+        <div class="flow-col">
+          <div class="flow-col-label flow-col-label--pass">Authentication flow</div>
+          <pre class="flow-ascii"><span class="fa-node">       PHONE</span>
+<span class="fa-arrow">         │</span>
+<span class="fa-arrow">         ▼</span>
+<span class="fa-node">Generate verifier</span>
+<span class="fa-arrow">         │</span>
+<span class="fa-arrow">         ▼</span>
+<span class="fa-node"> Store in Keychain</span>
+<span class="fa-arrow">         │</span>
+<span class="fa-arrow">         ▼</span>
+<span class="fa-node">  Open browser</span>
+<span class="fa-arrow">         │</span>
+<span class="fa-arrow">         ▼</span>
+<span class="fa-node">  User logs in</span>
+<span class="fa-arrow">         │</span>
+<span class="fa-arrow">         ▼</span>
+<span class="fa-node"> OAuth callback</span>
+<span class="fa-arrow">         │</span>
+<span class="fa-arrow">         ▼</span>
+<span class="fa-node"> Read verifier</span>  <span class="fa-fail">← ✗ Failure observed here</span>
+<span class="fa-arrow">         │</span>
+<span class="fa-arrow">         ▼</span>
+<span class="fa-node"> Exchange code</span>
+<span class="fa-arrow">         │</span>
+<span class="fa-arrow">         ▼</span>
+<span class="fa-node">  Logged in</span></pre>
+        </div>
+        <div class="flow-col">
+          <div class="flow-col-label flow-col-label--open">Simulator vs. physical device</div>
+          <ul class="checklist">
+            <li><span class="ch-pass">✓</span> Verifier generated correctly</li>
+            <li><span class="ch-pass">✓</span> Keychain write initiated</li>
+            <li><span class="ch-pass">✓</span> Browser opens, user logs in</li>
+            <li><span class="ch-pass">✓</span> OAuth callback received</li>
+            <li><span class="ch-pass">✓</span> Simulator: full flow completes</li>
+          </ul>
+          <ul class="checklist" style="margin-top:1.25rem;">
+            <li><span class="ch-open">□</span> Physical device: verifier readable</li>
+            <li><span class="ch-open">□</span> Race condition ruled out</li>
+            <li><span class="ch-open">□</span> Survives app backgrounding</li>
+            <li><span class="ch-open">□</span> Consistent across clean installs</li>
+            <li><span class="ch-open">□</span> Token refresh after expiry</li>
+          </ul>
+        </div>
+      </div>
+      <div class="wg-ft">
+        <span class="wg-note">Flow shows the PKCE exchange sequence. Failure point is accurately placed.</span>
+        <button class="exp-btn" onclick="openModal('m2')">VIEW FULL CONTEXT ›</button>
+      </div>
+    </div>
+
+    <p>What connects these two isn't the engineering. It's the instinct. Both pieces produced output that looked correct. Both passed every check I'd thought to write.</p>
+
+    <h2>What done actually means</h2>
+
+    <!-- WIDGET 3: DONE CRITERIA -->
+    <div class="wg" id="w3">
+      <div class="wg-hd">
+        <div>
+          <div class="wg-ey">Acceptance criteria · Both tracks · June 2026</div>
+          <div class="wg-ti">How each component earns the right to be called finished</div>
+        </div>
+      </div>
+      <div class="done-wg-body">
+        <div class="done-row">
+          <div class="done-track">
+            HMAC webhook verification
+            <span class="tag-open">Open</span>
+          </div>
+          <div class="done-motif">
+            <span class="dm-pass">Looks done ✓</span> &nbsp;·&nbsp; Tests written &nbsp;·&nbsp; Simulator: passing<br>
+            <span class="dm-open">Actually done ✗</span> &nbsp;·&nbsp; Live payload: never tested &nbsp;·&nbsp; Replay: never tested
+          </div>
+          <ul class="done-list">
+            <li><span class="di">□</span> Live provider payload verified end-to-end against production secret</li>
+            <li><span class="di">□</span> Malformed and replayed requests correctly rejected under load</li>
+            <li><span class="di">□</span> Implementation survives provider retry sequences with timing jitter</li>
+            <li><span class="di">□</span> Vault secret confirmed round-trip from storage through signature comparison</li>
+          </ul>
+        </div>
+        <div class="done-row">
+          <div class="done-track">
+            PKCE authentication chain
+            <span class="tag-open">Open</span>
+          </div>
+          <div class="done-motif">
+            <span class="dm-pass">Looks done ✓</span> &nbsp;·&nbsp; Simulator: passing &nbsp;·&nbsp; Flow: complete<br>
+            <span class="dm-open">Actually done ✗</span> &nbsp;·&nbsp; Physical device: fails &nbsp;·&nbsp; Cause: under investigation
+          </div>
+          <ul class="done-list">
+            <li><span class="di">□</span> Physical device completes full exchange consistently across clean installs</li>
+            <li><span class="di">□</span> Keychain timing issue identified and resolved</li>
+            <li><span class="di">□</span> Login survives app backgrounding and interruption mid-flow</li>
+            <li><span class="di">□</span> Token refresh confirmed working after session expiry on device</li>
+          </ul>
+        </div>
+      </div>
+      <div class="wg-ft">
+        <span class="wg-note">Criteria are minimum bars, not exhaustive. Updated when status changes.</span>
+        <button class="exp-btn" onclick="openModal('m3')">VIEW FULL CONTEXT ›</button>
+      </div>
+    </div>
+
+    <p>Neither of these is a months-long rebuild. The webhook work closes once I have a sandbox endpoint receiving live provider notifications — that's the next concrete step. The Keychain issue is most likely a timing problem that the simulator papers over, which makes it diagnosable once I have the right device instrumented properly.</p>
+
+    <p>I could simply have delayed the launch and said nothing. I'd rather explain the specific engineering reasons than ask anyone to take "coming soon" on trust.</p>
+
+    <p>Refueler is not a payment processor. It doesn't hold your money. Your phone knows where you are; Refueler doesn't. Most of what the app asks you to trust is timing, not custody. But timing infrastructure still touches the moment a payment is confirmed and the moment your identity is verified, and you should know exactly how seriously the gap between "looks done" and "is done" is being taken before you ever have reason to test it yourself.</p>
+
+    <p>Good engineering isn't the absence of bugs. It's resisting the urge to call something finished before reality has had its turn — and then publishing the gap so that when it closes, the closure means something.</p>
+
+  </article>
+
+  <!-- SERIES NAV -->
+  <nav class="series" aria-label="Editorial series">
+    <div class="series-label">Refueler Editorial Series</div>
+    <ul class="series-list">
+      <li class="series-item">
+        <span class="series-n">1</span>
+        <div class="series-inner">
+          <a href="/editorial/the-float.html" class="series-ti">The Float</a>
+          <div class="series-q">Why do loyalty rewards take weeks?</div>
+        </div>
+      </li>
+      <li class="series-item">
+        <span class="series-n">2</span>
+        <div class="series-inner">
+          <a href="/editorial/nothing-to-collect-nothing-to-hide.html" class="series-ti">Nothing to Collect, Nothing to Hide</a>
+          <div class="series-q">Why does a preorder app need your location at all?</div>
+        </div>
+      </li>
+      <li class="series-item">
+        <span class="series-n">3</span>
+        <div class="series-inner">
+          <a href="/editorial/the-city-worker.html" class="series-ti">The City Worker</a>
+          <div class="series-q">Who actually benefits from this?</div>
+        </div>
+      </li>
+      <li class="series-item series-item--cur">
+        <span class="series-n">4</span>
+        <div class="series-inner">
+          <a href="/editorial/looks-done-isnt-done.html" class="series-ti">Looks Done Isn't Done</a>
+          <div class="series-q">Why isn't the app available yet?</div>
+        </div>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="notes">
+    <p class="notes-label">Notes</p>
+    <ul class="notes-list">
+      <li>Status of both components reflects internal engineering tracking as of publication date. No external audit has been commissioned; this is a first-party disclosure.</li>
+      <li>Flow diagrams are illustrative — architecture and failure points are accurate; labels are simplified for clarity.</li>
+      <li>No customer funds or customer accounts have been connected to either system. Both remain in pre-production.</li>
+    </ul>
+  </div>
+
+</div><!-- /aw -->
+
+<!-- ── MODAL 1: HMAC full context ── -->
+<div class="mo" id="m1" onclick="handleOvClick(event,'m1')">
+  <div class="mo-box">
+    <div class="mo-top">
+      <span class="mo-ey">HMAC webhook verification · Full context · Expected flow vs. untested gaps</span>
+      <button class="mo-close" onclick="closeModal('m1')">Close ✕</button>
+    </div>
+    <div class="mo-ti">Payment notification verification — complete flow and open questions</div>
+    <div class="mo-cols">
+      <div class="mo-col">
+        <div class="mo-col-label mo-col-label--pass">Expected production flow</div>
+        <p class="mo-col-desc">A payment notification arrives from the provider's server. My implementation reads the raw request body, recreates the HMAC digest using the shared secret held in a production vault, and compares it against the signature supplied in the request header. Match = process. No match = discard silently.</p>
+        <pre class="mo-flow"><span class="mf-node">PAYMENT PROVIDER SERVER</span>
+<span class="mf-note">         │</span>
+<span class="mf-note">         │  HTTP POST</span>
+<span class="mf-note">         │  Body: raw JSON event</span>
+<span class="mf-note">         │  Header: HMAC signature</span>
+<span class="mf-note">         │  Header: timestamp</span>
+<span class="mf-note">         ▼</span>
+<span class="mf-node">   MY WEBHOOK HANDLER</span>
+<span class="mf-note">         │</span>
+<span class="mf-note">         ├─ Read raw body (pre-parse)</span>
+<span class="mf-note">         ├─ Read timestamp header</span>
+<span class="mf-note">         ├─ Check replay window</span>
+<span class="mf-note">         ├─ Recreate HMAC digest</span>
+<span class="mf-note">         │  (body + timestamp + secret)</span>
+<span class="mf-note">         ├─ Compare to header signature</span>
+<span class="mf-note">         ▼</span>
+<span class="mf-pass">   Match → process event</span>
+<span class="mf-fail">   No match → discard silently</span></pre>
+      </div>
+      <div class="mo-col">
+        <div class="mo-col-label mo-col-label--open">What hasn't been tested</div>
+        <p class="mo-col-desc">Every test I've run constructs both the payload and the signature. The function has never received a notification it didn't help create. Until a live provider payload arrives, the following remain unknown.</p>
+        <pre class="mo-flow"><span class="mf-q">? Provider's body serialisation order</span>
+<span class="mf-note">  Does their JSON match the field order</span>
+<span class="mf-note">  my digest function expects?</span>
+
+<span class="mf-q">? Timestamp header field name</span>
+<span class="mf-note">  Am I reading the right header?</span>
+<span class="mf-note">  Is the format what I'm parsing?</span>
+
+<span class="mf-q">? Replay window sizing</span>
+<span class="mf-note">  Is ±5 minutes correct for this</span>
+<span class="mf-note">  provider's retry cadence?</span>
+
+<span class="mf-q">? Production vault secret round-trip</span>
+<span class="mf-note">  Secret has never been used in a live</span>
+<span class="mf-note">  verification. Only test values.</span>
+
+<span class="mf-q">? Behaviour under retries</span>
+<span class="mf-note">  Provider retries failed deliveries.</span>
+<span class="mf-note">  Replay detection must handle this</span>
+<span class="mf-note">  without rejecting legitimate retries.</span>
+
+<span class="mf-note">Status: open — no fix landed</span>
+<span class="mf-note">Next step: sandbox live payload test</span></pre>
+      </div>
+    </div>
+    <div class="mo-ft">Illustrative — shape and category of the gap, not the production implementation. No library names, actual header values, or secrets are disclosed. Source: internal engineering tracking, June 2026.</div>
+  </div>
+</div>
+
+<!-- ── MODAL 2: PKCE full context ── -->
+<div class="mo" id="m2" onclick="handleOvClick(event,'m2')">
+  <div class="mo-box">
+    <div class="mo-top">
+      <span class="mo-ey">PKCE authentication chain · Full context · Simulator vs. physical device</span>
+      <button class="mo-close" onclick="closeModal('m2')">Close ✕</button>
+    </div>
+    <div class="mo-ti">Login flow — where simulator and physical device diverge</div>
+    <div class="mo-cols">
+      <div class="mo-col">
+        <div class="mo-col-label mo-col-label--pass">Simulator — passes every time</div>
+        <p class="mo-col-desc">In the iOS Simulator, the full PKCE exchange completes without issue on every run. The verifier is written to Keychain, the browser opens, the user authenticates, the callback fires, the verifier is read back, the code is exchanged for a token, the session is established.</p>
+        <pre class="mo-flow"><span class="mf-node">       APP OPENS</span>
+<span class="mf-note">           │</span>
+<span class="mf-pass">  ✓  Generate PKCE verifier</span>
+<span class="mf-note">           │</span>
+<span class="mf-pass">  ✓  Write verifier to Keychain</span>
+<span class="mf-note">           │</span>
+<span class="mf-pass">  ✓  Open browser (ASWebAuthSession)</span>
+<span class="mf-note">           │</span>
+<span class="mf-pass">  ✓  User authenticates</span>
+<span class="mf-note">           │</span>
+<span class="mf-pass">  ✓  OAuth callback received</span>
+<span class="mf-note">           │</span>
+<span class="mf-pass">  ✓  Read verifier from Keychain</span>
+<span class="mf-note">           │</span>
+<span class="mf-pass">  ✓  Exchange code for token</span>
+<span class="mf-note">           │</span>
+<span class="mf-pass">  ✓  Session established</span></pre>
+      </div>
+      <div class="mo-col">
+        <div class="mo-col-label mo-col-label--open">Physical device — failure observed</div>
+        <p class="mo-col-desc">On physical hardware in early testing, the flow breaks at the Keychain read. The callback arrives, but the verifier is not recoverable. The login appears to have completed — the browser closes, the app resumes — but the token exchange never happens. The session does not exist.</p>
+        <pre class="mo-flow"><span class="mf-node">       APP OPENS</span>
+<span class="mf-note">           │</span>
+<span class="mf-pass">  ✓  Generate PKCE verifier</span>
+<span class="mf-note">           │</span>
+<span class="mf-pass">  ✓  Write verifier to Keychain</span>
+<span class="mf-note">     (write initiated — success assumed)</span>
+<span class="mf-note">           │</span>
+<span class="mf-pass">  ✓  Open browser</span>
+<span class="mf-note">           │</span>
+<span class="mf-pass">  ✓  User authenticates</span>
+<span class="mf-note">           │</span>
+<span class="mf-pass">  ✓  OAuth callback received</span>
+<span class="mf-note">           │</span>
+<span class="mf-fail">  ✗  Read verifier from Keychain</span>
+<span class="mf-fail">     → item not found</span>
+<span class="mf-note">           │</span>
+<span class="mf-fail">  ✗  Exchange aborted</span>
+<span class="mf-note">           │</span>
+<span class="mf-fail">  ✗  Login appeared to complete.</span>
+<span class="mf-fail">     Did not.</span>
+
+<span class="mf-note">Open question: race condition between</span>
+<span class="mf-note">callback and Keychain write, or</span>
+<span class="mf-note">persistence issue, or something else.</span>
+<span class="mf-note">Under investigation on physical device.</span></pre>
+      </div>
+    </div>
+    <div class="mo-ft">Flow represents the observed behaviour in early physical device testing. Failure point accurately placed. Cause not yet confirmed — investigation ongoing. Source: internal engineering tracking, June 2026.</div>
+  </div>
+</div>
+
+<!-- ── MODAL 3: Done criteria full context ── -->
+<div class="mo" id="m3" onclick="handleOvClick(event,'m3')">
+  <div class="mo-box">
+    <div class="mo-top">
+      <span class="mo-ey">Acceptance criteria · Both tracks · Full definition of done</span>
+      <button class="mo-close" onclick="closeModal('m3')">Close ✕</button>
+    </div>
+    <div class="mo-ti">What "done" means for each open component — in full</div>
+    <div class="mo-cols">
+      <div class="mo-col">
+        <div class="mo-col-label mo-col-label--open">HMAC webhook verification</div>
+        <p class="mo-col-desc">This track closes when a live provider payload has been verified end-to-end under real conditions — not a payload I constructed, not a test secret, not a simulated retry. The full acceptance criteria:</p>
+        <pre class="mo-flow"><span class="mf-note">Looks done ✓</span>
+<span class="mf-pass">  Unit tests: passing</span>
+<span class="mf-pass">  Logic reviewed</span>
+<span class="mf-pass">  Shared secret: in vault</span>
+
+<span class="mf-note">Actually done ✗  — requires:</span>
+
+<span class="mf-q">□  Live provider payload received and</span>
+<span class="mf-note">   verified against production secret</span>
+
+<span class="mf-q">□  Malformed requests correctly rejected</span>
+<span class="mf-note">   (wrong secret, wrong body, tampered)</span>
+
+<span class="mf-q">□  Replayed requests rejected</span>
+<span class="mf-note">   (timestamp outside window)</span>
+
+<span class="mf-q">□  Implementation survives retries</span>
+<span class="mf-note">   with realistic timing jitter from</span>
+<span class="mf-note">   provider's retry schedule</span>
+
+<span class="mf-q">□  Vault secret verified round-trip</span>
+<span class="mf-note">   from storage through comparison</span>
+<span class="mf-note">   on a live notification</span>
+
+<span class="mf-note">Next step: sandbox live payload test</span></pre>
+      </div>
+      <div class="mo-col">
+        <div class="mo-col-label mo-col-label--open">PKCE authentication chain</div>
+        <p class="mo-col-desc">This track closes when the full login exchange completes reliably on physical hardware across realistic conditions — not just the clean simulator path. The full acceptance criteria:</p>
+        <pre class="mo-flow"><span class="mf-note">Looks done ✓</span>
+<span class="mf-pass">  Simulator: full flow passing</span>
+<span class="mf-pass">  PKCE verifier: generates correctly</span>
+<span class="mf-pass">  OAuth callback: received correctly</span>
+
+<span class="mf-note">Actually done ✗  — requires:</span>
+
+<span class="mf-q">□  Physical device: full exchange</span>
+<span class="mf-note">   completes consistently on</span>
+<span class="mf-note">   clean installs</span>
+
+<span class="mf-q">□  Keychain timing issue resolved</span>
+<span class="mf-note">   (race condition or persistence</span>
+<span class="mf-note">   root cause confirmed and fixed)</span>
+
+<span class="mf-q">□  Login survives app backgrounding</span>
+<span class="mf-note">   mid-flow</span>
+
+<span class="mf-q">□  Interrupted flows handled cleanly</span>
+<span class="mf-note">   (no ghost sessions, no stuck state)</span>
+
+<span class="mf-q">□  Token refresh confirmed on device</span>
+<span class="mf-note">   after session expiry</span>
+
+<span class="mf-note">Next step: physical device instrumentation</span></pre>
+      </div>
+    </div>
+    <div class="mo-ft">Criteria are minimum bars, not exhaustive test suites. Updated when the status of either track changes. Source: internal engineering tracking, June 2026.</div>
+  </div>
+</div>
+
+<footer class="sf-wrap">
+  <div class="sf-inner">
+    <span class="sf-note">© 2026 Refueler · refueler.io/editorial/looks-done-isnt-done</span>
+    <div class="sf-links">
+      <a href="/editorial/">← Editorial</a>
+      <a href="/privacy/">Privacy</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  /* ── THEME ── */
+  const TK = 'rfTheme';
+  function applyTheme(t) {
+    const r = document.documentElement, b = document.getElementById('theme-btn');
+    if (t === 'carbon') { r.setAttribute('data-theme','carbon'); if(b) b.textContent='Carbon / Paper'; }
+    else { r.removeAttribute('data-theme'); if(b) b.textContent='Paper / Carbon'; }
+  }
+  function toggleTheme() {
+    const n = (localStorage.getItem(TK)||'paper')==='paper'?'carbon':'paper';
+    localStorage.setItem(TK,n); applyTheme(n);
+  }
+  (function(){ applyTheme(localStorage.getItem(TK)||'paper'); })();
+
+  /* ── MODALS ── */
+  function openModal(id) {
+    document.getElementById(id).classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+    document.body.style.overflow='';
+  }
+  function handleOvClick(e,id) {
+    if (e.target===document.getElementById(id)) closeModal(id);
+  }
+  document.addEventListener('keydown', function(e){
+    if (e.key==='Escape') {
+      ['m1','m2','m3'].forEach(function(id){
+        var el=document.getElementById(id);
+        if(el&&el.classList.contains('open')) closeModal(id);
+      });
+    }
+  });
+</script>
+
+</body>
+</html>
