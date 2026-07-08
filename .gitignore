@@ -36,4 +36,7 @@ npm-debug.log*
 *.mp4
 *.dmg
 
-refueler_csuite_briefing_v2_4.html
+# Editorial — internal planning and spec documents (never publish)
+editorial/EDITORIAL-MASTER.md
+editorial/*-spec.md
+editorial/*-spec-*.md
