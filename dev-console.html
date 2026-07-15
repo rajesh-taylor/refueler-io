@@ -745,11 +745,6 @@
   <!-- Main -->
   <main class="main">
 
-    <!-- Standing item -->
-    <div class="standing-banner">
-      <strong>Standing item CC-25:</strong> <code>merchant_orders</code> schema drift resolved. <code>blink-balance</code> edge function deployed. Next: browser E2E merchant PIN test + <code>orders.payment_processor</code> default → blink.
-    </div>
-
     <!-- Page header -->
     <div class="page-header">
       <div>
@@ -1078,8 +1073,6 @@ function updateLastRefresh() {
 async function loadTelemetry() {
   // Auth events = count of sessions
   try {
-    const { data, error } = await sb.from('sessions').select('id', { count: 'exact', head: true });
-    const count = error ? '—' : (data?.length ?? 0);
     const { count: sessCount, error: sessErr } = await sb.from('sessions').select('*', { count: 'exact', head: true });
     setTile('auth', sessErr ? '—' : sessCount, 'Active sessions in DB', sessErr ? 'warn' : 'ok', sessErr ? 'warn' : 'ok', sessErr ? 'WARN' : 'OK');
   } catch(e) { setTile('auth', 'ERR', e.message, 'error', 'error', 'ERR'); }

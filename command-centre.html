@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="">
+<html lang="en" data-theme="carbon">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,21 +11,6 @@
   <style>
     /* ─── DESIGN TOKENS ─────────────────────────────────── */
     :root {
-      --bg:              #F7F4EF;
-      --surface:         #EDEAE4;
-      --surface-raised:  #E4E0D8;
-      --text-primary:    #3D3A36;
-      --text-secondary:  #5A5751;
-      --text-tertiary:   #9A948D;
-      --border:          #D6D1C8;
-      --accent:          #C8A96E;
-      --accent-hover:    #E0C48A;
-      --error-bg:        #FDF0EC;
-      --error-border:    #E8C4B8;
-      --error-text:      #8B3A2A;
-    }
-
-    [data-theme="carbon"] {
       --bg:              #1E1F22;
       --surface:         #26282C;
       --surface-raised:  #2E3035;
@@ -38,6 +23,21 @@
       --error-bg:        #2A1F1C;
       --error-border:    #6B3328;
       --error-text:      #E8A090;
+    }
+
+    [data-theme="paper"] {
+      --bg:              #F7F4EF;
+      --surface:         #EDEAE4;
+      --surface-raised:  #E4E0D9;
+      --text-primary:    #3D3A36;
+      --text-secondary:  #5A5751;
+      --text-tertiary:   #9A948D;
+      --border:          #D6D1C8;
+      --accent:          #A07C3A;
+      --accent-hover:    #C8A96E;
+      --error-bg:        #FDF0EC;
+      --error-border:    #E8C4B8;
+      --error-text:      #8B3A2A;
     }
 
     /* ─── RESET & BASE ──────────────────────────────────── */
@@ -431,6 +431,7 @@
       letter-spacing: 0.06em;
     }
   </style>
+  <script>if (localStorage.getItem('rfTheme') === 'paper') document.documentElement.setAttribute('data-theme', 'paper');</script>
 </head>
 <body>
 
@@ -532,8 +533,8 @@
 
   <!-- FOOTER -->
   <footer class="cc-footer">
-    <span class="footer-meta">REFUELER · CC-13</span>
-    <span class="footer-version">v0.7.0</span>
+    <span class="footer-meta">REFUELER · CC-65</span>
+    <span class="footer-version">v0.8.0</span>
   </footer>
 
 </div>
