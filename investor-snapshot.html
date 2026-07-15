@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="carbon">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Refueler — Investor Snapshot</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Satoshi:wght@400;600;700&family=DM+Sans:wght@300;400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --bg:              #1E1F22;
+      --surface:         #26282C;
+      --surface-raised:  #2E3035;
+      --text-primary:    #E4E2DC;
+      --text-secondary:  #8A8680;
+      --text-tertiary:   #5A5751;
+      --border:          #35373B;
+      --accent:          #C8A96E;
+      --accent-hover:    #E0C48A;
+      --warn:            #C8943A;
+      --green:           #4CAF7A;
+      --red:             #CF4747;
+    }
+    [data-theme="paper"] {
+      --bg:              #F7F4EF;
+      --surface:         #EDEAE4;
+      --surface-raised:  #E4E0D9;
+      --text-primary:    #3D3A36;
+      --text-secondary:  #5A5751;
+      --text-tertiary:   #9A948D;
+      --border:          #D6D1C8;
+      --accent:          #A07C3A;
+      --accent-hover:    #C8A96E;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { min-height: 100%; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-weight: 300;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+
+    /* ── Auth screen ── */
+    #auth-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+      gap: 1.5rem;
+    }
+    .auth-wordmark {
+      font-family: 'Satoshi', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 2rem 2.5rem;
+      width: 100%;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .auth-title {
+      font-family: 'Satoshi', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .auth-sub {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .auth-input {
+      width: 100%;
+      padding: 0.65rem 0.9rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .auth-input:focus { border-color: var(--accent); }
+    .auth-btn {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .auth-btn:hover { background: var(--accent); color: #1E1F22; }
+    .auth-notice {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      text-align: center;
+      min-height: 1rem;
+    }
+    .auth-notice.error { color: var(--red); }
+
+    /* ── App shell ── */
+    #app { display: none; min-height: 100vh; flex-direction: column; }
+
+    /* ── Header ── */
+    .snap-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.1rem 2rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .snap-wordmark {
+      font-family: 'Satoshi', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    .snap-badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.55rem;
+      border: 1px solid var(--border);
+      color: var(--text-tertiary);
+    }
+    .snap-header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .sign-out-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-tertiary);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.7rem;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .sign-out-btn:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+
+    /* ── Main ── */
+    .snap-main {
+      flex: 1;
+      padding: 2.5rem 2rem;
+      max-width: 860px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .snap-headline {
+      font-family: 'Satoshi', sans-serif;
+      font-size: 1.55rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.35rem;
+      letter-spacing: -0.01em;
+    }
+    .snap-subline {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      margin-bottom: 2.5rem;
+      line-height: 1.6;
+    }
+
+    /* ── KPI strip ── */
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-bottom: 2.5rem;
+    }
+    .kpi-card {
+      background: var(--surface);
+      padding: 1.4rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      position: relative;
+    }
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--accent);
+    }
+    .kpi-label {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+    .kpi-value {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 1.85rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    .kpi-value.loading {
+      color: var(--text-tertiary);
+      font-size: 1.4rem;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.35} }
+    .kpi-sub {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+    }
+
+    /* ── Venue traction ── */
+    .snap-section-label {
+      font-family: 'Satoshi', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .venue-traction {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-bottom: 2.5rem;
+    }
+    .venue-row {
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 1.25rem;
+      gap: 1rem;
+    }
+    .venue-row:first-child { border-top: none; }
+    .venue-name {
+      font-weight: 500;
+      font-size: 0.88rem;
+      color: var(--text-primary);
+      flex: 1;
+    }
+    .venue-first-dt {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+    }
+    .venue-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      flex-shrink: 0;
+    }
+    .venue-empty {
+      background: var(--surface);
+      padding: 1.5rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-tertiary);
+    }
+
+    /* ── Context block ── */
+    .snap-context {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      padding: 1.25rem 1.5rem;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 2.5rem;
+    }
+    .snap-context strong { color: var(--text-primary); font-weight: 600; }
+
+    /* ── Sparkline section ── */
+    .spark-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .spark-title {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 0.85rem;
+    }
+    .spark-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.4rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--text-tertiary);
+    }
+
+    /* ── Footer ── */
+    .snap-footer {
+      border-top: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .snap-footer-left {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      color: var(--text-tertiary);
+      letter-spacing: 0.04em;
+    }
+    .snap-footer-right {
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Auth ─────────────────────────────────────────────────── -->
+<div id="auth-screen">
+  <div class="auth-wordmark">Refueler</div>
+  <div class="auth-card">
+    <div class="auth-title">Investor access</div>
+    <div class="auth-sub">Enter your email address. A single-use link will be sent to your inbox.</div>
+    <input class="auth-input" type="email" id="auth-email" placeholder="you@fund.com" autocomplete="email" />
+    <button class="auth-btn" id="auth-btn">Send access link</button>
+    <div class="auth-notice" id="auth-notice"></div>
+  </div>
+</div>
+
+<!-- ── App ───────────────────────────────────────────────────── -->
+<div id="app">
+  <header class="snap-header">
+    <div class="snap-wordmark">Refueler</div>
+    <div class="snap-header-right">
+      <div class="snap-badge">Investor Snapshot</div>
+      <button class="sign-out-btn" id="sign-out-btn">Sign out</button>
+    </div>
+  </header>
+
+  <main class="snap-main">
+    <div class="snap-headline">Platform at a glance</div>
+    <div class="snap-subline" id="snap-subline">Fenchurch St line — pre-order infrastructure connecting Bitcoin-native commuters to independent merchants at station approaches.</div>
+
+    <!-- KPI strip -->
+    <div class="kpi-strip">
+      <div class="kpi-card">
+        <div class="kpi-label">Lightning Volume</div>
+        <div class="kpi-value loading" id="kpi-vol">—</div>
+        <div class="kpi-sub" id="kpi-vol-sub">Gross sats settled</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Orders</div>
+        <div class="kpi-value loading" id="kpi-orders">—</div>
+        <div class="kpi-sub">Paid via Lightning</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Venues Active</div>
+        <div class="kpi-value loading" id="kpi-venues">—</div>
+        <div class="kpi-sub">On platform</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Commuter Wallets</div>
+        <div class="kpi-value loading" id="kpi-wallets">—</div>
+        <div class="kpi-sub">Lightning addresses set</div>
+      </div>
+    </div>
+
+    <!-- Orders per hour sparkline -->
+    <div class="snap-section-label">Order Cadence — last 12 hours</div>
+    <div class="spark-wrap">
+      <div class="spark-title">Orders per hour</div>
+      <svg id="inv-spark-svg" width="100%" height="48" viewBox="0 0 760 48" preserveAspectRatio="none"
+        style="display:block;overflow:visible;">
+        <text x="380" y="28" text-anchor="middle" font-family="IBM Plex Mono,monospace"
+          font-size="11" fill="#5A5751">loading…</text>
+      </svg>
+      <div class="spark-labels" id="spark-hour-labels"></div>
+    </div>
+
+    <!-- Venue traction -->
+    <div class="snap-section-label">Venue Traction — first order per location</div>
+    <div class="venue-traction" id="venue-traction-list">
+      <div class="venue-empty">Loading…</div>
+    </div>
+
+    <!-- Context -->
+    <div class="snap-context">
+      <strong>Refueler</strong> is a Bitcoin-native pre-order platform for commuters on the Fenchurch St line (Shoeburyness → Fenchurch Street). Commuters place orders before they arrive; merchants fulfil at the counter. Payment settles via the Lightning Network — no custody, non-reversible, instant. The loyalty stamp bridge onboards non-Bitcoin users and nudges them toward sats. Merchant integration is web-based, requiring no additional hardware.
+    </div>
+
+  </main>
+
+  <footer class="snap-footer">
+    <div class="snap-footer-left" id="snap-ts">—</div>
+    <div class="snap-footer-right">Confidential · Refueler</div>
+  </footer>
+</div>
+
+<script>
+const SUPABASE_URL  = 'https://tihgvdokeofnjxjkenmm.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpaGd2ZG9rZW9mbmp4amtlbm1tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTY2NDksImV4cCI6MjA5NDE5MjY0OX0.cRb94WeIP8yRfWd9s2XKmq2nqm1ov-sK1df6u8LNUbo';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+const authScreen = document.getElementById('auth-screen');
+const appEl      = document.getElementById('app');
+const authBtn    = document.getElementById('auth-btn');
+const authNotice = document.getElementById('auth-notice');
+
+// ── Auth ──────────────────────────────────────────────────────
+async function checkSession() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    // Verify investor role in merchant_users
+    const { data: mu } = await sb.from('merchant_users')
+      .select('role')
+      .eq('user_id', session.user.id)
+      .single();
+    if (mu && mu.role === 'investor') {
+      showApp();
+    } else {
+      // Valid Supabase session but wrong role — sign out quietly
+      await sb.auth.signOut();
+      authNotice.textContent = 'Access restricted to investor accounts.';
+      authNotice.className = 'auth-notice error';
+    }
+  }
+}
+
+function showApp() {
+  authScreen.style.display = 'none';
+  appEl.style.display = 'flex';
+  loadSnapshot();
+  document.getElementById('snap-ts').textContent =
+    'Data as of ' + new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' UTC';
+}
+
+authBtn.addEventListener('click', async () => {
+  const email = document.getElementById('auth-email').value.trim();
+  if (!email) { authNotice.textContent = 'Enter your email.'; authNotice.className = 'auth-notice error'; return; }
+  authBtn.disabled = true;
+  authBtn.textContent = 'Sending…';
+  authNotice.textContent = '';
+  authNotice.className = 'auth-notice';
+  const { error } = await sb.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: window.location.href }
+  });
+  if (error) {
+    authNotice.textContent = error.message;
+    authNotice.className = 'auth-notice error';
+  } else {
+    authNotice.textContent = 'Link sent — check your inbox.';
+    authNotice.className = 'auth-notice';
+  }
+  authBtn.disabled = false;
+  authBtn.textContent = 'Send access link';
+});
+
+document.getElementById('sign-out-btn').addEventListener('click', async () => {
+  await sb.auth.signOut();
+  appEl.style.display = 'none';
+  authScreen.style.display = 'flex';
+});
+
+sb.auth.onAuthStateChange(async (_event, session) => {
+  if (session) {
+    const { data: mu } = await sb.from('merchant_users')
+      .select('role')
+      .eq('user_id', session.user.id)
+      .single();
+    if (mu && mu.role === 'investor') {
+      showApp();
+    } else if (session) {
+      await sb.auth.signOut();
+      authNotice.textContent = 'Access restricted to investor accounts.';
+      authNotice.className = 'auth-notice error';
+    }
+  }
+});
+
+// ── Snapshot data ──────────────────────────────────────────────
+async function loadSnapshot() {
+  loadKPIs();
+  loadVenueTraction();
+  loadSparkline();
+}
+
+async function loadKPIs() {
+  // Lightning volume
+  try {
+    const { data } = await sb.from('orders').select('settled_sats').not('settled_sats', 'is', null);
+    const total = (data || []).reduce((s, r) => s + (parseInt(r.settled_sats) || 0), 0);
+    document.getElementById('kpi-vol').textContent = total.toLocaleString() + ' sats';
+    document.getElementById('kpi-vol').classList.remove('loading');
+    document.getElementById('kpi-vol-sub').textContent = total > 0 ? 'Gross settled Lightning' : 'Pre-revenue';
+  } catch(e) {
+    document.getElementById('kpi-vol').textContent = '—';
+    document.getElementById('kpi-vol').classList.remove('loading');
+  }
+
+  // Paid orders count
+  try {
+    const { count } = await sb.from('orders').select('*', { count: 'exact', head: true }).eq('payment_status', 'paid');
+    document.getElementById('kpi-orders').textContent = (count || 0).toLocaleString();
+    document.getElementById('kpi-orders').classList.remove('loading');
+  } catch(e) {
+    document.getElementById('kpi-orders').textContent = '—';
+    document.getElementById('kpi-orders').classList.remove('loading');
+  }
+
+  // Active venues
+  try {
+    const { count } = await sb.from('venue_partners').select('*', { count: 'exact', head: true }).eq('active', true);
+    document.getElementById('kpi-venues').textContent = (count || 0).toLocaleString();
+    document.getElementById('kpi-venues').classList.remove('loading');
+  } catch(e) {
+    document.getElementById('kpi-venues').textContent = '—';
+    document.getElementById('kpi-venues').classList.remove('loading');
+  }
+
+  // User profiles with lightning address set
+  try {
+    const { count } = await sb.from('user_profiles').select('*', { count: 'exact', head: true }).not('lightning_address', 'is', null);
+    document.getElementById('kpi-wallets').textContent = (count || 0).toLocaleString();
+    document.getElementById('kpi-wallets').classList.remove('loading');
+  } catch(e) {
+    document.getElementById('kpi-wallets').textContent = '—';
+    document.getElementById('kpi-wallets').classList.remove('loading');
+  }
+}
+
+async function loadVenueTraction() {
+  const el = document.getElementById('venue-traction-list');
+  try {
+    const { data } = await sb.from('orders')
+      .select('venue_id, created_at, venue_partners!inner(name)')
+      .eq('payment_status', 'paid')
+      .order('created_at', { ascending: true });
+    const rows = data || [];
+    const seen = new Set();
+    const firsts = rows.filter(r => {
+      if (!r.venue_id || seen.has(r.venue_id)) return false;
+      seen.add(r.venue_id);
+      return true;
+    });
+    if (!firsts.length) {
+      el.innerHTML = '<div class="venue-empty">No paid orders yet — pre-revenue.</div>';
+      return;
+    }
+    el.innerHTML = firsts.map(r => {
+      const name = r.venue_partners?.name || '—';
+      const dt = r.created_at ? new Date(r.created_at) : null;
+      const dtStr = dt ? dt.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+      return `<div class="venue-row">
+        <div class="venue-dot"></div>
+        <div class="venue-name">${esc(name)}</div>
+        <div class="venue-first-dt">${dtStr}</div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = `<div class="venue-empty" style="color:var(--red);">${esc(e.message)}</div>`;
+  }
+}
+
+async function loadSparkline() {
+  const svg = document.getElementById('inv-spark-svg');
+  const labelsEl = document.getElementById('spark-hour-labels');
+  try {
+    const since = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString();
+    const { data } = await sb.from('orders')
+      .select('created_at')
+      .gte('created_at', since)
+      .order('created_at', { ascending: true });
+    const rows = data || [];
+    const now = Date.now();
+    const buckets = Array(12).fill(0);
+    rows.forEach(r => {
+      const age = now - new Date(r.created_at).getTime();
+      const slot = Math.floor(age / (60 * 60 * 1000));
+      if (slot >= 0 && slot < 12) buckets[11 - slot]++;
+    });
+    const max = Math.max(...buckets, 1);
+    const W = 760, H = 48, pad = 3;
+    const barW = (W - pad * 13) / 12;
+    const bars = buckets.map((v, i) => {
+      const h = Math.max(2, Math.round((v / max) * (H - 8)));
+      const x = pad + i * (barW + pad);
+      const y = H - h;
+      const fill = v === 0 ? 'var(--text-tertiary)' : v === max ? 'var(--accent)' : 'var(--text-secondary)';
+      return `<rect x="${x.toFixed(1)}" y="${y}" width="${barW.toFixed(1)}" height="${h}" rx="1.5" fill="${fill}" opacity="0.8"/>`;
+    }).join('');
+    svg.innerHTML = bars || `<text x="380" y="28" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="var(--text-tertiary)">no orders in last 12 hours</text>`;
+
+    // Hour labels: −12h, −9h, −6h, −3h, now
+    const labels = ['−12h', '−9h', '−6h', '−3h', 'now'];
+    labelsEl.innerHTML = labels.map(l => `<span>${l}</span>`).join('');
+  } catch(e) {
+    svg.innerHTML = `<text x="380" y="28" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" fill="var(--red);">Could not load</text>`;
+  }
+}
+
+function esc(str) {
+  return String(str).replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// Init
+checkSession();
+</script>
+</body>
+</html>

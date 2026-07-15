@@ -327,7 +327,7 @@
       margin-bottom: 0.75rem;
     }
 
-    /* ─── Telemetry Grid 2×3 ──────────────────────────── */
+    /* ─── Telemetry Grid 3×3 ──────────────────────────── */
     .telemetry-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -759,7 +759,7 @@
 
     <!-- ── Telemetry ─────────────────────────────────────────── -->
     <section id="section-telemetry">
-      <div class="section-label">Platform Telemetry — 2×3</div>
+      <div class="section-label">Platform Telemetry — 3×3</div>
       <div class="telemetry-grid">
 
         <!-- Tile 1: Blink Wallet Balance -->
@@ -810,11 +810,85 @@
           <span class="tel-badge badge-ok" id="err-badge">CLEAN</span>
         </div>
 
+        <!-- Tile 7: Cumulative Lightning Volume -->
+        <div class="tel-tile status-neutral" id="tile-vol">
+          <div class="tel-label">Lightning Volume</div>
+          <div class="tel-value loading" id="vol-val">—</div>
+          <div class="tel-meta" id="vol-meta">Gross sats settled</div>
+          <span class="tel-badge badge-info" id="vol-badge">SETTLED</span>
+        </div>
+
+        <!-- Tile 8: Routing Fee Total -->
+        <div class="tel-tile status-neutral" id="tile-fee">
+          <div class="tel-label">Routing Fees</div>
+          <div class="tel-value loading" id="fee-val">—</div>
+          <div class="tel-meta" id="fee-meta">Sum of routing_fee_sats</div>
+          <span class="tel-badge badge-info" id="fee-badge">FEES</span>
+        </div>
+
+        <!-- Tile 9: Orders Per Hour (sparkline) -->
+        <div class="tel-tile status-neutral" id="tile-spark">
+          <div class="tel-label">Orders / Hour</div>
+          <div id="spark-svg-wrap" style="margin:0.35rem 0 0.25rem;">
+            <svg id="spark-svg" width="100%" height="36" viewBox="0 0 220 36" preserveAspectRatio="none"
+              style="display:block;overflow:visible;">
+              <text x="110" y="22" text-anchor="middle" font-family="IBM Plex Mono,monospace"
+                font-size="10" fill="var(--text-tertiary)">loading…</text>
+            </svg>
+          </div>
+          <div class="tel-meta" id="spark-meta">Last 12 hours</div>
+          <span class="tel-badge badge-info" id="spark-badge">12H</span>
+        </div>
+
       </div>
+
+      <!-- First Order Per Venue — traction table -->
+      <div class="section-label" style="margin-top:1.75rem;">First Order Per Venue</div>
+      <div class="data-panel" style="margin-top:0.5rem;">
+        <table class="data-table" id="first-order-table">
+          <thead>
+            <tr>
+              <th>Venue</th>
+              <th>First Order</th>
+              <th>Item</th>
+              <th>Sats</th>
+              <th>Days Since</th>
+            </tr>
+          </thead>
+          <tbody id="first-order-tbody">
+            <tr><td colspan="5" style="color:var(--text-tertiary);padding:1.5rem 1rem;font-family:var(--mono);font-size:0.72rem;">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
     </section>
 
     <!-- ── Log Stream ─────────────────────────────────────────── -->
     <section id="section-logs" class="hidden">
+
+      <!-- Live Orders Feed -->
+      <div class="section-label" style="margin-bottom:0.5rem;">Live Order Feed — orders table</div>
+      <div class="data-panel" style="margin-bottom:1.5rem;">
+        <table class="data-table" id="live-order-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Venue</th>
+              <th>Item</th>
+              <th>Gross</th>
+              <th>Fee</th>
+              <th>Net</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="live-order-tbody">
+            <tr><td colspan="7" style="color:var(--text-tertiary);padding:1.5rem 1rem;font-family:var(--mono);font-size:0.72rem;">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- log_entries stream -->
+      <div class="section-label" style="margin-bottom:0.5rem;">Log Entries — log_entries table</div>
       <div class="log-stream-wrap">
         <div class="log-toolbar">
           <button class="log-filter-btn active" data-filter="all">All</button>
@@ -1096,6 +1170,129 @@ async function loadTelemetry() {
 
   // Geofence hits — on-device only, always 0 in DB (by design)
   setTile('geo', '0', 'On-device only — no server record', 'ok', 'ok', 'ON-DEVICE');
+
+  // Tile 7: Cumulative Lightning Volume (settled_sats)
+  try {
+    const { data, error } = await sb.from('orders')
+      .select('settled_sats')
+      .not('settled_sats', 'is', null);
+    if (error) throw error;
+    const total = (data || []).reduce((s, r) => s + (parseInt(r.settled_sats) || 0), 0);
+    const count = (data || []).length;
+    setTile('vol',
+      total.toLocaleString() + ' sats',
+      count + ' settled payment' + (count !== 1 ? 's' : ''),
+      total > 0 ? 'ok' : 'neutral',
+      total > 0 ? 'ok' : 'info',
+      total > 0 ? 'LIVE' : 'PRE-REV'
+    );
+  } catch(e) { setTile('vol', '—', 'Could not fetch', 'error', 'error', 'ERR'); }
+
+  // Tile 8: Routing Fee Total
+  try {
+    const { data, error } = await sb.from('orders')
+      .select('routing_fee_sats')
+      .not('routing_fee_sats', 'is', null);
+    if (error) throw error;
+    const total = (data || []).reduce((s, r) => s + (parseInt(r.routing_fee_sats) || 0), 0);
+    const pending = await sb.from('orders')
+      .select('*', { count: 'exact', head: true })
+      .eq('payment_status', 'paid')
+      .is('routing_fee_sats', null);
+    const pendingCount = pending.count || 0;
+    setTile('fee',
+      total.toLocaleString() + ' sats',
+      pendingCount > 0 ? pendingCount + ' fee: pending' : 'All fees resolved',
+      'neutral', 'info', 'ROUTING'
+    );
+  } catch(e) { setTile('fee', '—', 'Could not fetch', 'error', 'error', 'ERR'); }
+
+  // Tile 9: Orders-per-hour sparkline (last 12 hours)
+  try {
+    const since = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString();
+    const { data, error } = await sb.from('orders')
+      .select('created_at')
+      .gte('created_at', since)
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+    renderSparkline(data || []);
+    const total = (data || []).length;
+    const rate = (total / 12).toFixed(1);
+    setTile('spark', '', rate + '/hr avg · ' + total + ' orders', total > 0 ? 'ok' : 'neutral', total > 0 ? 'ok' : 'info', '12H');
+    // Overwrite value area — the SVG is the value display
+    const valEl = document.getElementById('spark-svg-wrap');
+    if (valEl) valEl.style.display = 'block';
+  } catch(e) { setTile('spark', '—', 'Could not fetch sparkline', 'error', 'error', 'ERR'); }
+
+  // First order per venue
+  loadFirstOrderPerVenue();
+}
+
+function renderSparkline(rows) {
+  const svg = document.getElementById('spark-svg');
+  if (!svg) return;
+  // Bucket into 12 hourly slots
+  const now = Date.now();
+  const buckets = Array(12).fill(0);
+  rows.forEach(r => {
+    const age = now - new Date(r.created_at).getTime();
+    const slot = Math.floor(age / (60 * 60 * 1000));
+    if (slot >= 0 && slot < 12) buckets[11 - slot]++;
+  });
+  const max = Math.max(...buckets, 1);
+  const W = 220, H = 36, pad = 2;
+  const barW = (W - pad * 13) / 12;
+  const bars = buckets.map((v, i) => {
+    const h = Math.max(2, Math.round((v / max) * (H - 6)));
+    const x = pad + i * (barW + pad);
+    const y = H - h;
+    const fill = v === 0 ? 'var(--text-tertiary)' : v === max ? 'var(--accent)' : 'var(--text-secondary)';
+    return `<rect x="${x.toFixed(1)}" y="${y}" width="${barW.toFixed(1)}" height="${h}" rx="1" fill="${fill}" opacity="0.85"/>`;
+  }).join('');
+  svg.innerHTML = bars || `<text x="110" y="22" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="10" fill="var(--text-tertiary)">no data</text>`;
+}
+
+async function loadFirstOrderPerVenue() {
+  try {
+    // Get all paid orders joined to venue name, find first per venue
+    const { data, error } = await sb.from('orders')
+      .select('venue_id, item_name, settled_sats, created_at, venue_partners!inner(name)')
+      .eq('payment_status', 'paid')
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+    const rows = data || [];
+    // Dedupe: first occurrence per venue_id
+    const seen = new Set();
+    const firsts = rows.filter(r => {
+      if (!r.venue_id || seen.has(r.venue_id)) return false;
+      seen.add(r.venue_id);
+      return true;
+    });
+    const tbody = document.getElementById('first-order-tbody');
+    if (!tbody) return;
+    if (!firsts.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="color:var(--text-tertiary);padding:1.5rem 1rem;font-family:var(--mono);font-size:0.72rem;">No paid orders yet — pre-revenue.</td></tr>';
+      return;
+    }
+    const now = Date.now();
+    tbody.innerHTML = firsts.map(r => {
+      const venueName = r.venue_partners?.name || '—';
+      const dt = r.created_at ? new Date(r.created_at) : null;
+      const dtStr = dt ? dt.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+      const daysSince = dt ? Math.floor((now - dt.getTime()) / (1000 * 60 * 60 * 24)) : '—';
+      const sats = r.settled_sats != null ? parseInt(r.settled_sats).toLocaleString() + ' sats' : 'fee: pending';
+      return `<tr>
+        <td>${escHtml(venueName)}</td>
+        <td style="font-family:var(--mono);font-size:0.75rem;">${dtStr}</td>
+        <td>${escHtml(r.item_name || '—')}</td>
+        <td style="font-family:var(--mono);font-size:0.75rem;">${escHtml(sats)}</td>
+        <td style="font-family:var(--mono);font-size:0.75rem;">${daysSince}${typeof daysSince === 'number' ? 'd' : ''}</td>
+      </tr>`;
+    }).join('');
+  } catch(e) {
+    const tbody = document.getElementById('first-order-tbody');
+    if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="color:var(--danger);padding:1rem;font-family:var(--mono);font-size:0.72rem;">${escHtml(e.message)}</td></tr>`;
+  }
 }
 
 function setTile(id, val, meta, tileStatus, badgeType, badgeLabel) {
@@ -1208,7 +1405,49 @@ async function fetchBlinkBalance() {
 let allLogs = [];
 let activeFilter = 'all';
 
+async function loadLiveOrders() {
+  const tbody = document.getElementById('live-order-tbody');
+  if (!tbody) return;
+  try {
+    const { data, error } = await sb.from('orders')
+      .select('id, item_name, settled_sats, routing_fee_sats, payment_status, created_at, venue_partners!inner(name)')
+      .order('created_at', { ascending: false })
+      .limit(40);
+    if (error) throw error;
+    const rows = data || [];
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="color:var(--text-tertiary);padding:1.5rem 1rem;font-family:var(--mono);font-size:0.72rem;">No orders yet — pre-revenue.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = rows.map(r => {
+      const ts = r.created_at
+        ? new Date(r.created_at).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+        : '—';
+      const venueName = r.venue_partners?.name || '—';
+      const gross = r.settled_sats != null ? parseInt(r.settled_sats).toLocaleString() + ' sats' : '—';
+      const fee   = r.routing_fee_sats != null ? parseInt(r.routing_fee_sats).toLocaleString() + ' sats' : 'fee: pending';
+      const net   = (r.settled_sats != null && r.routing_fee_sats != null)
+        ? (parseInt(r.settled_sats) - parseInt(r.routing_fee_sats)).toLocaleString() + ' sats'
+        : '—';
+      const ps = r.payment_status || 'unpaid';
+      const pillClass = ps === 'paid' ? 'pill-settled' : ps === 'expired' || ps === 'failed' ? 'pill-failed' : 'pill-pending';
+      return `<tr>
+        <td style="font-family:var(--mono);font-size:0.72rem;">${ts}</td>
+        <td>${escHtml(venueName)}</td>
+        <td>${escHtml(r.item_name || '—')}</td>
+        <td style="font-family:var(--mono);font-size:0.72rem;">${gross}</td>
+        <td style="font-family:var(--mono);font-size:0.72rem;color:var(--text-secondary);">${fee}</td>
+        <td style="font-family:var(--mono);font-size:0.72rem;">${net}</td>
+        <td><span class="status-pill ${pillClass}">${escHtml(ps)}</span></td>
+      </tr>`;
+    }).join('');
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="7" style="color:var(--danger);padding:1rem;font-family:var(--mono);font-size:0.72rem;">${escHtml(e.message)}</td></tr>`;
+  }
+}
+
 async function loadLogs() {
+  loadLiveOrders();
   const { data, error } = await sb.from('log_entries')
     .select('*')
     .order('created_at', { ascending: false })
