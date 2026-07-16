@@ -1000,7 +1000,40 @@ async function opsTogglePreorder(checked) {
   console.info('[CC-21] opsTogglePreorder called but toggle removed from UI — CPO decision pending');
 }
 async function opsTogglePause(checked) {
-  showToast(checked ? 'New orders paused' : 'Accepting new orders', checked ? 'warn' : 'ok');
+  if (!_venueId) return;
+  try {
+    const session = await getSbClient().auth.getSession();
+    const token = session?.data?.session?.access_token || SB_KEY;
+    const body = checked
+      ? { active: false, pause_reason: 'Paused by operator' }
+      : { active: true,  pause_reason: null };
+    const res = await fetch(`${SB_URL}/rest/v1/venue_partners?id=eq.${_venueId}`, {
+      method: 'PATCH',
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token,
+                 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    if (_venueData) {
+      _venueData.active = !checked;
+      _venueData.pause_reason = body.pause_reason;
+    }
+    // Keep the venue-open toggle in sync — pausing closes the venue
+    const openToggle = document.getElementById('ops-toggle-open');
+    if (openToggle) openToggle.checked = !checked;
+    const dot   = document.getElementById('site-status-dot');
+    const label = document.getElementById('site-status-label');
+    if (dot)   dot.className = 'site-status-dot' + (checked ? ' closed' : '');
+    if (label) {
+      label.textContent  = checked ? 'Paused — no new orders' : 'Open — accepting orders';
+      label.style.color  = checked ? 'var(--c-warn)' : 'var(--c-green)';
+    }
+    showToast(checked ? 'New orders paused' : 'Accepting new orders', checked ? 'warn' : 'ok');
+  } catch (e) {
+    showToast('Pause update failed: ' + e.message, 'err');
+    const t = document.getElementById('ops-toggle-pause');
+    if (t) t.checked = !checked;
+  }
 }
 
 // ─── INIT AUTH ───────────────────────────────────────────────

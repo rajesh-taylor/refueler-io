@@ -715,13 +715,13 @@
 <div id="auth-gate">
   <div class="auth-box">
     <div class="auth-wordmark">Refueler <span>/</span> Franchise</div>
-    <div class="auth-subtitle">Head office access · @refueler.io only</div>
+    <div class="auth-subtitle">Head office access · franchise_hq role required</div>
     <div id="login-form">
       <div class="auth-field" style="margin-bottom:6px">
         <label>Email address</label>
-        <input type="email" id="auth-email" placeholder="you@refueler.io" autocomplete="email">
+        <input type="email" id="auth-email" placeholder="your@email.com" autocomplete="email">
       </div>
-      <div class="auth-note">Access restricted to <em>@refueler.io</em> accounts.</div>
+      <div class="auth-note">Access restricted to Franchise HQ accounts.</div>
       <button class="btn-primary" id="btn-magic-link" onclick="sendMagicLink()">Send magic link</button>
       <div class="auth-msg" id="auth-msg"></div>
     </div>
@@ -829,11 +829,6 @@
     const btn = document.getElementById('btn-magic-link');
 
     if (!email) { msg.textContent = 'Enter your email address.'; msg.className = 'auth-msg error'; return; }
-    if (!email.endsWith('@refueler.io')) {
-      msg.textContent = 'Access restricted to @refueler.io accounts.';
-      msg.className = 'auth-msg error';
-      return;
-    }
     btn.disabled = true;
     msg.textContent = 'Sending…';
     msg.className = 'auth-msg';
@@ -860,14 +855,20 @@
 
   sb.auth.onAuthStateChange(async (event, session) => {
     if (session?.user) {
-      const email = session.user.email || '';
-      if (!email.endsWith('@refueler.io')) {
+      currentUser = session.user;
+      // Role check — must be franchise_hq in merchant_users
+      const { data: mu, error: muErr } = await sb
+        .from('merchant_users')
+        .select('role, franchise_group_id')
+        .eq('user_id', currentUser.id)
+        .single();
+      if (muErr || !mu || mu.role !== 'franchise_hq') {
         await sb.auth.signOut();
-        showAuthError('Access restricted to @refueler.io accounts.');
+        showAuthError('Access restricted to Franchise HQ accounts.');
         return;
       }
-      currentUser = session.user;
-      document.getElementById('user-email-display').textContent = email;
+      franchiseGroupId = mu.franchise_group_id || null;
+      document.getElementById('user-email-display').textContent = currentUser.email || '';
       document.getElementById('auth-gate').style.display = 'none';
       document.getElementById('app').style.display = 'flex';
       await initDashboard();
@@ -917,10 +918,15 @@
   }
 
   async function loadOrders() {
-    // Date filter
+    // RLS (orders_franchise_hq_select) already scopes rows to this user's
+    // franchise_group_id via venue_partners join. Belt-and-braces: also filter
+    // client-side to venue IDs we loaded in venueData.
     const since = dateFilterSince(activeDateFilter);
+    const venueIds = venueData.map(v => v.id);
+    if (!venueIds.length) { orderData = []; return; }
     let query = sb.from('orders')
       .select('id, venue_id, partner, order_value_gbp, commission_gbp, commission_pct, status, created_at, item_name, reward_type')
+      .in('venue_id', venueIds)
       .order('created_at', { ascending: false });
     if (since) query = query.gte('created_at', since.toISOString());
     const { data, error } = await query;
