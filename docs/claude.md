@@ -109,6 +109,18 @@ Do not deviate. No new palette colours without a formal session decision.
 
 **4r. Editorial spec files:** `editorial/EDITORIAL-MASTER.md` and any `*-spec.md` files are internal planning documents — gitignored in `refueler-io`, never on GitHub.
 
+**4s. CDK version pinning rule (refueler-mint):**
+All three layers must pin to the same CDK version.
+
+  refueler-mint Cargo.toml    → cdk = "0.17.2", cdk-sqlite = "0.17.2"
+  tests/go/ cdk-go harness    → pin to equivalent CDK 0.17.x tag
+  cdk-dart TurboModule        → pin to equivalent CDK 0.17.x tag
+
+Mismatched versions break blind signature validation across language
+boundaries. Never bump without updating all three simultaneously.
+Fortnightly: check cashubtc/cdk-go and cashubtc/cdk-dart for
+uniffi-generated API surface changes — new NUTs land without warning.
+
 ---
 
 ## 5. Open-Source Infrastructure Repos

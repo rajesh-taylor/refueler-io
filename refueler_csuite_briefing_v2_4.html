@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Refueler · C-Suite Briefing v2.4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --accent: #C8A96E;
+  --accent-dim: rgba(200,169,110,0.10);
+  --accent-border: rgba(200,169,110,0.30);
+  --green: #1E8A4A;
+  --carbon: #0E0E0E;
+  --carbon-surface: #161616;
+  --carbon-elevated: #1E1E1E;
+  --carbon-border: rgba(255,255,255,0.08);
+  --carbon-border-mid: rgba(255,255,255,0.14);
+  --text-primary: #F0EDE8;
+  --text-secondary: #8A857D;
+  --text-muted: #4A4741;
+  --mono: 'DM Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+  --radius: 6px;
+  --radius-lg: 10px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body { background: var(--carbon); color: var(--text-primary); font-family: var(--sans); min-height: 100vh; }
+.app { max-width: 860px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+.masthead {
+  display: flex; align-items: baseline; justify-content: space-between;
+  border-bottom: 0.5px solid var(--carbon-border-mid);
+  padding-bottom: 1.25rem; margin-bottom: 2rem;
+}
+.wordmark { font-family: var(--mono); font-size: 13px; font-weight: 500; letter-spacing: 0.18em; color: var(--text-secondary); text-transform: uppercase; }
+.wordmark em { color: var(--accent); font-style: normal; }
+.week-label { font-family: var(--mono); font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; }
+.section-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+
+/* Role grid — multi-select mode */
+.role-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 6px; margin-bottom: 1.75rem; }
+.role-btn {
+  padding: 10px 12px; background: var(--carbon-surface); border: 0.5px solid var(--carbon-border);
+  border-radius: var(--radius); cursor: pointer; text-align: left;
+  transition: border-color 0.15s, background 0.15s; line-height: 1.35; position: relative;
+}
+.role-btn:hover { border-color: var(--carbon-border-mid); background: var(--carbon-elevated); }
+.role-btn.selected { border-color: var(--accent-border); background: var(--accent-dim); }
+.role-btn .tag { display: block; font-family: var(--mono); font-size: 10px; font-weight: 500; color: var(--accent); letter-spacing: 0.06em; margin-bottom: 3px; }
+.role-btn .name { font-size: 12px; color: var(--text-secondary); font-weight: 400; }
+.role-btn.selected .name { color: var(--text-primary); }
+.role-btn .check {
+  position: absolute; top: 7px; right: 8px;
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 0.5px solid var(--carbon-border-mid);
+  background: transparent;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+}
+.role-btn.selected .check { background: var(--accent); border-color: var(--accent); }
+.role-btn.selected .check::after { content: ''; display: block; width: 5px; height: 5px; background: #fff; border-radius: 50%; }
+
+/* Toggle row */
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.5rem; padding: 10px 14px;
+  background: var(--carbon-surface); border: 0.5px solid var(--carbon-border);
+  border-radius: var(--radius);
+}
+.toggle-row-left { display: flex; flex-direction: column; gap: 2px; }
+.toggle-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); }
+.toggle-sub { font-size: 11px; color: var(--text-muted); }
+.toggle-switch { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-track {
+  position: absolute; inset: 0; background: var(--carbon-elevated);
+  border: 0.5px solid var(--carbon-border-mid); border-radius: 10px;
+  cursor: pointer; transition: background 0.2s, border-color 0.2s;
+}
+.toggle-track::before {
+  content: ''; position: absolute; top: 3px; left: 3px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--text-muted); transition: transform 0.2s, background 0.2s;
+}
+.toggle-switch input:checked + .toggle-track { background: var(--accent-dim); border-color: var(--accent-border); }
+.toggle-switch input:checked + .toggle-track::before { transform: translateX(16px); background: var(--accent); }
+
+/* Context */
+.context-block { margin-bottom: 1.5rem; }
+.context-block textarea {
+  width: 100%; min-height: 64px; background: var(--carbon-surface);
+  border: 0.5px solid var(--carbon-border); border-radius: var(--radius);
+  color: var(--text-primary); font-family: var(--sans); font-size: 13px;
+  line-height: 1.55; padding: 10px 14px; resize: vertical;
+  transition: border-color 0.15s; outline: none;
+}
+.context-block textarea::placeholder { color: var(--text-muted); }
+.context-block textarea:focus { border-color: var(--carbon-border-mid); }
+
+/* Controls */
+.controls { display: flex; gap: 8px; margin-bottom: 2rem; flex-wrap: wrap; }
+.btn-primary {
+  padding: 10px 22px; background: var(--accent); color: #fff; border: none;
+  border-radius: var(--radius); font-family: var(--sans); font-size: 13px;
+  font-weight: 500; cursor: pointer; transition: opacity 0.15s;
+}
+.btn-primary:hover { opacity: 0.88; }
+.btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-secondary {
+  padding: 10px 22px; background: transparent; color: var(--text-secondary);
+  border: 0.5px solid var(--carbon-border-mid); border-radius: var(--radius);
+  font-family: var(--sans); font-size: 13px; cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.btn-secondary:hover { color: var(--text-primary); border-color: rgba(255,255,255,0.25); }
+.btn-secondary:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-ghost {
+  padding: 10px 16px; background: transparent; color: var(--text-muted);
+  border: 0.5px solid var(--carbon-border); border-radius: var(--radius);
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em;
+  text-transform: uppercase; cursor: pointer; transition: color 0.15s, border-color 0.15s;
+}
+.btn-ghost:hover { color: var(--text-secondary); border-color: var(--carbon-border-mid); }
+
+/* Output */
+.output-shell { background: var(--carbon-surface); border: 0.5px solid var(--carbon-border); border-radius: var(--radius-lg); overflow: hidden; }
+.output-bar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 0.5px solid var(--carbon-border); }
+.output-role { font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; }
+.status-pip { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); flex-shrink: 0; }
+.status-pip.pulsing { background: var(--accent); animation: breathe 2s ease-in-out infinite; }
+.status-pip.done { background: var(--green); }
+@keyframes breathe { 0%,100%{opacity:1} 50%{opacity:0.25} }
+.output-body { padding: 1.25rem 1.5rem; min-height: 140px; }
+.placeholder-text { font-size: 13px; color: var(--text-muted); font-style: italic; line-height: 1.65; }
+.section-block { margin-bottom: 1.25rem; }
+.section-block:last-child { margin-bottom: 0; }
+.section-head {
+  font-family: var(--mono); font-size: 10px; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);
+  margin-bottom: 8px; padding-bottom: 6px; border-bottom: 0.5px solid var(--accent-dim);
+}
+.section-content { font-size: 13px; line-height: 1.7; color: var(--text-secondary); white-space: pre-wrap; }
+.section-content strong { color: var(--text-primary); font-weight: 500; }
+.role-divider { border: none; border-top: 0.5px solid var(--carbon-border); margin: 1.5rem 0; }
+.role-head-all {
+  font-family: var(--mono); font-size: 10px; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;
+}
+.role-head-all em { color: var(--accent); font-style: normal; }
+.raw-text { font-size: 13px; line-height: 1.7; color: var(--text-secondary); white-space: pre-wrap; }
+.output-footer { display: flex; align-items: center; justify-content: flex-end; padding: 10px 16px; border-top: 0.5px solid var(--carbon-border); }
+.btn-copy {
+  display: flex; align-items: center; gap: 6px; padding: 7px 14px;
+  background: transparent; color: var(--text-muted); border: 0.5px solid var(--carbon-border);
+  border-radius: var(--radius); font-family: var(--mono); font-size: 10px; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.btn-copy:hover { color: var(--text-primary); border-color: var(--carbon-border-mid); background: var(--carbon-elevated); }
+.btn-copy.copied { color: var(--green); border-color: rgba(30,138,74,0.4); }
+.btn-copy svg { flex-shrink: 0; }
+.footer-note {
+  display: flex; align-items: center; gap: 8px; margin-top: 1rem;
+  padding: 8px 12px; background: var(--carbon-surface);
+  border-radius: var(--radius); border: 0.5px solid var(--carbon-border);
+}
+.footer-note span { font-family: var(--mono); font-size: 10px; color: var(--text-muted); letter-spacing: 0.02em; }
+.dot-accent { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+.dot-muted { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--text-muted); flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="masthead">
+    <div class="wordmark">RE<em>FUELER</em></div>
+    <div class="week-label">C-suite briefing · w/c <span id="week-label"></span></div>
+  </div>
+
+  <div class="section-label">Select roles</div>
+  <div class="role-grid" id="role-grid"></div>
+
+  <div class="toggle-row">
+    <div class="toggle-row-left">
+      <span class="toggle-label">Web search</span>
+      <span class="toggle-sub" id="search-sub">Off — uses model knowledge only · cheaper</span>
+    </div>
+    <label class="toggle-switch">
+      <input type="checkbox" id="search-toggle" onchange="updateSearchLabel()">
+      <span class="toggle-track"></span>
+    </label>
+  </div>
+
+  <div class="context-block">
+    <div class="section-label">Context (optional)</div>
+    <textarea id="context-input" placeholder="New venue activations, live issues, priority decisions this week…"></textarea>
+  </div>
+
+  <div class="controls">
+    <button class="btn-primary" id="run-btn" onclick="runSelected()">Brief selected roles</button>
+    <button class="btn-secondary" id="run-all-btn" onclick="runAll()">Brief all roles</button>
+    <button class="btn-ghost" onclick="selectNone()">Clear</button>
+  </div>
+
+  <div class="output-shell">
+    <div class="output-bar">
+      <div class="output-role" id="out-label">Awaiting selection</div>
+      <div class="status-pip" id="pip"></div>
+    </div>
+    <div class="output-body" id="out-body">
+      <span class="placeholder-text">Select one or more roles and click Brief selected roles — or run the full C-suite at once.</span>
+    </div>
+    <div class="output-footer">
+      <button class="btn-copy" id="copy-btn" onclick="copyOutput()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="4" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1"/>
+          <path d="M3 8H2C1.44772 8 1 7.55228 1 7V2C1 1.44772 1.44772 1 2 1H7C7.55228 1 8 1.44772 8 2V3" stroke="currentColor" stroke-width="1"/>
+        </svg>
+        <span id="copy-label">Copy</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    <div class="dot-muted" id="footer-dot"></div>
+    <span id="footer-text">claude-haiku-4-5-20251001 · web search off · ~$0.01–0.02 per full run</span>
+  </div>
+
+</div>
+
+<script>
+const ROLES = [
+  {
+    tag: "CMO",
+    name: "Chief Marketing",
+    persona: "You are Refueler's CMO. You have 7+ years in premium consumer fintech and brand strategy. You track youth and teen design trends (Nike, Adidas, McDonald's kiosk UX), Bitcoin-native communities (Nostr, Fountain, Stacker News), and London commuter culture. You monitor competitor loyalty apps and fintech marketing moves. Tone: precise, British, understated. You write like a knowledgeable friend, never marketing copy."
+  },
+  {
+    tag: "CTO",
+    name: "Chief Technology",
+    persona: "You are Refueler's CTO. You specialise in consumer fintech, Lightning Network, Cashu ecash, React Native, Supabase, Cloudflare Pages, and on-device geofencing. You are the technical guardian of the zero-location-data guarantee. You track Apple and Google OS changes that affect geofencing, and Lightning/ecash protocol developments."
+  },
+  {
+    tag: "CPO/DPO",
+    name: "Privacy Officer",
+    persona: "You are Refueler's CPO and DPO. UK GDPR specialist. You track ICO enforcement actions, fintech privacy developments, ecash and Bitcoin wallet regulation, and on-device processing precedents. You see privacy as architecture, not compliance theatre."
+  },
+  {
+    tag: "CRO",
+    name: "Revenue Officer",
+    persona: "You are Refueler's CRO. You track London F&B chains, premium transport, EV charging, and Bitcoin merchant adoption. You follow Duffel, airline booking APIs, and London fintech commercial developments. Your lens: unit economics, partnership pipeline, and commission model optimisation."
+  },
+  {
+    tag: "HoD",
+    name: "Head of Design",
+    persona: "You are Refueler's Head of Design. You track premium product design, Apple Liquid Glass, fintech UX trends, youth and teen design trends, and luxury digital interfaces. Your aesthetic register: suave, discreet, refined — James Bond, not fintech neon. You monitor Nike, Adidas, and McDonald's order-flow UX for the youth pickup cohort."
+  },
+  {
+    tag: "⚡ Adv",
+    name: "Lightning Advisor",
+    persona: "You are Refueler's Bitcoin and Lightning Network Advisor. You track Cashu protocol updates, LNURL, Nostr Wallet Connect, Bolt12, Minibits, Zebedee, and the UK Bitcoin regulatory landscape. You advise on self-custody architecture, ecash mint selection, and Bitcoin community positioning."
+  },
+  {
+    tag: "Founder",
+    name: "Founder Brief",
+    persona: "You are a strategic advisor to Rajesh, founder of Refueler. You synthesise signals across marketing, technology, privacy, revenue, design, and Bitcoin. Your output is a tight founder briefing: what matters most this week, one decision to make, one thing to watch. Dry wit. No filler."
+  }
+];
+
+let selectedRoles = new Set([0]); // CMO selected by default
+let running = false;
+
+// Set week label
+const d = new Date();
+const mon = new Date(d);
+mon.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+document.getElementById('week-label').textContent = mon.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+
+// Build role buttons
+const grid = document.getElementById('role-grid');
+ROLES.forEach((r, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'role-btn' + (i === 0 ? ' selected' : '');
+  btn.innerHTML =
+    '<span class="tag">' + r.tag + '</span>' +
+    '<span class="name">' + r.name + '</span>' +
+    '<span class="check"></span>';
+  btn.onclick = () => toggleRole(i, btn);
+  grid.appendChild(btn);
+});
+
+function toggleRole(i, btn) {
+  if (selectedRoles.has(i)) {
+    selectedRoles.delete(i);
+    btn.classList.remove('selected');
+  } else {
+    selectedRoles.add(i);
+    btn.classList.add('selected');
+  }
+}
+
+function selectNone() {
+  selectedRoles.clear();
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('selected'));
+}
+
+function updateSearchLabel() {
+  const on = document.getElementById('search-toggle').checked;
+  document.getElementById('search-sub').textContent = on
+    ? 'On — live web results · higher cost'
+    : 'Off — uses model knowledge only · cheaper';
+  const dot = document.getElementById('footer-dot');
+  dot.className = on ? 'dot-accent' : 'dot-muted';
+  document.getElementById('footer-text').textContent = on
+    ? 'claude-haiku-4-5-20251001 · web search on · ~$0.05–0.08 per role'
+    : 'claude-haiku-4-5-20251001 · web search off · ~$0.01–0.02 per full run';
+}
+
+function buildPrompt(role, context) {
+  const today = new Date().toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  const isFounder = role.tag === 'Founder';
+  const searchLine = document.getElementById('search-toggle').checked
+    ? 'Use web search to find 2-3 current specific developments for your role. No fabrication.'
+    : 'Draw on your knowledge to identify 2-3 relevant recent developments for your role.';
+
+  return role.persona + '\n\n' +
+    today + '. Weekly brief for Rajesh, founder of Refueler.\n\n' +
+    'APP: Pre-order coffee/retail, C2C commuters (Shoeburyness to Fenchurch St). Lightning sats + loyalty stamp dual-track. On-device geofence, zero location data to server. Venues: Costa, M&S, Pret, Caffe Nero. Pre-TestFlight. React Native + Supabase + Cloudflare.\n' +
+    (context ? 'CONTEXT: ' + context + '\n' : '') + '\n' +
+    searchLine + '\n\n' +
+    'FORMAT (use these exact headings, no preamble, no sign-off):\n\n' +
+    'TREND WATCH\n[3 specific observations. Name products, companies, data points.]\n\n' +
+    'MARKET MOVE\n[1 competitor move or market development. Named and specific.]\n\n' +
+    'QUESTION FOR THE TABLE\n[1 sharp question needing a decision or discussion.]\n' +
+    (isFounder ?
+      '\nDECISION THIS WEEK\n[1 decision Rajesh should make this week. Specific.]\n\n' +
+      'ONE THING TO WATCH\n[Single most important signal this week.]\n' : '') +
+    '\nConcise. British. Never fintech-neon.';
+}
+
+async function callAPI(role, context) {
+  const useSearch = document.getElementById('search-toggle').checked;
+  const body = {
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 1000,
+    messages: [{ role: 'user', content: buildPrompt(role, context) }]
+  };
+  if (useSearch) {
+    body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
+  }
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': 'REDACTED',
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify(body)
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.content?.filter(b => b.type === 'text').map(b => b.text).join('') || '';
+}
+
+function renderBriefing(container, text, role) {
+  const sectionPattern = /^(TREND WATCH|MARKET MOVE|QUESTION FOR THE TABLE|DECISION THIS WEEK|ONE THING TO WATCH)$/m;
+  const parts = text.split(sectionPattern);
+  container.innerHTML = '';
+
+  // Role title header — always shown
+  const titleEl = document.createElement('div');
+  titleEl.className = 'role-head-all';
+  titleEl.innerHTML = '<em>' + role.tag + '</em> · ' + role.name.toUpperCase();
+  container.appendChild(titleEl);
+
+  if (parts.length < 3) {
+    const raw = document.createElement('div');
+    raw.className = 'raw-text';
+    raw.textContent = text;
+    container.appendChild(raw);
+    return;
+  }
+  for (let i = 1; i < parts.length; i += 2) {
+    const head = parts[i].trim();
+    const body = (parts[i + 1] || '').trim();
+    if (!head) continue;
+    const block = document.createElement('div');
+    block.className = 'section-block';
+    block.innerHTML =
+      '<div class="section-head">' + esc(head) + '</div>' +
+      '<div class="section-content">' + esc(body) + '</div>';
+    container.appendChild(block);
+  }
+}
+
+function esc(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+          .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+}
+
+async function runRoles(roles) {
+  if (running) return;
+  running = true;
+  lock(true);
+  const context = document.getElementById('context-input').value.trim();
+  const outBody = document.getElementById('out-body');
+  pip('loading');
+  setBody('');
+
+  for (let i = 0; i < roles.length; i++) {
+    const role = roles[i];
+    setLabel('Briefing ' + role.tag + ' (' + (i+1) + '/' + roles.length + ')...');
+
+    const divider = i > 0 ? '<hr class="role-divider">' : '';
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = divider;
+    outBody.appendChild(wrapper);
+
+    const section = document.createElement('div');
+    section.innerHTML = '<span class="placeholder-text">Drafting ' + role.tag + '...</span>';
+    outBody.appendChild(section);
+
+    if (i > 0) await new Promise(r => setTimeout(r, 3000));
+
+    try {
+      const text = await callAPI(role, context);
+      section.innerHTML = '';
+      renderBriefing(section, text, role);
+    } catch(e) {
+      section.innerHTML = '<span class="placeholder-text">Error: ' + esc(e.message) + '</span>';
+    }
+  }
+
+  const label = roles.length === 1
+    ? roles[0].tag + ' · ' + roles[0].name
+    : roles.length + ' roles · w/c ' + document.getElementById('week-label').textContent;
+  setLabel(label);
+  pip('done');
+  running = false;
+  lock(false);
+}
+
+async function runSelected() {
+  const roles = Array.from(selectedRoles).sort((a,b) => a-b).map(i => ROLES[i]);
+  if (roles.length === 0) {
+    setBody('<span class="placeholder-text">Select at least one role first.</span>');
+    return;
+  }
+  await runRoles(roles);
+}
+
+async function runAll() {
+  await runRoles(ROLES);
+}
+
+function setLabel(t) { document.getElementById('out-label').textContent = t; }
+function pip(s) {
+  const el = document.getElementById('pip');
+  el.className = 'status-pip' + (s === 'loading' ? ' pulsing' : s === 'done' ? ' done' : '');
+}
+function setBody(html) { document.getElementById('out-body').innerHTML = html; }
+
+function lock(on) {
+  document.getElementById('run-btn').disabled = on;
+  document.getElementById('run-all-btn').disabled = on;
+}
+
+function copyOutput() {
+  const body = document.getElementById('out-body');
+  const btn = document.getElementById('copy-btn');
+  const label = document.getElementById('copy-label');
+  const text = body.innerText || body.textContent || '';
+  if (!text.trim() || text.includes('Select at least') || text.includes('Drafting')) return;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add('copied');
+    label.textContent = 'Copied';
+    setTimeout(() => { btn.classList.remove('copied'); label.textContent = 'Copy'; }, 2200);
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.classList.add('copied');
+    label.textContent = 'Copied';
+    setTimeout(() => { btn.classList.remove('copied'); label.textContent = 'Copy'; }, 2200);
+  });
+}
+</script>
+<script src="/analytics.js" defer></script>
+</body>
+</html>
