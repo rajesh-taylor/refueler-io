@@ -1,5 +1,5 @@
 # claude.md — Refueler Project DNA
-> **Version:** 4.8 | **Last updated:** CC-69 · 20 July 2026 | **Status:** Pre-TestFlight / Infrastructure Live — Auth closed, Webhook closed, Demand-Intelligence cron closed, Strategy backlog closed, Numo Phase 1–3 hardening closed, three new open-source repos initialised, repo hygiene pass closed, Block 2 E2E closed
+> **Version:** 4.9 | **Last updated:** CC-70 · 25 July 2026 | **Status:** Pre-TestFlight / Infrastructure Live — Auth closed, Webhook closed, Demand-Intelligence cron closed, Strategy backlog closed, Numo Phase 1–3 hardening closed, three new open-source repos initialised, repo hygiene pass closed, Block 2 E2E closed, fiat→sats rewards scoped (Block 8), LNBits deferred post merchant onboarding (Block 9)
 > This file is the single source of truth for Claude session context. Read it in full before any session begins.
 > **Operational detail** (DNS, file registry, session history, SMTP config, full schema) lives in `Refueler_MasterContext_CC69.md` — load that file alongside this one every session.
 
@@ -178,22 +178,25 @@ uniffi-generated API surface changes — new NUTs land without warning.
 | Priority | Item | Status |
 |---|---|---|
 | 🔴 1 | **Block 3 — Franchise dashboard** — KPI strip, per-venue commission, operator controls | Next |
-| 🟡 2 | **Session A — CDK mint architecture** (refueler-mint) | Queued |
-| 🟡 3 | **Session B — Stamp lifecycle + FCA compliance check** (refueler-mint) | Queued after Session A |
-| 🟡 4 | **refueler-share MVP** — BLAKE3 + Cashu file transfer | Queued |
-| 🟡 5 | **Block 5 — Merchant onboarding flow** | Queued |
-| 🟡 6 | **Ticketing MVP (CC-70)** | Queued |
-| 🟡 7 | **Gate plugin + orange UI (CC-67)** | Queued |
-| ⚪ 8 | `car_park_occupancy` strip from FEEDS array | Bundle with next rail-signal-poll touch |
-| ⚪ 9 | Darwin Push Port planning session | Dedicated future session — `refueler-darwin-bridge` repo ready |
-| ⚪ 10 | `CONTRIBUTING.md` for 3 open-source repos | Deferred — end of August |
-| ⚪ 11 | `.well-known/assetlinks.json` SHA256 fingerprint | Replace placeholder at first signed Android build |
-| ⚪ 12 | `refueler-darwin-bridge` licence decision | Bundle with Darwin Push Port session |
-| ⚪ 13 | CC-60 partnerships outreach (Aaron) | Held pending call |
-| ⚪ 14 | `blink-webhook_index.ts` stale file in repo | Delete or replace with v12 source |
-| ⚪ 15 | `bsc-dev` Dev Test item in PreOrderScreen | Remove before TestFlight |
-| ⚪ 16 | `Costa Coffee HQ` category label fix | `Franchise_hq` → proper display name |
-| ⚪ 17 | GitHub Actions red X on commit `9b9655d` | Fix when convenient |
+| 🔴 2 | **Block 5 — Merchant onboarding flow** — first 1–2 merchants live | Queued |
+| 🟡 3 | **Block 8 — Fiat → sats rewards** — pay by card, earn Bitcoin, primary traction lever | Queued — gated on Block 5 |
+| 🟡 4 | **Session A — CDK mint architecture** (refueler-mint) | Queued |
+| 🟡 5 | **Session B — Stamp lifecycle + FCA compliance check** (refueler-mint) | Queued after Session A |
+| 🟡 6 | **refueler-share MVP** — BLAKE3 + Cashu file transfer | Queued |
+| 🟡 7 | **Ticketing MVP** | Queued |
+| 🟡 8 | **Gate plugin + NFC validation** | Queued |
+| ⚪ 9 | **Block 9 — LNBits integration** | Deferred — post merchant onboarding. Hetzner CX22 ~€4.50/month costed. Not economically viable until volume exists. |
+| ⚪ 10 | `car_park_occupancy` strip from FEEDS array | Bundle with next rail-signal-poll touch |
+| ⚪ 11 | Darwin Push Port planning session | Dedicated future session — `refueler-darwin-bridge` repo ready |
+| ⚪ 12 | `CONTRIBUTING.md` for 3 open-source repos | Deferred — end of August |
+| ⚪ 13 | `.well-known/assetlinks.json` SHA256 fingerprint | Replace placeholder at first signed Android build |
+| ⚪ 14 | `refueler-darwin-bridge` licence decision | Bundle with Darwin Push Port session |
+| ⚪ 15 | CC-60 partnerships outreach (Aaron) | Held pending call |
+| ⚪ 16 | `blink-webhook_index.ts` stale file in repo | Delete or replace with v12 source |
+| ⚪ 17 | `bsc-dev` Dev Test item in PreOrderScreen | Remove before TestFlight |
+| ⚪ 18 | `Costa Coffee HQ` category label fix | `Franchise_hq` → proper display name |
+| ⚪ 19 | GitHub Actions red X on commit `9b9655d` | Fix when convenient |
+| ⚪ 20 | LNBits webhook payload shape | Confirm payment hash field with Ben Arc before Block 9 starts |
 
 ---
 
@@ -206,6 +209,7 @@ uniffi-generated API surface changes — new NUTs land without warning.
 | CC-64 hygiene | Full `refueler-io` repo audit. `timer/` removed (pre-pivot artifact). `darwin_bridge/` extracted to own repo (`refueler-darwin-bridge`, pushed). `.env.example` ZBD vars replaced with Blink. `EDITORIAL-MASTER.md` + `the-float-spec.md` removed from GitHub. `.gitignore` updated. |
 | CC-68 | Blink API key rotated (`refueler-beta` revoked, `refueler-cc68` active). `blink-webhook` v12 redeployed. PreOrderScreen polling fallback added. |
 | CC-69 | Block 2 closed. Settled view inline in PreOrderScreen (NativeTabs routing incompatible with sibling routes). Three-layer settlement detection (Realtime + poll + AppState). Fee:pending rule for zero/null routing fee. BOLT11 display removed. Blink wallet for future tests. |
+| CC-70 | Planning session — CypherMunk House / Ben Arc (LNBits). Fiat→sats rewards confirmed as primary traction lever (Block 8). LNBits deferred post merchant onboarding (Block 9, not economically viable until volume exists). VPS costed: Hetzner CX22 ~€4.50/month. Ticketing proto-concept confirmed (8-char reference → one-time token via BoltCard/LNURL-withdraw). E2E demo run live on GrapheneOS — full flow confirmed. |
 
 ---
 
