@@ -1,0 +1,325 @@
+---
+title: "Editorial — Refueler"
+description: "Writing on Bitcoin payments, privacy architecture, and the economics of the Fenchurch Street line commute."
+canonical: "https://refueler.io/editorial/"
+activePage: editorial
+permalink: /editorial/index.html
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+{% include "head.njk" %}
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=Satoshi:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper:          #F7F4EF;
+    --carbon:         #1E1F22;
+    --carbon-soft:    #26282C;
+    --ink:            #3D3A36;
+    --ink-secondary:  #5A5751;
+    --ink-tertiary:   #9A948D;
+    --rule:           #D6D1C8;
+
+    --bg:             var(--paper);
+    --text-primary:   var(--ink);
+    --text-secondary: var(--ink-secondary);
+    --text-tertiary:  var(--ink-tertiary);
+    --border:         var(--rule);
+
+    --font-heading:   'Satoshi', 'DM Sans', sans-serif;
+    --font-serif:     'Source Serif 4', Georgia, serif;
+    --font-sans:      'DM Sans', system-ui, sans-serif;
+
+    --max-w:          1200px;
+    --gutter:         clamp(1.25rem, 4vw, 3rem);
+  }
+
+  [data-theme="carbon"] {
+    --bg:             var(--carbon);
+    --text-primary:   #E4E2DC;
+    --text-secondary: #8A8680;
+    --text-tertiary:  #5A5751;
+    --border:         #35373B;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-font-smoothing: antialiased; }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-weight: 300;
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .site-header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 var(--gutter);
+    position: sticky; top: 0;
+    background: var(--bg);
+    z-index: 100;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .header-inner {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .wordmark {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.06em;
+    text-transform: none;
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .wordmark-divider { font-weight: 300; opacity: 0.3; margin: 0 0.5rem; }
+  .wordmark-section { font-weight: 400; letter-spacing: 0.06em; opacity: 0.55; text-transform: none; }
+
+  .site-nav { display: flex; align-items: center; gap: 2rem; }
+  .site-nav a {
+    font-family: var(--font-heading);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .site-nav a:hover { color: var(--text-primary); }
+  .site-nav a.active { color: var(--text-primary); }
+
+  .theme-pill {
+    font-family: var(--font-heading);
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 0.35rem 0.85rem;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    white-space: nowrap;
+  }
+  .theme-pill:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+
+  /* ── Index layout ── */
+  .index-wrap {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    padding: 0 var(--gutter);
+  }
+
+  .index-header {
+    padding: 80px 0 64px;
+    border-bottom: 1px solid var(--border);
+    max-width: 640px;
+  }
+
+  .index-eyebrow {
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 1.25rem;
+  }
+
+  .index-title {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 4.5vw, 3.25rem);
+    font-weight: 600;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    color: var(--text-primary);
+    margin-bottom: 1.25rem;
+  }
+
+  .index-standfirst {
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    color: var(--text-secondary);
+    font-weight: 300;
+  }
+
+  /* ── Article list ── */
+  .article-list {
+    padding: 0 0 80px;
+  }
+
+  .article-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2rem;
+    align-items: start;
+    padding: 2.5rem 0;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: inherit;
+    transition: opacity 0.2s;
+  }
+  .article-row:hover { opacity: 0.75; }
+  .article-row:first-child { border-top: none; }
+
+  .row-eyebrow {
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 0.625rem;
+  }
+
+  .row-title {
+    font-family: var(--font-heading);
+    font-size: clamp(1.0625rem, 2vw, 1.25rem);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--text-primary);
+    line-height: 1.2;
+    margin-bottom: 0.625rem;
+  }
+
+  .row-standfirst {
+    font-family: var(--font-serif);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    max-width: 56ch;
+    font-weight: 300;
+  }
+
+  .row-meta {
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    letter-spacing: 0.06em;
+    color: var(--text-tertiary);
+    white-space: nowrap;
+    padding-top: 0.25rem;
+  }
+
+  /* ── Footer ── */
+  .site-footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem var(--gutter);
+  }
+  .footer-inner {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .footer-note, .footer-links a {
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    letter-spacing: 0.06em;
+    color: var(--text-tertiary);
+    text-decoration: none;
+  }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-links a:hover { color: var(--text-secondary); }
+
+  @media (max-width: 640px) {
+    .article-row { grid-template-columns: 1fr; gap: 0.5rem; }
+    .site-nav a:not(.active):not(button) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+{% include "nav.njk" %}
+
+<div class="index-wrap">
+
+  <header class="index-header">
+    <p class="index-eyebrow">Refueler / Editorial</p>
+    <h1 class="index-title">Writing worth<br>reading.</h1>
+    <p class="index-standfirst">On Bitcoin payments, privacy architecture, and the economics of the Fenchurch Street line commute. No marketing copy.</p>
+  </header>
+
+  <div class="article-list">
+
+    <a class="article-row" href="/editorial/the-city-worker/">
+      <div>
+        <p class="row-eyebrow">Consumer · City commuter · Loyalty</p>
+        <h2 class="row-title">The Least Loyal Customer in Britain</h2>
+        <p class="row-standfirst">The City of London coffee unit has a denominator problem. The customer it most needs to retain is the one most likely to have left already.</p>
+      </div>
+      <span class="row-meta">May 2026 · 7 min</span>
+    </a>
+
+    <a class="article-row" href="/editorial/nothing-to-collect-nothing-to-hide/">
+      <div>
+        <p class="row-eyebrow">Privacy · Architecture · Data</p>
+        <h2 class="row-title">Nothing to collect. Nothing to hide.</h2>
+        <p class="row-standfirst">The most honest privacy policy is the one you don't need to write. On building a payments platform where the architecture does the work the policy can't.</p>
+      </div>
+      <span class="row-meta">May 2026 · 12 min</span>
+    </a>
+
+    <a class="article-row" href="/editorial/the-float/">
+      <div>
+        <p class="row-eyebrow">Regulation · FCA · PS25/12 · Loyalty apps</p>
+        <h2 class="row-title">The float</h2>
+        <p class="row-standfirst">Your coffee app knows more about you than your bank. And the regulator finally noticed.</p>
+      </div>
+      <span class="row-meta">May 2026 · 9 min</span>
+    </a>
+
+    <a class="article-row" href="/editorial/looks-done-isnt-done/">
+      <div>
+        <p class="row-eyebrow">Engineering · Authentication · Payments</p>
+        <h2 class="row-title">Looks Done Isn't Done</h2>
+        <p class="row-standfirst">Two pieces of infrastructure pass every test written. Neither has been proven against reality. On the gap between working code and shipped product.</p>
+      </div>
+      <span class="row-meta">June 2026 · 8 min</span>
+    </a>
+
+  </div>
+
+</div>
+
+{% include "footer.njk" %}
+
+<script>
+const THEME_KEY = 'rfTheme';
+function applyTheme(theme) {
+  const root = document.documentElement;
+  const pill = document.getElementById('themePill');
+  if (theme === 'carbon') {
+    root.classList.add('carbon-mode');
+    root.setAttribute('data-theme', 'carbon');
+    if (pill) pill.textContent = 'Carbon / Paper';
+  } else {
+    root.classList.remove('carbon-mode');
+    root.removeAttribute('data-theme');
+    if (pill) pill.textContent = 'Paper / Carbon';
+  }
+}
+function toggleTheme() {
+  const current = localStorage.getItem(THEME_KEY) || 'paper';
+  const next = current === 'paper' ? 'carbon' : 'paper';
+  localStorage.setItem(THEME_KEY, next);
+  applyTheme(next);
+}
+(function () { applyTheme(localStorage.getItem(THEME_KEY) || 'paper'); })();
+</script>
+<script src="/analytics.js" defer></script>
+</body>
+</html>
