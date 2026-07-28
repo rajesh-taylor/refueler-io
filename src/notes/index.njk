@@ -1,0 +1,57 @@
+---
+title: "Notes — Refueler"
+description: "Technical notes for professional buyers — lawyers, journalists, accountants, and Bitcoin-adjacent professionals. Precise, honest, no marketing copy."
+canonical: "https://refueler.io/notes/"
+activePage: notes
+permalink: /notes/index.html
+---
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+{% include "head.njk" %}
+<link rel="preload" href="/notes/notes.css" as="style">
+<link rel="preload" href="/notes/notes.js" as="script">
+<link rel="stylesheet" href="/notes/notes.css">
+</head>
+<body>
+
+{% include "nav.njk" %}
+
+<main>
+  <section class="notes-header">
+    <p class="section-eyebrow">Refueler / Notes</p>
+    <h1 class="section-title">Technical notes.<br>No marketing copy.</h1>
+    <p class="section-standfirst">For lawyers, journalists, accountants, and Bitcoin-adjacent professionals. Precise where the privacy policies are vague, honest about what operators can and cannot see.</p>
+  </section>
+
+  <div class="notes-grid-wrap">
+    <div class="notes-grid">
+
+      <!-- Note 1 — What a subpoena gets -->
+      <a class="note-card" href="/notes/what-a-subpoena-gets/">
+        <div class="card-tags">
+          <span class="card-tag">Privacy</span>
+          <span class="card-dot"></span>
+          <span class="card-tag">Legal</span>
+          <span class="card-dot"></span>
+          <span class="card-tag">File transfer</span>
+        </div>
+        <h2 class="card-title">What a subpoena gets from seven file transfer services</h2>
+        <p class="card-description">Most privacy policies are written by lawyers to protect the company, not you. This skips the policy and goes straight to what would actually be handed over.</p>
+        <div class="card-meta">
+          <span>July 2026</span>
+          <span class="card-dot"></span>
+          <span>6 min</span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</main>
+
+{% include "footer.njk" %}
+
+<script src="/notes/notes.js"></script>
+<script src="/analytics.js" defer></script>
+</body>
+</html>
