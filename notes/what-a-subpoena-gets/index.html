@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What a subpoena gets from seven file transfer services · Refueler Notes</title>
+<meta name="description" content="Seven file transfer services, one table: if someone served a valid legal order to your provider tomorrow, what would they actually hand over?">
+<meta property="og:title" content="What a subpoena gets from seven file transfer services · Refueler Notes">
+<meta property="og:description" content="Seven services. One table. No marketing copy.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://refueler.io/notes/what-a-subpoena-gets/">
+<meta property="og:site_name" content="Refueler">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="What a subpoena gets from seven file transfer services">
+<meta name="twitter:description" content="Seven services. One table. No marketing copy.">
+<link rel="canonical" href="https://refueler.io/notes/what-a-subpoena-gets/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap">
+<link rel="preload" href="/notes/notes.css" as="style">
+<link rel="preload" href="/notes/notes.js" as="script">
+<link rel="stylesheet" href="/notes/notes.css">
+<style>
+  /* ── Article-specific additions ── */
+  .table-note {
+    font-family: var(--font-serif);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--text-tertiary);
+    margin-top: 0.75rem;
+    font-style: italic;
+  }
+
+  /* Content/identity cells — styled indicator */
+  .cell-yes   { color: var(--text-primary); font-weight: 500; }
+  .cell-no    { color: var(--text-tertiary); }
+  .cell-maybe { color: var(--text-secondary); }
+
+  /* Modal table — full detail */
+  .modal-table-wrap { overflow-x: auto; margin-top: 1.5rem; }
+  .modal-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.55;
+  }
+  .modal-data-table th {
+    font-family: var(--font-heading);
+    font-size: 0.6125rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    padding: 0.625rem 0.875rem;
+    text-align: left;
+    border-bottom: 0.5px solid var(--border);
+    white-space: nowrap;
+  }
+  .modal-data-table td {
+    padding: 0.7rem 0.875rem;
+    border-bottom: 0.5px solid var(--border);
+    color: var(--text-primary);
+    vertical-align: top;
+  }
+  .modal-data-table tr:last-child td { border-bottom: none; }
+  .modal-data-table td:first-child {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .modal-data-table td.notes {
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+  }
+
+  .modal-note {
+    font-family: var(--font-serif);
+    font-size: 0.875rem;
+    color: var(--text-tertiary);
+    line-height: 1.65;
+    margin-top: 1.5rem;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/notes/" class="wordmark">Refueler<span class="wordmark-divider">/</span><span class="wordmark-section">Notes</span></a>
+    <nav class="site-nav">
+      <a href="/">App</a>
+      <a href="/editorial/">Editorial</a>
+      <a href="/notes/" class="active">Notes</a>
+      <a href="/privacy/">Privacy</a>
+      <button class="theme-pill" id="theme-btn" onclick="toggleTheme()">Paper / Carbon</button>
+    </nav>
+  </div>
+</header>
+
+<div class="article-wrap">
+
+  <p class="breadcrumb">
+    <a href="/notes/">Notes</a><span class="breadcrumb-sep">/</span>Privacy · Legal · File transfer
+  </p>
+
+  <header class="article-header">
+    <div class="article-eyebrow">
+      <span>Privacy</span>
+      <span class="eyebrow-dot"></span>
+      <span>Legal</span>
+      <span class="eyebrow-dot"></span>
+      <span>File transfer</span>
+    </div>
+    <h1 class="article-title">What a subpoena gets from seven file transfer services</h1>
+    <p class="article-standfirst">Most privacy policies are written by lawyers to protect the company, not you. This skips the policy and goes straight to what would actually be handed over.</p>
+    <div class="article-meta">
+      <span>July 2026</span>
+      <span class="meta-dot"></span>
+      <span>6 min read</span>
+    </div>
+  </header>
+
+  <article class="article-body">
+
+    <p>Most privacy policies are written by lawyers to protect the company, not you. They're long, reassuring, and structurally designed to be unread. This piece skips the policy and goes straight to the question that matters: if someone served a valid legal order to your file transfer provider tomorrow, what would they actually hand over?</p>
+
+    <p>Seven services. One table. No marketing copy.</p>
+
+    <h2>The table</h2>
+
+    <div class="table-wrap">
+      <table class="data-table" aria-label="Subpoena disclosure by file transfer service">
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>Your content</th>
+            <th>Your identity</th>
+            <th>Metadata</th>
+            <th class="notes-col">Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>WeTransfer</td>
+            <td class="cell-yes">Yes</td>
+            <td class="cell-yes">Yes</td>
+            <td class="cell-yes">Yes</td>
+            <td class="notes-col">Operator holds the keys. TLS in transit, at rest on their servers.</td>
+          </tr>
+          <tr>
+            <td>Smash</td>
+            <td class="cell-yes">Yes</td>
+            <td class="cell-yes">IPs; email if provided</td>
+            <td class="cell-yes">Yes</td>
+            <td class="notes-col">Same model. Content is readable by design.</td>
+          </tr>
+          <tr>
+            <td>SwissTransfer</td>
+            <td class="cell-yes">Yes</td>
+            <td class="cell-yes">IPs</td>
+            <td class="cell-yes">Yes</td>
+            <td class="notes-col">Infomaniak holds the keys. The flag is not the architecture.</td>
+          </tr>
+          <tr>
+            <td>Wormhole</td>
+            <td class="cell-maybe">Probably not</td>
+            <td class="cell-maybe">No account; IPs yes</td>
+            <td class="cell-yes">Yes</td>
+            <td class="notes-col">PAKE-based. Closed source — claim unverifiable. US jurisdiction.</td>
+          </tr>
+          <tr>
+            <td>Tresorit</td>
+            <td class="cell-no">No</td>
+            <td class="cell-yes">Yes — name, email, org</td>
+            <td class="cell-yes">Yes, extensive</td>
+            <td class="notes-col">Client-side E2EE, genuine. Identity is a feature for their buyers.</td>
+          </tr>
+          <tr>
+            <td>Proton Drive</td>
+            <td class="cell-no">No</td>
+            <td class="cell-yes">Yes — account + payment</td>
+            <td class="cell-yes">Yes, incl. IPs on order</td>
+            <td class="notes-col">Proven: Swiss court order, 2021. Content stayed protected; metadata did not.</td>
+          </tr>
+          <tr>
+            <td>Refueler Share</td>
+            <td class="cell-no">No — encrypted noise</td>
+            <td class="cell-no">None exists</td>
+            <td class="cell-maybe">Sizes, timestamps, edge IPs</td>
+            <td class="notes-col">UK jurisdiction. No account, no identity to produce.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="table-note">The rightmost column is the honest one. Take your time with it.</p>
+
+    <button class="table-expand-trigger" onclick="openModal('modal-full-analysis')" aria-haspopup="dialog">
+      See full analysis ↗
+    </button>
+
+    <h2>What "encrypted" actually means</h2>
+
+    <p>Three of these services describe themselves as encrypted. All of them are, technically speaking, correct. The question is: encrypted with whose key?</p>
+
+    <p>WeTransfer, Smash, and SwissTransfer encrypt your file in transit (TLS) and at rest on their servers. They hold the keys. A valid court order, a motivated employee, or a sufficiently thorough breach can produce your file in plaintext. This is not a flaw in their implementation — it is their architecture. They built a system where they can read your files, and they did so deliberately, because useful features like link previews, virus scanning, and thumbnail generation require it.</p>
+
+    <p>Tresorit and Proton Drive are different. Both encrypt client-side — your device does the encryption before anything leaves it, and the key never reaches their servers. A subpoena against Proton's infrastructure yields account metadata and IP addresses (as Swiss courts demonstrated in 2021) but not file content. The architecture earns the claim.</p>
+
+    <p>Wormhole states a similar property via PAKE — Password Authenticated Key Exchange, where the decryption key derives from a code shared out-of-band and never transmitted to the server. The claim is architecturally sound. The problem is that Wormhole is closed source and unaudited, so you cannot verify it. The gap between "they say so" and "we can check" is where legal risk lives.</p>
+
+    <h2>The metadata problem</h2>
+
+    <p>Client-side encryption solves one problem and leaves another standing.</p>
+
+    <p>Even when a provider cannot read your files, they know you have files. They know how large they are, when you uploaded them, when they were downloaded, and — increasingly, under legal pressure — who was at the keyboard when both events happened. IP address logs are metadata. Account identity is metadata. The graph of who sent what to whom, without a single readable byte of content, can be legally and journalistically significant.</p>
+
+    <p>Proton published a transparency report after their 2021 case. It confirmed what their architecture already implied: the content of a ProtonMail user's emails was never produced. The user's IP address was. Content protection and identity protection are not the same property, and privacy-focused providers vary considerably in which one they offer.</p>
+
+    <p>The honest position is to be specific about each: <em>this</em> is protected by mathematics, <em>that</em> is visible to the operator and therefore reachable by legal process.</p>
+
+    <h2>What jurisdiction actually buys you</h2>
+
+    <p>SwissTransfer's homepage prominently features Switzerland. The implication is that Swiss privacy law protects your files. This is partially true and mostly irrelevant.</p>
+
+    <p>Swiss law does require a valid Swiss court order to compel disclosure — a higher bar than a US subpoena or UK production order in some respects. But if the company holds your encryption keys, jurisdiction determines the <em>process</em> for getting your files, not whether they're gettable. A sufficiently motivated court in any jurisdiction that can reach the company will eventually produce a valid order. The flag on the website describes the legal process surface, not the cryptographic one.</p>
+
+    <p>Architecture protects your content. Jurisdiction shapes the paperwork required to ask for it.</p>
+
+    <h2>The identity question</h2>
+
+    <p>Most services in this table require an account to send. An account is a persistent identity anchor — every file, every access event, every IP address hangs off it and can be correlated. Even Proton, whose encryption is genuinely strong, ties your files to an account identity. A subpoena that cannot read your files can still prove you sent them.</p>
+
+    <p>WeTransfer's free tier accepts a sender email address. That email is logged. Smash logs the address you provide, or your IP if you don't provide one. SwissTransfer logs your IP.</p>
+
+    <p>Wormhole and OnionShare (not in the table above, because it's software rather than a service) require no account. Neither does Refueler Share. For services without accounts, the subpoena has no identity to request — because none was collected.</p>
+
+    <p>This is a design choice, not an accident. It has costs: no account means no recovery, no history, no admin console. Some buyers want those things. For buyers to whom identity linkage is the risk, the absence of an account is the feature.</p>
+
+    <h2>What a subpoena gets from Refueler Share</h2>
+
+    <p>Encrypted ciphertext the operator cannot decrypt. File sizes and chunk counts. Upload and download timestamps. Cloudflare edge IP addresses — the IP addresses of connections to Cloudflare's network, logged at the infrastructure level. No account. No identity. No payment record for the free tier; a Lightning payment hash (pseudonymous) or a Stripe record (identified) for paid tiers.</p>
+
+    <p>We publish this list voluntarily because the alternative — making you guess — is the pattern that produces the surprises in other providers' terms updates.</p>
+
+    <p>The encryption key for every file lives in the URL fragment. Fragments are not transmitted in HTTP requests and are not logged by servers. Whoever has the link has the key. Whoever doesn't, doesn't.</p>
+
+    <p>If you sent a file yesterday and deleted the link, the file is still in our storage until its expiry date — but it is, practically speaking, unreadable by anyone without the fragment. Including us.</p>
+
+    <h2>The one thing this table doesn't tell you</h2>
+
+    <p>None of these services protect against endpoint compromise. If the device you're using is already compromised, the file was readable before it was encrypted. Client-side encryption is not a substitute for device security; it's a protection against server-side failure. Every provider in this table, including us, has the same answer to that threat: we cannot help you.</p>
+
+    <p>OnionShare's documentation is the most honest in the industry on this point. They publish a specific list of what their software does not protect against. We're working on a similar document for Refueler Share, because our buyers — lawyers, journalists, accountants — deserve the same precision.</p>
+
+    <p>Until then: this table is the version we can stand behind today.</p>
+
+    <div class="article-cta">
+      <p class="cta-label">Refueler Share</p>
+      <p class="cta-text">Anonymous encrypted file transfer. No account required. Free for transfers up to 4 GB.</p>
+      <a class="cta-link" href="https://share.refueler.io">Try it →</a>
+    </div>
+
+  </article>
+
+</div><!-- /article-wrap -->
+
+<!-- ── Modal: Full analysis ── -->
+<div
+  class="modal-overlay"
+  id="modal-full-analysis"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-full-analysis-title"
+  aria-hidden="true"
+>
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('modal-full-analysis')" aria-label="Close">Close</button>
+    <h2 class="modal-title" id="modal-full-analysis-title">Full analysis — what each service actually exposes</h2>
+    <p style="font-family:var(--font-serif);font-size:0.9375rem;line-height:1.7;color:var(--text-secondary);margin-bottom:1.5rem;">The summary table shows what a subpoena <em>gets</em>. This table shows why, and what the operator can see independently of any legal process.</p>
+    <div class="modal-table-wrap">
+      <table class="modal-data-table" aria-label="Extended analysis of file transfer service disclosure risks">
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>Encryption model</th>
+            <th>Key holder</th>
+            <th>Account required</th>
+            <th>Jurisdiction</th>
+            <th class="notes">Operator can see</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>WeTransfer</td>
+            <td>TLS + server-side at rest</td>
+            <td>Operator</td>
+            <td>No (free); email logged</td>
+            <td>Netherlands / US</td>
+            <td class="notes">File content, sender email, recipient email, download IPs, timestamps.</td>
+          </tr>
+          <tr>
+            <td>Smash</td>
+            <td>TLS + server-side at rest</td>
+            <td>Operator</td>
+            <td>No; email or IP logged</td>
+            <td>France</td>
+            <td class="notes">File content, sender identity (email or IP), download events.</td>
+          </tr>
+          <tr>
+            <td>SwissTransfer</td>
+            <td>TLS + server-side at rest</td>
+            <td>Operator (Infomaniak)</td>
+            <td>No; IP logged</td>
+            <td>Switzerland</td>
+            <td class="notes">File content. Swiss process required to compel — but keys exist.</td>
+          </tr>
+          <tr>
+            <td>Wormhole</td>
+            <td>PAKE client-side (claimed)</td>
+            <td>Neither (if claim holds)</td>
+            <td>No; IPs logged</td>
+            <td>US</td>
+            <td class="notes">File sizes, timing, IPs. Content: unverifiable without audit.</td>
+          </tr>
+          <tr>
+            <td>Tresorit</td>
+            <td>Client-side E2EE (audited)</td>
+            <td>User</td>
+            <td>Yes — name, email, org, payment</td>
+            <td>Switzerland / Hungary</td>
+            <td class="notes">File sizes, sharing graph, account metadata. Content: not accessible.</td>
+          </tr>
+          <tr>
+            <td>Proton Drive</td>
+            <td>Client-side E2EE (audited)</td>
+            <td>User</td>
+            <td>Yes — account + payment + IPs</td>
+            <td>Switzerland</td>
+            <td class="notes">Account identity, IP logs (court-compelled 2021), file metadata. Content: not accessible.</td>
+          </tr>
+          <tr>
+            <td>Refueler Share</td>
+            <td>AES-GCM client-side; key in URL fragment</td>
+            <td>Sender (fragment never leaves device)</td>
+            <td>No — no account exists</td>
+            <td>UK</td>
+            <td class="notes">Encrypted ciphertext, file sizes, chunk counts, timestamps, Cloudflare edge IPs. Content and identity: not accessible.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="modal-note">Operator visibility is independent of legal process. A subpoena can only compel disclosure of data the operator holds. Where content is encrypted client-side and the operator has no key, a valid court order produces noise.</p>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span class="footer-note">© 2026 Refueler Ltd (incorporating) · refueler.io/notes</span>
+    <div class="footer-links">
+      <a href="/privacy/">Privacy</a>
+      <a href="/notes/">Notes</a>
+      <a href="/editorial/">Editorial</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/notes/notes.js"></script>
+<script src="/analytics.js" defer></script>
+</body>
+</html>
