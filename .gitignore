@@ -40,3 +40,4 @@ npm-debug.log*
 editorial/EDITORIAL-MASTER.md
 editorial/*-spec.md
 editorial/*-spec-*.md
+_site/

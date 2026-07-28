@@ -1,0 +1,52 @@
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{{ title }}</title>
+{% if description %}<meta name="description" content="{{ description }}" />{% endif %}
+{% if canonical %}<link rel="canonical" href="{{ canonical }}" />{% endif %}
+<meta name="robots" content="index, follow" />
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+{% if canonical %}<meta property="og:url" content="{{ canonical }}" />{% endif %}
+<meta property="og:title" content="{{ title }}" />
+{% if description %}<meta property="og:description" content="{{ description }}" />{% endif %}
+<meta property="og:site_name" content="Refueler" />
+
+<!-- Twitter / X card -->
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="{{ title }}" />
+{% if description %}<meta name="twitter:description" content="{{ description }}" />{% endif %}
+
+<!-- Fonts: Satoshi · DM Sans · IBM Plex Mono -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" />
+
+{{ extraHead | safe }}
+
+<!-- Theme: applied before first paint — Paper default on public site -->
+<script>
+  const THEME_KEY = 'rfTheme';
+  function applyTheme(theme) {
+    const root = document.documentElement;
+    const pill = document.getElementById('themePill');
+    if (theme === 'carbon') {
+      root.classList.add('carbon-mode');
+      root.setAttribute('data-theme', 'carbon');
+      if (pill) pill.textContent = 'Carbon / Paper';
+    } else {
+      root.classList.remove('carbon-mode');
+      root.removeAttribute('data-theme');
+      if (pill) pill.textContent = 'Paper / Carbon';
+    }
+  }
+  function toggleTheme() {
+    const current = localStorage.getItem(THEME_KEY) || 'paper';
+    const next = current === 'paper' ? 'carbon' : 'paper';
+    localStorage.setItem(THEME_KEY, next);
+    applyTheme(next);
+  }
+  (function () { applyTheme(localStorage.getItem(THEME_KEY) || 'paper'); })();
+</script>

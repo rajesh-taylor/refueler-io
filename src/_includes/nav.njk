@@ -1,0 +1,16 @@
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/" class="wordmark">
+      Refueler
+      <span class="wordmark-divider">/</span>
+      <span class="wordmark-section">App</span>
+    </a>
+    <nav class="site-nav">
+      <a href="/"{% if activePage == 'app' %} class="active"{% endif %}>App</a>
+      <a href="/editorial/"{% if activePage == 'editorial' %} class="active"{% endif %}>Editorial</a>
+      <a href="/notes/"{% if activePage == 'notes' %} class="active"{% endif %}>Notes</a>
+      <a href="/privacy/"{% if activePage == 'privacy' %} class="active"{% endif %}>Privacy</a>
+      <button class="theme-pill" id="themePill" onclick="toggleTheme()">Paper / Carbon</button>
+    </nav>
+  </div>
+</header>
