@@ -38,6 +38,16 @@ permalink: /editorial/looks-done-isnt-done/index.html
     --max:           1200px;
     --col:           68ch;
     --g:             clamp(1.25rem,4vw,3rem);
+
+    /* Canonical token aliases for shared partials */
+    --text-primary:   var(--fg);
+    --text-secondary: var(--fg-2);
+    --text-tertiary:  var(--fg-3);
+    --border:         var(--bd);
+    --font-heading:   var(--hed);
+    --max-w:          var(--max);
+    --gutter:         var(--g);
+    --article-max:    var(--col);
     --body-sz:       18px;
     --lh:            1.8;
     --ps:            1.5em;
@@ -271,6 +281,86 @@ permalink: /editorial/looks-done-isnt-done/index.html
   .sf-links a:hover{color:var(--fg);}
 
   @media(max-width:680px){:root{--g:1.125rem;} .ab{font-size:17px;}}
+
+  /* — Canonical nav + footer — */
+  .site-header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 var(--gutter);
+    position: sticky; top: 0;
+    background: var(--bg);
+    z-index: 100;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .header-inner {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .wordmark {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.06em;
+    text-transform: none;
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .wordmark-divider { font-weight: 300; opacity: 0.3; margin: 0 0.5rem; }
+  .wordmark-section { font-weight: 400; letter-spacing: 0.06em; opacity: 0.55; text-transform: none; }
+  nav { display: flex; align-items: center; gap: 2rem; }
+  nav a {
+    font-family: var(--font-heading);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  nav a:hover { color: var(--text-primary); }
+  .theme-pill {
+    font-family: var(--font-heading);
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 0.35rem 0.85rem;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    white-space: nowrap;
+  }
+  .theme-pill:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+  .site-footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem var(--gutter);
+    margin-top: 5rem;
+  }
+  .footer-inner {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .footer-note, .footer-links a {
+    font-family: var(--font-heading);
+    font-size: 0.6375rem;
+    letter-spacing: 0.06em;
+    color: var(--text-tertiary);
+    text-decoration: none;
+  }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-links a:hover { color: var(--text-secondary); }
 </style>
 </head>
 <body>
