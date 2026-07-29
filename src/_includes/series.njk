@@ -1,0 +1,47 @@
+<style>
+  .series{max-width:68ch;margin:3.5rem 0 0;padding-top:1.75rem;border-top:1px solid var(--border);transition:border-color .3s;}
+  .series-label{font-family:var(--font-heading);font-size:.575rem;letter-spacing:.13em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:1rem;}
+  .series-list{list-style:none;padding:0;margin:0;}
+  .series-item{display:flex;gap:1rem;align-items:baseline;padding:.5rem 0;border-bottom:1px solid var(--border);transition:border-color .3s;}
+  .series-item:last-child{border-bottom:none;}
+  .series-n{font-family:var(--font-heading);font-size:.625rem;color:var(--text-tertiary);flex-shrink:0;width:1.5rem;}
+  .series-inner{flex:1;}
+  .series-ti{font-family:var(--font-heading);font-size:.8125rem;font-weight:600;color:var(--text-primary);text-decoration:none;display:block;margin-bottom:.1rem;}
+  .series-ti:hover{color:#C8A96E;}
+  .series-q{font-family:var(--font-heading);font-size:.6875rem;color:var(--text-tertiary);font-style:italic;}
+  .series-item--cur .series-ti{color:#C8A96E;}
+</style>
+
+<nav class="series" aria-label="Editorial series">
+  <div class="series-label">Refueler Editorial Series</div>
+  <ul class="series-list">
+    <li class="series-item{% if currentSlug == 'the-float' %} series-item--cur{% endif %}">
+      <span class="series-n">1</span>
+      <div class="series-inner">
+        <a href="/editorial/the-float/" class="series-ti">The Float</a>
+        <div class="series-q">Why do loyalty rewards take weeks?</div>
+      </div>
+    </li>
+    <li class="series-item{% if currentSlug == 'nothing-to-collect-nothing-to-hide' %} series-item--cur{% endif %}">
+      <span class="series-n">2</span>
+      <div class="series-inner">
+        <a href="/editorial/nothing-to-collect-nothing-to-hide/" class="series-ti">Nothing to Collect, Nothing to Hide</a>
+        <div class="series-q">Why does a preorder app need your location at all?</div>
+      </div>
+    </li>
+    <li class="series-item{% if currentSlug == 'the-city-worker' %} series-item--cur{% endif %}">
+      <span class="series-n">3</span>
+      <div class="series-inner">
+        <a href="/editorial/the-city-worker/" class="series-ti">The City Worker</a>
+        <div class="series-q">Who actually benefits from this?</div>
+      </div>
+    </li>
+    <li class="series-item{% if currentSlug == 'looks-done-isnt-done' %} series-item--cur{% endif %}">
+      <span class="series-n">4</span>
+      <div class="series-inner">
+        <a href="/editorial/looks-done-isnt-done/" class="series-ti">Looks Done Isn't Done</a>
+        <div class="series-q">Why isn't the app available yet?</div>
+      </div>
+    </li>
+  </ul>
+</nav>
