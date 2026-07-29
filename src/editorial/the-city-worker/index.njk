@@ -876,7 +876,8 @@ permalink: /editorial/the-city-worker/index.html
 
   </article>
 
-  <div class="sources">
+  {% set currentSlug = 'the-city-worker' %}{% include "series.njk" %}
+<div class="sources">
     <p class="sources-label">Sources</p>
     <ul class="sources-list">
       <li>Food waste at transport hub outlets: WRAP UK Food Waste 2024; British Sandwich &amp; Food to Go Association annual trade data. Hot drink preparation-to-sale ratio at transport hubs estimated from industry benchmarks; field data pending.</li>
@@ -890,7 +891,6 @@ permalink: /editorial/the-city-worker/index.html
     </ul>
   </div>
 
-{% set currentSlug = 'the-city-worker' %}{% include "series.njk" %}
 </div><!-- /article-wrap -->
 
 <!-- Modal: food waste chart expanded view -->

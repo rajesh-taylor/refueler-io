@@ -489,7 +489,8 @@ permalink: /editorial/looks-done-isnt-done/index.html
 
   </article>
 
-    <p class="notes-label">Notes</p>
+    {% set currentSlug = 'looks-done-isnt-done' %}{% include "series.njk" %}
+<p class="notes-label">Notes</p>
     <ul class="notes-list">
       <li>Status of both components reflects internal engineering tracking as of publication date. No external audit has been commissioned; this is a first-party disclosure.</li>
       <li>Flow diagrams are illustrative — architecture and failure points are accurate; labels are simplified for clarity.</li>
@@ -497,7 +498,6 @@ permalink: /editorial/looks-done-isnt-done/index.html
     </ul>
   </div>
 
-{% set currentSlug = 'looks-done-isnt-done' %}{% include "series.njk" %}
 </div><!-- /aw -->
 
 <!-- ── MODAL 1: HMAC full context ── -->

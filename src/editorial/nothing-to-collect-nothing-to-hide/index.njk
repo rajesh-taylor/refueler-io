@@ -1478,7 +1478,8 @@ permalink: /editorial/nothing-to-collect-nothing-to-hide/index.html
 
   </article>
 
-  <div class="sources">
+  {% set currentSlug = 'nothing-to-collect-nothing-to-hide' %}{% include "series.njk" %}
+<div class="sources">
     <p class="sources-label">Sources</p>
     <ul class="sources-list">
       <li>URM Consulting — Analysis of ICO enforcement action 2025: urmconsulting.com</li>
@@ -1490,7 +1491,6 @@ permalink: /editorial/nothing-to-collect-nothing-to-hide/index.html
     </ul>
   </div>
 
-{% set currentSlug = 'nothing-to-collect-nothing-to-hide' %}{% include "series.njk" %}
 </div><!-- /article-wrap -->
 
 {% include "footer.njk" %}
