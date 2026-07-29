@@ -2,9 +2,6 @@ name = "refueler-io"
 compatibility_date = "2026-05-20"
 pages_build_output_dir = "_site"
 
-[build]
-command = "npx @11ty/eleventy"
-
 [[analytics_engine_datasets]]
 binding = "ANALYTICS"
 dataset = "refueler_pageviews"
