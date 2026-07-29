@@ -1481,32 +1481,6 @@ permalink: /editorial/the-float/index.html
 {% include "footer.njk" %}
 
 <script>
-  /* THEME FIX — rfTheme localStorage persistence */
-  const THEME_KEY = 'rfTheme';
-
-  function applyTheme(theme) {
-    const root = document.documentElement;
-    const pill = document.getElementById('themePill') || document.getElementById('theme-btn');
-    if (theme === 'carbon') {
-      root.classList.add('carbon-mode');
-      root.setAttribute('data-theme', 'carbon');
-      if (pill) pill.textContent = 'Carbon / Paper';
-    } else {
-      root.classList.remove('carbon-mode');
-      root.removeAttribute('data-theme');
-      if (pill) pill.textContent = 'Paper / Carbon';
-    }
-  }
-
-  function toggleTheme() {
-    const current = localStorage.getItem(THEME_KEY) || 'paper';
-    const next = current === 'paper' ? 'carbon' : 'paper';
-    localStorage.setItem(THEME_KEY, next);
-    applyTheme(next);
-  }
-
-  (function () { applyTheme(localStorage.getItem(THEME_KEY) || 'paper'); })();
-</script>
     <!-- Modal: FCA safeguarding widget -->
     <div class="fca-modal" id="fca-modal" role="dialog" aria-modal="true" aria-label="FCA safeguarding requirements">
       <div class="fca-scrim" onclick="fcaModalClose()" aria-hidden="true"></div>

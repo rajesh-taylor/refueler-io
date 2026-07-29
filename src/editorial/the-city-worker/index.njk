@@ -946,29 +946,6 @@ permalink: /editorial/the-city-worker/index.html
 {% include "footer.njk" %}
 
 <script>
-  const THEME_KEY = 'rfTheme';
-
-  function applyTheme(theme) {
-    const root = document.documentElement;
-    const pill = document.getElementById('theme-btn');
-    if (theme === 'carbon') {
-      root.setAttribute('data-theme', 'carbon');
-      if (pill) pill.textContent = 'Carbon / Paper';
-    } else {
-      root.removeAttribute('data-theme');
-      if (pill) pill.textContent = 'Paper / Carbon';
-    }
-  }
-
-  function toggleTheme() {
-    const current = localStorage.getItem(THEME_KEY) || 'paper';
-    const next = current === 'paper' ? 'carbon' : 'paper';
-    localStorage.setItem(THEME_KEY, next);
-    applyTheme(next);
-  }
-
-  (function () { applyTheme(localStorage.getItem(THEME_KEY) || 'paper'); })();
-
   function wasteChartOpen() {
     var modal = document.getElementById('waste-modal');
     var btn = document.getElementById('waste-open-btn');
