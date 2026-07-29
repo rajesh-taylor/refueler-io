@@ -246,25 +246,6 @@ permalink: /editorial/looks-done-isnt-done/index.html
     .mo-col+.mo-col{border-left:none;border-top:1px solid var(--bd);}
   }
 
-  /* ── SERIES NAV ── */
-  .series{max-width:var(--col);margin:3.5rem 0 0;
-          padding-top:1.75rem;border-top:1px solid var(--bd);
-          transition:border-color .3s;}
-  .series-label{font-family:var(--hed);font-size:.575rem;letter-spacing:.13em;
-                text-transform:uppercase;color:var(--fg-3);margin-bottom:1rem;}
-  .series-list{list-style:none;}
-  .series-item{display:flex;gap:1rem;align-items:baseline;
-               padding:.5rem 0;border-bottom:1px solid var(--bd);
-               transition:border-color .3s;}
-  .series-item:last-child{border-bottom:none;}
-  .series-n{font-family:var(--hed);font-size:.625rem;color:var(--fg-3);
-            flex-shrink:0;width:1.5rem;}
-  .series-inner{flex:1;}
-  .series-ti{font-family:var(--hed);font-size:.8125rem;font-weight:600;
-             color:var(--fg);text-decoration:none;display:block;margin-bottom:.1rem;}
-  .series-ti:hover{color:var(--ac);}
-  .series-q{font-family:var(--hed);font-size:.6875rem;color:var(--fg-3);font-style:italic;}
-  .series-item--cur .series-ti{color:var(--ac);}
 
   /* ── NOTES / SOURCES ── */
   .notes{max-width:var(--col);margin:3rem 0 4rem;
@@ -508,42 +489,6 @@ permalink: /editorial/looks-done-isnt-done/index.html
 
   </article>
 
-  <!-- SERIES NAV -->
-  <nav class="series" aria-label="Editorial series">
-    <div class="series-label">Refueler Editorial Series</div>
-    <ul class="series-list">
-      <li class="series-item">
-        <span class="series-n">1</span>
-        <div class="series-inner">
-          <a href="/editorial/the-float.html" class="series-ti">The Float</a>
-          <div class="series-q">Why do loyalty rewards take weeks?</div>
-        </div>
-      </li>
-      <li class="series-item">
-        <span class="series-n">2</span>
-        <div class="series-inner">
-          <a href="/editorial/nothing-to-collect-nothing-to-hide.html" class="series-ti">Nothing to Collect, Nothing to Hide</a>
-          <div class="series-q">Why does a preorder app need your location at all?</div>
-        </div>
-      </li>
-      <li class="series-item">
-        <span class="series-n">3</span>
-        <div class="series-inner">
-          <a href="/editorial/the-city-worker.html" class="series-ti">The City Worker</a>
-          <div class="series-q">Who actually benefits from this?</div>
-        </div>
-      </li>
-      <li class="series-item series-item--cur">
-        <span class="series-n">4</span>
-        <div class="series-inner">
-          <a href="/editorial/looks-done-isnt-done.html" class="series-ti">Looks Done Isn't Done</a>
-          <div class="series-q">Why isn't the app available yet?</div>
-        </div>
-      </li>
-    </ul>
-  </nav>
-
-  <div class="notes">
     <p class="notes-label">Notes</p>
     <ul class="notes-list">
       <li>Status of both components reflects internal engineering tracking as of publication date. No external audit has been commissioned; this is a first-party disclosure.</li>
@@ -753,6 +698,7 @@ permalink: /editorial/looks-done-isnt-done/index.html
   </div>
 </div>
 
+{% set currentSlug = 'looks-done-isnt-done' %}{% include "series.njk" %}
 {% include "footer.njk" %}
 
 <script>
