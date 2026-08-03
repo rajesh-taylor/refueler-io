@@ -1,0 +1,53 @@
+---
+title: "Legend — Private Bitcoin Block Explorer"
+description: "Query Bitcoin addresses, transactions, and blocks without telling anyone what you're watching. No logs. No tracking. No account."
+canonical: "https://refueler.io/legend/"
+activePage: legend
+wordmarkSection: Legend
+permalink: /legend/index.html
+---
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  {% include "head.njk" %}
+  <link rel="stylesheet" href="/assets/css/legend.css" />
+</head>
+
+<body>
+
+  {% include "nav.njk" %}
+
+  <main class="legend-main" id="legend-root">
+    <!-- SPA mounts here — legend-spa.js owns everything inside this element -->
+    <div id="legend-spa-mount"></div>
+
+    <!-- Below-fold acquisition content — static, Eleventy, not touched by SPA -->
+    <section class="legend-below">
+      <div class="legend-below-inner">
+
+        <div class="legend-below-col">
+          <h2 class="legend-below-heading">What Legend does differently</h2>
+          <p class="legend-below-body">Every query to a public block explorer tells that server exactly which addresses you're watching. Mempool.space and Blockstream.info log every request by design. Legend is architected so this is structurally impossible — not a policy promise.</p>
+        </div>
+
+        <div class="legend-below-col">
+          <h2 class="legend-below-heading">Who it's for</h2>
+          <p class="legend-below-body">Anyone who holds Bitcoin and would prefer their block explorer not know about it. Individual holders, Lightning wallet users, family offices, compliance teams. The free tier is unlimited and requires no account.</p>
+        </div>
+
+        <div class="legend-below-col">
+          <h2 class="legend-below-heading">How the free tier works</h2>
+          <p class="legend-below-body">No account. No payment. No rate limit. Query as many addresses as you need. Enterprise clients get dedicated infrastructure, Tor API, and Silent Payments scanning — but the explorer itself is free and open source.</p>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  {% include "footer.njk" %}
+
+  <script src="/assets/js/legend-spa.js" defer></script>
+
+</body>
+</html>
