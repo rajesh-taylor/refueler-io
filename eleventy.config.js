@@ -1,5 +1,6 @@
 module.exports = function (eleventyConfig) {
   // Static assets — copied verbatim to _site/
+  eleventyConfig.addPassthroughCopy("src/assets");
   eleventyConfig.addPassthroughCopy("src/analytics.js");
   eleventyConfig.addPassthroughCopy("src/notes/notes.css");
   eleventyConfig.addPassthroughCopy("src/notes/notes.js");
