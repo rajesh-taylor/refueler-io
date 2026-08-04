@@ -1,15 +1,23 @@
 /* ─────────────────────────────────────────────────────────────────────────────
    notes.js — Refueler /notes/ shared scripts
-   Theme: rfTheme in localStorage, 'paper' | 'carbon'
+   Theme: rs-theme cookie scoped to .refueler.io — same as head.njk and global
    Modal: focus-trapped, Escape-dismissible, click-outside-dismissible
    ───────────────────────────────────────────────────────────────────────────── */
 
 /* ── Theme ── */
-const THEME_KEY = 'rfTheme';
+function getCookie(name) {
+  var m = document.cookie.match('(?:^|; )' + name + '=([^;]*)');
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
+function setCookie(name, value) {
+  var expires = new Date(Date.now() + 30 * 864e5).toUTCString();
+  document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/; domain=.refueler.io; SameSite=Lax';
+}
 
 function applyTheme(theme) {
-  const root = document.documentElement;
-  const pill = document.getElementById('theme-btn');
+  var root = document.documentElement;
+  var pill = document.getElementById('theme-btn');
   if (theme === 'carbon') {
     root.setAttribute('data-theme', 'carbon');
     if (pill) pill.textContent = 'Carbon / Paper';
@@ -20,23 +28,27 @@ function applyTheme(theme) {
 }
 
 function toggleTheme() {
-  const next = (localStorage.getItem(THEME_KEY) || 'paper') === 'paper' ? 'carbon' : 'paper';
-  localStorage.setItem(THEME_KEY, next);
+  var current = getCookie('rs-theme') || 'paper';
+  var next = current === 'paper' ? 'carbon' : 'paper';
+  setCookie('rs-theme', next);
   applyTheme(next);
 }
 
-(function () { applyTheme(localStorage.getItem(THEME_KEY) || 'paper'); })();
+/* head.njk already applied the theme before first paint.
+   notes.js re-reads the same cookie and re-applies — no conflict,
+   no localStorage read, no overwrite of head.njk's work. */
+(function () { applyTheme(getCookie('rs-theme') || 'paper'); }());
 
 /* ── Modal ── */
 (function () {
-  const FOCUSABLE = 'a[href], button:not([disabled]), input, textarea, select, [tabindex]:not([tabindex="-1"])';
-  let previousFocus = null;
+  var FOCUSABLE = 'a[href], button:not([disabled]), input, textarea, select, [tabindex]:not([tabindex="-1"])';
+  var previousFocus = null;
 
   function trapFocus(modal) {
-    const focusable = Array.from(modal.querySelectorAll(FOCUSABLE));
+    var focusable = Array.from(modal.querySelectorAll(FOCUSABLE));
     if (!focusable.length) return;
-    const first = focusable[0];
-    const last  = focusable[focusable.length - 1];
+    var first = focusable[0];
+    var last  = focusable[focusable.length - 1];
     modal.addEventListener('keydown', function trap(e) {
       if (e.key !== 'Tab') return;
       if (e.shiftKey) {
@@ -48,22 +60,22 @@ function toggleTheme() {
   }
 
   window.openModal = function (id) {
-    const overlay = document.getElementById(id);
+    var overlay = document.getElementById(id);
     if (!overlay) return;
     previousFocus = document.activeElement;
     overlay.classList.add('open');
     overlay.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
-    const box = overlay.querySelector('.modal-box');
+    var box = overlay.querySelector('.modal-box');
     if (box) {
       trapFocus(box);
-      const firstFocusable = box.querySelector(FOCUSABLE);
+      var firstFocusable = box.querySelector(FOCUSABLE);
       if (firstFocusable) firstFocusable.focus();
     }
   };
 
   window.closeModal = function (id) {
-    const overlay = document.getElementById(id);
+    var overlay = document.getElementById(id);
     if (!overlay) return;
     overlay.classList.remove('open');
     overlay.setAttribute('aria-hidden', 'true');
@@ -85,4 +97,4 @@ function toggleTheme() {
       closeModal(overlay.id);
     });
   });
-})();
+}());
