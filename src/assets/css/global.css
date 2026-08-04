@@ -1,0 +1,196 @@
+/* ─── global.css ─────────────────────────────────────────────────────────────
+   Shared across all refueler.io pages.
+   Token reference: REFUELER-BRIDGE.md § Design system
+   Theme detection: document.documentElement.dataset.theme === 'carbon'
+   Theme persistence: cookie rs-theme scoped to .refueler.io
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* ─── Brand tokens — Paper default ──────────────────────────────────────── */
+:root {
+  --carbon:  #1A1A1A;
+  --paper:   #F5F0E8;
+
+  --bg:             var(--paper);
+  --fg:             var(--carbon);
+  --fg-muted:       #5A5550;
+  --fg-subtle:      #9A9590;
+  --border:         rgba(26,26,26,0.12);
+  --nav-bg:         rgba(245,240,232,0.88);
+  --input-bg:       #FFFFFF;
+  --input-border:   rgba(26,26,26,0.18);
+  --divider-color:  rgba(26,26,26,0.14);
+  --metric-block-bg: rgba(26,26,26,0.04);
+  --submit-bg:      var(--carbon);
+  --submit-fg:      var(--paper);
+
+  /* REFUELER-BRIDGE canonical surface tokens */
+  --surface:        #EDEAE4;
+  --surface-raised: #E4E1DA;
+  --text-primary:   #3D3A36;
+  --text-secondary: #5A5751;
+  --text-tertiary:  #9A948D;
+  --accent:         #C8A96E;
+  --accent-hover:   #E0C48A;
+  --accent-action:  #D4690A;
+
+  /* Structural */
+  --radius-card:    10px;
+  --radius-btn:     8px;
+  --radius-modal:   12px;
+  --border-weight:  0.5px;
+  --theme-transition: 0.35s;
+}
+
+/* ─── Carbon override ────────────────────────────────────────────────────── */
+[data-theme="carbon"] {
+  --bg:             var(--carbon);
+  --fg:             var(--paper);
+  --fg-muted:       #B0AAA2;
+  --fg-subtle:      #6A6560;
+  --border:         rgba(245,240,232,0.10);
+  --nav-bg:         rgba(26,26,26,0.90);
+  --input-bg:       #252525;
+  --input-border:   rgba(245,240,232,0.18);
+  --divider-color:  rgba(245,240,232,0.14);
+  --metric-block-bg: rgba(245,240,232,0.04);
+  --submit-bg:      var(--paper);
+  --submit-fg:      var(--carbon);
+
+  /* REFUELER-BRIDGE canonical surface tokens */
+  --surface:        #26282C;
+  --surface-raised: #2E3035;
+  --text-primary:   #E4E2DC;
+  --text-secondary: #8A8680;
+  --text-tertiary:  #5A5751;
+  --accent:         #C8A96E;
+  --accent-hover:   #E0C48A;
+  --accent-action:  #F5820A;
+}
+
+/* ─── Reset ──────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  background-color: var(--bg);
+  color: var(--fg);
+  min-height: 100vh;
+  transition: background-color var(--theme-transition) ease, color 0.25s ease;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Nav ────────────────────────────────────────────────────────────────── */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--nav-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: var(--border-weight) solid var(--border);
+  padding: 0 clamp(1.25rem, 4vw, 3rem);
+  transition: background var(--theme-transition) ease, border-color 0.25s ease;
+}
+.header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.wordmark {
+  font-family: 'Satoshi', 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.875rem;
+  letter-spacing: 0.06em;
+  color: var(--fg);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.wordmark-divider {
+  font-weight: 300;
+  opacity: 0.3;
+  margin: 0 0.5rem;
+}
+.wordmark-section {
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  opacity: 0.55;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+.site-nav a {
+  font-family: 'Satoshi', 'DM Sans', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.site-nav a:hover { color: var(--fg); }
+.site-nav a.active { color: var(--fg); }
+
+.theme-pill {
+  font-family: 'Satoshi', 'DM Sans', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: var(--border-weight) solid var(--border);
+  border-radius: 100px;
+  padding: 0.35rem 0.85rem;
+  background: transparent;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+  white-space: nowrap;
+  user-select: none;
+}
+.theme-pill:hover {
+  border-color: var(--fg-muted);
+  color: var(--fg);
+}
+
+/* ─── Footer ─────────────────────────────────────────────────────────────── */
+.site-footer {
+  border-top: var(--border-weight) solid var(--border);
+  padding: 2rem clamp(1.25rem, 4vw, 3rem);
+  transition: border-color 0.25s;
+}
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.footer-note,
+.footer-links a {
+  font-family: 'Satoshi', 'DM Sans', sans-serif;
+  font-size: 0.6375rem;
+  letter-spacing: 0.06em;
+  color: var(--fg-subtle);
+  text-decoration: none;
+}
+.footer-links {
+  display: flex;
+  gap: 1.5rem;
+}
+.footer-links a:hover { color: var(--fg-muted); }
+
+/* ─── Responsive nav ─────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .site-header { padding: 0 24px; }
+  .site-nav a:not(.active):not(button) { display: none; }
+}

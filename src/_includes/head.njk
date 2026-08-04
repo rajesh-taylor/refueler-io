@@ -24,29 +24,42 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" />
 
+<!-- Global styles: tokens, reset, nav, footer -->
+<link rel="stylesheet" href="/assets/css/global.css" />
+
 {{ extraHead | safe }}
 
-<!-- Theme: applied before first paint — Paper default on public site -->
+<!-- Theme: applied before first paint.
+     Detection: document.documentElement.dataset.theme === 'carbon'
+     Persistence: cookie rs-theme scoped to .refueler.io (30-day rolling)
+     Paper is default on public site. Carbon is user toggle only. -->
 <script>
-  const THEME_KEY = 'rfTheme';
-  function applyTheme(theme) {
-    const root = document.documentElement;
-    const pill = document.getElementById('themePill');
-    if (theme === 'carbon') {
-      root.classList.add('carbon-mode');
-      root.setAttribute('data-theme', 'carbon');
-      if (pill) pill.textContent = 'Carbon / Paper';
-    } else {
-      root.classList.remove('carbon-mode');
-      root.removeAttribute('data-theme');
-      if (pill) pill.textContent = 'Paper / Carbon';
+  (function () {
+    function getCookie(name) {
+      var m = document.cookie.match('(?:^|; )' + name + '=([^;]*)');
+      return m ? decodeURIComponent(m[1]) : null;
     }
-  }
-  function toggleTheme() {
-    const current = localStorage.getItem(THEME_KEY) || 'paper';
-    const next = current === 'paper' ? 'carbon' : 'paper';
-    localStorage.setItem(THEME_KEY, next);
-    applyTheme(next);
-  }
-  (function () { applyTheme(localStorage.getItem(THEME_KEY) || 'paper'); })();
+    function setCookie(name, value) {
+      var expires = new Date(Date.now() + 30 * 864e5).toUTCString();
+      document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/; domain=.refueler.io; SameSite=Lax';
+    }
+    function applyTheme(theme) {
+      var root = document.documentElement;
+      var pill = document.getElementById('themePill');
+      if (theme === 'carbon') {
+        root.dataset.theme = 'carbon';
+        if (pill) pill.textContent = 'Carbon / Paper';
+      } else {
+        delete root.dataset.theme;
+        if (pill) pill.textContent = 'Paper / Carbon';
+      }
+    }
+    window.toggleTheme = function () {
+      var current = getCookie('rs-theme') || 'paper';
+      var next = current === 'paper' ? 'carbon' : 'paper';
+      setCookie('rs-theme', next);
+      applyTheme(next);
+    };
+    applyTheme(getCookie('rs-theme') || 'paper');
+  }());
 </script>
