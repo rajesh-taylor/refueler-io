@@ -1,0 +1,110 @@
+/* ─── editorial.css ───────────────────────────────────────────────────────────
+   Editorial index page layout.
+   Tokens, reset, nav, footer: global.css (via head.njk).
+   ─────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --font-serif:   'Source Serif 4', Georgia, serif;
+  --max-w:        1200px;
+  --gutter:       clamp(1.25rem, 4vw, 3rem);
+}
+
+/* ── Index layout ─────────────────────────────────────────────────────────── */
+.index-wrap {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.index-header {
+  padding: 80px 0 64px;
+  border-bottom: var(--border-weight) solid var(--border);
+  max-width: 640px;
+}
+
+.index-eyebrow {
+  font-family: 'Satoshi', 'DM Sans', sans-serif;
+  font-size: 0.6375rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-subtle);
+  margin-bottom: 1.25rem;
+}
+
+.index-title {
+  font-family: 'Satoshi', 'DM Sans', sans-serif;
+  font-size: clamp(2rem, 4.5vw, 3.25rem);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  color: var(--fg);
+  margin-bottom: 1.25rem;
+}
+
+.index-standfirst {
+  font-family: var(--font-serif);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--fg-muted);
+  font-weight: 300;
+}
+
+/* ── Article list ─────────────────────────────────────────────────────────── */
+.article-list { padding: 0 0 80px; }
+
+.article-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2rem;
+  align-items: start;
+  padding: 2.5rem 0;
+  border-bottom: var(--border-weight) solid var(--border);
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.2s;
+}
+.article-row:hover { opacity: 0.75; }
+.article-row:first-child { border-top: none; }
+
+.row-eyebrow {
+  font-family: 'Satoshi', 'DM Sans', sans-serif;
+  font-size: 0.6375rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-subtle);
+  margin-bottom: 0.625rem;
+}
+
+.row-title {
+  font-family: 'Satoshi', 'DM Sans', sans-serif;
+  font-size: clamp(1.0625rem, 2vw, 1.25rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--fg);
+  line-height: 1.2;
+  margin-bottom: 0.625rem;
+}
+
+.row-standfirst {
+  font-family: var(--font-serif);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--fg-muted);
+  max-width: 56ch;
+  font-weight: 300;
+}
+
+.row-meta {
+  font-family: 'Satoshi', 'DM Sans', sans-serif;
+  font-size: 0.6375rem;
+  letter-spacing: 0.06em;
+  color: var(--fg-subtle);
+  white-space: nowrap;
+  padding-top: 0.25rem;
+}
+
+@media (max-width: 640px) {
+  .article-row { grid-template-columns: 1fr; gap: 0.5rem; }
+}

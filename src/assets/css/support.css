@@ -1,0 +1,163 @@
+/* ─── support.css ─────────────────────────────────────────────────────────────
+   Support page layout.
+   Tokens, reset, nav, footer: global.css (via head.njk).
+   ─────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --font-serif:    'Source Serif 4', Georgia, serif;
+  --max-w:         1200px;
+  --content-w:     960px;
+  --gutter:        clamp(1.25rem, 4vw, 3rem);
+  --inset-rule:    var(--border);
+}
+
+[data-theme="carbon"] {
+  --inset-rule:    #C8A96E;
+}
+
+/* ── Body link style ──────────────────────────────────────────────────────── */
+a {
+  color: var(--fg);
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 2px;
+  transition: text-decoration-color 0.2s, color var(--theme-transition);
+}
+a:hover { text-decoration-color: var(--fg-muted); }
+
+/* ── Page wrap ────────────────────────────────────────────────────────────── */
+.page-wrap {
+  max-width: var(--content-w);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+/* ── Hero ─────────────────────────────────────────────────────────────────── */
+.hero { padding: 80px 0 64px; }
+
+.hero-headline {
+  font-family: 'Satoshi', 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  line-height: 1.15;
+  margin-bottom: 20px;
+}
+.hero-sub {
+  font-family: var(--font-serif);
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: var(--fg-muted);
+  max-width: 520px;
+  margin-bottom: 24px;
+}
+.hero-cta {
+  font-family: 'Satoshi', 'DM Sans', sans-serif;
+  font-weight: 500;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  color: var(--fg-muted);
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 2px;
+}
+.hero-cta:hover { color: var(--fg); }
+
+/* ── Inset card ───────────────────────────────────────────────────────────── */
+.inset-card {
+  background: var(--surface);
+  border-left: 2px solid var(--inset-rule);
+  border-radius: 0 4px 4px 0;
+  padding: 40px 48px;
+  max-width: 680px;
+  margin: 0 auto;
+  transition: background var(--theme-transition), border-color var(--theme-transition);
+}
+
+.intro-section { padding: 0 0 72px; }
+
+.intro-text {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  color: var(--fg);
+  line-height: 1.7;
+}
+
+/* ── Panel (two-col layout) ───────────────────────────────────────────────── */
+.panel {
+  border-top: var(--border-weight) solid var(--border);
+  padding: 56px 0;
+  display: grid;
+  grid-template-columns: 28% 1fr;
+  gap: 40px;
+  transition: border-color var(--theme-transition);
+}
+.panel-label {
+  font-family: 'Satoshi', 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--fg-subtle);
+  padding-top: 4px;
+}
+.panel-body p {
+  font-family: var(--font-serif);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: var(--fg);
+  margin-bottom: 24px;
+}
+.panel-body p:last-child { margin-bottom: 0; }
+.panel-body p strong {
+  font-family: 'Satoshi', 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* ── Raise section ────────────────────────────────────────────────────────── */
+.raise-section {
+  padding: 72px 0;
+  border-top: var(--border-weight) solid var(--border);
+  transition: border-color var(--theme-transition);
+}
+.raise-heading {
+  font-family: 'Satoshi', 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--fg-subtle);
+  margin-bottom: 32px;
+  text-align: center;
+}
+.raise-items { display: flex; flex-direction: column; gap: 16px; }
+.raise-item {
+  font-family: var(--font-serif);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: var(--fg);
+}
+
+/* ── Contact sub-copy ─────────────────────────────────────────────────────── */
+.contact-sub {
+  font-family: var(--font-serif);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: var(--fg-muted);
+  margin-top: 12px;
+  margin-bottom: 20px;
+}
+.contact-rights {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.8125rem;
+  color: var(--fg-subtle);
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 640px) {
+  .panel { grid-template-columns: 1fr; gap: 20px; }
+  .inset-card { padding: 28px 28px 28px 26px; }
+  .hero { padding: 56px 0 48px; }
+}

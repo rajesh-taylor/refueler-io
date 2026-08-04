@@ -1,75 +1,32 @@
-/* ─── Legend — design tokens ────────────────────────────────────────────────
-   All colour tokens inherited from the page-level :root defined in index.njk
-   (the main site). This file handles Legend-specific layout and SPA chrome only.
-   Token reference: REFUELER-BRIDGE.md § Design system
+/* ─── legend.css ──────────────────────────────────────────────────────────────
+   Legend-specific layout only.
+   All colour tokens, reset, nav, and footer come from global.css (via head.njk).
    Theme detection: document.documentElement.dataset.theme === 'carbon'
-   Never: classList.contains('carbon-mode')
-   ───────────────────────────────────────────────────────────────────────── */
+   Never: classList.contains / html.carbon-mode
+   ─────────────────────────────────────────────────────────────────────────── */
 
-/* ─── Legend token layer ────────────────────────────────────────────────── */
-/* Paper defaults */
+/* ─── Font aliases (Legend-specific usage) ───────────────────────────────── */
 :root {
-  --bg:             #F7F4EF;
-  --surface:        #EDEAE4;
-  --surface-raised: #E4E1DA;
-  --text-primary:   #3D3A36;
-  --text-secondary: #5A5751;
-  --text-tertiary:  #9A948D;
-  --border:         #D6D1C8;
-  --border-mid:     #B8B2A8;
-  --accent:         #C8A96E;
-  --accent-hover:   #E0C48A;
-  --accent-action:  #D4690A;
-  --inset-rule:     #D6D1C8;
-  --font-heading:   'Satoshi', 'DM Sans', sans-serif;
-  --font-sans:      'DM Sans', sans-serif;
-  --font-mono:      'IBM Plex Mono', monospace;
+  --font-heading: 'Satoshi', 'DM Sans', sans-serif;
+  --font-sans:    'DM Sans', sans-serif;
+  --font-mono:    'IBM Plex Mono', monospace;
+  --border-mid:   #B8B2A8;
+  --inset-rule:   var(--border);
 }
 
-/* Carbon override — dataset.theme === 'carbon' only */
-html[data-theme="carbon"] {
-  --bg:             #1E1F22;
-  --surface:        #26282C;
-  --surface-raised: #2E3035;
-  --text-primary:   #E4E2DC;
-  --text-secondary: #8A8680;
-  --text-tertiary:  #5A5751;
-  --border:         #35373B;
-  --border-mid:     #4A4D52;
-  --accent:         #C8A96E;
-  --accent-hover:   #E0C48A;
-  --accent-action:  #F5820A;
-  --inset-rule:     #C8A96E;
+[data-theme="carbon"] {
+  --border-mid:  #4A4D52;
+  --inset-rule:  #C8A96E;
 }
 
-/* ─── Base ──────────────────────────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-html, body {
-  font-family: var(--font-sans);
-  font-weight: 300;
-  background-color: var(--bg);
-  color: var(--text-primary);
-  min-height: 100vh;
-  transition: background-color 0.35s, color 0.35s;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* ─── Nav overrides for Legend ──────────────────────────────────────────── */
-/* Wordmark shows Refueler / Legend — override wordmark-section opacity */
-.wordmark-section {
-  opacity: 0.55;
-  letter-spacing: 0.08em;
-}
-
-/* ─── Legend main layout ────────────────────────────────────────────────── */
+/* ─── Legend main layout ─────────────────────────────────────────────────── */
 .legend-main {
   min-height: calc(100vh - 56px);
   display: flex;
   flex-direction: column;
 }
 
-/* ─── SPA mount point ───────────────────────────────────────────────────── */
+/* ─── SPA mount point ────────────────────────────────────────────────────── */
 #legend-spa-mount {
   width: 100%;
   max-width: 860px;
@@ -78,18 +35,18 @@ html, body {
   flex: 1;
 }
 
-/* ─── SPA chrome — wordmark ─────────────────────────────────────────────── */
+/* ─── SPA chrome — wordmark ──────────────────────────────────────────────── */
 .legend-wordmark {
   font-family: var(--font-heading);
   font-weight: 700;
   font-size: 1.75rem;
-  color: var(--text-primary);
+  color: var(--fg);
   letter-spacing: -0.02em;
   margin-bottom: 2.5rem;
   display: block;
 }
 
-/* ─── SPA chrome — query input ──────────────────────────────────────────── */
+/* ─── SPA chrome — query input ───────────────────────────────────────────── */
 .legend-input-wrap {
   position: relative;
   width: 100%;
@@ -105,23 +62,23 @@ html, body {
   font-family: var(--font-mono);
   font-size: 0.875rem;
   font-weight: 400;
-  color: var(--text-primary);
+  color: var(--fg);
   outline: none;
-  transition: border-color 0.2s, background 0.35s;
+  transition: border-color 0.2s, background var(--theme-transition);
   -webkit-font-smoothing: antialiased;
 }
 
 .legend-input::placeholder {
   font-family: var(--font-sans);
   font-weight: 300;
-  color: var(--text-tertiary);
+  color: var(--fg-subtle);
 }
 
 .legend-input:focus {
   border-color: var(--border-mid);
 }
 
-/* Batch icon — hidden by default, shown on input focus via JS */
+/* Batch icon */
 .legend-batch-btn {
   position: absolute;
   right: 0.875rem;
@@ -145,11 +102,8 @@ html, body {
   pointer-events: auto;
 }
 
-.legend-batch-btn:hover {
-  color: var(--accent-hover);
-}
+.legend-batch-btn:hover { color: var(--accent-hover); }
 
-/* Batch icon SVG */
 .legend-batch-btn svg {
   width: 16px;
   height: 16px;
@@ -160,22 +114,20 @@ html, body {
   stroke-linejoin: round;
 }
 
-/* ─── Input tagline ─────────────────────────────────────────────────────── */
+/* ─── Input tagline ──────────────────────────────────────────────────────── */
 .legend-tagline {
   font-family: var(--font-sans);
   font-size: 0.6875rem;
   font-weight: 400;
-  color: var(--text-tertiary);
+  color: var(--fg-subtle);
   letter-spacing: 0.02em;
   padding-left: 0.125rem;
 }
 
-/* ─── Result area — placeholder for Multi-8 ────────────────────────────── */
-#legend-result {
-  margin-top: 2.5rem;
-}
+/* ─── Result area ────────────────────────────────────────────────────────── */
+#legend-result { margin-top: 2.5rem; }
 
-/* ─── Credential status icon ────────────────────────────────────────────── */
+/* ─── Credential status icon ─────────────────────────────────────────────── */
 .legend-cred-icon {
   position: absolute;
   top: clamp(3rem, 6vw, 5rem);
@@ -185,7 +137,7 @@ html, body {
   border-radius: 50%;
   background: var(--accent);
   cursor: pointer;
-  transition: background 0.35s;
+  transition: background var(--theme-transition);
   border: none;
   padding: 0;
 }
@@ -195,12 +147,12 @@ html, body {
   outline-offset: 3px;
 }
 
-/* ─── Below-fold acquisition content ────────────────────────────────────── */
+/* ─── Below-fold acquisition content ─────────────────────────────────────── */
 .legend-below {
   border-top: 0.5px solid var(--border);
   margin-top: 5rem;
   padding: 4rem clamp(1.25rem, 4vw, 2rem);
-  transition: border-color 0.35s;
+  transition: border-color var(--theme-transition);
 }
 
 .legend-below-inner {
@@ -217,7 +169,7 @@ html, body {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--text-primary);
+  color: var(--fg);
   margin-bottom: 0.875rem;
 }
 
@@ -226,48 +178,19 @@ html, body {
   font-size: 0.875rem;
   font-weight: 300;
   line-height: 1.7;
-  color: var(--text-secondary);
-}
-
-/* ─── Nav and footer token sync ─────────────────────────────────────────── */
-/* The main site nav uses --fg / --fg-muted / --fg-subtle / --nav-bg which
-   are defined in the main index.njk :root. We restate them here so the
-   Legend page has its own full token set without depending on the app page. */
-:root {
-  --fg:        var(--text-primary);
-  --fg-muted:  var(--text-secondary);
-  --fg-subtle: var(--text-tertiary);
-  --nav-bg:    rgba(247, 244, 239, 0.88);
-}
-
-html[data-theme="carbon"] {
-  --fg:        #E4E2DC;
-  --fg-muted:  #8A8680;
-  --fg-subtle: #5A5751;
-  --nav-bg:    rgba(30, 31, 34, 0.90);
+  color: var(--fg-muted);
 }
 
 /* ─── Responsive ─────────────────────────────────────────────────────────── */
 @media (max-width: 860px) {
-  .legend-below-inner {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
+  .legend-below-inner { grid-template-columns: 1fr; gap: 2rem; }
 }
 
 @media (max-width: 600px) {
-  #legend-spa-mount {
-    padding-top: 2.5rem;
-  }
-  .legend-wordmark {
-    font-size: 1.375rem;
-    margin-bottom: 1.75rem;
-  }
+  #legend-spa-mount { padding-top: 2.5rem; }
+  .legend-wordmark { font-size: 1.375rem; margin-bottom: 1.75rem; }
 }
 
-/* ─── Reduced motion ─────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    transition-duration: 0.01ms !important;
-  }
+  *, *::before, *::after { transition-duration: 0.01ms !important; }
 }
