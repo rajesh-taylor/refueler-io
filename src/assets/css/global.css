@@ -15,7 +15,7 @@
   --fg-muted:       #5A5550;
   --fg-subtle:      #9A9590;
   --border:         rgba(26,26,26,0.12);
-  --nav-bg:         rgba(245,240,232,0.88);
+  --nav-bg:         #F5F0E8;
   --input-bg:       #FFFFFF;
   --input-border:   rgba(26,26,26,0.18);
   --divider-color:  rgba(26,26,26,0.14);
@@ -48,7 +48,7 @@
   --fg-muted:       #B0AAA2;
   --fg-subtle:      #6A6560;
   --border:         rgba(245,240,232,0.10);
-  --nav-bg:         rgba(26,26,26,0.90);
+  --nav-bg:         #1A1A1A;
   --input-bg:       #252525;
   --input-border:   rgba(245,240,232,0.18);
   --divider-color:  rgba(245,240,232,0.14);
@@ -86,8 +86,6 @@ html, body {
   top: 0;
   z-index: 100;
   background: var(--nav-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border-bottom: var(--border-weight) solid var(--border);
   padding: 0 clamp(1.25rem, 4vw, 3rem);
   transition: background var(--theme-transition) ease, border-color 0.25s ease;

@@ -135,7 +135,7 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--accent);
+  background: #1E8A4A;
   cursor: pointer;
   transition: background var(--theme-transition);
   border: none;

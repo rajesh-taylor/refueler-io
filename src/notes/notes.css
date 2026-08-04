@@ -201,13 +201,22 @@ body {
 
 .note-card {
   display: block;
-  background: var(--surface);
+  background: var(--surface);       /* Paper: subtle tint — correct */
   border: 0.5px solid var(--border);
   border-radius: var(--radius-card);
   padding: 2rem;
   text-decoration: none;
   color: inherit;
   transition: border-color 0.2s, background 0.2s;
+}
+
+/* Carbon: border-only — transparent background matches Editorial treatment */
+[data-theme="carbon"] .note-card {
+  background: transparent;
+}
+[data-theme="carbon"] .note-card:hover {
+  background: transparent;
+  border-color: var(--border-mid);
 }
 .note-card:hover {
   border-color: var(--border-mid);
