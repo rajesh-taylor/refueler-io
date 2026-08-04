@@ -27,9 +27,9 @@
 
 .subhead {
   font-family: 'DM Sans', sans-serif;
-  font-size: clamp(18px, 2vw, 24px);
+  font-size: clamp(22px, 2.5vw, 32px);
   font-weight: 300;
-  line-height: 1.5;
+  line-height: 1.45;
   color: var(--fg);
   letter-spacing: -0.01em;
 }
@@ -58,21 +58,21 @@
 
 .cap-label {
   font-family: 'Satoshi', 'DM Sans', sans-serif;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--fg-subtle);
-  margin-bottom: 14px;
+  color: var(--fg-muted);
+  margin-bottom: 16px;
   display: block;
 }
 
 .cap-descriptor {
   font-family: 'DM Sans', sans-serif;
-  font-size: 17px;
+  font-size: 20px;
   font-weight: 400;
-  line-height: 1.6;
-  color: var(--fg-muted);
+  line-height: 1.5;
+  color: var(--fg);
 }
 
 /* ─── Responsive ──────────────────────────────────────────────────── */
