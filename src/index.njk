@@ -1,494 +1,55 @@
 ---
-title: "Refueler — Order ahead. Skip the queue."
-description: "Refueler lets commuters on the Fenchurch Street line pre-order food and drinks so their order is ready the moment they arrive. Earn Bitcoin sats on every purchase."
+title: "Refueler — Your transaction is nobody else's business."
+description: "Fiat or Bitcoin — privacy included. Encrypted transfer, private chain queries, and Lightning payments."
 canonical: "https://refueler.io/"
-activePage: app
-extraHead: '<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>'
 permalink: /index.html
 ---
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
   {% include "head.njk" %}
-  <style>
-    /* ─── Brand tokens ─────────────────────────────────────────────── */
-    :root {
-      --carbon:  #1A1A1A;
-      --paper:   #F5F0E8;
-
-      /* Paper-mode tokens */
-      --bg:             var(--paper);
-      --fg:             var(--carbon);
-      --fg-muted:       #5A5550;
-      --fg-subtle:      #9A9590;
-      --border:         rgba(26,26,26,0.12);
-      --nav-bg:         rgba(245,240,232,0.88);
-      --input-bg:       #FFFFFF;
-      --input-border:   rgba(26,26,26,0.18);
-      --divider-color:  rgba(26,26,26,0.14);
-      --metric-block-bg: rgba(26,26,26,0.04);
-      --submit-bg:      var(--carbon);
-      --submit-fg:      var(--paper);
-    }
-
-    /* Carbon override */
-    html.carbon-mode {
-      --bg:             var(--carbon);
-      --fg:             var(--paper);
-      --fg-muted:       #B0AAA2;
-      --fg-subtle:      #6A6560;
-      --border:         rgba(245,240,232,0.10);
-      --nav-bg:         rgba(26,26,26,0.90);
-      --input-bg:       #252525;
-      --input-border:   rgba(245,240,232,0.18);
-      --divider-color:  rgba(245,240,232,0.14);
-      --metric-block-bg: rgba(245,240,232,0.04);
-      --submit-bg:      var(--paper);
-      --submit-fg:      var(--carbon);
-    }
-
-    /* ─── Reset ─────────────────────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html, body {
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 300;
-      background-color: var(--bg);
-      color: var(--fg);
-      min-height: 100vh;
-      transition: background-color 0.35s ease, color 0.25s ease;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* ─── Nav — canonical spec ───────────────────────────────────────── */
-    .site-header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: var(--nav-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border);
-      padding: 0 clamp(1.25rem, 4vw, 3rem);
-      transition: background 0.35s ease, border-color 0.25s ease;
-    }
-    .header-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .wordmark {
-      font-family: 'Satoshi', 'DM Sans', sans-serif;
-      font-weight: 600;
-      font-size: 0.875rem;
-      letter-spacing: 0.06em;
-      color: var(--fg);
-      text-decoration: none;
-      white-space: nowrap;
-      text-transform: none;
-    }
-    .wordmark-divider {
-      font-weight: 300;
-      opacity: 0.3;
-      margin: 0 0.5rem;
-    }
-    .wordmark-section {
-      font-weight: 400;
-      letter-spacing: 0.08em;
-      opacity: 0.55;
-      text-transform: none;
-    }
-
-    .site-nav {
-      display: flex;
-      align-items: center;
-      gap: 2rem;
-    }
-    .site-nav a {
-      font-family: 'Satoshi', 'DM Sans', sans-serif;
-      font-size: 0.7rem;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--fg-muted);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-    .site-nav a:hover { color: var(--fg); }
-    .site-nav a.active { color: var(--fg); }
-
-    .theme-pill {
-      font-family: 'Satoshi', 'DM Sans', sans-serif;
-      font-size: 0.65rem;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      padding: 0.35rem 0.85rem;
-      background: transparent;
-      color: var(--fg-muted);
-      cursor: pointer;
-      transition: border-color 0.2s, color 0.2s;
-      white-space: nowrap;
-      user-select: none;
-    }
-    .theme-pill:hover {
-      border-color: var(--fg-muted);
-      color: var(--fg);
-    }
-
-    /* ─── Hero layout ────────────────────────────────────────────────── */
-    .hero {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      min-height: calc(100vh - 56px);
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 clamp(1.25rem, 4vw, 3rem);
-      gap: 64px;
-      align-items: center;
-    }
-
-    .hero-left {
-      padding: 80px 0;
-    }
-
-    .headline {
-      font-size: clamp(44px, 5.5vw, 72px);
-      font-weight: 300;
-      line-height: 1.08;
-      letter-spacing: -0.02em;
-      color: var(--fg);
-      margin-bottom: 24px;
-    }
-    .headline em {
-      font-style: normal;
-      font-weight: 300;
-      color: var(--fg);
-    }
-
-    .subhead {
-      font-size: 18px;
-      font-weight: 300;
-      line-height: 1.65;
-      color: var(--fg-muted);
-      max-width: 420px;
-      margin-bottom: 40px;
-    }
-
-    .metric-block {
-      margin-top: 64px;
-      padding-top: 32px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      align-items: flex-start;
-      gap: 40px;
-    }
-
-    .metric-item {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .metric-figure {
-      font-size: 36px;
-      font-weight: 300;
-      letter-spacing: -0.03em;
-      color: var(--fg);
-      line-height: 1;
-    }
-    .metric-label {
-      font-size: 12px;
-      font-weight: 400;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--fg-subtle);
-      max-width: 160px;
-      line-height: 1.5;
-    }
-
-    .hero-right {
-      display: flex;
-      flex-direction: column;
-      gap: 32px;
-      padding: 80px 0;
-    }
-
-    .signin-panel {
-      background: var(--metric-block-bg);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 36px;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      transition: background 0.35s ease, border-color 0.25s ease;
-    }
-
-    .signin-label {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--fg-subtle);
-      margin-bottom: 20px;
-    }
-
-    .signin-headline {
-      font-size: 22px;
-      font-weight: 300;
-      line-height: 1.3;
-      color: var(--fg);
-      margin-bottom: 28px;
-      letter-spacing: -0.01em;
-    }
-
-    .magic-form {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
-    .magic-form input[type="email"] {
-      width: 100%;
-      padding: 13px 16px;
-      background: var(--input-bg);
-      border: 1px solid var(--input-border);
-      border-radius: 2px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 15px;
-      font-weight: 300;
-      color: var(--fg);
-      outline: none;
-      transition: border-color 0.15s ease, background 0.35s ease;
-    }
-    .magic-form input[type="email"]::placeholder {
-      color: var(--fg-subtle);
-    }
-    .magic-form input[type="email"]:focus {
-      border-color: var(--fg-muted);
-    }
-
-    .magic-form button[type="submit"] {
-      width: 100%;
-      padding: 14px;
-      background: var(--submit-bg);
-      color: var(--submit-fg);
-      border: none;
-      border-radius: 2px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
-      font-weight: 400;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: opacity 0.15s ease;
-    }
-    .magic-form button[type="submit"]:hover { opacity: 0.82; }
-
-    .magic-note {
-      font-size: 12px;
-      font-weight: 300;
-      color: var(--fg-subtle);
-      line-height: 1.5;
-      margin-top: 4px;
-    }
-
-    /* ─── Footer ─────────────────────────────────────────────────────── */
-    .site-footer {
-      border-top: 1px solid var(--border);
-      padding: 2rem clamp(1.25rem, 4vw, 3rem);
-      margin-top: 0;
-      transition: border-color 0.25s;
-    }
-    .footer-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-    .footer-note,
-    .footer-links a {
-      font-family: 'Satoshi', 'DM Sans', sans-serif;
-      font-size: 0.6375rem;
-      letter-spacing: 0.06em;
-      color: var(--fg-subtle);
-      text-decoration: none;
-    }
-    .footer-links {
-      display: flex;
-      gap: 1.5rem;
-    }
-    .footer-links a:hover { color: var(--fg-muted); }
-
-    /* ─── Responsive ─────────────────────────────────────────────────── */
-    @media (max-width: 900px) {
-      .site-header { padding: 0 24px; }
-      .site-nav a:not(.active):not(button) { display: none; }
-
-      .hero {
-        grid-template-columns: 1fr;
-        padding: 0 24px;
-        gap: 40px;
-      }
-      .hero-left  { padding: 60px 0 0; }
-      .hero-right { padding: 0 0 60px; }
-
-      .headline { font-size: clamp(36px, 8vw, 52px); }
-
-      .metric-block { flex-direction: column; gap: 28px; }
-    }
-  </style>
+  <link rel="stylesheet" href="/assets/css/home.css">
 </head>
 
 <body>
 
   {% include "nav.njk" %}
 
-  <!-- ─── Hero ───────────────────────────────────────────────────── -->
-  <main class="hero">
+  <main>
+    <div class="hero">
 
-    <!-- Left column — marketing copy -->
-    <div class="hero-left">
-
-      <h1 class="headline">
-        Your order<br>is ready.<br>So is your train.
-      </h1>
-
-      <p class="subhead">
-        We get your order started at the right time<br>
-        so it's ready when you arrive.
-      </p>
-
-      <div class="metric-block">
-        <div class="metric-item">
-          <span class="metric-figure">Every&thinsp;morning.</span>
-          <span class="metric-label">The queue you didn&rsquo;t join</span>
-        </div>
-        <div class="metric-item">
-          <span class="metric-figure">Zero&thinsp;wait.</span>
-          <span class="metric-label">Walk in. Pick up. Leave.</span>
-        </div>
+      <div class="hero-intro">
+        <h1 class="headline">
+          Two rails. One principle.<span class="headline-break">Your transaction is nobody else's business.</span>
+        </h1>
+        <p class="subhead">Fiat or Bitcoin — privacy included.</p>
       </div>
 
-    </div><!-- /hero-left -->
+      <div class="capability-block">
 
+        <div class="capability-item">
+          <span class="cap-label">Encrypted transfer</span>
+          <p class="cap-descriptor">The server is blind, so is the till.</p>
+        </div>
 
-    <!-- Right column — sign-in panel -->
-    <div class="hero-right">
+        <div class="capability-item">
+          <span class="cap-label">Chain queries</span>
+          <p class="cap-descriptor">Your lookups stay yours.</p>
+        </div>
 
-      <div class="signin-panel" id="signin">
-
-        <p class="signin-label">Early access</p>
-        <h2 class="signin-headline">Order ahead.<br>Skip the queue.</h2>
-
-        <form data-analytics="signup" class="magic-form" onsubmit="handleMagicLink(event)">
-          <input
-            type="email"
-            name="email"
-            placeholder="your@email.com"
-            autocomplete="email"
-            inputmode="email"
-            required
-            aria-label="Email address"
-          />
-          <button type="submit">Continue with email</button>
-        </form>
-
-        <p class="magic-note">We&rsquo;ll send you a secure link. No password needed.</p>
+        <div class="capability-item">
+          <span class="cap-label">Lightning payments</span>
+          <p class="cap-descriptor">Tap and go. Sats or card, your call.</p>
+        </div>
 
       </div>
 
-    </div><!-- /hero-right -->
-
+    </div>
   </main>
-
 
   {% include "footer.njk" %}
 
-  <!-- ─── Scripts ────────────────────────────────────────────────── -->
-  <script>
-    const THEME_KEY = 'rfTheme';
-
-    function applyTheme(theme) {
-      const root = document.documentElement;
-      const pill = document.getElementById('themePill');
-      if (theme === 'carbon') {
-        root.classList.add('carbon-mode');
-        root.setAttribute('data-theme', 'carbon');
-        if (pill) pill.textContent = 'Carbon / Paper';
-      } else {
-        root.classList.remove('carbon-mode');
-        root.removeAttribute('data-theme');
-        if (pill) pill.textContent = 'Paper / Carbon';
-      }
-    }
-
-    function toggleTheme() {
-      const current = localStorage.getItem(THEME_KEY) || 'paper';
-      const next = current === 'paper' ? 'carbon' : 'paper';
-      localStorage.setItem(THEME_KEY, next);
-      applyTheme(next);
-    }
-
-    (function () {
-      const saved = localStorage.getItem(THEME_KEY) || 'paper';
-      applyTheme(saved);
-    })();
-
-    const _sb = supabase.createClient(
-      'https://tihgvdokeofnjxjkenmm.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpaGd2ZG9rZW9mbmp4amtlbm1tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTY2NDksImV4cCI6MjA5NDE5MjY0OX0.cRb94WeIP8yRfWd9s2XKmq2nqm1ov-sK1df6u8LNUbo'
-    );
-
-    async function handleMagicLink(e) {
-      e.preventDefault();
-      const email = e.target.email.value.trim();
-      if (!email) return;
-
-      const btn = e.target.querySelector('button[type="submit"]');
-      btn.textContent = 'Sending…';
-      btn.disabled = true;
-
-      const { error } = await _sb.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: 'https://refueler.io/',
-          shouldCreateUser: true
-        }
-      });
-
-      if (error) {
-        btn.textContent = 'Try again';
-        btn.disabled = false;
-        console.error(error.message);
-      } else {
-        const panel = document.getElementById('signin');
-        panel.innerHTML = `
-          <p class="signin-label">Early access</p>
-          <h2 class="signin-headline" style="margin-bottom:16px;">Check your inbox.</h2>
-          <p style="font-size:15px;font-weight:300;line-height:1.65;color:var(--fg-muted);margin-bottom:0;">
-            We've sent a sign-in link to <strong style="font-weight:500;color:var(--fg);">${email}</strong>.<br>
-            It expires in 60 minutes.
-          </p>
-          <p style="font-size:12px;font-weight:300;color:var(--fg-subtle);margin-top:20px;line-height:1.5;">
-            Wrong address? <a href="/" style="color:var(--fg-muted);text-decoration:underline;">Start over</a>.
-          </p>
-        `;
-      }
-    }
-  </script>
-
+  <!-- Mobile auth deep-link handler (PKCE callback for consumer app) -->
   <script>
   (function () {
     var params = new URLSearchParams(window.location.search);
@@ -523,5 +84,6 @@ permalink: /index.html
   </script>
 
   <script src="/analytics.js" defer></script>
+
 </body>
 </html>
