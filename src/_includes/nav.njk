@@ -1,9 +1,7 @@
 <header class="site-header">
   <div class="header-inner">
     <a href="/" class="wordmark">
-      Refueler
-      <span class="wordmark-divider">/</span>
-      <span class="wordmark-section">{{ wordmarkSection or "Legend" }}</span>
+      Refueler{% if wordmarkSection %}<span class="wordmark-divider">/</span><span class="wordmark-section">{{ wordmarkSection }}</span>{% endif %}
     </a>
     <nav class="site-nav">
       <a href="/legend/"{% if activePage == 'legend' %} class="active"{% endif %}>Legend</a>

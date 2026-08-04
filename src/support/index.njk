@@ -320,7 +320,7 @@ permalink: /support/index.html
       <section class="intro-section" aria-label="Introduction">
         <div class="inset-card">
           <p class="intro-text">
-            Refueler is a small team building something we care about. If we've fallen short — a missed order, a reward that didn't arrive, something that just felt off — we want to hear it. Every message is read by a person. Please contact us, we are here to help you.
+            Refueler is a small team building things we care about — across payments, file transfer, and privacy infrastructure. If something hasn't worked the way it should, or something felt off, we want to hear it. Every message is read by a person. We're here to help.
           </p>
         </div>
       </section>
@@ -329,7 +329,7 @@ permalink: /support/index.html
         <div class="panel-label" id="how-label">How it works</div>
         <div class="panel-body">
           <p>
-            <strong>Write to us.</strong> Send a message to <a href="mailto:privacy@refueler.io">privacy@refueler.io</a> and tell us what happened in your own words. There's no form to fill in. You don't need order numbers or account details to get started — just tell us what's on your mind.
+            <strong>Write to us.</strong> Send a message to <a href="mailto:support@refueler.io">support@refueler.io</a> and tell us what happened in your own words. There's no form to fill in. You don't need order numbers or account details to get started — just tell us what's on your mind.
           </p>
           <p>
             <strong>We'll be in touch.</strong> We'll acknowledge your message within 24 hours. A real person on the team will read what you've written and send you a substantive response within 30 days. In practice, it's usually much sooner.
@@ -347,8 +347,8 @@ permalink: /support/index.html
         <p class="raise-heading" id="raise-heading">What can I raise?</p>
         <div class="inset-card">
           <div class="raise-items">
-            <p class="raise-item">A reward that wasn't issued or was the wrong amount</p>
-            <p class="raise-item">An order that wasn't ready or wasn't right</p>
+            <p class="raise-item">Something that didn't work the way you expected</p>
+            <p class="raise-item">A payment, reward, or transfer that didn't arrive or wasn't right</p>
             <p class="raise-item">A data protection concern — how we've collected, used, stored, or shared your information</p>
             <p class="raise-item">Anything else that felt wrong — we'd rather hear it</p>
           </div>
@@ -362,10 +362,10 @@ permalink: /support/index.html
         <div class="panel-label" id="contact-label">Get in touch</div>
         <div class="panel-body">
           <p>
-            Email us: <a href="mailto:privacy@refueler.io" style="font-family:var(--font-heading);font-weight:500;font-size:0.875rem;">privacy@refueler.io</a>
+            Email us: <a href="mailto:support@refueler.io" style="font-family:var(--font-heading);font-weight:500;font-size:0.875rem;">support@refueler.io</a>
           </p>
           <p class="contact-sub">
-            We aim to come back to you within 24 hours. If your concern is about your personal data or how we've handled it, this is the right address for that too — the same team looks after both.
+            We aim to come back to you within 24 hours. If your concern is about your personal data or how we've handled it, you can also reach us at <a href="mailto:privacy@refueler.io">privacy@refueler.io</a> — the same team looks after both.
           </p>
           <p class="contact-rights">
             For a full explanation of your rights under UK GDPR (Articles 15–22), take a look at our <a href="/privacy#your-rights">Privacy Policy</a>. If you feel we haven't resolved your concern to your satisfaction, you also have the right to raise it with the Information Commissioner's Office at <a href="https://ico.org.uk">ico.org.uk</a>.
@@ -379,37 +379,45 @@ permalink: /support/index.html
 
   <footer class="site-footer">
     <div class="footer-inner">
-      <span class="footer-note">© 2026 Refueler Ltd (incorporating) · refueler.io/support</span>
+      <span class="footer-note">© 2026 Refueler · refueler.io/support</span>
       <div class="footer-links">
         <a href="/privacy/">Privacy</a>
         <a href="/support/">Support</a>
-        <a href="mailto:privacy@refueler.io">privacy@refueler.io</a>
+        <a href="mailto:support@refueler.io">support@refueler.io</a>
       </div>
     </div>
   </footer>
 
   <script>
-  const THEME_KEY = 'rfTheme';
-  function applyTheme(theme) {
-    const root = document.documentElement;
-    const pill = document.getElementById('themePill');
-    if (theme === 'carbon') {
-      root.classList.add('carbon-mode');
-      root.setAttribute('data-theme', 'carbon');
-      if (pill) pill.textContent = 'Carbon / Paper';
-    } else {
-      root.classList.remove('carbon-mode');
-      root.removeAttribute('data-theme');
-      if (pill) pill.textContent = 'Paper / Carbon';
+  (function () {
+    function getCookie(name) {
+      const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+      return match ? decodeURIComponent(match[1]) : null;
     }
-  }
-  function toggleTheme() {
-    const current = localStorage.getItem(THEME_KEY) || 'paper';
-    const next = current === 'paper' ? 'carbon' : 'paper';
-    localStorage.setItem(THEME_KEY, next);
-    applyTheme(next);
-  }
-  (function () { applyTheme(localStorage.getItem(THEME_KEY) || 'paper'); })();
+    function setCookie(name, value) {
+      const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toUTCString();
+      document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/; domain=.refueler.io; SameSite=Lax';
+    }
+    function applyTheme(theme) {
+      const root = document.documentElement;
+      const pill = document.getElementById('themePill');
+      if (theme === 'carbon') {
+        root.setAttribute('data-theme', 'carbon');
+        if (pill) pill.textContent = 'Carbon / Paper';
+      } else {
+        root.removeAttribute('data-theme');
+        if (pill) pill.textContent = 'Paper / Carbon';
+      }
+    }
+    function toggleTheme() {
+      const current = getCookie('rs-theme') || 'paper';
+      const next = current === 'paper' ? 'carbon' : 'paper';
+      setCookie('rs-theme', next);
+      applyTheme(next);
+    }
+    window.toggleTheme = toggleTheme;
+    applyTheme(getCookie('rs-theme') || 'paper');
+  })();
   </script>
 
   <script src="/analytics.js" defer></script>
