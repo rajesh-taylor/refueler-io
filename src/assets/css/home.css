@@ -1,8 +1,16 @@
 /* home.css — Refueler homepage layout
    No :root token block. All tokens from global.css via head.njk.
    Headline: Cormorant Garamond 600 (loaded in index.njk)
-   Body/subhead/caps: DM Sans (global.css)
+   Overline / caps: Satoshi (global)
+   Subhead / descriptors: DM Sans (global)
    ----------------------------------------------------------------- */
+
+/* ── Hero ──────────────────────────────────────────────────────────── */
+.hero {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: clamp(56px, 7vh, 96px) clamp(1.5rem, 4vw, 3.5rem) 0;
+}
 
 /* ── Overline ──────────────────────────────────────────────────────── */
 .overline {
@@ -25,23 +33,7 @@
   flex-shrink: 0;
 }
 
-/* ── Hero ──────────────────────────────────────────────────────────── */
-.hero {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: clamp(56px, 7vh, 96px) clamp(1.5rem, 4vw, 3.5rem) 0;
-}
-
-/* ── Headline + accent column ──────────────────────────────────────── */
-.headline-wrap {
-  display: grid;
-  grid-template-columns: 1fr 160px;
-  gap: 0;
-  align-items: end;
-  padding-bottom: clamp(36px, 4.5vh, 56px);
-  /* No border-bottom — subhead is the next sentence */
-}
-
+/* ── Headline ──────────────────────────────────────────────────────── */
 .headline {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: clamp(3.5rem, 7vw, 6.5rem);
@@ -49,44 +41,10 @@
   line-height: 0.98;
   letter-spacing: -0.01em;
   color: var(--fg);
+  margin-bottom: clamp(36px, 4.5vh, 56px);
 }
 
-/* ── Right accent column ───────────────────────────────────────────── */
-.accent-col {
-  padding-left: 2rem;
-  padding-bottom: 0.5rem;
-  border-left: 0.5px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: 0.875rem;
-}
-
-.accent-year {
-  font-family: 'Satoshi', 'DM Sans', sans-serif;
-  font-size: 0.575rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--fg-subtle);
-}
-
-.accent-line {
-  width: 0.5px;
-  height: 56px;
-  background: var(--border);
-}
-
-.accent-mark {
-  font-family: 'Satoshi', 'DM Sans', sans-serif;
-  font-size: 0.575rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
-
-/* ── Subhead — DM Sans, full fg, no hairline above ─────────────────── */
+/* ── Subhead ───────────────────────────────────────────────────────── */
 .subhead {
   font-family: 'DM Sans', sans-serif;
   font-size: clamp(1.125rem, 1.75vw, 1.5rem);
@@ -141,14 +99,6 @@
 
 /* ── Responsive ────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
-  .headline-wrap {
-    grid-template-columns: 1fr;
-  }
-
-  .accent-col {
-    display: none;
-  }
-
   .subhead {
     max-width: 100%;
   }
