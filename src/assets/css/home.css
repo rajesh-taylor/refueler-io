@@ -1,84 +1,86 @@
 /* home.css — Refueler homepage layout
-   No :root token block. All tokens from global.css via head.njk.
+   All classes prefixed home- to avoid any collision with global.css.
+   No :root block. All tokens from global.css via head.njk.
    Headline: Cormorant Garamond 600 (loaded in index.njk)
-   Overline / caps: Satoshi (global)
-   Subhead / descriptors: DM Sans (global)
    ----------------------------------------------------------------- */
 
-/* ── Hero ──────────────────────────────────────────────────────────── */
-.hero {
+.home-hero {
   max-width: 1200px;
   margin: 0 auto;
   padding: clamp(56px, 7vh, 96px) clamp(1.5rem, 4vw, 3.5rem) 0;
 }
 
 /* ── Overline ──────────────────────────────────────────────────────── */
-.overline {
-  font-family: 'Satoshi', 'DM Sans', sans-serif;
-  font-size: 0.65rem;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 2.25rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+.home-overline {
+  font-family: 'Satoshi', 'DM Sans', sans-serif !important;
+  font-size: 0.65rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  color: #C8A96E !important;
+  margin-bottom: 2.25rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
 }
 
-.overline-rule {
+.home-overline-rule {
   height: 0.5px;
   width: 36px;
-  background: var(--accent);
+  background: #C8A96E;
   flex-shrink: 0;
+  display: block;
 }
 
 /* ── Headline ──────────────────────────────────────────────────────── */
-.headline {
+.home-headline {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: clamp(3.5rem, 7vw, 6.5rem);
   font-weight: 600;
   line-height: 0.98;
   letter-spacing: -0.01em;
   color: var(--fg);
-  margin-bottom: clamp(36px, 4.5vh, 56px);
+  margin-bottom: clamp(40px, 5vh, 64px);
 }
 
-/* ── Subhead ───────────────────────────────────────────────────────── */
-.subhead {
-  font-family: 'DM Sans', sans-serif;
-  font-size: clamp(1.125rem, 1.75vw, 1.5rem);
-  font-weight: 300;
-  line-height: 1.5;
-  letter-spacing: -0.01em;
-  color: var(--fg);
-  max-width: 640px;
-  padding-bottom: clamp(48px, 6vh, 72px);
+/* ── Subhead band — div wrapper avoids p tag reset issues ──────────── */
+.home-subhead-band {
+  padding-bottom: clamp(48px, 6vh, 80px);
   border-bottom: 0.5px solid var(--border);
 }
 
+.home-subhead {
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: clamp(1.125rem, 1.75vw, 1.5rem) !important;
+  font-weight: 300 !important;
+  line-height: 1.5 !important;
+  letter-spacing: -0.01em !important;
+  color: var(--fg) !important;
+  max-width: 640px;
+}
+
 /* ── Capability block ──────────────────────────────────────────────── */
-.capability-block {
+.home-caps {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
 }
 
-.capability-item {
+.home-cap {
   padding: 40px 0;
   padding-right: clamp(1.5rem, 3vw, 3rem);
   border-right: 0.5px solid var(--border);
 }
 
-.capability-item:last-child {
+.home-cap:last-child {
   border-right: none;
   padding-right: 0;
 }
 
-.capability-item + .capability-item {
+.home-cap + .home-cap {
   padding-left: clamp(1.5rem, 3vw, 3rem);
 }
 
-.cap-label {
+.home-cap-label {
   font-family: 'Satoshi', 'DM Sans', sans-serif;
   font-size: 0.65rem;
   font-weight: 600;
@@ -89,32 +91,32 @@
   display: block;
 }
 
-.cap-descriptor {
-  font-family: 'DM Sans', sans-serif;
-  font-size: clamp(17px, 1.75vw, 20px);
-  font-weight: 400;
-  line-height: 1.45;
-  color: var(--fg);
+.home-cap-desc {
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: clamp(17px, 1.75vw, 20px) !important;
+  font-weight: 400 !important;
+  line-height: 1.45 !important;
+  color: var(--fg) !important;
 }
 
 /* ── Responsive ────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
-  .subhead {
+  .home-subhead {
     max-width: 100%;
   }
 
-  .capability-block {
+  .home-caps {
     grid-template-columns: 1fr;
   }
 
-  .capability-item,
-  .capability-item + .capability-item {
+  .home-cap,
+  .home-cap + .home-cap {
     padding: 28px 0;
     border-right: none;
     border-bottom: 0.5px solid var(--border);
   }
 
-  .capability-item:last-child {
+  .home-cap:last-child {
     border-bottom: none;
     padding-bottom: 0;
   }
