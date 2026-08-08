@@ -59,6 +59,7 @@
       var next = current === 'paper' ? 'carbon' : 'paper';
       setCookie('rs-theme', next);
       applyTheme(next);
+      {% if stripeThemeRemount %}if (typeof remountStripeForTheme === 'function') remountStripeForTheme();{% endif %}
     };
     applyTheme(getCookie('rs-theme') || 'paper');
   }());
