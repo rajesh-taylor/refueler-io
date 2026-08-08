@@ -1,0 +1,15 @@
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/share/" class="wordmark">
+      Refueler
+      <span class="wordmark-divider">/</span>
+      <span class="wordmark-section">Share</span>
+    </a>
+    <nav class="site-nav">
+      <a href="https://refueler.io/notes/"{% if activePage == 'notes' %} class="active"{% endif %}>Notes</a>
+      <a href="/share/upgrade/"{% if activePage == 'upgrade' %} class="active"{% endif %}>Plans</a>
+      <a href="https://refueler.io/support/">Support</a>
+      <button class="theme-pill" id="themePill" onclick="toggleTheme()">Paper / Carbon</button>
+    </nav>
+  </div>
+</header>
