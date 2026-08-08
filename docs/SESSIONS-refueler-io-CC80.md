@@ -207,7 +207,7 @@ Strip `:root` blocks from `looks-done-isnt-done` and `the-float`. Read live file
 
 ## Opening prompt for CSS-1 (Opus)
 
-**Attach:** `Refueler_MasterContext_IO_CC79b.md`, `SESSIONS-refueler-io-CC79b.md`, `REFUELER-BRIDGE.md`
+**Attach:** `Refueler_MasterContext_IO_CC80.md`, `SESSIONS-refueler-io-CC80.md`, `REFUELER-BRIDGE.md`
 
 CSS-1 open. Design context cross-reference. Planning session — uncounted.
 
