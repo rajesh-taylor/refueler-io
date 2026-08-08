@@ -299,9 +299,8 @@ Known issue: `ReferenceError: share is not defined` on upgrade page — pre-exis
 
 **`refueler-io`:** `/notes/` live. Article 1 published. Articles 2–14 planned.
 Homepage redesigned CC-79: Cormorant Garamond 600 headline, banded layout, "Privacy isn't a feature. It's the architecture." subhead. All homepage classes prefixed `home-` to prevent global.css cascade collisions. Gold hardcoded `#C8A96E !important` on overline — `var(--accent)` overridden by body cascade on `p` tags. Subhead in `div.home-subhead-band` wrapper — padding-bottom on `<p>` zeroed by global reset. Commits `553313f`, `f34a944`, `2ac19ea`, `17f69d6`.
-Two editorial articles migrated CC-79: `the-city-worker` + `nothing-to-collect-nothing-to-hide` — `:root` blocks stripped.
-Remaining unmigrated (CC-80): `looks-done-isnt-done` + `the-float`.
-Nav links broken on live site (CC-80 fix): Legend, Editorial, Privacy in nav + all three footer links non-functional. Notes works. Cause unknown — read nav.njk and footer.njk live to diagnose.
+All four editorial articles migrated — `:root` blocks stripped. Commits `553313f` (CC-79), `2566bbf` (CC-80).
+Nav links fixed CC-80 (`ee3584b`): editorial, legend, support, privacy pages restored as Eleventy source files. Root cause — pages did not exist, not a nav bug.
 CSS rationalisation track (CSS-1 through CSS-6) planned before Block 3 — global.css has body cascade conflict and duplicate token naming that caused multiple CC-79 fixes.
 
 **`refueler-legend` (Legend):** Shell live at `refueler.io/legend`. No query logic yet. Starts post-B9.
