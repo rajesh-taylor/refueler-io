@@ -7,7 +7,7 @@ module.exports = function (eleventyConfig) {
 
   // Share — JS, CSS, and BLAKE3 WASM copied verbatim
   eleventyConfig.addPassthroughCopy("src/share/assets");
-  eleventyConfig.addPassthroughCopy("src/share/blake3");
+  
 
   eleventyConfig.addWatchTarget("src/_includes/");
 
