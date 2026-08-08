@@ -7,7 +7,10 @@ module.exports = function (eleventyConfig) {
 
   // Share — JS, CSS, and BLAKE3 WASM copied verbatim
   eleventyConfig.addPassthroughCopy("src/share/assets");
-  
+
+  // Cloudflare Pages headers and redirects
+  eleventyConfig.addPassthroughCopy("src/_headers");
+  eleventyConfig.addPassthroughCopy("src/_redirects");
 
   eleventyConfig.addWatchTarget("src/_includes/");
 
