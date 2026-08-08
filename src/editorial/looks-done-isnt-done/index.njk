@@ -11,59 +11,6 @@ permalink: /editorial/looks-done-isnt-done/index.html
 {% include "head.njk" %}
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --paper:         #F7F4EF;
-    --carbon:        #1E1F22;
-    --ink:           #3D3A36;
-    --ink-2:         #5A5751;
-    --ink-3:         #9A948D;
-    --rule:          #D6D1C8;
-    --gold:          #C8A96E;
-
-    --bg:            var(--paper);
-    --fg:            var(--ink);
-    --fg-2:          var(--ink-2);
-    --fg-3:          var(--ink-3);
-    --bd:            var(--rule);
-    --ac:            var(--gold);
-
-    --pass:          #3A6B4A;
-    --open:          #8B4A28;
-    --code-bg:       #E8E4DC;
-
-    --hed:           'DM Sans', system-ui, sans-serif;
-    --ser:           'Source Serif 4', Georgia, serif;
-    --mono:          'DM Mono','Fira Mono','Courier New',monospace;
-
-    --max:           1200px;
-    --col:           68ch;
-    --g:             clamp(1.25rem,4vw,3rem);
-
-    /* Canonical token aliases for shared partials */
-    --text-primary:   var(--fg);
-    --text-secondary: var(--fg-2);
-    --text-tertiary:  var(--fg-3);
-    --border:         var(--bd);
-    --font-heading:   var(--hed);
-    --max-w:          var(--max);
-    --gutter:         var(--g);
-    --article-max:    var(--col);
-    --body-sz:       18px;
-    --lh:            1.8;
-    --ps:            1.5em;
-  }
-
-  [data-theme="carbon"] {
-    --bg:    #1E1F22;
-    --fg:    #E4E2DC;
-    --fg-2:  #8A8680;
-    --fg-3:  #5A5751;
-    --bd:    #35373B;
-    --pass:  #6BAF7F;
-    --open:  #C8845A;
-    --code-bg: #26282C;
-  }
-
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
   html{-webkit-font-smoothing:antialiased;}
   body{background:var(--bg);color:var(--fg);font-family:var(--ser);
@@ -792,19 +739,6 @@ permalink: /editorial/looks-done-isnt-done/index.html
 {% include "footer.njk" %}
 
 <script>
-  /* ── THEME ── */
-  const TK = 'rfTheme';
-  function applyTheme(t) {
-    const r = document.documentElement, b = document.getElementById('theme-btn');
-    if (t === 'carbon') { r.setAttribute('data-theme','carbon'); if(b) b.textContent='Carbon / Paper'; }
-    else { r.removeAttribute('data-theme'); if(b) b.textContent='Paper / Carbon'; }
-  }
-  function toggleTheme() {
-    const n = (localStorage.getItem(TK)||'paper')==='paper'?'carbon':'paper';
-    localStorage.setItem(TK,n); applyTheme(n);
-  }
-  (function(){ applyTheme(localStorage.getItem(TK)||'paper'); })();
-
   /* ── MODALS ── */
   function openModal(id) {
     document.getElementById(id).classList.add('open');
@@ -829,3 +763,4 @@ permalink: /editorial/looks-done-isnt-done/index.html
 
 </body>
 </html>
+
