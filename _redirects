@@ -1,2 +1,1 @@
-/auth/v1/*    https://tihgvdokeofnjxjkenmm.supabase.co/auth/v1/:splat    200
-/.well-known/*  /.well-known/:splat  200
+https://share.refueler.io/* https://refueler.io/share/:splat 301
