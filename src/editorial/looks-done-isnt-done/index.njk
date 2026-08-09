@@ -11,6 +11,23 @@ permalink: /editorial/looks-done-isnt-done/index.html
 {% include "head.njk" %}
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap" rel="stylesheet">
 <style>
+:root {
+  /* ── Aliases: maps old minified token names to canonical global.css tokens ── */
+  --ser:      var(--font-serif);
+  --hed:      var(--font-heading);
+  --mono:     var(--font-mono);
+  --bd:       var(--border);
+  --g:        clamp(1.25rem, 4vw, 3rem);
+  --max:      1200px;
+  --col:      640px;
+  --lh:       1.75;
+  --body-sz:  1.0625rem;
+  --fg-2:     var(--fg-muted);
+  --fg-3:     var(--fg-subtle);
+  --ac:       var(--accent);
+  --pass:     var(--success);
+  --open:     var(--warn);
+}
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
   html{-webkit-font-smoothing:antialiased;}
   body{background:var(--bg);color:var(--fg);font-family:var(--ser);
