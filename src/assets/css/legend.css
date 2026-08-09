@@ -1,24 +1,11 @@
 /* ─── legend.css ──────────────────────────────────────────────────────────────
    Legend-specific layout only.
-   All colour tokens, reset, nav, and footer come from global.css (via head.njk).
+   All tokens (incl. --font-heading, --font-sans, --font-mono, --border-mid,
+   --inset-rule), reset, nav, and footer come from global.css (via head.njk).
+   CSS-6: :root and [data-theme="carbon"] blocks stripped.
    Theme detection: document.documentElement.dataset.theme === 'carbon'
    Never: classList.contains / html.carbon-mode
    ─────────────────────────────────────────────────────────────────────────── */
-
-/* ─── Font aliases (Legend-specific usage) ───────────────────────────────── */
-/* CSS-6 migration target: move these to global.css                           */
-:root {
-  --font-heading: 'Satoshi', 'DM Sans', sans-serif;
-  --font-sans:    'DM Sans', sans-serif;
-  --font-mono:    'IBM Plex Mono', monospace;
-  --border-mid:   #B8B2A8;
-  --inset-rule:   var(--border);
-}
-
-[data-theme="carbon"] {
-  --border-mid:  #4A4D52;
-  --inset-rule:  #C8A96E;
-}
 
 /* ─── Legend main layout ─────────────────────────────────────────────────── */
 .legend-main {
@@ -57,7 +44,7 @@
 .legend-input {
   width: 100%;
   background: var(--surface);
-  border: 0.5px solid var(--border);
+  border: var(--border-weight) solid var(--border);
   border-radius: 8px;
   padding: 0.9375rem 3rem 0.9375rem 1.125rem;
   font-family: var(--font-mono);
@@ -118,7 +105,7 @@
 /* ─── Input tagline ──────────────────────────────────────────────────────── */
 .legend-tagline {
   font-family: var(--font-sans);
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 400;
   color: var(--fg-subtle);
   letter-spacing: 0.02em;

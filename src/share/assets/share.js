@@ -646,8 +646,8 @@ function renderQr(url) {
     text: url,
     radius: 0,
     ecLevel: 'M',
-    fill:       isDark ? '#F7F4EF' : '#3D3A36',
-    background: isDark ? '#111316' : '#F7F4EF',
+    fill:       isDark ? '#E8E2D8' : '#1A1A1A',
+    background: isDark ? '#1A1A1A' : '#E8E2D8',
     size: 200,
   }, svg);
 }

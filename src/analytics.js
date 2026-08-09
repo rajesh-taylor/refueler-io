@@ -12,10 +12,11 @@
 
   const ENDPOINT = "https://analytics.refueler.io/event";
 
-  // Current theme — read from localStorage key rfTheme
+  // Current theme — read from canonical dataset.theme attribute (CSS-6 fix)
+  // Replaces abolished localStorage key rfTheme
   function currentTheme() {
     try {
-      return localStorage.getItem("rfTheme") || "paper";
+      return document.documentElement.dataset.theme || "paper";
     } catch {
       return "unknown";
     }
@@ -82,7 +83,7 @@
     if (toggleEl) {
       toggleEl.addEventListener("click", function () {
         var before = currentTheme();
-        // Fire after the IIFE has had a tick to update localStorage
+        // Fire after the theme script has had a tick to update dataset.theme
         setTimeout(function () {
           var after = currentTheme();
           if (before !== after) {

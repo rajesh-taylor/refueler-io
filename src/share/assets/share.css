@@ -189,7 +189,7 @@ main {
 
 /* ── Upgrade nudge links ─────────────────────────────────────────── */
 .upgrade-nudge-link {
-  color: var(--accent-action);
+  color: var(--accent);
   text-decoration: none;
   font-weight: 500;
 }

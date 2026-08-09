@@ -1,164 +1,21 @@
 /* ─────────────────────────────────────────────────────────────────────────────
-   notes.css — Refueler /notes/ shared styles
-   Design tokens from REFUELER-BRIDGE.md §Design system
-   Theme: Paper default, Carbon on [data-theme="carbon"]
+   notes.css — Refueler /notes/ layout only.
+   All tokens, reset, nav, footer: global.css (via head.njk).
+   CSS-6: :root stripped, --text-* migrated to --fg*, duplicate chrome removed,
+          backdrop-filter removed, solid-hex borders → var(--border),
+          article-body h2 / blockquote → var(--accent) explicitly (both themes).
    ───────────────────────────────────────────────────────────────────────────── */
 
-/* ── Tokens ── */
-:root {
-  --paper:          #F5F0E8;
-  --carbon:         #1A1A1A;
-
-  --bg:             var(--paper);
-  --surface:        #EDEAE4;
-  --surface-raised: #E4E1DA;
-
-  --text-primary:   #3D3A36;
-  --text-secondary: #5A5751;
-  --text-tertiary:  #9A948D;
-
-  --border:         #D6D1C8;
-  --border-mid:     #B8B2A8;
-  --inset-rule:     var(--border);
-
-  --gold:           #C8A96E;
-  --gold-hover:     #E0C48A;
-
-  --font-heading:   'Satoshi', 'DM Sans', sans-serif;
-  --font-serif:     'Source Serif 4', Georgia, serif;
-  --font-sans:      'DM Sans', system-ui, sans-serif;
-  --font-mono:      'IBM Plex Mono', 'Courier New', monospace;
-
-  --max-w:          1200px;
-  --col:            68ch;
-  --gutter:         clamp(1.25rem, 4vw, 3rem);
-  --radius-card:    10px;
-  --radius-btn:     8px;
-  --radius-modal:   12px;
-}
-
-[data-theme="carbon"] {
-  --bg:             #1A1A1A;
-  --surface:        #26282C;
-  --surface-raised: #2E3035;
-
-  --text-primary:   #E4E2DC;
-  --text-secondary: #8A8680;
-  --text-tertiary:  #5A5751;
-
-  --border:         #35373B;
-  --border-mid:     #4A4D52;
-  --inset-rule:     #C8A96E;
-}
-
-/* ── Reset ── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-font-smoothing: antialiased; }
-body {
-  background: var(--bg);
-  color: var(--text-primary);
-  font-family: var(--font-sans);
-  font-weight: 300;
-  min-height: 100vh;
-  transition: background 0.35s ease, color 0.35s ease;
-}
-
-/* ── Header ── */
-.site-header {
-  border-bottom: 0.5px solid var(--border);
-  padding: 0 var(--gutter);
-  position: sticky;
-  top: 0;
-  background: var(--bg);
-  z-index: 100;
-  transition: background 0.35s, border-color 0.35s;
-}
-.header-inner {
-  max-width: var(--max-w);
-  margin: 0 auto;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.wordmark {
-  font-family: var(--font-heading);
-  font-weight: 600;
-  font-size: 0.875rem;
-  letter-spacing: 0.06em;
-  color: var(--text-primary);
-  text-decoration: none;
-}
-.wordmark-divider { font-weight: 300; opacity: 0.3; margin: 0 0.5rem; }
-.wordmark-section { font-weight: 400; opacity: 0.55; }
-
-.site-nav {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-}
-.site-nav a {
-  font-family: var(--font-heading);
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  text-decoration: none;
-  transition: color 0.2s;
-}
-.site-nav a:hover { color: var(--text-primary); }
-.site-nav a.active { color: var(--text-primary); }
-
-.theme-pill {
-  font-family: var(--font-heading);
-  font-size: 0.65rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  border: 0.5px solid var(--border);
-  border-radius: 100px;
-  padding: 0.35rem 0.85rem;
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
-  white-space: nowrap;
-}
-.theme-pill:hover { border-color: var(--text-secondary); color: var(--text-primary); }
-
-/* ── Footer ── */
-.site-footer {
-  border-top: 0.5px solid var(--border);
-  padding: 2rem var(--gutter);
-  margin-top: 4rem;
-}
-.footer-inner {
-  max-width: var(--max-w);
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-.footer-note,
-.footer-links a {
-  font-family: var(--font-heading);
-  font-size: 0.6375rem;
-  letter-spacing: 0.06em;
-  color: var(--text-tertiary);
-  text-decoration: none;
-}
-.footer-links { display: flex; gap: 1.5rem; }
-.footer-links a:hover { color: var(--text-secondary); }
+/* ── Layout vars (non-token, local to this file) ──────────────────────────── */
+/* --max-w, --col, --gutter are layout helpers, not colour/font tokens.        */
+/* Defined here so notes pages don't require them in global.css.               */
 
 /* ── /notes/ index — section header ── */
 .notes-header {
-  max-width: var(--max-w);
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 4.5rem var(--gutter) 3rem;
-  border-bottom: 0.5px solid var(--border);
+  padding: 4.5rem clamp(1.25rem, 4vw, 3rem) 3rem;
+  border-bottom: var(--border-weight) solid var(--border);
 }
 .section-eyebrow {
   font-family: var(--font-heading);
@@ -166,14 +23,14 @@ body {
   font-weight: 500;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text-tertiary);
+  color: var(--fg-subtle);
   margin-bottom: 1.25rem;
 }
 .section-title {
   font-family: var(--font-heading);
   font-size: clamp(1.625rem, 3vw, 2.5rem);
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--fg);
   line-height: 1.15;
   letter-spacing: -0.02em;
   margin-bottom: 0.875rem;
@@ -183,15 +40,15 @@ body {
   font-family: var(--font-serif);
   font-size: 1rem;
   line-height: 1.7;
-  color: var(--text-secondary);
+  color: var(--fg-muted);
   max-width: 52ch;
 }
 
 /* ── Card grid ── */
 .notes-grid-wrap {
-  max-width: var(--max-w);
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 3rem var(--gutter) 0;
+  padding: 3rem clamp(1.25rem, 4vw, 3rem) 0;
 }
 .notes-grid {
   display: grid;
@@ -201,8 +58,8 @@ body {
 
 .note-card {
   display: block;
-  background: var(--surface);       /* Paper: subtle tint — correct */
-  border: 0.5px solid var(--border);
+  background: var(--surface);
+  border: var(--border-weight) solid var(--border);
   border-radius: var(--radius-card);
   padding: 2rem;
   text-decoration: none;
@@ -210,7 +67,7 @@ body {
   transition: border-color 0.2s, background 0.2s;
 }
 
-/* Carbon: border-only — transparent background matches Editorial treatment */
+/* Carbon: border-only — transparent background matches editorial treatment */
 [data-theme="carbon"] .note-card {
   background: transparent;
 }
@@ -236,13 +93,13 @@ body {
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--text-tertiary);
+  color: var(--fg-subtle);
 }
 .card-dot {
   width: 2px;
   height: 2px;
   border-radius: 50%;
-  background: var(--text-tertiary);
+  background: var(--fg-subtle);
   opacity: 0.35;
   flex-shrink: 0;
 }
@@ -253,17 +110,19 @@ body {
   font-size: clamp(1.0625rem, 1.5vw, 1.25rem);
   line-height: 1.2;
   letter-spacing: -0.015em;
-  color: var(--text-primary);
+  color: var(--fg);
   margin-bottom: 0.625rem;
   transition: opacity 0.15s;
 }
 .note-card:hover .card-title { opacity: 0.7; }
 
+/* Card body text spec (locked CSS-1a): DM Sans 400, line-height 1.7, var(--fg) */
 .card-description {
-  font-family: var(--font-serif);
+  font-family: var(--font-sans);
+  font-weight: 400;
   font-size: 0.9375rem;
-  line-height: 1.65;
-  color: var(--text-secondary);
+  line-height: 1.7;
+  color: var(--fg);
   margin-bottom: 1.5rem;
 }
 
@@ -274,14 +133,14 @@ body {
   font-family: var(--font-heading);
   font-size: 0.6375rem;
   letter-spacing: 0.06em;
-  color: var(--text-tertiary);
+  color: var(--fg-subtle);
 }
 
 /* ── Article page ── */
 .article-wrap {
-  max-width: var(--max-w);
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 var(--gutter);
+  padding: 0 clamp(1.25rem, 4vw, 3rem);
 }
 
 .breadcrumb {
@@ -289,16 +148,16 @@ body {
   font-family: var(--font-heading);
   font-size: 0.6375rem;
   letter-spacing: 0.07em;
-  color: var(--text-tertiary);
+  color: var(--fg-subtle);
 }
 .breadcrumb a { color: inherit; text-decoration: none; }
-.breadcrumb a:hover { color: var(--text-secondary); }
+.breadcrumb a:hover { color: var(--fg-muted); }
 .breadcrumb-sep { margin: 0 0.4rem; opacity: 0.35; }
 
 .article-header {
   padding: 2.5rem 0 2.25rem;
-  max-width: var(--col);
-  border-bottom: 0.5px solid var(--border);
+  max-width: 68ch;
+  border-bottom: var(--border-weight) solid var(--border);
   margin-bottom: 3rem;
 }
 
@@ -315,13 +174,13 @@ body {
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--text-tertiary);
+  color: var(--fg-subtle);
 }
 .eyebrow-dot {
   width: 2px;
   height: 2px;
   border-radius: 50%;
-  background: var(--text-tertiary);
+  background: var(--fg-subtle);
   opacity: 0.35;
 }
 
@@ -331,7 +190,7 @@ body {
   font-size: clamp(1.625rem, 3.5vw, 2.75rem);
   line-height: 1.1;
   letter-spacing: -0.025em;
-  color: var(--text-primary);
+  color: var(--fg);
   margin-bottom: 1.25rem;
   max-width: 22ch;
 }
@@ -340,7 +199,7 @@ body {
   font-family: var(--font-serif);
   font-size: 1.125rem;
   line-height: 1.7;
-  color: var(--text-secondary);
+  color: var(--fg-muted);
   margin-bottom: 1.5rem;
   max-width: 56ch;
 }
@@ -352,23 +211,23 @@ body {
   font-family: var(--font-heading);
   font-size: 0.6375rem;
   letter-spacing: 0.07em;
-  color: var(--text-tertiary);
+  color: var(--fg-subtle);
 }
 .meta-dot {
   width: 2px;
   height: 2px;
   border-radius: 50%;
-  background: var(--text-tertiary);
+  background: var(--fg-subtle);
   opacity: 0.35;
 }
 
 /* ── Article body ── */
 .article-body {
-  max-width: var(--col);
+  max-width: 68ch;
   font-family: var(--font-serif);
   font-size: 1.125rem;
   line-height: 1.8;
-  color: var(--text-primary);
+  color: var(--fg);
   padding-bottom: 4rem;
 }
 
@@ -376,15 +235,16 @@ body {
   margin-bottom: 1.5em;
 }
 
+/* Gold on h2 dividers — both themes (ruling 7). Explicit var(--accent), not --inset-rule. */
 .article-body h2 {
   font-family: var(--font-heading);
   font-size: 1.0625rem;
   font-weight: 600;
   letter-spacing: -0.01em;
-  color: var(--text-primary);
+  color: var(--fg);
   margin: 2.5em 0 0.875em;
   padding-top: 0.25em;
-  border-top: 0.5px solid var(--inset-rule);
+  border-top: 0.5px solid var(--accent);
 }
 
 .article-body h3 {
@@ -392,22 +252,22 @@ body {
   font-size: 0.9375rem;
   font-weight: 500;
   letter-spacing: 0.02em;
-  color: var(--text-secondary);
+  color: var(--fg-muted);
   margin: 2em 0 0.75em;
 }
 
 .article-body a {
-  color: var(--text-primary);
+  color: var(--fg);
   text-decoration: underline;
   text-decoration-thickness: 0.5px;
   text-underline-offset: 2px;
   transition: color 0.2s;
 }
-.article-body a:hover { color: var(--text-secondary); }
+.article-body a:hover { color: var(--fg-muted); }
 
 .article-body strong {
   font-weight: 500;
-  color: var(--text-primary);
+  color: var(--fg);
 }
 
 .article-body em { font-style: italic; }
@@ -416,7 +276,7 @@ body {
 .table-wrap {
   overflow-x: auto;
   margin: 2em 0;
-  border: 0.5px solid var(--border);
+  border: var(--border-weight) solid var(--border);
   border-radius: var(--radius-card);
 }
 .data-table {
@@ -432,10 +292,10 @@ body {
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--text-tertiary);
+  color: var(--fg-subtle);
   padding: 0.875rem 1rem;
   text-align: left;
-  border-bottom: 0.5px solid var(--border);
+  border-bottom: var(--border-weight) solid var(--border);
   background: var(--surface);
   white-space: nowrap;
 }
@@ -443,8 +303,8 @@ body {
 .data-table th:last-child { border-radius: 0 var(--radius-card) 0 0; }
 .data-table td {
   padding: 0.75rem 1rem;
-  border-bottom: 0.5px solid var(--border);
-  color: var(--text-primary);
+  border-bottom: var(--border-weight) solid var(--border);
+  color: var(--fg);
   vertical-align: top;
 }
 .data-table tr:last-child td { border-bottom: none; }
@@ -458,7 +318,7 @@ body {
 .data-table td.notes-col {
   font-family: var(--font-sans);
   font-size: 0.8125rem;
-  color: var(--text-secondary);
+  color: var(--fg-muted);
 }
 
 /* "See full analysis" trigger */
@@ -471,8 +331,8 @@ body {
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--text-tertiary);
-  border: 0.5px solid var(--border);
+  color: var(--fg-subtle);
+  border: var(--border-weight) solid var(--border);
   border-radius: var(--radius-btn);
   padding: 0.4rem 0.875rem;
   background: transparent;
@@ -482,28 +342,26 @@ body {
 }
 .table-expand-trigger:hover {
   border-color: var(--border-mid);
-  color: var(--text-secondary);
+  color: var(--fg-muted);
 }
 
-/* ── Modal ── */
+/* ── Modal — backdrop-filter stripped (ruling 8), solid semi-opaque scrim ── */
 .modal-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.65);
   z-index: 500;
   align-items: center;
   justify-content: center;
-  padding: var(--gutter);
+  padding: clamp(1.25rem, 4vw, 3rem);
 }
 .modal-overlay.open {
   display: flex;
 }
 .modal-box {
   background: var(--bg);
-  border: 0.5px solid var(--border);
+  border: var(--border-weight) solid var(--border);
   border-radius: var(--radius-modal);
   max-width: 780px;
   width: 100%;
@@ -521,22 +379,22 @@ body {
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--text-tertiary);
-  border: 0.5px solid var(--border);
+  color: var(--fg-subtle);
+  border: var(--border-weight) solid var(--border);
   border-radius: 100px;
   padding: 0.3rem 0.75rem;
   background: transparent;
   cursor: pointer;
   transition: color 0.2s, border-color 0.2s;
 }
-.modal-close:hover { color: var(--text-primary); border-color: var(--border-mid); }
+.modal-close:hover { color: var(--fg); border-color: var(--border-mid); }
 
 .modal-title {
   font-family: var(--font-heading);
   font-weight: 600;
   font-size: 1.125rem;
   letter-spacing: -0.015em;
-  color: var(--text-primary);
+  color: var(--fg);
   margin-bottom: 1.5rem;
   padding-right: 4rem;
 }
@@ -546,9 +404,9 @@ body {
   margin-top: 3rem;
   padding: 2rem;
   background: var(--surface);
-  border: 0.5px solid var(--border);
+  border: var(--border-weight) solid var(--border);
   border-radius: var(--radius-card);
-  max-width: var(--col);
+  max-width: 68ch;
 }
 .cta-label {
   font-family: var(--font-heading);
@@ -556,14 +414,14 @@ body {
   font-weight: 500;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text-tertiary);
+  color: var(--fg-subtle);
   margin-bottom: 0.75rem;
 }
 .cta-text {
   font-family: var(--font-serif);
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: var(--text-secondary);
+  color: var(--fg-muted);
   margin-bottom: 1.25rem;
 }
 .cta-link {
@@ -571,17 +429,16 @@ body {
   font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.06em;
-  color: var(--text-primary);
+  color: var(--fg);
   text-decoration: none;
-  border-bottom: 0.5px solid var(--border);
+  border-bottom: var(--border-weight) solid var(--border);
   padding-bottom: 1px;
   transition: border-color 0.2s, color 0.2s;
 }
-.cta-link:hover { border-color: var(--text-secondary); color: var(--text-secondary); }
+.cta-link:hover { border-color: var(--fg-muted); color: var(--fg-muted); }
 
 /* ── Responsive ── */
 @media (max-width: 640px) {
   .notes-grid { grid-template-columns: 1fr; }
-  .site-nav a:not(.active) { display: none; }
   .modal-box { padding: 1.5rem; }
 }

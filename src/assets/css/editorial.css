@@ -1,19 +1,14 @@
 /* ─── editorial.css ───────────────────────────────────────────────────────────
    Editorial index page layout.
-   Tokens, reset, nav, footer: global.css (via head.njk).
+   All tokens, reset, nav, footer: global.css (via head.njk).
+   CSS-6: :root stripped (--font-serif, --max-w, --gutter now from global.css).
    ─────────────────────────────────────────────────────────────────────────── */
-
-:root {
-  --font-serif:   'Source Serif 4', Georgia, serif;
-  --max-w:        1200px;
-  --gutter:       clamp(1.25rem, 4vw, 3rem);
-}
 
 /* ── Index layout ─────────────────────────────────────────────────────────── */
 .index-wrap {
-  max-width: var(--max-w);
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 var(--gutter);
+  padding: 0 clamp(1.25rem, 4vw, 3rem);
 }
 
 .index-header {
@@ -23,7 +18,7 @@
 }
 
 .index-eyebrow {
-  font-family: 'Satoshi', 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.6375rem;
   font-weight: 500;
   letter-spacing: 0.1em;
@@ -33,7 +28,7 @@
 }
 
 .index-title {
-  font-family: 'Satoshi', 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-size: clamp(2rem, 4.5vw, 3.25rem);
   font-weight: 600;
   line-height: 1.08;
@@ -68,7 +63,7 @@
 .article-row:first-child { border-top: none; }
 
 .row-eyebrow {
-  font-family: 'Satoshi', 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.6375rem;
   font-weight: 500;
   letter-spacing: 0.1em;
@@ -78,7 +73,7 @@
 }
 
 .row-title {
-  font-family: 'Satoshi', 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-size: clamp(1.0625rem, 2vw, 1.25rem);
   font-weight: 600;
   letter-spacing: -0.015em;
@@ -97,7 +92,7 @@
 }
 
 .row-meta {
-  font-family: 'Satoshi', 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.6375rem;
   letter-spacing: 0.06em;
   color: var(--fg-subtle);

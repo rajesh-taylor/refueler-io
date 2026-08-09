@@ -46,7 +46,7 @@
       </button>
     </div>
 
-    <p class="legend-tagline">Private query. No logs. No tracking.</p>
+    <p class="legend-tagline">Private address queries. No logs. No tracking.</p>
 
     <div id="legend-result" role="region" aria-live="polite" aria-label="Query result"></div>
   `;

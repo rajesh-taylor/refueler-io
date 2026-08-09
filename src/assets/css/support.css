@@ -1,42 +1,33 @@
 /* ─── support.css ─────────────────────────────────────────────────────────────
    Support page layout.
-   Tokens, reset, nav, footer: global.css (via head.njk).
+   All tokens, reset, nav, footer: global.css (via head.njk).
+   CSS-6: :root and [data-theme="carbon"] blocks stripped.
+          .inset-card border-left → var(--border) (§A.4a — card chrome neutral).
+          Bare a{} scoped to .page-wrap to avoid global override.
    ─────────────────────────────────────────────────────────────────────────── */
 
-:root {
-  --font-serif:    'Source Serif 4', Georgia, serif;
-  --max-w:         1200px;
-  --content-w:     960px;
-  --gutter:        clamp(1.25rem, 4vw, 3rem);
-  --inset-rule:    var(--border);
-}
-
-[data-theme="carbon"] {
-  --inset-rule:    #C8A96E;
-}
-
-/* ── Body link style ──────────────────────────────────────────────────────── */
-a {
+/* ── Body link style — scoped to page content ─────────────────────────────── */
+.page-wrap a {
   color: var(--fg);
   text-decoration: underline;
   text-decoration-color: var(--border);
   text-underline-offset: 2px;
   transition: text-decoration-color 0.2s, color var(--theme-transition);
 }
-a:hover { text-decoration-color: var(--fg-muted); }
+.page-wrap a:hover { text-decoration-color: var(--fg-muted); }
 
 /* ── Page wrap ────────────────────────────────────────────────────────────── */
 .page-wrap {
-  max-width: var(--content-w);
+  max-width: 960px;
   margin: 0 auto;
-  padding: 0 var(--gutter);
+  padding: 0 clamp(1.25rem, 4vw, 3rem);
 }
 
 /* ── Hero ─────────────────────────────────────────────────────────────────── */
 .hero { padding: 80px 0 64px; }
 
 .hero-headline {
-  font-family: 'Satoshi', 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-weight: 600;
   font-size: clamp(2rem, 5vw, 3.5rem);
   letter-spacing: -0.02em;
@@ -53,7 +44,7 @@ a:hover { text-decoration-color: var(--fg-muted); }
   margin-bottom: 24px;
 }
 .hero-cta {
-  font-family: 'Satoshi', 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-weight: 500;
   font-size: 0.8rem;
   letter-spacing: 0.06em;
@@ -64,10 +55,10 @@ a:hover { text-decoration-color: var(--fg-muted); }
 }
 .hero-cta:hover { color: var(--fg); }
 
-/* ── Inset card ───────────────────────────────────────────────────────────── */
+/* ── Inset card — border neutral (§A.4a: cards use var(--border), not gold) ── */
 .inset-card {
   background: var(--surface);
-  border-left: 2px solid var(--inset-rule);
+  border-left: 2px solid var(--border);
   border-radius: 0 4px 4px 0;
   padding: 40px 48px;
   max-width: 680px;
@@ -94,7 +85,7 @@ a:hover { text-decoration-color: var(--fg-muted); }
   transition: border-color var(--theme-transition);
 }
 .panel-label {
-  font-family: 'Satoshi', 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-weight: 600;
   font-size: 0.6875rem;
   text-transform: uppercase;
@@ -111,7 +102,7 @@ a:hover { text-decoration-color: var(--fg-muted); }
 }
 .panel-body p:last-child { margin-bottom: 0; }
 .panel-body p strong {
-  font-family: 'Satoshi', 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-weight: 600;
   font-size: 0.875rem;
 }
@@ -123,7 +114,7 @@ a:hover { text-decoration-color: var(--fg-muted); }
   transition: border-color var(--theme-transition);
 }
 .raise-heading {
-  font-family: 'Satoshi', 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   font-weight: 600;
   font-size: 0.6875rem;
   text-transform: uppercase;
@@ -150,7 +141,7 @@ a:hover { text-decoration-color: var(--fg-muted); }
   margin-bottom: 20px;
 }
 .contact-rights {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.8125rem;
   color: var(--fg-subtle);
   letter-spacing: 0.02em;
