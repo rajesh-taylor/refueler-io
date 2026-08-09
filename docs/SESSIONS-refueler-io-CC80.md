@@ -43,8 +43,8 @@ Buffer untouchable until a block overruns.
 | CSS-2 | global.css full audit post-migration | Opus — uncounted | ✅ Closed — uncounted |
 | CSS-3 | New CSS architecture blueprint | Opus — uncounted | ✅ Closed — uncounted |
 | CSS-4 | Implement new global.css | Sonnet — counted | ✅ Closed — commit 2cbc496 |
-| CSS-5 | Full site verification + Legend layout removal | Sonnet — counted | 🟡 This session |
-| CSS-6 | Page CSS rationalisation — `notes.css` and `legend.css` `:root` migration | Sonnet — counted | 🟡 After CSS-5 |
+| CSS-5 | Full site verification + Legend layout removal | Sonnet — counted | ✅ Closed — commits 9f44d3b, 7fb04de, 83c9fa9, 7ed7ac3 |
+| CSS-6 | Page CSS rationalisation — `:root` strip, `notes.css`, `legend.css`, `editorial.css`, `support.css`, `privacy.css`, analytics.js rfTheme fix | Sonnet — counted | 🟡 Next |
 | CSS-7 | Share design session — upload complete, download page, progress states | Sonnet — counted | 🟡 After CSS-6 |
 
 ---
@@ -100,25 +100,25 @@ Three elements removed per the CSS-1a locked spec (wordmark + input + tagline on
 
 | # | Item | Status |
 |---|---|---|
-| 1 | Homepage Paper default load | — |
-| 2 | Homepage Carbon toggle | — |
+| 1 | Homepage Paper default load | ✅ |
+| 2 | Homepage Carbon toggle | ✅ |
 | 3 | Homepage ≤640px | — |
-| 4 | Legend Carbon default | — |
-| 5 | Legend: only wordmark + input + tagline visible | — |
-| 6 | Legend: no green dot top-right | — |
-| 7 | Legend: no below-fold three-column block | — |
-| 8 | Share upload page Paper/Carbon | — |
-| 9 | Share drop zone renders | — |
-| 10 | Share plans page renders | — |
-| 11 | Share status page renders | — |
+| 4 | Legend Carbon default | ✅ |
+| 5 | Legend: only wordmark + input + tagline visible | ✅ |
+| 6 | Legend: no green dot top-right | ✅ |
+| 7 | Legend: no below-fold three-column block | ✅ |
+| 8 | Share upload page Paper/Carbon | ✅ |
+| 9 | Share drop zone renders | ✅ |
+| 10 | Share plans page renders | ✅ |
+| 11 | Share status page renders | ✅ |
 | 12 | Notes index page | — |
 | 13 | Editorial index page | — |
-| 14 | Privacy page | — |
-| 15 | Nav links correct all surfaces | — |
-| 16 | Footer stamp present all surfaces | — |
-| 17 | Theme pill works all surfaces | — |
+| 14 | Privacy page | ✅ |
+| 15 | Nav links correct all surfaces | ✅ |
+| 16 | Footer stamp present all surfaces | ✅ |
+| 17 | Theme pill works all surfaces | ✅ |
 
-**Commit:** `[hash — fill after push]` — fix(css): CSS-5 — Legend layout removal, abolished value audit
+**Commits:** `9f44d3b` Legend layout removal + abolished value audit | `7fb04de` Share wordmark, footer links, privacy footer | `83c9fa9` editorial articles (all 4), share-footer, privacy.css, notes link | `7ed7ac3` share-footer.njk restore
 
 ### M-3 — date: 2026-08-08
 **Scope:** Share migration verification and close. Counted session.
@@ -259,3 +259,56 @@ Output: a locked nav spec table for each surface. Label copy decisions included.
 ---
 
 *"Nothing stops this train."*
+
+---
+
+## Opening prompt — CSS-6 (Sonnet — counted)
+
+**Attach:** `Refueler_MasterContext_IO_CC80.md`, `SESSIONS-refueler-io-CC80.md`, `REFUELER-BRIDGE.md`, `CSS-3-BLUEPRINT.md`
+
+CSS-6 open. Page CSS rationalisation. Counted session.
+
+**Context:** CSS-5 closed. All four editorial articles fixed. Legend layout locked. Share footer correct. `global.css` is canonical after CSS-4.
+
+**Before doing anything, pull these files live:**
+- `https://raw.githubusercontent.com/rajesh-taylor/refueler-io/main/src/assets/css/global.css`
+- `https://raw.githubusercontent.com/rajesh-taylor/refueler-io/main/src/assets/css/notes.css`
+- `https://raw.githubusercontent.com/rajesh-taylor/refueler-io/main/src/assets/css/legend.css`
+- `https://raw.githubusercontent.com/rajesh-taylor/refueler-io/main/src/assets/css/editorial.css`
+- `https://raw.githubusercontent.com/rajesh-taylor/refueler-io/main/src/assets/css/support.css`
+- `https://raw.githubusercontent.com/rajesh-taylor/refueler-io/main/src/assets/css/privacy.css`
+- `https://raw.githubusercontent.com/rajesh-taylor/refueler-io/main/src/analytics.js`
+- `https://raw.githubusercontent.com/rajesh-taylor/refueler-io/main/src/share/assets/share.js`
+- `https://raw.githubusercontent.com/rajesh-taylor/refueler-io/main/src/share/assets/share.css`
+
+**Task 1 — Strip `:root` blocks from all page CSS files.**
+Per CSS-3 blueprint Part C: no page CSS file may define its own `:root` block. All tokens come from `global.css`. Strip `:root` blocks (and `[data-theme="carbon"]` overrides) from:
+- `notes.css` — has full `:root` token block + duplicate nav/footer + body on `--text-primary` → repoint to `--fg`
+- `legend.css` — has font aliases + `--border-mid`/`--inset-rule` → migrate to `global.css`
+- `editorial.css` — has `--font-serif`, `--max-w`, `--gutter`
+- `support.css` — check for `:root` block
+- `privacy.css` — check for `:root` block (custom footer block was stripped in CSS-5; verify clean)
+
+**Task 2 — Fix `analytics.js` rfTheme bug.**
+`src/analytics.js` L15,18 reads `localStorage.getItem("rfTheme")` — abolished key. Update `currentTheme()` to read `document.documentElement.dataset.theme` instead, returning `'carbon'` or `'paper'`.
+
+**Task 3 — Fix `share.js` stale QR code colours.**
+`src/share/assets/share.js` L649,650: `#F7F4EF` used for QR code dark-mode bg/fill. Replace with `#E8E2D8` (canonical Paper) for fill and `#1A1A1A` for background.
+
+**Task 4 — Fix `share.css` accent-action reference.**
+`src/share/assets/share.css` L192: `.upgrade-nudge-link { color: var(--accent-action) }`. Token abolished. Replace with `var(--accent)` (gold).
+
+**Task 5 — Legend tagline.**
+In `src/assets/js/legend-spa.js`: update tagline copy from `Private query. No logs. No tracking.` to `Private address queries. No logs. No tracking.` Also increase font size from `0.6875rem` to `0.75rem` in `legend.css`.
+
+**Task 6 — MasterContext + SESSIONS update.**
+Update `docs/Refueler_MasterContext_IO_CC80.md` CSS status table: mark all five page CSS files as ✅ Clean after `:root` strip. Update `docs/SESSIONS-refueler-io-CC80.md` with CSS-6 session entry.
+
+**Commit message:** `"fix(css): CSS-6 — :root strip, analytics rfTheme fix, share.js QR colours, legend tagline"`
+
+**CSS-6 scope only. Do not touch:**
+- `global.css` (canonical, locked after CSS-4)
+- `share-tokens.css` (already merged)
+- Editorial article `.njk` files (alias blocks are a temporary fix until CSS-7)
+- Homepage `home.css` (locked, `home-` prefixed)
+
