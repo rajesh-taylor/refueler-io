@@ -51,19 +51,6 @@
     <div id="legend-result" role="region" aria-live="polite" aria-label="Query result"></div>
   `;
 
-  // Credential status icon — positioned relative to the SPA mount container
-  // Inserted into legend-main so it sits top-right of the content area
-  const main = document.querySelector('.legend-main');
-  if (main) {
-    const credIcon = document.createElement('button');
-    credIcon.className = 'legend-cred-icon';
-    credIcon.id = 'legend-cred-icon';
-    credIcon.setAttribute('title', 'Private queries active. No logs.');
-    credIcon.setAttribute('aria-label', 'Credential status: private queries active');
-    main.style.position = 'relative';
-    main.appendChild(credIcon);
-  }
-
   // ─── Input focus — show/hide batch icon ─────────────────────────────────
   const input = document.getElementById('legend-input');
   const batchBtn = document.getElementById('legend-batch-btn');
@@ -91,14 +78,6 @@
     // Batch button — placeholder for batch modal (Multi-8)
     batchBtn.addEventListener('click', function () {
       // batch modal wires in here at Multi-8
-    });
-  }
-
-  // ─── Credential icon — placeholder for credential modal (Multi-8) ────────
-  const credIconEl = document.getElementById('legend-cred-icon');
-  if (credIconEl) {
-    credIconEl.addEventListener('click', function () {
-      // credential status modal wires in here at Multi-8
     });
   }
 

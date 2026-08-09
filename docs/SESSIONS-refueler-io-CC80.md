@@ -1,6 +1,6 @@
 # SESSIONS — refueler-io
 *Canonical session log for `rajesh-taylor/refueler-io`.*
-*Last updated: M-2 · 2026-08-08 (M-2 closed — Share live at refueler.io/share/)*
+*Last updated: M-3 · 2026-08-08 (M-3 closed — Block M complete. Share canonical at refueler.io/share/)*
 
 ---
 
@@ -8,8 +8,8 @@
 
 Primary: 100 · Buffer: 25 · Total: 125
 Planning/Opus sessions: uncounted by convention.
-Block M: 1 uncounted (M-1 ✅) + 2 counted (M-2 ✅, M-3 pending).
-CSS rationalisation: 3 uncounted (CSS-1b, CSS-2, CSS-3) + 3 counted (CSS-4, CSS-5, CSS-6).
+Block M: 1 uncounted (M-1 ✅) + 3 counted (M-2 ✅, M-3 ✅).
+CSS rationalisation: 3 uncounted (CSS-1b, CSS-2, CSS-3) + 4 counted (CSS-4, CSS-5, CSS-6, CSS-7).
 Buffer untouchable until a block overruns.
 
 ---
@@ -22,7 +22,7 @@ Buffer untouchable until a block overruns.
 | Block 1 | Schema hardening: RLS, opsTogglePause, PIN RLS | ✅ Closed CC-66 |
 | Block 2 | Consumer app ↔ merchant tablet live connection | ✅ Closed CC-69 |
 | Block 4 | Dev console hardening + investor telemetry | ✅ Closed CC-65 |
-| Block M | Share migration — `share.refueler.io` → `refueler.io/share/` | 🟡 M-2 closed — M-3 pending |
+| Block M | Share migration — `share.refueler.io` → `refueler.io/share/` | ✅ Closed M-3 |
 | Block 3 | Franchise dashboard | 🟡 After CSS track |
 | Block 5 | Merchant onboarding flow | 🟡 Queued after Block 3 |
 | Block 6 | Darwin Push Port upgrade | ⚪ Deferred |
@@ -33,102 +33,172 @@ Buffer untouchable until a block overruns.
 
 ---
 
-## CSS rationalisation track (runs after Block M)
+## CSS rationalisation track
 
 | Session | Scope | Type | Status |
 |---|---|---|---|
-| CSS-1 | Design reference document — cross-reference all locked decisions | ✅ Closed — uncounted | |
-| CSS-1a | Visual review + conflict resolution. All four conflicts settled | ✅ Closed — uncounted | |
-| CSS-1b | Cross-product nav architecture — one domain, one nav system | Opus — uncounted | 🟡 After M-3 |
-| CSS-2 | global.css full audit post-migration — all CSS files in context, findings only | Opus — uncounted | 🟡 After CSS-1b |
-| CSS-3 | New CSS architecture blueprint — token naming, cascade, reset, page responsibilities | Opus — uncounted | 🟡 After CSS-2 |
-| CSS-4 | Implement new global.css — `#E8E2D8`, surface tokens, input recess, `--inset-rule` fix, orange removal, share-tokens merge | Sonnet — counted | 🟡 After CSS-3 |
-| CSS-5 | Full site verification — every page, every theme, every nav. Legend simplified. Fix anything. | Sonnet — counted | 🟡 After CSS-4 |
-| CSS-6 | Page CSS rationalisation — `notes.css` and `legend.css` `:root` migration, `--text-*` → `--fg*`, strip `!important` | Sonnet — counted | 🟡 After CSS-5 |
+| CSS-1 | Design reference document | ✅ Closed — uncounted | |
+| CSS-1a | Visual review + conflict resolution | ✅ Closed — uncounted | |
+| CSS-1b | Cross-product nav architecture | Opus — uncounted | ✅ Closed — uncounted |
+| CSS-2 | global.css full audit post-migration | Opus — uncounted | ✅ Closed — uncounted |
+| CSS-3 | New CSS architecture blueprint | Opus — uncounted | ✅ Closed — uncounted |
+| CSS-4 | Implement new global.css | Sonnet — counted | ✅ Closed — commit 2cbc496 |
+| CSS-5 | Full site verification + Legend layout removal | Sonnet — counted | 🟡 This session |
+| CSS-6 | Page CSS rationalisation — `notes.css` and `legend.css` `:root` migration | Sonnet — counted | 🟡 After CSS-5 |
+| CSS-7 | Share design session — upload complete, download page, progress states | Sonnet — counted | 🟡 After CSS-6 |
 
 ---
 
 ## Session log
 
-### M-2 — date: 2026-08-08
-**Scope:** Share migration execution. Counted session.
+### CSS-5 — date: 2026-08-09
+**Scope:** Full-site verification + Legend layout removal. Counted session.
 **Type:** Counted.
 
-**Commits:**
-- `213798d` — Commit 1: Share pages migrated to `src/share/`, `eleventy.config.js` passthrough rules added, `stripeThemeRemount` ported to `head.njk`, assets and BLAKE3 copied
-- `8abf0c5` — Commit 2: Share link added to main site nav, `_redirects` subdomain rule added
-- `e577379` — Fix: restore main site `nav.njk` (accidentally overwritten during file placement), create `src/_includes/share-nav.njk` and `src/_includes/share-footer.njk`, fix Eleventy include paths in all three Share pages
+**Legend layout removal (CSS-1a lock):**
 
-**Worker:** `refueler-share` redeployed as version `af37c80b` — CORS `allowed` array updated to include `https://refueler.io` alongside existing `https://share.refueler.io` and `https://upgrade.refueler.io`.
+Three elements removed per the CSS-1a locked spec (wordmark + input + tagline only):
 
-**Cloudflare dashboard:**
-- Turnstile: `refueler.io` confirmed present in allowed hostnames for sitekey `0x4AAAAAAD0N7GlHlCRuWITr`
-- Worker CORS: updated and redeployed
-- Pages: `refueler-io` build succeeded on `e577379`
+1. **Credential dot** — removed from both files:
+   - `legend.css` L131–148: `.legend-cred-icon` and `.legend-cred-icon:focus-visible` blocks deleted.
+   - `legend-spa.js` L54–64: `credIcon` createElement block deleted.
+   - `legend-spa.js` L97–103: `credIconEl` click listener deleted.
+2. **Below-fold three-column block** — removed from both files:
+   - `legend.css` L150–187: `.legend-below`, `.legend-below-inner`, `.legend-below-heading`, `.legend-below-body`, responsive grid media query — all deleted.
+   - `legend/index.njk` L24–44: `<section class="legend-below">` block and its three column divs deleted.
+3. **Silent Payments card** — not present in either file (not yet built). No action required.
 
-**Status:** `refueler.io/share/`, `refueler.io/share/upgrade/`, `refueler.io/share/status/` all live and verified in Safari and Chrome. `share.refueler.io` still running — not retired until M-3 signs off.
+**Abolished value audit (grep across `src/`):**
+
+| Pattern | Hits | Verdict |
+|---|---|---|
+| `#F5820A` | 0 | ✅ Clean |
+| `#D4690A` | 0 | ✅ Clean |
+| `#1E1F22` | 0 | ✅ Clean |
+| `#F7F4EF` | 0 | ✅ Clean |
+| `#F5F0E8` | 4 | ⚠️ See notes |
+| `accent-action` | 1 | ⚠️ See notes |
+| `rfTheme` | 3 | ⚠️ See notes |
+| `html.carbon-mode` / `carbon-mode` | 3 | ✅ Comments only |
+| `setTheme(` | 2 | ✅ Comments only |
+
+**Hit notes (do not fix this session — log for CSS-6):**
+- `#F5F0E8` at `global.css:83` — this is `--fg` in Carbon theme. **Correct usage.** The value is the Carbon foreground colour; it happens to match the old Paper bg hex. Not a bug.
+- `#F5F0E8` at `src/index.njk:77` — noscript fallback inline style, Carbon fg. Acceptable.
+- `#F5F0E8` at `src/share/upgrade.njk:516` — Stripe colorText for dark mode. Acceptable; it is the fg colour.
+- `#F5F0E8` at `src/notes/notes.css:9` — stale `--paper` token in  block. **CSS-6 target** (notes.css  strip).
+- `#F7F4EF` at `src/share/assets/share.js:649,650` — QR code dark-mode bg/fill. Stale value. **CSS-6 or CSS-7 target.**
+- `accent-action` at `src/share/assets/share.css:192` — `.upgrade-nudge-link { color: var(--accent-action) }`. Token is abolished in `share-tokens.css` after CSS-4 merge. Link will render with no colour. **Fix in CSS-7** (Share design session).
+- `rfTheme` at `src/analytics.js:15,18` — **live read** of abolished key via `localStorage.getItem("rfTheme")`. Theme analytics are returning stale/wrong values. **Fix in CSS-6** — update to read `document.documentElement.dataset.theme`.
+
+**MasterContext corrections applied (Task 4):**
+- C-2: Homepage phrasing corrected to "Paper default on load; Carbon on toggle."
+- CSS status: `editorial.css` 🟡, `support.css` 🟡, `privacy.css` 🔴
+- Design-reference §2 and §9 noted as superseded.
+
+**Visual verification checklist:** *(Rajesh confirms after browser check — see Task 3 below)*
+
+| # | Item | Status |
+|---|---|---|
+| 1 | Homepage Paper default load | — |
+| 2 | Homepage Carbon toggle | — |
+| 3 | Homepage ≤640px | — |
+| 4 | Legend Carbon default | — |
+| 5 | Legend: only wordmark + input + tagline visible | — |
+| 6 | Legend: no green dot top-right | — |
+| 7 | Legend: no below-fold three-column block | — |
+| 8 | Share upload page Paper/Carbon | — |
+| 9 | Share drop zone renders | — |
+| 10 | Share plans page renders | — |
+| 11 | Share status page renders | — |
+| 12 | Notes index page | — |
+| 13 | Editorial index page | — |
+| 14 | Privacy page | — |
+| 15 | Nav links correct all surfaces | — |
+| 16 | Footer stamp present all surfaces | — |
+| 17 | Theme pill works all surfaces | — |
+
+**Commit:** `[hash — fill after push]` — fix(css): CSS-5 — Legend layout removal, abolished value audit
+
+### M-3 — date: 2026-08-08
+**Scope:** Share migration verification and close. Counted session.
+**Type:** Counted.
 
 **Issues found and fixed:**
-- Eleventy `_includes` resolution: Share nav/footer placed as `src/share/_includes/` but Eleventy resolves includes relative to `src/_includes/` only. Fixed by moving to `src/_includes/share-nav.njk` and `src/_includes/share-footer.njk` and updating include statements in all three Share pages via `sed`.
-- `nav.njk` overwritten: the downloaded `nav.njk` from the output bundle was the Share nav, not the main site nav. Restored main site nav via `cat > ...` in terminal.
-- `src/share/_includes/` folder: never physically created during file placement — files weren't landing there. Resolved by writing directly to `src/_includes/` with `share-` prefix.
 
-**Outstanding for M-3:**
-- Stripe return URLs in Worker still point to `share.refueler.io/upgrade` (lines 1052, 1053, 1117 of `refueler-share/worker/src/index.js`)
-- Plans nav link incorrectly shows as active on Share index page
-- Full M-3 verification checklist below
+1. **Worker Stripe return URLs** — lines 1052, 1053, 1117 of `refueler-share/worker/src/index.js` updated from `share.refueler.io/upgrade` to `refueler.io/share/upgrade/`. CORS `refueler.io` already present in source from M-2 local edit — committed in same pass. Worker redeployed as version `7a0183e1`.
+
+2. **Plans active state bug** — `activePage: ""` already correct in `src/share/index.njk`. No fix needed — was a non-issue.
+
+3. **Turnstile widget hostname** — widget had only 1 hostname (`share.refueler.io`). `refueler.io` added in Cloudflare dashboard → widget now shows 2 hostnames. This was blocking all uploads on `refueler.io/share/`.
+
+4. **BLAKE3 path mismatch** — `share.js` imports `./blake3/browser-async.js` (relative from `/share/assets/`), resolving to `/share/assets/blake3/`. Blake3 was at `src/share/blake3/` (building to `/share/blake3/`). Moved entire blake3 directory to `src/share/assets/blake3/`. Stale `src/share/blake3` passthrough rule removed from `eleventy.config.js`.
+
+5. **`_headers` file** — added to `src/_headers` with passthrough rule in `eleventy.config.js` to unblock blake3 subdirectory on Cloudflare Pages.
+
+6. **Signoff copy** — "Part of the Refueler ecosystem · Your data. Your rules." replaced with three-line colophon: "Encrypted in your browser. / Deleted when it expires. / refueler.io". CSS updated to match: Source Serif 4 weight 300, `--text-tertiary`, tighter type scale, more breathing room.
+
+**Commits (refueler-share):**
+- `cd5fb6d` — fix: Stripe return URLs → refueler.io/share/upgrade/, CORS refueler.io committed to source
+
+**Commits (refueler-io):**
+- `4e326bb` — fix: move blake3 into share/assets/ so relative import resolves correctly
+- `3d9658c` — fix: _headers to unblock blake3 assets on Cloudflare Pages
+- `ae0b981` — fix: move _headers to src/, add passthrough, remove stale blake3 passthrough rule
+- `[pending]` — fix: Share signoff copy and CSS (place share-index.njk → src/share/index.njk, share.css → src/share/assets/share.css)
+
+**Verification results:**
+- ✅ `refueler.io/share/` loads, Paper default, upload zone renders
+- ✅ Theme toggle Carbon ↔ Paper, cookie persistence confirmed
+- ✅ Turnstile widget completes
+- ✅ Upload completes end-to-end — share link generated with `uuid=` and `key=` in fragment
+- ✅ Download page renders correctly — file name, size, expiry, Download button
+- ✅ `refueler.io/share/status/` loads
+- ✅ `refueler.io/share/upgrade/` loads (Plans)
+- ✅ Share nav: Notes, Plans, Support all correct
+- ✅ Main site Share link present and correct
+- ⚠️ `share.refueler.io` not redirecting — still serving old Pages project (expected; requires manual Cloudflare dashboard action to retire)
+
+**Action required (Rajesh — Cloudflare dashboard):**
+1. Go to Cloudflare Pages → `refueler-share` project → Custom domains
+2. Disconnect `share.refueler.io` custom domain
+3. Delete or disable the `refueler-share` Pages project
+
+**Known limitations logged:**
+- Safari large file limitation (~1.5 GB+) — client-side AES-GCM memory constraint. Fix: chunked streaming encryption (Share B-series roadmap).
+- Cloudflare Workers KV free tier (1,000 writes/day) sufficient for testing but upgrade to Paid ($5/month) before production.
+
+---
+
+### M-2 — date: 2026-08-08
+**Scope:** Share migration execution. Counted session.
+**Commits:** `213798d`, `8abf0c5`, `e577379`
+**Status:** `refueler.io/share/` live.
 
 ---
 
 ### M-1 — date: 2026-08-08
-**Scope:** Share migration planning. Live files read from `rajesh-taylor/refueler-share`. Complete migration plan produced.
-**Type:** Planning — uncounted.
-
-**Key findings from live files:**
-- Three Eleventy pages: `index.njk` → `/`, `upgrade.njk` → `/upgrade.html`, `status.njk` → `/status.html`
-- No `notes.njk` in Share — nav already links to `https://refueler.io/notes/` (absolute, correct)
-- `WORKER_URL = 'https://refueler-share.rt-fc4.workers.dev'` hardcoded in `share.js` line 8, `upgrade.njk` inline JS (×2), `status.njk` inline JS — does not change post-migration
-- CSS asset paths all root-relative — need path prefix update
-- Turnstile sitekey `0x4AAAAAAD0N7GlHlCRuWITr` registered against `share.refueler.io` — add `refueler.io` to allowlist
-- Theme cookie already scoped to `.refueler.io` — works at new path without change
-- `stripeThemeRemount` Nunjucks flag in `upgrade.njk` — must be ported into main `head.njk`
-- BLAKE3 WASM in `src/blake3/` via passthrough copy
-- `shared-styles.njk` is a comment-only stub — nothing to migrate
-
-**Option A confirmed:** Share pages live at `src/share/` in `refueler-io`, built to `_site/share/`.
+**Scope:** Share migration planning. Uncounted.
 
 ---
 
 ### CSS-1a — date: 2026-08-08
-**Scope:** Visual review artifact. Conflict resolution. Block M planned. Subdomain policy locked.
-**Type:** Planning — uncounted.
-
-**Decisions locked:** C-1 orange abolished. C-2 Paper default confirmed. C-3 notes.css cleanup confirmed. C-4 `--fg*` wins. Paper hex `#E8E2D8`. `--inset-rule` gold scope reduced. Legend page simplified. Card body text DM Sans 400 / 1.7. Subdomain policy locked.
+**Scope:** Visual review + conflict resolution. Uncounted.
 
 ---
 
 ### CSS-1 — date: 2026-08-08
-**Scope:** Design context cross-reference. Six live CSS files pulled and audited.
-**Type:** Planning — uncounted.
+**Scope:** Design context cross-reference. Uncounted.
 **Output:** `REFUELER-WEBSITE-DESIGN-REFERENCE.md`
 
 ---
 
 ### CC-80 — date: 2026-08-08
-**Scope:** Part 1 — nav destination pages restored. Part 2 — editorial `:root` strip.
-**Commits:** `ee3584b` (nav pages), `2566bbf` (editorial `:root` strip)
-
----
+**Commits:** `ee3584b`, `2566bbf`
 
 ### CC-79b — date: 2026-08-05
-**Commits:** `2ac19ea`, `17f69d6`
-
 ### CC-79 — date: 2026-08-05
-**Commits:** `553313f`, `08b7b95`, `f34a944`, `5e251c2`, `2ac19ea`, `17f69d6`
-
 ### CC-78 — date: 2026-08-04
-**Commits:** `f267602`, `77f509a`
-
 ### CC-77 — date: 2026-08-04 (planning — uncounted)
 ### CC-76 — date: 2026-08-04
 ### CC-75 — date: 2026-08-04
@@ -144,6 +214,8 @@ Buffer untouchable until a block overruns.
 
 ## Ongoing / bundled items
 
+- **Action required:** Disconnect `share.refueler.io` custom domain from `refueler-share` Pages project in Cloudflare dashboard, then delete or disable the project
+- Upgrade Cloudflare Workers to Paid plan ($5/month) before production volume
 - New Anthropic API key → before csuite briefing reuse
 - `car_park_occupancy` strip → next rail-signal-poll touch
 - `blink-webhook_index.ts` → hygiene pass
@@ -151,47 +223,11 @@ Buffer untouchable until a block overruns.
 - `Costa Coffee HQ` category label fix
 - GitHub Actions red X on `9b9655d`
 - LNBits webhook payload shape → confirm with Ben Arc before Block 9
-- Notes article seeds → `notes-articles-list.md` at next Share session
+- Notes article seeds → `notes-articles-list.md` in refueler-share at next Share session
 - Est. 2026 accent column → replace with Companies House reg on incorporation
 - Paper input field recess → review after one month in production
-- Worker Stripe return URLs → M-3 (lines 1052, 1053, 1117 of `refueler-share/worker/src/index.js`)
-- `refueler-share` Pages project retirement → after M-3 signs off
-- Plans active state bug on Share index nav → M-3
-
----
-
-## Opening prompt — M-3
-
-**Attach:** `Refueler_MasterContext_IO_CC80.md`, `SESSIONS-refueler-io-CC80.md`, `REFUELER-BRIDGE.md`
-
-M-3 open. Share migration verification. Counted session.
-
-M-2 is deployed. `refueler.io/share/` is live. This session verifies every page, fixes two known issues, and closes Block M.
-
-**Known issues to fix first:**
-
-1. **Stripe return URLs in Worker** — `refueler-share/worker/src/index.js` lines 1052, 1053, 1117 still point to `share.refueler.io/upgrade`. Update to `refueler.io/share/upgrade/` and redeploy Worker via `cd /Users/rajeshtaylor/Documents/refueler-share/worker && npx wrangler deploy`.
-
-2. **Plans active state bug** — Share nav shows Plans as active on the index page. Check `activePage` frontmatter in `src/share/index.njk` — should be empty string, not `upgrade`.
-
-**Verification checklist — work through in order:**
-
-1. `https://refueler.io/share/` loads. Paper default. Upload zone renders. Theme pill toggles. Carbon and back. No console errors.
-2. `https://refueler.io/share/` in Carbon — toggle to Paper — reload — stays Paper. Toggle back — reload — stays Carbon. (Cookie persistence.)
-3. Drop a small test file on the upload zone. Turnstile widget renders after file selection.
-4. Complete a test upload. Share link generated with `uuid=` and `key=` in fragment. Open in new tab — file downloads correctly.
-5. `https://refueler.io/share/status/` loads. State card renders. Incidents section populated. Paper and Carbon.
-6. `https://refueler.io/share/upgrade/` loads. Plan cards render. Stripe JS loads. `stripeThemeRemount` fires on theme toggle (no console error). Paper and Carbon.
-7. Nav on all three Share pages: Notes → `https://refueler.io/notes/`. Plans → `/share/upgrade/`. Support → `https://refueler.io/support/`. Plans not active on index page.
-8. `https://share.refueler.io/` redirects to `https://refueler.io/share/` (301). No redirect loop.
-9. Main site `https://refueler.io/` — Share link in nav present. Clicking reaches `/share/`. All other nav links intact.
-10. No console errors on any page. No 404s on assets (CSS, JS, BLAKE3 WASM).
-
-**At session close:**
-- Log all issues found and fixes applied
-- Update MasterContext: mark Block M closed, confirm Share URL canonical
-- Update BRIDGE: same
-- Instruction for Rajesh: disconnect `share.refueler.io` custom domain from `refueler-share` Cloudflare Pages project in dashboard, then delete or disable the Pages project
+- Share streaming encryption → B-series Share roadmap item
+- Safari >1.5 GB file limit → document in Share FAQ
 
 ---
 
@@ -199,9 +235,9 @@ M-2 is deployed. `refueler.io/share/` is live. This session verifies every page,
 
 **Attach:** `Refueler_MasterContext_IO_CC80.md`, `SESSIONS-refueler-io-CC80.md`, `REFUELER-BRIDGE.md`
 
-CSS-1b open. Cross-product navigation architecture. Planning session — uncounted. No code, no commits. Runs after M-3 is complete.
+CSS-1b open. Cross-product navigation architecture. Planning session — uncounted. No code, no commits.
 
-**Context:** All products now live on `refueler.io`. Share at `/share/`, Legend at `/legend/`, Notes at `/notes/`, Editorial at `/editorial/`. One domain. One nav system to lock.
+**Context:** All products now live on `refueler.io`. Share at `/share/`, Legend at `/legend/`, Notes at `/notes/`, Editorial at `/editorial/`. One domain. One nav system to lock. Block M complete.
 
 A paid member dashboard for Share is on the horizon — nav placement of Plans/Upgrade should account for that. Do not design the paid dashboard here, but note the dependency.
 
