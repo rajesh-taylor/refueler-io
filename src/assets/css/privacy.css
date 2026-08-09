@@ -94,7 +94,7 @@ main a:hover,
 main {
   max-width: 1040px;
   margin: 0 auto;
-  padding: 0 40px;
+  padding: 0 clamp(1.25rem, 4vw, 3rem);
 }
 
 .policy-section {
