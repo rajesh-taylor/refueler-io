@@ -11,6 +11,18 @@ permalink: /editorial/the-float/index.html
 {% include "head.njk" %}
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=Satoshi:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+:root {
+  /* ── Aliases: maps CC-80 intermediate token names to canonical global.css tokens ── */
+  --body-font:      var(--font-serif);
+  --body-size-d:    1.0625rem;
+  --body-lh-d:      1.75;
+  --body-size-m:    1rem;
+  --body-lh-m:      1.7;
+  --gutter:         clamp(1.25rem, 4vw, 3rem);
+  --article-max:    640px;
+  --article-max-m:  100%;
+  --para-spacing:   1.5rem;
+}
   /* Variant A (serif) locked — Source Serif 4, 68ch, 18px/1.8 */
 
   /* Column width locked: Option A (68ch editorial measure) */

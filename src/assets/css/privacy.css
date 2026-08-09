@@ -420,57 +420,6 @@ main {
   line-height: 1.55;
 }
 
-/* ── Privacy footer (custom layout, differs from global footer) ───────────── */
-footer {
-  border-top: var(--border-weight) solid var(--border);
-  padding: 40px;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: start;
-  gap: 24px;
-  max-width: 1040px;
-  margin: 48px auto 0;
-}
-
-.footer-brand {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  color: var(--fg);
-  margin-bottom: 8px;
-}
-
-.footer-meta {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 300;
-  color: var(--fg-subtle);
-  line-height: 1.7;
-}
-
-.footer-meta a {
-  color: var(--fg-subtle);
-  text-decoration: underline;
-  text-decoration-color: var(--border);
-  text-underline-offset: 2px;
-}
-
-.footer-links {
-  display: flex;
-  gap: 24px;
-  flex-wrap: wrap;
-  align-items: flex-start;
-}
-
-.footer-links a {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 300;
-  color: var(--fg-subtle);
-  text-decoration: none;
-}
-.footer-links a:hover { color: var(--fg); }
 
 /* ── Responsive ───────────────────────────────────────────────────────────── */
 @media (max-width: 720px) {
