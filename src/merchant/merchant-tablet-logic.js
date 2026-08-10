@@ -168,6 +168,7 @@ async function verifyStaffPin(pin) {
 
 // Called when staff PIN is accepted
 function onStaffAuthenticated() {
+  document.getElementById('tablet-ui').style.display = '';
   renderAuthNav(_currentUser);
   showSignedInState();
   startOrderPoll();
@@ -268,6 +269,7 @@ async function loadOwnerStats() {
 
 async function ownerSignOut() {
   _staffAuthenticated = false;
+  document.getElementById('tablet-ui').style.display = 'none';
   const client = getSbClient();
   if (client) await client.auth.signOut();
   window.location.href = '/command-centre/';
@@ -312,6 +314,7 @@ async function sendGateMagicLink() {
 // Full sign-out → back to Command Centre
 async function signOut() {
   _staffAuthenticated = false;
+  document.getElementById('tablet-ui').style.display = 'none';
   const client = getSbClient();
   if (client) await client.auth.signOut();
   window.location.href = '/command-centre/';

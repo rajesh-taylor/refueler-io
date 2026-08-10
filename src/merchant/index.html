@@ -52,7 +52,7 @@
 <div class="pin-gate" id="pin-gate">
   <div class="pin-gate-inner">
     <div class="pin-gate-eyebrow">Staff Sign In</div>
-    <div class="pin-gate-wordmark">Refueler<span> ⚡</span></div>
+    <div class="pin-gate-wordmark">Refueler</div>
 
     <!-- 4-dot indicator -->
     <div class="pin-dots" id="pin-dots">
@@ -85,7 +85,7 @@
 <!-- ─── MAGIC LINK GATE (owner only — first login / expiry / explicit sign-out) ─── -->
 <div class="auth-gate" id="auth-gate">
   <div class="auth-gate-inner">
-    <div class="auth-gate-logo">Refueler<span> ⚡</span></div>
+    <div class="auth-gate-logo">Refueler</div>
     <div class="auth-gate-subtitle">Refueler Command Centre</div>
     <div class="auth-gate-label">Owner email address</div>
     <input class="auth-gate-input" type="email" id="gate-email"
@@ -220,6 +220,9 @@
   </div>
 </div>
 
+<!-- ─── TABLET UI — hidden until PIN accepted ─── -->
+<div id="tablet-ui" style="display:none;">
+
 <!-- Back to Queue — always visible in OPS view -->
 <button class="btn-back-queue" id="btn-back-queue" onclick="switchToQueueView()">
   ← Back to Queue
@@ -228,7 +231,7 @@
 <!-- Nav -->
 <nav class="nav">
   <div class="nav-brand">
-    <div class="nav-logo">Refueler<span> ⚡</span></div>
+    <div class="nav-logo">Refueler</div>
     <div class="nav-divider"></div>
     <div class="nav-page-label">Merchant Tablet</div>
   </div>
@@ -470,6 +473,8 @@
 
   </main>
 </div>
+
+</div><!-- /tablet-ui -->
 
 <div class="toast" id="toast"></div>
 
