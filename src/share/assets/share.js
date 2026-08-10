@@ -60,6 +60,7 @@ const shareLinkDisplay = $('share-link-display');
 const copyBtn          = $('copy-btn');
 const newUploadBtn     = $('new-upload-btn');
 const qrWrap           = $('qr-wrap');
+const qrLabel          = document.getElementById('qr-label');
 const unlockScreen     = $('unlock-screen');
 const unlockInput      = $('unlock-input');
 const unlockError      = $('unlock-error');
@@ -68,6 +69,8 @@ const downloadCard     = $('download-card');
 const dlStageTag       = $('dl-stage-tag');
 const dlPct            = $('dl-pct');
 const dlBar            = $('dl-bar');
+const dlDetail         = $('dl-detail');
+const shareSuccessMeta = $('share-success-meta');
 const dlSignoff        = $('dl-signoff');
 const dropMultiMsg     = $('drop-multi-msg');
 const folderInput      = $('folder-input');
@@ -655,6 +658,7 @@ function renderQr(url) {
 function showSharePanel(url, isProtected) {
   shareCard.classList.remove('hidden');
   shareLinkDisplay.textContent = url;
+  if (shareSuccessMeta) shareSuccessMeta.textContent = 'Uploaded · expires in 7 days';
   if (isProtected) {
     const note = document.createElement('p');
     note.className = 'muted small mt8';
@@ -666,6 +670,7 @@ function showSharePanel(url, isProtected) {
   // Guard: if self-hosted script didn't load, skip QR silently — link is still copyable.
   if (typeof QrCreator !== 'undefined') {
     renderQr(url);
+    if (qrLabel) qrLabel.style.display = '';
   }
 }
 
@@ -853,6 +858,7 @@ async function startDownloadStream(uuid, meta, fileHandle) {
   dlStageTag.textContent = 'Downloading';
   dlPct.textContent = '0%';
   dlBar.style.width = '0%';
+  if (dlDetail) dlDetail.textContent = '';
 
   let writable;
   try {
@@ -930,10 +936,12 @@ async function startDownloadStream(uuid, meta, fileHandle) {
       const pct = Math.round(((i + 1) / totalChunks) * 100);
       dlBar.style.width = pct + '%';
       dlPct.textContent = pct + '%';
+      if (dlDetail) dlDetail.textContent = `chunk ${i + 1} of ${totalChunks}`;
     }
 
     await writable.close();
     dlStageTag.textContent = 'Complete';
+    if (dlDetail) dlDetail.textContent = '';
     dlBar.style.width = '100%';
     dlPct.textContent = '100%';
     uspBlock.classList.add('hidden');
@@ -971,6 +979,7 @@ async function startDownload(uuid, meta) {
   dlStageTag.textContent = 'Downloading';
   dlPct.textContent = '0%';
   dlBar.style.width = '0%';
+  if (dlDetail) dlDetail.textContent = '';
 
   const totalBytes = (meta.total_bytes && meta.total_bytes > 0) ? meta.total_bytes : 0;
   const fileName = meta?.file_name || `refueler-${uuid.slice(0, 8)}`;
@@ -1004,9 +1013,11 @@ async function startDownload(uuid, meta) {
       : Math.round(((i + 1) / totalChunks) * 50);
     dlBar.style.width = pct + '%';
     dlPct.textContent = pct + '%';
+    if (dlDetail) dlDetail.textContent = `chunk ${i + 1} of ${totalChunks}`;
   }
 
   dlStageTag.textContent = 'Decrypting';
+  if (dlDetail) dlDetail.textContent = 'Verifying integrity…';
   const decrypted = [];
   for (let i = 0; i < chunks.length; i++) {
     try {
@@ -1039,6 +1050,7 @@ async function startDownload(uuid, meta) {
   setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
 
   dlStageTag.textContent = 'Complete';
+  if (dlDetail) dlDetail.textContent = '';
   dlBar.style.width = '100%';
   dlPct.textContent = '100%';
   uspBlock.classList.add('hidden');
