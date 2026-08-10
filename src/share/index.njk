@@ -224,7 +224,8 @@ function showMaintenanceModal(status) {
 
     <!-- Share link panel — upload complete state -->
     <!-- CSS-7: resolved hierarchy. Filled circle mark, file name echo,      -->
-    <!-- expiry reminder, full-width copy button, ghost new-upload, QR below. -->
+    <!-- expiry reminder, full-width copy button, ghost new-upload.           -->
+    <!-- CSS-7b: QR removed — professional buyers don't use QR codes.        -->
     <div class="card hidden" id="share-card">
       <div class="share-success-header">
         <div class="share-success-mark" aria-hidden="true">✓</div>
@@ -240,8 +241,6 @@ function showMaintenanceModal(status) {
         </button>
         <button class="btn btn-ghost" id="new-upload-btn">New upload</button>
       </div>
-      <div class="qr-label" id="qr-label" style="display:none">Scan to share</div>
-      <div id="qr-wrap"></div>
     </div>
 
     <!-- Receiver landing card (S47c) — shown before any download starts -->
@@ -304,7 +303,7 @@ function showMaintenanceModal(status) {
 
     <!-- Post-download sign-off (colophon) -->
     <!-- CSS-7: left-border corrected from --accent (gold) to --border.   -->
-    <!-- Three lines, Source Serif 4 weight 300, --fg-subtle.             -->
+    <!-- CSS-7b: color lightened from --fg-subtle to --fg-muted.          -->
     <div class="hidden" id="dl-signoff">
       <p class="dl-signoff-line">Encrypted in your browser.</p>
       <p class="dl-signoff-line">Deleted when it expires.</p>
@@ -319,10 +318,10 @@ function showMaintenanceModal(status) {
 
 {% include "share-footer.njk" %}
 
-<!-- fflate + qr-creator self-hosted (S56 — cdnjs blocked). Blocking scripts so  -->
-<!-- globals are defined before the module script executes.                        -->
+<!-- fflate self-hosted (S56 — cdnjs blocked). Blocking script so global       -->
+<!-- is defined before the module script executes.                              -->
+<!-- CSS-7b: qr-creator.min.js removed — QR feature removed as product decision. -->
 <script src="/share/assets/fflate.min.js"></script>
-<script src="/share/assets/qr-creator.min.js"></script>
 <script type="module" src="/share/assets/share.js"></script>
 </body>
 </html>

@@ -1,3 +1,7 @@
 /share/assets/blake3/*
   Access-Control-Allow-Origin: *
   X-Content-Type-Options: nosniff
+
+/share/upgrade/
+  Location: /share/plans/
+  Status: 301

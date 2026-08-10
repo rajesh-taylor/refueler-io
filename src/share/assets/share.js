@@ -59,8 +59,6 @@ const shareCard        = $('share-card');
 const shareLinkDisplay = $('share-link-display');
 const copyBtn          = $('copy-btn');
 const newUploadBtn     = $('new-upload-btn');
-const qrWrap           = $('qr-wrap');
-const qrLabel          = document.getElementById('qr-label');
 const unlockScreen     = $('unlock-screen');
 const unlockInput      = $('unlock-input');
 const unlockError      = $('unlock-error');
@@ -641,20 +639,6 @@ async function startUpload() {
   showSharePanel(shareUrl, !!p2shHashHex);
 }
 
-function renderQr(url) {
-  const isDark = document.documentElement.dataset.theme === 'carbon';
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  qrWrap.appendChild(svg);
-  QrCreator.render({
-    text: url,
-    radius: 0,
-    ecLevel: 'M',
-    fill:       isDark ? '#E8E2D8' : '#1A1A1A',
-    background: isDark ? '#1A1A1A' : '#E8E2D8',
-    size: 200,
-  }, svg);
-}
-
 function showSharePanel(url, isProtected) {
   shareCard.classList.remove('hidden');
   shareLinkDisplay.textContent = url;
@@ -664,13 +648,6 @@ function showSharePanel(url, isProtected) {
     note.className = 'muted small mt8';
     note.textContent = '🔐 Password protected — share the password separately.';
     shareLinkDisplay.insertAdjacentElement('afterend', note);
-  }
-  qrWrap.innerHTML = '';
-  // qr-creator renders to SVG — crisp at any DPR, no canvas blur.
-  // Guard: if self-hosted script didn't load, skip QR silently — link is still copyable.
-  if (typeof QrCreator !== 'undefined') {
-    renderQr(url);
-    if (qrLabel) qrLabel.style.display = '';
   }
 }
 

@@ -1,6 +1,7 @@
 /* ── share.css — extracted from src/index.njk at S51 ─────────────────────── */
 /* DO NOT edit inline CSS in index.njk — edit this file only.                 */
 /* CSS-7: success state hierarchy, colophon gold→border, dl detail label.     */
+/* CSS-7b: QR rules removed, colophon color --fg-subtle → --fg-muted.        */
 
 /* ── Layout ─────────────────────────────────────────────────────── */
 .shell {
@@ -144,7 +145,8 @@ main {
 
 /* ── Share link panel — upload complete state ────────────────────── */
 /* CSS-7: resolved hierarchy. Success mark reads clearly. File echo  */
-/* anchors context. Primary CTA has full weight. QR is subordinate.  */
+/* anchors context. Primary CTA has full weight.                      */
+/* CSS-7b: QR removed as product decision.                            */
 .share-success-header {
   display: flex;
   align-items: center;
@@ -191,26 +193,6 @@ main {
   word-break: break-all;
   color: var(--fg-muted);
   line-height: 1.6;
-}
-#qr-wrap {
-  margin-top: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-#qr-wrap svg {
-  border-radius: 4px;
-  width: 160px;
-  height: 160px;
-  display: block;
-}
-.qr-label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--fg-subtle);
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
 }
 
 /* ── Share panel button row ─────────────────────────────────────── */
@@ -268,6 +250,7 @@ main {
 /* CSS-7: left-border corrected from var(--accent) gold → var(--border).      */
 /* Gold is restricted to article-body h2/blockquote (CSS-3 §A.4). A colophon  */
 /* is chrome, not editorial body content.                                       */
+/* CSS-7b: color --fg-subtle → --fg-muted — was too recessive in browser.     */
 #dl-signoff {
   margin-top: 6rem;
   border-left: 0.5px solid var(--border);
@@ -278,7 +261,7 @@ main {
   font-weight: 300;
   font-size: 15px;
   line-height: 2;
-  color: var(--fg-subtle);
+  color: var(--fg-muted);
   margin: 0;
   letter-spacing: 0.01em;
 }
