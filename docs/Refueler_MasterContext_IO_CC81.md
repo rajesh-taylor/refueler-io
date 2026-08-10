@@ -1,7 +1,7 @@
 # Refueler Master Context — IO CC-81
-*Updated: 2026-08-10 (CC-81 — Block 3 franchise dashboard. RPC data layer. Schema: franchise_dashboard_summary + column-guard trigger.)*
+*Updated: 2026-08-10 (CC-81 closed — Block 3 franchise dashboard complete. RPC data layer, auth fix, UI polish.)*
 *Supersedes: CC-80*
-*Sync log: MasterContext_IO_CC81 — schema: franchise_dashboard_summary RPC (SECURITY DEFINER), venue_partners_franchise_hq_update policy, franchise_hq_venue_update_guard trigger. franchise-dashboard.html rewritten to RPC data layer. Token alignment to canonical CSS-4 values. rs-theme cookie. Session allocation → 550 (500 primary + 50 buffer).*
+*Sync log: MasterContext_IO_CC81 — schema: franchise_dashboard_summary RPC (SECURITY DEFINER), venue_partners_franchise_hq_update policy, franchise_hq_venue_update_guard trigger. All operator HTML tools moved from repo root into src/ (served via Eleventy): command-centre → /command-centre/, franchise-dashboard → /franchise/, merchant-tablet → /merchant/, dev-console → /dev/, investor-snapshot → /investor/. franchise/index.html: RPC data layer, topbar date filter + theme pill, sidebar reorder (Operator Controls → Venue Roster → Orders → Revenue), franchise group name top of sidebar, footer email+signout only, hash token exchange for cross-browser magic link auth. moniker@rajeshtaylor.com merchant_users row updated to franchise_hq. Snag list: Auth-1 (resolved — hash exchange), Export-1 (Revenue + Orders PDF icon, deferred). Opus queue: Pass-A, Pass-B. Dash-1 (charts) deferred until volume.*
 
 ---
 

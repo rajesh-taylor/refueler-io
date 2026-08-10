@@ -1,6 +1,6 @@
 # SESSIONS — refueler-io
 *Canonical session log for `rajesh-taylor/refueler-io`.*
-*Last updated: CC-81 · 2026-08-10 (Block 3 — franchise dashboard closed)*
+*Last updated: CC-81 · 2026-08-10 (Block 3 closed — franchise dashboard, operator tools into src/, auth fix)*
 
 ---
 
@@ -92,6 +92,45 @@ Buffer untouchable until a block overruns.
 - No `franchise_hq` merchant_users row exists yet — will work on first login after row is created
 
 **Commit message:** `"feat(dashboard): CC-81 — franchise dashboard RPC data layer, update policy + column guard"`
+
+---
+
+### CC-81b — date: 2026-08-10
+**Scope:** Operator tools into src/ + franchise UI polish. Counted (bundled with CC-81).
+
+**Files changed:** `eleventy.config.js`, `src/command-centre/index.html`, `src/franchise/index.html`, `src/merchant/index.html`, `src/merchant/merchant-tablet-styles.css`, `src/merchant/merchant-tablet-logic.js`, `src/dev/index.html`, `src/investor/index.html`
+
+**Operator tools migration:**
+- All five operator HTML files moved from repo root into `src/[slug]/index.html` — now served by Eleventy at proper URLs
+- `command-centre.html` → `/command-centre/`, `franchise-dashboard.html` → `/franchise/`, `merchant-tablet.html` → `/merchant/`, `dev-console.html` → `/dev/`, `investor-snapshot.html` → `/investor/`
+- `merchant-tablet-styles.css` and `merchant-tablet-logic.js` moved into `src/merchant/` alongside `index.html` (relative paths preserved)
+- `eleventy.config.js` updated: passthrough rules for `src/merchant/merchant-tablet-styles.css` and `src/merchant/merchant-tablet-logic.js`
+- Root-level files deleted via `git rm`
+
+**Franchise dashboard UI polish (CC-81b/c):**
+- Topbar: date filter + theme pill moved to right side as `.topbar-controls`; `gap: 20px` between them for clear separation
+- Sidebar top: "REFUELER FRANCHISE" label + franchise group name in gold replaces "Fenchurch St line" eyebrow
+- Sidebar nav reorder: Operator Controls → Venue Roster → Orders → Revenue (Finance → Financials)
+- Sidebar footer: column layout — email above sign out, no pill; `--fg-muted` colour for legibility in both Paper and Carbon
+- Commission tab renamed Revenue; Venue Payout leads the bar chart, Refueler Fee secondary; column headers updated
+- KPI strip: 4th card = Venue Payout with Refueler fee as muted sub-line; "GMV" → "Total Orders Value" everywhere user-facing
+- `moniker@rajeshtaylor.com` merchant_users row updated: `independent_owner` → `franchise_hq`, `franchise_group_id` = Costa Coffee
+
+**CC-81d — cross-browser magic link fix:**
+- `emailRedirectTo: window.location.href` causes magic link to open in OS default browser (not the one that requested it) — logged as Auth-1
+- Fix: hash token exchange IIFE runs before `onAuthStateChange`, detects `access_token` in URL fragment, calls `sb.auth.setSession()`, strips tokens from URL via `history.replaceState`
+- Auth now works regardless of which browser the magic link opens in
+
+**Snag list:**
+- Auth-1: ✅ Resolved (hash token exchange)
+- Export-1: PDF/print icon on Revenue tab and Orders table panels — deferred
+- Dash-1: Orders over time (bar chart) + Peak hours (heatmap) on Overview — deferred until order volume exists
+
+**Opus sessions queued:**
+- Pass-A: Pass/Events concept for franchise dashboard — greyed stub, activation model, nav hierarchy
+- Pass-B: Venue hire extension — external hirer flow, Fountain livestream integration, sats-on-first-drink
+
+**Commits:** `cd9c288` CC-81 | `4f343d8` operator tools into src/ | `b891e83` topbar/sidebar/Revenue | `f7b7260` footer legibility (file accidentally deleted) | `9dcc2ad` restore + hash auth fix
 
 ---
 
