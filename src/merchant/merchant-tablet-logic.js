@@ -270,7 +270,7 @@ async function ownerSignOut() {
   _staffAuthenticated = false;
   const client = getSbClient();
   if (client) await client.auth.signOut();
-  window.location.href = 'command-centre.html';
+  window.location.href = '/command-centre/';
 }
 
 // ─── MAGIC LINK (owner gate) ─────────────────────────────────
@@ -287,8 +287,8 @@ async function sendGateMagicLink() {
     // — Supabase rejects both and silently falls back to Site URL (the homepage).
     // Always hard-fall to the production URL when not running on https.
     const redirectTo = window.location.origin.startsWith('https://')
-      ? window.location.origin + '/merchant-tablet.html'
-      : 'https://refueler.io/merchant-tablet.html';
+      ? window.location.origin + '/merchant/'
+      : 'https://refueler.io/merchant/';
     const { error } = await client.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: redirectTo }
@@ -314,7 +314,7 @@ async function signOut() {
   _staffAuthenticated = false;
   const client = getSbClient();
   if (client) await client.auth.signOut();
-  window.location.href = 'command-centre.html';
+  window.location.href = '/command-centre/';
 }
 
 // ─── AUTH NAV ────────────────────────────────────────────────

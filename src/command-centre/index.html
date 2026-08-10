@@ -553,12 +553,12 @@
 
   /* ─── ROLE → DESTINATION MAP ───────────────────────────── */
   const ROLE_DESTINATIONS = {
-    merchant:           'merchant-tablet.html',
-    franchise_branch:   'merchant-tablet.html',
-    independent_owner:  'merchant-tablet.html',
-    franchise_hq:       'franchise-dashboard.html',
-    admin:              'dev-console.html',
-    investor:           'investor-snapshot.html',
+    merchant:           '/merchant/',
+    franchise_branch:   '/merchant/',
+    independent_owner:  '/merchant/',
+    franchise_hq:       '/franchise/',
+    admin:              '/dev/',
+    investor:           '/investor/',
   };
 
   const ROLE_LABELS = {
@@ -642,12 +642,12 @@
     }, 3000);
 
     try {
-      const userEmail = session.user.email;
+      
 
       const { data, error } = await sb
         .from('merchant_users')
         .select('role, venue_id, franchise_group_id')
-        .eq('email', userEmail)
+        .eq('user_id', session.user.id)
         .maybeSingle();
 
       clearTimeout(timeoutId);
