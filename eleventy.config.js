@@ -8,6 +8,11 @@ module.exports = function (eleventyConfig) {
   // Share — JS, CSS, and BLAKE3 WASM copied verbatim
   eleventyConfig.addPassthroughCopy("src/share/assets");
   eleventyConfig.addPassthroughCopy("src/share/admin");
+
+  // Merchant tablet — companion CSS and JS copied verbatim
+  eleventyConfig.addPassthroughCopy("src/merchant/merchant-tablet-styles.css");
+  eleventyConfig.addPassthroughCopy("src/merchant/merchant-tablet-logic.js");
+
   // Cloudflare Pages headers and redirects
   eleventyConfig.addPassthroughCopy("src/_headers");
   eleventyConfig.addPassthroughCopy("src/_redirects");
