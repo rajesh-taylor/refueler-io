@@ -190,9 +190,11 @@ main {
   font-family: var(--font-mono);
   font-size: 11px;
   padding: 12px 14px;
-  word-break: break-all;
   color: var(--fg-muted);
   line-height: 1.6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ── Share panel button row ─────────────────────────────────────── */
