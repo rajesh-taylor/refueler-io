@@ -1,17 +1,16 @@
 # Refueler
 
-> Bitcoin-native pre-order for Fenchurch Street line commuters.  
-> Your order is ready. So is your train.
+> Bitcoin-native privacy infrastructure. London.
 
 ---
 
-## What it is
+## Products
 
-Refueler times café and food orders to a commuter's train arrival on the Fenchurch Street line (Shoeburyness → Fenchurch Street). The commuter orders on the app, the venue gets the order at the right moment, and the item is ready at the counter when they walk in — no queue, no wait.
+**Share** — Anonymous encrypted file transfer. No account. No identity. The server stores encrypted noise and cannot read file content or identify users. Live at [refueler.io/share](https://refueler.io/share/).
 
-Payment is settled over the Lightning Network. The app is designed for both Bitcoin-native users (sats rewards) and everyday commuters (loyalty stamp bridge).
+**Legend** — Privacy-first Bitcoin block explorer. Designed for users who need to query addresses without broadcasting what they own or what they're watching. In development.
 
-**Status:** Infrastructure live. Pre-TestFlight. Beta target: July 2026.
+**Consumer app** — Lightning-native pre-order for commuters. Orders timed to train arrivals; payment settled via the Lightning Network. End-to-end flow verified on GrapheneOS.
 
 ---
 
@@ -19,58 +18,50 @@ Payment is settled over the Lightning Network. The app is designed for both Bitc
 
 | Layer | Technology |
 |---|---|
-| Mobile app | React Native (iOS-first) |
+| Mobile app | React Native (Expo Router) |
 | Backend / DB | Supabase |
-| Auth | Supabase magic link (email) |
-| Payments | Lightning BOLT11 via Blink (`api.blink.sv/graphql`) |
+| Auth | Supabase magic link (PKCE) |
+| Payments | Lightning BOLT11 via Blink |
+| File transfer | AES-GCM client-side + BLAKE3 chunk verification |
+| Anonymous auth | Cashu blind signatures (NUT-00) |
 | Hosting | Cloudflare Pages ← GitHub `main` |
-| Analytics | Cloudflare Analytics Engine |
+| Workers | Cloudflare Workers |
 | Email | Tuta Business + Resend SMTP |
-| Ecash (future) | Cashu CDK — closed-loop loyalty stamp mint |
 
 ---
 
-## Command Centre
+## Operator interfaces
 
-Five operator-facing interfaces, all served from repo root via Cloudflare Pages:
+Five internal tools, served at `refueler.io/[slug]/`:
 
-| File | Role | Access |
-|---|---|---|
-| `command-centre.html` | Auth entry point — role-based routing | All operator roles |
-| `merchant-tablet.html` | Live order queue + Darwin departure feed | Venue staff / owners |
-| `dev-console.html` | Platform telemetry, Blink wallet, error stack | Admin only |
-| `franchise-dashboard.html` | Franchise HQ reporting | Franchise HQ role |
-| `investor-snapshot.html` | Read-only platform KPIs | Investor role |
-
-Supporting files: `merchant-tablet-styles.css`, `merchant-tablet-logic.js`, `analytics.js`.
-
-Auth flow: magic link email → `command-centre.html` → role resolved from `merchant_users` → redirect to appropriate interface.
+| URL | Role |
+|---|---|
+| `/command-centre/` | Auth entry point — role-based routing |
+| `/merchant/` | Live order queue + departure feed |
+| `/franchise/` | Franchise HQ reporting |
+| `/dev/` | Platform telemetry and diagnostics |
+| `/investor/` | Read-only platform KPIs |
 
 ---
 
 ## Supabase edge functions
 
-| Function | Purpose | Status |
-|---|---|---|
-| `create-order` | Generate Blink BOLT11 invoice at order confirm | ACTIVE |
-| `blink-webhook` | Receive Blink payment settlement, update `merchant_orders` | ACTIVE |
-| `blink-balance` | Return Blink wallet balance (sats + GBP) for dev console tile | ACTIVE |
+| Function | Purpose |
+|---|---|
+| `create-order` | Generate Blink BOLT11 invoice at order confirm |
+| `blink-webhook` | Receive Blink payment settlement |
+| `blink-balance` | Blink wallet balance for internal tooling |
+| `rail-signal-poll` | Live departure feed poller |
 
 ---
 
-## Key architecture decisions
+## Architecture principles
 
-- **Merchants read from `merchant_orders` only** — never `orders` directly (data isolation, locked)
-- **Geofence is on-device only** — no location data ever transmitted (GDPR, locked)
-- **Lightning address is transient** — never persisted to database, logs, or backups
-- **Blink only for beta** — BOLT12 parked; ZBD permanently replaced
-
----
-
-## Corridor
-
-**Fenchurch Street line only.** Never "C2C" (trademark clearance pending).  
-37.3M annual journeys · ~29,760 daily passengers · 45th most used UK station (ORR 2025).
+- Merchants read from `merchant_orders` only — never `orders` directly
+- Geofence is on-device only — no location data transmitted
+- Lightning address is transient — never persisted to database or logs
+- No new subdomains — all products live at `refueler.io/[product]/`
+- No external mint — ecash is closed-loop, non-monetary
 
 ---
 
