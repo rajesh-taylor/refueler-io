@@ -1,6 +1,6 @@
 # SESSIONS — refueler-io
 *Canonical session log for `rajesh-taylor/refueler-io`.*
-*Last updated: Merchant-Sats-B · 2026-08-11 (Opus uncounted — reward flow locked, ADR-MS-11 through ADR-MS-18, multi-programme stamps, commission schema, Stripe shape, Block 8 pre-req schema, walk-in trigger, float mechanics)*
+*Last updated: Merchant-Sats-C · 2026-08-11 (Opus uncounted — reward choice UI spec locked, ADR-MS-19 through ADR-MS-28, Pass Wallet card scoped, sats non-destruction guarantee, Cashu upgrade direction, `orders.reward_status` mirror column, stamp read path via RLS confirmed)*
 
 ---
 
@@ -48,6 +48,36 @@ Sessions used to Merchant-Sats-B: ~83 counted + uncounted planning sessions.
 ---
 
 ## Session log
+
+### Merchant-Sats-C — date: 2026-08-11
+**Scope:** Reward choice UI spec for consumer app — state machine, sats claim UX, stamp picker, edge cases, Pass Wallet card, Realtime requirements. Opus — uncounted.
+**No commits this session.**
+
+**Decisions locked:**
+
+- **ADR-MS-19 — Inline sub-state model:** Reward choice is an inline sub-state of the settled view, never a navigated screen. NativeTabs constraint honoured. `rewardState` reducer driven by server state (`orders.reward_status`) — always rehydrated on foreground, never trusted from memory.
+
+- **ADR-MS-20 — Skip vs abandon:** Explicit Skip → `declined` (hard, requires confirm copy: *"Skip this reward? You won't be able to claim these sats later."*). Silent abandonment (background/kill/close) → `claimable` → recovery banner on next open. Token expiry 7 days. Unclaimed sats never destroyed — LNURL-withdraw pull model means float never debited until claim.
+
+- **ADR-MS-21 — `orders.reward_status` mirror column:** `none|claimable|paused|claimed|expired|declined`. App's single read surface. Piggies off existing per-order Realtime subscription (CC-69). No new Supabase channel. `reward_payouts` stays service-role-only.
+
+- **ADR-MS-22 — Float-low pre-emptive signal:** Primary = claim-time graceful (token stays open, alert fires). Enhancement = `float-monitor` sets `reward_status = paused` on open claimable rows when below low-water. App greys Claim option. No float balance exposed to client.
+
+- **ADR-MS-23 — Stamp read path RLS:** RLS SELECT for `authenticated` on `stamp_programmes` where `active = true` (non-sensitive columns). No edge function. Bundle into CC-84 pre-req migrations.
+
+- **ADR-MS-24 — New edge functions:** `get-reward` (returns token data at claim time, never stored in app) and `decline-reward` (explicit skip only — not called on abandon).
+
+- **ADR-MS-25 — 7-day token expiry:** LNURL-withdraw token expires 7 days from issuance. Static date display, not countdown. Digital stamps do not expire — separate concept.
+
+- **ADR-MS-26 — Pass Wallet card (first-class Pass-A feature):** `NO_WALLET` state resolved by surfacing the LNURL token as a card in the Pass tab. Front face: QR + amount. Reverse face: Refueler products + download CTA (ADR-MS-27). Varops instrument — same infrastructure as stamp token, different face. Interim (before Pass tab exists): server-side recovery-banner only. Apple/Google Wallet: fallback for Pass *ticketing* only, not the reward card.
+
+- **ADR-MS-27 — Card reverse face:** Referral surface, not marketing panel. Refueler wordmark, three product one-liners (Share · Legend · Pass), single CTA (*"Get the app"* → refueler.io), privacy tagline. No forwarding UX — screenshot-and-send is the natural gesture. Reverse face designed in Pass-A. Legend mobile clean UX vs mempool.space density noted as the conversion pitch for curious new users arriving via a gifted card.
+
+- **ADR-MS-28 — Cashu token upgrade: locked as direction:** When mint live, Pass Wallet card upgrades from LNURL-withdraw to Cashu NUT-00 token. Enables offline spend, transfer without QR exposure, gifting via string. Float debited at Cashu issuance (vs claim for LNURL) — NUT-07 expiry sweep mandatory before Cashu reward goes live. Sats must never be destroyed — standing constraint across all reward infrastructure.
+
+- **Sats non-destruction guarantee confirmed:** Under LNURL-withdraw pull model, unclaimed sats never leave the float. Under future Cashu push model, expiry sweep (NUT-07) is mandatory. Any mechanism that could result in unrecoverable sats requires explicit founder sign-off. This is a standing ADR, not a one-time note.
+
+---
 
 ### Merchant-Sats-B — date: 2026-08-11
 **Scope:** Reward flow, stamp lifecycle, commission schema, Stripe shape, Block 8 pre-req schema, walk-in commission trigger, float mechanics, multi-programme stamps. Opus — uncounted.
@@ -185,22 +215,29 @@ Standing rules: Read live files from GitHub before touching anything. DDL via `a
 
 ---
 
-## Opening prompt — Merchant-Sats-C (Opus — uncounted)
+## Opening prompt — Pass-A (Opus — uncounted)
 
 **Attach:** `Refueler_MasterContext_IO_CC83.md`, `SESSIONS-refueler-io-CC83.md`, `REFUELER-BRIDGE.md`
 
-Merchant-Sats-C open. Reward choice UI spec for the consumer app. Opus — uncounted.
+Pass-A open. Full Pass product scope. Opus — uncounted. Extended thinking on.
 
-**Baseline:** ADR-MS-11 through ADR-MS-18 locked (Merchant-Sats-B). LNURL-withdraw pull model locked. Stamp track scaffolded pending mint.
+**Baseline:** ADR-MS-7 (Pass initial scope — ticketing, conditional entitlement, Fountain streaming, Apple/Google Wallet non-app path). ADR-MS-26–28 (Pass Wallet card — LNURL-withdraw bearer card in Pass tab, reverse face as referral surface, Cashu upgrade direction locked). ADR-MS-1 (Refueler never in the payment flow). Varops framing applies — Pass Wallet card and stamp token are both varops instruments.
 
 **Scope:**
-1. Reward choice screen state machine — exactly when it appears in the app settlement flow, what states it has, what triggers transitions. Pre-order Lightning (Flow 1) and pre-order fiat (Flow 2) may need different timing.
-2. Sats path: LNURL-withdraw claim UX — what the customer sees, what happens if their wallet app isn't open, how expiry is communicated, what "try again" looks like. NativeTabs constraint applies (no `router.replace` to sibling routes — settled view must remain inline state changes).
-3. Stamp path (scaffolded only — UI to exist Block 8, but dark until mint): what the programme picker looks like when there are 1 / 2 / 3 active programmes. Venue name and programme name displayed. "Buy 9 get 1 free" mechanic clearly communicated without being wordy.
-4. Edge case specs: float zero → sats option greyed / removed; no active programmes → stamp option absent; customer declines both → Skip confirmation; connection failure → token retained server-side, in-app recovery prompt on next app open.
-5. What Realtime events or polling the app needs to support the reward flow — is there a new Supabase channel needed beyond the existing settlement subscription?
 
-**Output:** Reward choice screen spec (state machine + annotated wireframe descriptions), NativeTabs-compatible implementation notes, new Realtime/polling requirements. Updated MasterContext and SESSIONS.
+1. **Pass Wallet card as first-class feature.** The card lives in the Pass tab. Front face: venue name, `5,284 sats` (always `toLocaleString()`), LNURL QR, expiry date. Reverse face: Refueler wordmark, one-line product descriptions (Share · Legend · Pass), *"Get the app"* CTA, privacy tagline. Card is a disposable Lightning bearer instrument — scan-to-claim by any wallet, single-use, single-amount. No forwarding UX built in (screenshot-and-send is the natural gesture). Interim behaviour if Pass tab not yet live: recovery-banner only. Cashu upgrade path (ADR-MS-28) — where does this change the card's data model and UX? Spec both LNURL and Cashu faces.
+
+2. **Ticketing credential.** QR/NFC in Refueler app or Apple/Google Wallet pass (non-app fallback for guests). Conditional entitlement post-scan (e.g. free first drink unlocks after entry). Venue terminal reads credential state. What does the credential contain? What's the minimal identifying information? Privacy layer.
+
+3. **Fountain / LNURL streaming opt-in.** After entry, LNURL address in-app. Customer streams sats to artist's Fountain profile Lightning address or any LNURL-compatible wallet. Opt-in, graceful skip if no Fountain profile. How does this interact with the Pass Wallet card — can a customer stream *from* their card balance?
+
+4. **Varops architecture.** Pass Wallet card + stamp token + ticketing credential all live in the Pass tab. What's the unified data model? How does the tab feel — a wallet of cards, or separate sections? What's the tab's nav label (Pass? Wallet? Cards?)?
+
+5. **Legend mobile.** Not Pass scope per se, but flag it: clean UX vs mempool.space density is the conversion pitch for curious users who arrive via a gifted Pass Wallet card. Note for the first Legend build session.
+
+6. **Sats non-destruction guarantee (ADR-MS-28).** Under Cashu issuance, float is debited at mint. NUT-07 expiry sweep is mandatory before Cashu rewards go live. Spec the sweep behaviour in this session so Session A (CDK mint) can implement it.
+
+**Output:** Pass product spec (ticketing credential, Wallet card, Fountain streaming, varops data model), tab architecture, card reverse design brief, Cashu upgrade requirements for Session A. Updated MasterContext and SESSIONS.
 
 ---
 
