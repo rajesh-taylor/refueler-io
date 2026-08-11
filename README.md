@@ -10,6 +10,8 @@
 
 **Legend** — Privacy-first Bitcoin block explorer. Designed for users who need to query addresses without broadcasting what they own or what they're watching. In development.
 
+**Pass** — Lightning-native ticketing and venue access. Early-stage research.
+
 **Consumer app** — Lightning-native pre-order for commuters. Orders timed to train arrivals; payment settled via the Lightning Network. End-to-end flow verified on GrapheneOS.
 
 ---
