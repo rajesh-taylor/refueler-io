@@ -1,6 +1,6 @@
 # Refueler Master Context — IO CC-83
-*Updated: 2026-08-11 (Block-5 Review — Opus uncounted. Sim discipline formalised. AD-1 complete. AD-2 added. S-13 deleted. Session allocation confirmed 550. Block 8 promoted above Blocks 6/7. Sim Stage gate defined.)*
-*Supersedes: CC-82*
+*Updated: 2026-08-11 (Merchant-Sats-A — Opus uncounted. Payment architecture locked. ADR-MS-1 through ADR-MS-10 added. Five flows extended to seven. Pass initial scope locked.)*
+*Supersedes: CC-82 / Block-5 Review*
 *Sync log: MasterContext_IO_CC83 — no schema changes this session. Planning session only.*
 
 ---
@@ -8,13 +8,13 @@
 ## Session allocation
 500 primary + 50 buffer = 550 total. Planning/Opus sessions uncounted.
 **Block review sessions** — standing uncounted Opus at end of each block. Recalibrate priorities and session allocation.
-Sessions used to CC-83 (Block-5 Review): ~83 counted + uncounted planning sessions.
+Sessions used to CC-83 (Merchant-Sats-A): ~83 counted + uncounted planning sessions.
 
 ---
 
 ## Project overview
 
-Refueler is a Bitcoin-native privacy ecosystem. Products: Share (anonymous encrypted file transfer, live at `refueler.io/share/`), Legend (privacy-first block explorer, post-B9), consumer pre-order app (Fenchurch St line), merchant terminal (cafés and restaurants near stations), Pass (Lightning-native ticketing and venue access, early-stage research).
+Refueler is a Bitcoin-native privacy ecosystem. Products: Share (anonymous encrypted file transfer, live at `refueler.io/share/`), Legend (privacy-first block explorer, post-B9), consumer pre-order app (Fenchurch St line), merchant terminal (cafés and restaurants near stations), Pass (Lightning-native ticketing and venue access — own repo and Claude project), Numo (in-venue Lightning + fiat terminal, fork of Numo hardware).
 
 **Mission:** A Bitcoin-native privacy layer operating within UK jurisdictional law. Not a fintech product. Not a loyalty app. A Bitcoin world that works quietly, legally, and without surveillance.
 
@@ -32,6 +32,7 @@ Refueler is a Bitcoin-native privacy ecosystem. Products: Share (anonymous encry
 | `rajesh-taylor/refueler-share` | Public — BLAKE3 + Cashu file transfer | `/Users/rajeshtaylor/Documents/refueler-share/` |
 | `rajesh-taylor/refueler-legend` | Public — Legend chain explorer + ARM Bitcoin indexer | `/Users/rajeshtaylor/Documents/refueler-legend/` |
 | `rajesh-taylor/refueler-mint` | Public — CDK Rust loyalty stamp mint | `/Users/rajeshtaylor/Documents/refueler-mint/` |
+| `rajesh-taylor/refueler-pass` | Public — Pass ticketing + venue access | Own repo + Claude project — Pass-A/B sessions |
 | `refueler-ecash-lab` | **Local only — never push** | `/Users/rajeshtaylor/Documents/refueler-ecash-lab/` |
 
 ---
@@ -157,6 +158,113 @@ Single token source: `global.css`. No page defines its own `:root`. No body-leve
 
 ---
 
+## Merchant payment architecture — locked Merchant-Sats-A · 2026-08-11
+
+### ADR-MS-1 — Refueler is never in the payment flow
+Refueler is an orchestrator and attribution layer, never a custodian or intermediary between consumer payment and merchant receipt. Consumer sats settle directly to the merchant's own wallet. Consumer fiat is processed by a licensed third party (Stripe for card; merchant's own acquirer for Numo walk-in terminal). Refueler's own revenue is collected separately as a B2B platform fee charged to the merchant. The Blink float (`fd2357fe…`) holds only Refueler's own received revenue — never consumer funds in transit.
+
+Model A (consumer funds routed through Refueler wallet then forwarded to merchant) is permanently excluded. Any future feature that routes consumer payment through a Refueler-controlled wallet requires a new FCA/PSR review before implementation.
+
+*Note: the beta uses one Blink wallet because it has no real merchant. Sim money has no regulator. At real-merchant go-live, `create-order` must issue against the merchant's own credentials.*
+
+### ADR-MS-2 — Commission liability trigger
+Commission liability is created **only by Refueler-originated, app-attributed orders.** Walk-in transactions on Numo that are not attributed to a Refueler app session generate no commission. This framing positions the fee as a marketing platform fee (Refueler demonstrably drove the foot-flow), not merchant acquiring.
+
+Commission is collected in **fiat, in real time, off the sats flow.** On Lightning settlement confirmation, a GBP charge fires to the merchant's stored card at the sats→GBP rate recorded in `orders.sats_rate`. Instrument: Stripe saved `PaymentMethod` + off-session `PaymentIntent`. No Stripe Connect — Refueler is billing its own customer, not splitting a payment it processed.
+
+### ADR-MS-3 — Loyalty stamps: closed loop, no FCA grey area
+Digital stamps for fiat-paying app users are a closed-loop promotional instrument. Buy 9, get the 10th free. Cannot be converted to sats or fiat. Cashu ecash tokens are strictly non-monetary and closed-loop in the UK. No e-money classification risk. No regulatory treatment required.
+
+### ADR-MS-4 — Numo's role
+Numo is the standard merchant hardware recommendation, installed at onboarding. NFC + Lightning + fiat. It extends the Refueler merchant surface to walk-in customers without requiring the Refueler app on the consumer side.
+
+**Scenario A (Refueler app present):** customer has the app → Numo detects or customer presents → order flow continues → commission attributable → reward offered.
+
+**Scenario B (no Refueler app):** Numo defaults to the merchant's own flow. Lightning payment goes directly to the merchant's Lightning address or Silent Payments setup, configured in the owner-only terminal view. No Refueler commission. No Refueler custody. Refueler is invisible to this transaction entirely.
+
+Scenario B is anticipated to become the dominant walk-in pattern as Bitcoin adoption grows. The architecture is designed to be comfortable with this — Refueler's value in Scenario B is the merchant infrastructure and dataset, not transaction revenue.
+
+### ADR-MS-5 — The seven payment flows (locked)
+
+**Flow 1 — App pre-order, Lightning**
+Consumer app → `create-order` issues BOLT11 against merchant's credentials → consumer pays → Lightning settles to merchant's wallet → Refueler captures attribution → real-time fiat commission charge to merchant's stored card.
+
+**Flow 2 — App pre-order, fiat (Block 8)**
+Consumer pays by card via Stripe → Stripe processes directly (Stripe holds the licence, Refueler calls the API) → settlement to merchant via Stripe → real-time commission charge. Stamp reward issued from closed-loop pool if customer selects it. Block 8 scopes the reward mechanic in detail (Merchant-Sats-B).
+
+**Flow 3 — App walk-in, fiat**
+Customer uses the Refueler app as an ordering reference handed to staff. Payment is fiat on the merchant's own terminal. App attribution is present → commission applies → real-time charge fires on staff order confirmation, not on payment settlement (no payment event visible to Refueler on fiat walk-in). Commission trigger event to be confirmed in Merchant-Sats-B.
+
+**Flow 4 — App walk-in, Lightning**
+Customer uses the Refueler app to present a Lightning payment. Merchant's own Lightning address or Silent Payments setup receives directly. App attribution present → same commission logic as Flow 3. Commission trigger event to be confirmed in Merchant-Sats-B.
+
+**Flow 5 — Numo walk-in, no app (fiat)**
+Consumer pays fiat on Numo → merchant's own acquirer → no Refueler attribution → no commission → no reward offered. Refueler invisible.
+
+**Flow 6 — Numo walk-in, no app (Lightning)**
+Consumer pays Lightning → merchant's own wallet directly → no attribution → no commission → no reward. Refueler invisible.
+
+**Flow 7 — Legend merchant add-on**
+£250/mo per entity, invoiced as part of terminal fee. No payment flow. Pure SaaS. Price held — free tier available as goodwill but never discounted from list. Enterprise and family office price-point credibility requires holding the number.
+
+### ADR-MS-6 — Node purpose (three-way lock)
+These three are permanently distinct and must never be described together:
+
+**1. Legend indexer node (post-B9):** Full node + BLAKE3-accelerated esplora fork. Indexes the chain for Legend queries. Handles no one's payment. Refueler's own infrastructure.
+
+**2. Merchant settlement node (long-term, optional):** A merchant's *own* self-custodial node receiving *their own* sales. Refueler may assist setup. Not between parties. Merchant's money throughout.
+
+**3. Refueler treasury:** Blink float (Refueler's own received revenue: platform fees, Share/Legend subscriptions) → Silent Payment sweep → cold storage. Operating-capital treasury management. Not a "Bitcoin treasury" strategy. Not consumer funds. Not merchant funds.
+
+The forbidden fourth — a Refueler node between consumer payment and merchant receipt — is Model A. Permanently excluded.
+
+The Stage 3 sim node and the Legend node are the same physical box. One box, two purposes (both purpose 1 until a merchant opts into self-custodial settlement on their own infrastructure).
+
+### ADR-MS-7 — Pass: initial scope (locked)
+Pass is a Lightning-native competitor to Ticketmaster/Eventbrite. It has its own repo (`rajesh-taylor/refueler-pass`) and its own Claude project. Pass-A and Pass-B sessions scope the full product. This record locks the principle and initial feature set only.
+
+**The ticket credential:** QR code living in the Refueler app *or* in Apple/Google Wallet for non-app users. Proves ticket purchase. Standard venue scanning at the door. Inherits ADR-MS-1 — ticket sats settle to venue, Refueler bills platform fee.
+
+**Conditional entitlement:** Ticket conditions change post-scan. Example: free first drink costed into the ticket price, entitlement unlocks once the customer has passed front-door security. The QR/NFC credential carries the state; the venue terminal reads it.
+
+**Fountain/LNURL streaming (opt-in):** After entry, an LNURL address appears in-app. Customer can stream sats to the performing artist's Fountain profile Lightning address during the gig, or accumulate them in their own Lightning wallet. Opt-in. Artist must have a Fountain profile or any LNURL-compatible wallet.
+
+**Apple/Google Wallet path for non-app users:** PKPass / Google Wallet pass. No Refueler app required for entry. LNURL streaming opt-in requires the Refueler app — graceful skip if absent.
+
+**Privacy layer:** to be specified in Pass-A/Pass-B. Minimum identifying information on the credential. Streaming payments pseudonymous.
+
+### ADR-MS-8 — BOLT12 position
+On the roadmap, not in scope for beta or Block 9. Three conditions before adoption: (a) receive-side wallet support is mainstream; (b) `create-order`'s invoice layer is abstracted for clean swap-in; (c) merchant has a persistent always-on node (LNbits/phoenixd/Greenlight) — a tablet cannot serve this role. Numo's BOLT12 viability is as a client to the merchant node, not as the node itself.
+
+### ADR-MS-9 — Flywheel (locked)
+
+```
+Desktop:  Share ──────────────────────────────────► Legend
+          Pass  ──────────────────────────────────► Legend
+                                                       │
+Mobile:   App + Pass ───────────────────────────────► Legend
+          (same app, separate tabs)                    │
+                                                       │
+In-venue: Numo ──► Merchant dashboard ──────────────► Legend
+                                                       │
+                                         "Come for privacy,
+                                          stay for Bitcoin"
+```
+
+Share, Pass, and Legend all feed Legend on desktop. On mobile, the app and Pass are the primary drivers toward Legend. Three surfaces, one destination. Open-source terminal / proprietary Legend integration + node network is the moat.
+
+### ADR-MS-10 — Legal caveat (permanently logged)
+*Not legal advice. Points requiring UK payments solicitor sign-off before real-merchant go-live:*
+
+1. Whether generating a Lightning invoice on a merchant's behalf constitutes payment initiation under PSR 2017 Schedule 1 Part 2. Assessment: Lightning wallets are not PSR-regulated payment accounts; risk is assessed as low.
+2. Whether commission-on-attributed-transaction pricing could be construed as merchant acquiring rather than a platform fee. Assessment: ADR-MS-2 attribution framing is the defence.
+3. The fiat walk-in leg on Numo — confirm routing via the merchant's own acquirer is sufficient to exclude Refueler from PSR scope.
+4. Cashu ecash stamp tokens — confirm non-monetary, closed-loop classification holds under UK e-money regulations. (Self-researched by Rajesh — confirm with solicitor.)
+
+*Lawyer briefing note: approach as confirmation of a designed architecture, not an open risk assessment. Present the ADRs above and ask for written confirmation that the described flows are outside PSR / EMR / FCA payment services scope.*
+
+---
+
 ## Simulation discipline — locked Block-5 Review
 
 **No real merchant clients until all four sim stages pass.** Raj's Steakhouse (`steakhouse@rajeshtaylor.com`, `independent_owner`, venue_id `c476df85`) is the primary simulation entity. Build, test, and break things there first.
@@ -166,18 +274,18 @@ Raj's Steakhouse tablet receives live consumer app orders end-to-end. Full order
 **Evaluate:** Can a fake staff member run a complete shift on the tablet without Rajesh touching the database?
 
 ### Sim Stage 2 — Franchise screen wired alongside
-A second sim entity under `franchise_hq` (Moniker, already exists as franchise_hq test) with franchise dashboard showing real KPI data flowing from sim orders. Milestone: migrate Raj's Steakhouse from `independent_owner` to a franchise entity — simulating a venue expanding thanks to the Refueler customer acquisition funnel.
+A second sim entity under `franchise_hq` (Moniker) with franchise dashboard showing real KPI data flowing from sim orders. Milestone: migrate Raj's Steakhouse from `independent_owner` to a franchise entity — simulating a venue expanding via the Refueler funnel.
 **Evaluate:** Does the franchise view reconcile with what the tablet shows? Does the independent→franchise migration path work cleanly?
 
 ### Sim Stage 3 — Node in the loop *(deferred — B9-gated)*
-Replace Blink custodial wallet with self-custodial Lightning node for consumer payment settlement. This is the same node Legend depends on (full Bitcoin node + indexer). Commission from merchants arrives in fiat (6–10% GBP) — that is separate. This stage is about consumer sats settlement becoming self-custodial. Merchants who wish to receive revenue in sats would follow a separate product decision downstream of Block 8.
+Replace Blink custodial with self-custodial Lightning node for consumer payment settlement. Same node as Legend. Commission from merchants arrives in fiat (GBP) — separate. Stage 3 is about consumer sats settlement becoming self-custodial.
 **Gate:** B9 must be live before Stage 3 sim can complete.
 
 ### Sim Stage 4 — Training document in hand
-Printed handover document physically produced (designed in Onboarding-A, printed by Rajesh). Sim includes the complete experience a real merchant would receive, paper included.
-**Evaluate:** Can a venue manager onboard, set PINs, and run the tablet using only the printed document and the magic-link email — without any verbal guidance from Rajesh?
+Printed handover document physically produced (designed in Onboarding-A, printed by Rajesh). Sim includes the complete experience a real merchant would receive.
+**Evaluate:** Can a venue manager onboard, set PINs, and run the tablet using only the printed document and magic-link email — without verbal guidance?
 
-**Sim-Close (Opus, uncounted):** Dedicated review session(s) — up to two — that formally sign off all four stages before any real merchant is onboarded. The go-live decision is made here, not assumed.
+**Sim-Close (Opus, uncounted):** Up to two dedicated sessions formally signing off all four stages before any real merchant is onboarded. Go-live decision made here.
 
 ---
 
@@ -191,13 +299,13 @@ Printed handover document physically produced (designed in Onboarding-A, printed
 - `admin` → `/dev/`
 - `investor` → `/investor/`
 
-**PIN gate (CC-82):** `tablet-ui` div hidden (`display:none`) until staff PIN accepted. Revealed by `onStaffAuthenticated()`, hidden by `signOut()` and `ownerSignOut()`. Known flash (~1 frame) — S-1, fix queued (dedicated session, inline gate CSS in `<head>`).
+**PIN gate (CC-82):** `tablet-ui` div hidden (`display:none`) until staff PIN accepted. Revealed by `onStaffAuthenticated()`, hidden by `signOut()` and `ownerSignOut()`. Known flash (~1 frame) — S-1, fix queued.
 
-**Merchant nav (queued CC-83):** STEAKHOUSE badge is currently merchant_id slug — should display `venue_partners.name`. Queue/Ops mode switch to become explicit two-state pill (replacing STEAKHOUSE toggle). Venue name or logo centred in nav. `venue_partners.logo_url` column to be added.
+**Merchant nav (queued CC-83):** STEAKHOUSE badge displays `venue_partners.name`. Queue/Ops mode switch → explicit two-state pill. Venue name or logo centred in nav. `venue_partners.logo_url` column to be added.
 
-**Merchant tablet UX (queued CC-83):** Horizon strip stat values need ~20% size increase for kitchen readability. Sidebar needs `min-height: 100%` to fill full column. "Accepting orders" toggle defaults to off — training implication documented in printed handover.
+**Merchant tablet UX (queued CC-83):** Horizon strip stat values ~20% size increase. Sidebar `min-height: 100%`. "Accepting orders" toggle defaults to off — training implication in printed handover.
 
-**Order correction and refunds (Sim Stage 1 scope):** Flow for correcting orders placed in error (wrong drink/size) and refund handling — DB repercussions and financial screen consequences — to be defined and built in Sim Stage 1 work.
+**Order correction and refunds (Sim Stage 1):** Flow for correcting orders in error and refund handling — DB repercussions and financial screen consequences — to be defined and built in Sim Stage 1 work.
 
 ---
 
@@ -207,7 +315,8 @@ Printed handover document physically produced (designed in Onboarding-A, printed
 |---|---|
 | Mobile app | React Native / Expo, Expo Router |
 | Backend | Supabase (Postgres, Edge Functions, Realtime, RLS) |
-| Payments | Blink BOLT11 (`api.blink.sv/graphql`) |
+| Payments | Blink BOLT11 (`api.blink.sv/graphql`) — beta/sim only |
+| Commission collection | Stripe off-session PaymentIntent (stored card) — Block 8 |
 | Webhook | `blink-webhook` v12, direct Blink callback |
 | Web/CDN | Cloudflare Pages + Workers |
 | Auth | PKCE via `refueler-auth-proxy` Cloudflare Worker |
@@ -283,20 +392,21 @@ Three-layer: Realtime + poll (3s, 5 min) + AppState foreground guard. Settled vi
 | Session | Scope | Type | Status |
 |---|---|---|---|
 | ~~CC-82~~ | Block 5 pre-work + test env + E2E | Sonnet counted | ✅ Closed |
-| ~~Block-5 Review~~ | Recalibrate Block 5 scope, sim discipline, priorities | Opus uncounted | ✅ This session |
-| **CC-83** | Block 5 — venue RLS fix, nav redesign, horizon strip, sidebar, logo_url, delete S-13 orphan row | Sonnet counted | **Next** |
-| **Onboarding-A** | Merchant onboarding flow design + printed handover document | Opus uncounted | Queued after CC-83 |
+| ~~Block-5 Review~~ | Recalibrate Block 5 scope, sim discipline, priorities | Opus uncounted | ✅ Closed |
+| ~~Merchant-Sats-A~~ | Payment architecture, flows, flywheel, node purpose | Opus uncounted | ✅ This session |
+| **CC-83** | Block 5 — venue RLS fix, nav redesign, horizon strip, sidebar, logo_url, S-13 cleanup | Sonnet counted | **Next** |
+| **Merchant-Sats-B** | Rewards backend: Blink float, Cashu stamp lifecycle, commission schema, Block 8 pre-reqs | Opus uncounted | Queued — after CC-83 files placed |
+| **Onboarding-A** | Merchant onboarding flow design + printed handover document | Opus uncounted | Queued |
 | **CC-84** | Block 5 — onboarding flow build, PIN self-service UX and RLS design | Sonnet counted | Queued |
-| **CC-85** | Block 5 — branded magic link email, first full sim run, any fallout | Sonnet counted | Queued |
-| **S-1 fix** | PIN flash — inline gate CSS in `<head>` | Sonnet counted | Queued (small — bundle into CC-83 if room, else standalone) |
+| **CC-85** | Block 5 — branded magic link email, first full sim run | Sonnet counted | Queued |
+| **S-1 fix** | PIN flash — inline gate CSS in `<head>` | Sonnet counted | Queued (bundle into CC-83 if room) |
 | **Block-5 Close** | Block 5 review and recalibration | Opus uncounted | Queued |
-| **Sim-Close** | Formal sign-off of all 4 sim stages before real merchant go-live | Opus uncounted (up to 2) | Queued — after Stage 4 complete |
+| **Sim-Close** | Formal sign-off all 4 sim stages | Opus uncounted (up to 2) | Queued |
 | **Block 8** | Fiat → sats rewards | Sonnet counted | **Promoted** — next after Block 5 |
-| **Pass-A** | Pass/Events concept for franchise dashboard — greyed stub, activation model | Opus uncounted | After Block 8 |
-| **Pass-B** | Venue hire, Fountain livestream, sats-on-first-drink | Opus uncounted | After Pass-A |
+| **Pass-A** | Full Pass scope — inherits ADR-MS-7 as baseline | Opus uncounted | After Block 8 |
+| **Pass-B** | Venue hire, Fountain detail, sats-on-first-drink | Opus uncounted | After Pass-A |
 | **Block 9** | LNBits integration | Sonnet counted | Deferred post Block 8 |
-| **Onboarding-B** | Printed handover doc (if timeboxed out of Onboarding-A) | Opus uncounted | Placeholder — may not be needed |
-| **AD-2** | Share admin dashboard — left-hand panel wiring + card drill-downs | Sonnet counted | Queued |
+| **AD-2** | Share admin dashboard — panel wiring + card drill-downs | Sonnet counted | Queued |
 | **Block 6** | Darwin Push Port upgrade | Sonnet counted | Deferred — non-gating |
 | **Block 7** | Passenger count join | Sonnet counted | Deferred — non-gating |
 
@@ -306,21 +416,21 @@ Three-layer: Realtime + poll (3s, 5 min) + AppState foreground guard. Settled vi
 
 | ID | Item | Priority | Target |
 |---|---|---|---|
-| S-1 | PIN flash — ~1 frame of tablet-ui visible before gate renders. Fix: inline gate CSS in `<head>`, gates at `z-index:9999/position:fixed/inset:0` from first paint | Medium | Dedicated session or bundle into CC-83 |
-| S-2 | "Loading venue…" in Active Site sidebar — `venue_partners` RLS likely blocking `independent_owner` read | High | CC-83 |
-| S-3 | STEAKHOUSE nav badge pulls merchant_id slug not venue name — should display `venue_partners.name` | High | CC-83 |
-| S-4 | Queue/Ops mode switch not obvious — STEAKHOUSE label doubles as toggle with no affordance. Replace with explicit two-state pill | High | CC-83 |
-| S-5 | Venue name (or logo) should be centred/prominent in merchant nav — vanity play for merchants, differentiator | Medium | CC-83 |
-| S-6 | Horizon strip stat values — ~20% size increase needed for kitchen readability at distance | Medium | CC-83 |
-| S-7 | Sidebar height — doesn't fill full column. `min-height: 100%` fix | Low | CC-83 |
-| S-8 | Owner/Staff PIN reset + Menu management — stubs in Owner View ("Beta — coming soon") | High | Onboarding-A / CC-84 |
-| S-9 | Magic link email bare Supabase template — needs branded HTML before real merchant onboard | High | CC-85 |
-| S-10 | Export-1: PDF/print icon on Revenue + Orders panels in franchise dashboard | Low | Future |
-| S-11 | Dash-1: Orders over time + peak hours heatmap on franchise dashboard Overview | Low | Post volume |
+| S-1 | PIN flash — ~1 frame of tablet-ui visible before gate renders. Fix: inline gate CSS in `<head>`, gates at `z-index:9999/position:fixed/inset:0` from first paint | Medium | Bundle into CC-83 or standalone |
+| S-2 | "Loading venue…" in Active Site sidebar — `venue_partners` RLS blocking `independent_owner` read | High | CC-83 |
+| S-3 | STEAKHOUSE nav badge pulls merchant_id slug — should display `venue_partners.name` | High | CC-83 |
+| S-4 | Queue/Ops mode switch not obvious — replace STEAKHOUSE toggle with explicit two-state pill | High | CC-83 |
+| S-5 | Venue name (or logo) should be centred/prominent in merchant nav | Medium | CC-83 |
+| S-6 | Horizon strip stat values — ~20% size increase for kitchen readability | Medium | CC-83 |
+| S-7 | Sidebar height — doesn't fill full column | Low | CC-83 |
+| S-8 | Owner/Staff PIN reset + Menu management — stubs in Owner View | High | Onboarding-A / CC-84 |
+| S-9 | Magic link email bare Supabase template — needs branded HTML | High | CC-85 |
+| S-10 | Export-1: PDF/print icon on Revenue + Orders panels | Low | Future |
+| S-11 | Dash-1: Orders over time + peak hours heatmap on franchise dashboard | Low | Post volume |
 | S-12 | `car_park_occupancy` strip from FEEDS array | Low | Next rail-signal-poll touch |
-| S-14 | `Costa Coffee HQ` category label — `franchise_hq` should display as proper name | Low | Future |
+| S-14 | `Costa Coffee HQ` category label fix | Low | Future |
 
-*S-13 deleted — `independent_owner@rajeshtaylor.com` orphan row to be removed in CC-83 migration.*
+*S-13 deleted — `independent_owner@rajeshtaylor.com` orphan row removed in CC-83 migration.*
 
 ---
 
@@ -339,6 +449,7 @@ Three-layer: Realtime + poll (3s, 5 min) + AppState foreground guard. Settled vi
 - Share streaming encryption → B-series roadmap (post-MVP)
 - Safari >1.5 GB file limit → document in Share FAQ, fix in streaming session
 - `venue_partners.logo_url` column → add in CC-83 migration
+- **Lawyer briefing:** draft written brief before appointment — can be a short Opus session
 
 ---
 
