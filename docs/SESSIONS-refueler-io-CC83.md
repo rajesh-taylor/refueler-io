@@ -1,6 +1,6 @@
 # SESSIONS — refueler-io
 *Canonical session log for `rajesh-taylor/refueler-io`.*
-*Last updated: Merchant-Sats-A · 2026-08-11 (Opus uncounted — payment architecture locked, ADR-MS-1 through ADR-MS-10, seven flows, Pass initial scope, flywheel confirmed, legal caveat permanently logged)*
+*Last updated: Merchant-Sats-B · 2026-08-11 (Opus uncounted — reward flow locked, ADR-MS-11 through ADR-MS-18, multi-programme stamps, commission schema, Stripe shape, Block 8 pre-req schema, walk-in trigger, float mechanics)*
 
 ---
 
@@ -10,7 +10,7 @@ Primary: 500 · Buffer: 50 · Total: 550
 Planning/Opus sessions: uncounted. Buffer untouchable until a block overruns.
 **Block review sessions** — standing uncounted Opus at end of each block. Recalibrate priorities and allocation.
 
-Sessions used to Merchant-Sats-A: ~83 counted + uncounted planning sessions.
+Sessions used to Merchant-Sats-B: ~83 counted + uncounted planning sessions.
 
 ---
 
@@ -49,24 +49,47 @@ Sessions used to Merchant-Sats-A: ~83 counted + uncounted planning sessions.
 
 ## Session log
 
-### Merchant-Sats-A — date: 2026-08-11
-**Scope:** Payment architecture, flows, flywheel, node purpose, Pass initial scope, legal caveat. Opus — uncounted.
+### Merchant-Sats-B — date: 2026-08-11
+**Scope:** Reward flow, stamp lifecycle, commission schema, Stripe shape, Block 8 pre-req schema, walk-in commission trigger, float mechanics, multi-programme stamps. Opus — uncounted.
 **No commits this session.**
 
 **Decisions locked:**
 
-- **ADR-MS-1:** Refueler is never in the payment flow. Consumer sats settle directly to merchant's own wallet. Consumer fiat processed by licensed third party (Stripe / merchant's own acquirer). Blink float holds only Refueler's own received revenue. Model A permanently excluded.
-- **ADR-MS-2:** Commission liability trigger = Refueler-originated, app-attributed orders only. Collected fiat, real-time, off the sats flow. Stripe off-session PaymentIntent (stored card) on Lightning settlement confirmation. No Stripe Connect.
-- **ADR-MS-3:** Loyalty stamps confirmed closed-loop, non-monetary, no FCA grey area. Buy 9 get 10th free — cannot convert to sats or fiat.
-- **ADR-MS-4:** Numo role locked. Scenario A (app present): attribution + commission + reward. Scenario B (no app): merchant's own flow, Lightning direct to merchant wallet (Silent Payments / own Lightning address in owner-only terminal view). Scenario B anticipated to become dominant — architecture is comfortable with this.
-- **ADR-MS-5:** Seven payment flows locked. Five flows from Merchant-Sats-A scope extended to seven: added Flow 3 (app walk-in fiat) and Flow 4 (app walk-in Lightning). Commission trigger event for walk-in flows (no payment event visible to Refueler on fiat) to be confirmed in Merchant-Sats-B.
-- **ADR-MS-6:** Node three-way lock confirmed. Legend indexer (post-B9) / Merchant settlement (long-term optional, merchant's own) / Refueler treasury sweep (own operating capital). Forbidden fourth (Refueler between consumer and merchant) permanently excluded. Stage 3 sim node = Legend node — same box, two purposes.
-- **ADR-MS-7:** Pass initial scope locked. Own repo (`rajesh-taylor/refueler-pass`) and own Claude project. QR/NFC credential (app or Apple/Google Wallet). Conditional entitlement post-scan. Fountain/LNURL streaming opt-in. Apple/Google Wallet path for non-app users. Privacy layer in Pass-A/B.
-- **ADR-MS-8:** BOLT12 roadmap position — not in scope for beta or Block 9. Three conditions before adoption. Numo as client to merchant node, not as node itself.
-- **ADR-MS-9:** Flywheel locked. Share + Pass + Legend → Legend on desktop. App + Pass → Legend on mobile (same app, separate tabs). Numo → merchant dashboard → Legend in-venue. Three surfaces, one destination.
-- **ADR-MS-10:** Legal caveat permanently logged. Four points requiring UK payments solicitor sign-off before real-merchant go-live. Approach lawyer as confirmation of architecture, not open risk assessment.
-- **Payment initiation clarified:** Stripe payment screen handoff does not constitute payment initiation (Stripe processes, not Refueler). Numo fiat on merchant's own acquirer — clean. Lightning on merchant's own wallet — clean. Risk is assessed as low across all seven flows. Confirm with solicitor.
-- **Merchant-Sats-B confirmed warranted:** Blink float mechanics, Cashu stamp lifecycle, commission schema, walk-in flow attribution trigger, and Block 8 pre-reqs all require a dedicated session.
+- **ADR-MS-11 — LNURL-withdraw pull model:** Sats reward is a PULL. On Lightning settlement, Refueler creates a one-time LNURL-withdraw token via Blink API. Customer claims from their own wallet at any time until expiry. Float debited only on successful claim. Failed claim leaves token in `claimable` state. ADR-4b honoured — no Lightning address ever stored. `reward_payouts` table: token string + lifecycle state only, never an address.
+
+- **ADR-MS-12 — Stamp track scaffolded, live pending mint:** Sats reward track fully live Block 8. Stamp track (`stamp_programmes`, `stamp_events`, mint issuance/redemption) scaffolded in Block 8 but dark until `refueler-mint` is deployed. No interim identity-linked DB stamp counter — contradicts IP honesty standard (Adversarial-1).
+
+- **ADR-MS-13 — Multi-programme stamps:** Max 3 active stamp programmes per venue. Programme selection: pre-order = customer selects in app; walk-in fallback cascade = time-window auto-assign → staff select → category tag (long-term). Time windows configured per programme (`start_time`/`end_time`). Max 3 active enforced via DB trigger + application layer. Merchant toggle: `venue_partners.stamp_feature_enabled boolean DEFAULT false`. Stamp feature in onboarding pitch and handover doc. Competitive check item: does Square/Toast/KDS offer this? If not, it's a differentiator.
+
+- **ADR-MS-14 — Walk-in commission trigger:** Primary trigger = staff Accept action on tablet (`merchant_orders.status` → `accepted`) → `commission_charges` row inserted. Nightly pg_cron reconciliation (02:00 UTC) surfaces attributed orders with no `commission_charges` row within 24h. Gaming risk managed by merchant agreement, not plumbing.
+
+- **ADR-MS-15 — Commission rate variability:** 4–8% range, varies by merchant and franchise. `merchant_billing.commission_rate` with `rate_effective_from` for annual renewals. `create-order` stamps rate onto `orders.commission_pct` — historical orders retain original rate permanently.
+
+- **ADR-MS-16 — Merchant billing separation:** `merchant_billing` table keyed by `venue_id`, separate from `venue_partners`. Stores `stripe_customer_id` + `has_default_pm` + `billing_status` + `delinquent_since` + `commission_rate` + `rate_effective_from`. Card data never in Supabase.
+
+- **ADR-MS-17 — Commission retry and delinquency:** `charge-commission` Edge Function, per-minute pg_cron. Up to 3 attempts, exponential backoff. After 3 fails: `commission_charges.status = delinquent`, `merchant_billing.delinquent_since` stamped, dev console alert + email.
+
+- **ADR-MS-18 — Float mechanics:** Float = Refueler's own sats revenue only. Manual top-up by Rajesh. Pre-load TBD-Rajesh based on sim volume data. Low-water alert: pg_cron every 5 min vs `float_config.low_water_sats`; alert fires to dev console + `dev@refueler.io`. `float_config` (single-row config) + `float_ledger` (credit/debit audit) both admin-only RLS.
+
+- **Block 8 pre-req schema locked:** 7 new tables (`merchant_billing`, `commission_charges`, `reward_payouts`, `float_config`, `float_ledger`, `stamp_programmes`, `stamp_events`). 2 modified tables (`orders` + `commission_status`; `venue_partners` + `stamp_feature_enabled`). 4 new Edge Functions (`charge-commission`, `issue-reward`, `stripe-webhook`, `claim-reward`). 3 new pg_cron jobs (`charge-commission-job`, `float-monitor`, `commission-reconciliation`). Full spec in MasterContext CC83.
+
+- **Reward choice UI:** presented inline on settlement screen — "Claim [X] sats" / "[Programme Name] stamp card" / "Skip". Edge cases: no wallet = token stays claimable until expiry; decline both = reward_payouts status `declined`, no float impact; connection failure = retry later; float zero at claim = LNURL-withdraw endpoint returns error, token stays open. Merchant sees nothing for sats reward (Refueler's money); sees tablet notification for stamp redemption only.
+
+- **Stripe integration shape:** no Stripe Connect. Refueler bills its own customer. `merchant_billing.stripe_customer_id` → Stripe Customer + PaymentMethod (Stripe-side). Webhook chain: settlement → `blink-webhook` → `issue-reward` + `commission_charges(pending)` → `charge-commission-job` → `charge-commission` → Stripe PaymentIntent → `stripe-webhook` → status update. Fiat walk-in: staff Accept → `commission_charges(pending)` → same charge job.
+
+- **Multi-franchise mint concept noted:** Each franchise could have its own CDK mint keyset — Moniker stamps cryptographically isolated from competitor chains. Could be offered as standalone "Refueler Mint as a Service." Scoped for Session A (CDK mint architecture) in `refueler-mint`/`refueler-ecash-lab`.
+
+- **AI helper queued:** Owner tab only. Swipe-up panel. Cloudflare AI Worker for quick queries. Serious issues → `support@refueler.io` + helpline. Not Block 8.
+
+- **ecash-lab scoped:** CDK Rust mint + Orchard GUI (github.com/cashubtc/orchard). Reference use case: café-by-day / wine-bar-at-night running concurrent stamp programmes. No README this session — queue Session A when ready to sit down and run a mint.
+
+---
+
+### Merchant-Sats-A — date: 2026-08-11
+**Scope:** Payment architecture, flows, flywheel, node purpose, Pass initial scope, legal caveat. Opus — uncounted.
+**No commits this session.**
+
+**Decisions locked:** ADR-MS-1 through ADR-MS-10. Seven payment flows. Node three-way lock. Pass initial scope. Flywheel confirmed. Legal caveat permanently logged. See MasterContext for full detail.
 
 ---
 
@@ -74,16 +97,7 @@ Sessions used to Merchant-Sats-A: ~83 counted + uncounted planning sessions.
 **Scope:** Planning and recalibration. Opus — uncounted.
 **No commits this session.**
 
-**Decisions locked:**
-
-- **Session allocation confirmed:** 550 total (500 primary + 50 buffer).
-- **Block 5 split into CC-83, CC-84, CC-85.**
-- **Block 8 promoted** above Blocks 6 and 7. New post-Block-5 order: Block 8 → Pass-A/B → Block 9 → Block 6/7.
-- **Simulation discipline locked.** Four sim stages defined. Sim-Close gates real merchant go-live.
-- **Order correction and refunds** added to Sim Stage 1 scope.
-- **AD-1 complete.** AD-2 added.
-- **S-13 deleted.** `independent_owner@rajeshtaylor.com` orphan row removed in CC-83 migration.
-- **S-1 (PIN flash fix):** Formally queued — bundle into CC-83 if room.
+**Decisions locked:** 550 session allocation confirmed. Block 5 split into CC-83/84/85. Block 8 promoted. Simulation discipline locked (4 stages). AD-1 complete; AD-2 added. S-13 deleted. S-1 formally queued.
 
 ---
 
@@ -159,7 +173,7 @@ Use `execute_sql` to read `pg_policies` for `venue_partners` — do not assume c
 
 4. **S-7 — sidebar height:** `min-height: 100%` or `align-self: stretch` on sidebar element.
 
-5. **logo_url migration:** Add `logo_url text` column to `venue_partners` via `apply_migration`.
+5. **logo_url and stamp_feature_enabled migration:** Add `logo_url text` column and `stamp_feature_enabled boolean DEFAULT false` column to `venue_partners` via single `apply_migration`. Also add `commission_status text` column to `orders`.
 
 6. **S-13 cleanup:** Delete `independent_owner@rajeshtaylor.com` row from `merchant_users` via `apply_migration`.
 
@@ -171,53 +185,22 @@ Standing rules: Read live files from GitHub before touching anything. DDL via `a
 
 ---
 
-## Opening prompt — Merchant-Sats-B (Opus — uncounted)
+## Opening prompt — Merchant-Sats-C (Opus — uncounted)
 
 **Attach:** `Refueler_MasterContext_IO_CC83.md`, `SESSIONS-refueler-io-CC83.md`, `REFUELER-BRIDGE.md`
 
-Merchant-Sats-B open. Rewards backend design — Blink float mechanics, Cashu stamp lifecycle, commission schema, Block 8 pre-requisites. Opus — uncounted.
+Merchant-Sats-C open. Reward choice UI spec for the consumer app. Opus — uncounted.
 
-**Baseline:** ADR-MS-1 through ADR-MS-10 are locked (Merchant-Sats-A). Read MasterContext in full before starting. All design here must be consistent with ADR-MS-1 (Refueler never in the payment flow) and ADR-MS-2 (commission = attributed orders only, real-time fiat off-session Stripe charge).
+**Baseline:** ADR-MS-11 through ADR-MS-18 locked (Merchant-Sats-B). LNURL-withdraw pull model locked. Stamp track scaffolded pending mint.
 
-**Scope in priority order:**
+**Scope:**
+1. Reward choice screen state machine — exactly when it appears in the app settlement flow, what states it has, what triggers transitions. Pre-order Lightning (Flow 1) and pre-order fiat (Flow 2) may need different timing.
+2. Sats path: LNURL-withdraw claim UX — what the customer sees, what happens if their wallet app isn't open, how expiry is communicated, what "try again" looks like. NativeTabs constraint applies (no `router.replace` to sibling routes — settled view must remain inline state changes).
+3. Stamp path (scaffolded only — UI to exist Block 8, but dark until mint): what the programme picker looks like when there are 1 / 2 / 3 active programmes. Venue name and programme name displayed. "Buy 9 get 1 free" mechanic clearly communicated without being wordy.
+4. Edge case specs: float zero → sats option greyed / removed; no active programmes → stamp option absent; customer declines both → Skip confirmation; connection failure → token retained server-side, in-app recovery prompt on next app open.
+5. What Realtime events or polling the app needs to support the reward flow — is there a new Supabase channel needed beyond the existing settlement subscription?
 
-1. **Blink float mechanics:**
-   - What is the float actually for? (Refueler's own sats revenue — Share Lightning payments, Legend subscriptions — not consumer funds in transit)
-   - Pre-load amount: what figure, how determined, how topped up
-   - Low-water mark threshold: what monitoring data from Q1 informs the decision, what the alert looks like (dev console tile + email)
-   - Top-up flow: manual Rajesh action or automated
-   - Webhook chain for sats reward payout: on Lightning settlement confirmation, what fires, in what order
-
-2. **Reward choice flow:**
-   - When and how is the choice presented in the app (sats vs stamp — not both, customer selects)
-   - What if the customer has no Lightning wallet? What if they decline both? What if the connection fails during reward payout?
-   - What does the merchant see (if anything) when a reward is issued?
-   - Edge case: customer selects sats reward but the float hits zero mid-payout
-
-3. **Cashu stamp lifecycle:**
-   - Mint issues stamp → customer holds in app → stamp redeemed at venue
-   - What happens in the DB at each stage
-   - What the merchant sees on the tablet
-   - What prevents double-spend (NUT-07 state check is the mechanism — confirm)
-   - Which NUTs are in scope for Block 8 vs later:
-     - Block 8: NUT-00 (blind auth), NUT-07 (state check)
-     - Later: NUT-11 (P2PK binding if stamps are customer-identity-linked), NUT-13+09 (deterministic restore), NUT-14 (HTLC for receiver-pays)
-
-4. **Commission tracking schema:**
-   - DB schema for recording GBP-equivalent at time of payment (`sats_rate` already exists in `orders` — confirm it's sufficient or extend)
-   - Walk-in flow commission trigger event: for Flows 3 and 4 (app walk-in, fiat and Lightning), no payment event is visible to Refueler — define what event creates the commission liability and how it's recorded (staff confirmation action? App order-complete event?)
-   - Off-session Stripe charge mechanics: stored PaymentMethod on `merchant_users` or separate `merchant_billing` table? Retry logic on failure?
-
-5. **Stripe integration shape:**
-   - Where is the merchant's stored card held (Stripe Customer object, Stripe-side — Refueler stores only `stripe_customer_id`)
-   - Webhook chain: Lightning settlement → `blink-webhook` fires → what edge function or pg_cron job triggers the Stripe charge?
-   - How fiat walk-in commission (Flow 3) is captured in real-time vs reconciled later
-
-6. **Block 8 schema pre-requisite list:**
-   - Every table addition or column addition needed before the first Block 8 counted session opens
-   - Flag any RLS implications
-
-**Output:** Reward flow spec, Cashu stamp lifecycle spec (with NUT selection), commission tracking schema, Stripe integration shape, walk-in commission trigger decision, Block 8 pre-requisite migration list. Updated MasterContext and SESSIONS.
+**Output:** Reward choice screen spec (state machine + annotated wireframe descriptions), NativeTabs-compatible implementation notes, new Realtime/polling requirements. Updated MasterContext and SESSIONS.
 
 ---
 
@@ -228,14 +211,17 @@ Merchant-Sats-B open. Rewards backend design — Blink float mechanics, Cashu st
 Onboarding-A open. Merchant onboarding flow design + printed handover document. Opus — uncounted.
 
 **Scope:**
-1. Self-service onboarding flow — magic-link invite → command-centre → first-run venue confirmation → PIN setup → "Accepting orders" activation. Map every screen state and edge case.
+1. Self-service onboarding flow — magic-link invite → command-centre → first-run venue confirmation → PIN setup → stamp programme setup → "Accepting orders" activation. Map every screen state and edge case.
 2. PIN self-service UX — how an owner sets and resets staff/owner PINs without Rajesh touching the database. RLS consequences (scoped write path to `merchant_users` PIN columns) — flag design constraints for CC-84.
-3. Branded magic-link email — content and layout outline only. Suave, discreet, on-brand. Build is CC-85.
-4. Printed handover document — format (A5 or A4, stock, feel), audience split (floor manager / owner / regional manager), full content outline. "Accepting orders" toggle default-off is a critical training item.
+3. Stamp programme setup — owner configures up to 3 programmes at onboarding or later in owner view. Time-window fields, reward description, target count. Stamp feature toggle (`venue_partners.stamp_feature_enabled`).
+4. Branded magic-link email — content and layout outline only. Suave, discreet, on-brand. Build is CC-85.
+5. Printed handover document — format (A5 or A4, stock, feel), audience split (floor manager / owner / regional manager), full content outline. Key items: "Accepting orders" toggle default-off, PIN setup, stamp programme configuration, escalation path (`support@refueler.io`).
+
+**Multi-programme stamp as a pitch point:** this is part of the sales conversation. The handover document and onboarding flow both need to communicate the value — café-by-day / wine bar-by-night use case as the reference example.
 
 **Timebox printed document work to 40% of session time.** Flow design and PIN self-service UX unblock CC-84.
 
-**Output:** Flow diagram or structured description, PIN self-service UX spec, email outline, printed document content outline and structure.
+**Output:** Flow diagram or structured description, PIN self-service UX spec, stamp programme setup flow, email outline, printed document content outline and structure.
 
 ---
 
