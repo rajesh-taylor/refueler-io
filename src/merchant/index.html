@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Refueler — Merchant Tablet</title>
+<!-- S-1: Flash guard — pin-gate and auth-gate are full-screen from first paint,
+     before any external stylesheet. Zero specificity (:where) lets themed CSS win once loaded. -->
+<style>
+:where(#pin-gate, #auth-gate) {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #1A1A1A;
+}
+</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400&display=swap" rel="stylesheet">
@@ -37,9 +47,7 @@
   white-space: nowrap;
   flex-shrink: 0;
 }
-.darwin-time.late {
-  color: #C8943A;
-}
+.darwin-time.late { color: #C8943A; }
 .darwin-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 6px; }
 .darwin-dot.online  { background: #27AE60; }
 .darwin-dot.offline { background: #5A5751; }
@@ -53,16 +61,12 @@
   <div class="pin-gate-inner">
     <div class="pin-gate-eyebrow">Staff Sign In</div>
     <div class="pin-gate-wordmark">Refueler</div>
-
-    <!-- 4-dot indicator -->
     <div class="pin-dots" id="pin-dots">
       <div class="pin-dot-indicator" id="pd0"></div>
       <div class="pin-dot-indicator" id="pd1"></div>
       <div class="pin-dot-indicator" id="pd2"></div>
       <div class="pin-dot-indicator" id="pd3"></div>
     </div>
-
-    <!-- PIN pad -->
     <div class="pin-pad">
       <button class="pin-key" onclick="pinKey('1')">1</button>
       <button class="pin-key" onclick="pinKey('2')">2</button>
@@ -77,12 +81,11 @@
       <button class="pin-key" onclick="pinKey('0')">0</button>
       <button class="pin-key del" onclick="pinKey('del')">⌫</button>
     </div>
-
     <div class="pin-error" id="pin-error">Incorrect PIN. Try again.</div>
   </div>
 </div>
 
-<!-- ─── MAGIC LINK GATE (owner only — first login / expiry / explicit sign-out) ─── -->
+<!-- ─── MAGIC LINK GATE (owner — first login / expiry / sign-out) ─── -->
 <div class="auth-gate" id="auth-gate">
   <div class="auth-gate-inner">
     <div class="auth-gate-logo">Refueler</div>
@@ -107,14 +110,12 @@
   <div class="owner-pin-box">
     <div class="owner-pin-eyebrow">Owner Access</div>
     <div class="owner-pin-heading">Enter owner PIN</div>
-
     <div class="pin-dots" id="owner-pin-dots">
       <div class="pin-dot-indicator" id="opd0"></div>
       <div class="pin-dot-indicator" id="opd1"></div>
       <div class="pin-dot-indicator" id="opd2"></div>
       <div class="pin-dot-indicator" id="opd3"></div>
     </div>
-
     <div class="pin-pad">
       <button class="pin-key" onclick="ownerPinKey('1')">1</button>
       <button class="pin-key" onclick="ownerPinKey('2')">2</button>
@@ -129,7 +130,6 @@
       <button class="pin-key" onclick="ownerPinKey('0')">0</button>
       <button class="pin-key del" onclick="ownerPinKey('del')">⌫</button>
     </div>
-
     <div class="pin-error" id="owner-pin-error">Incorrect PIN.</div>
     <button class="owner-pin-cancel" onclick="closeOwnerOverlay()">Cancel</button>
   </div>
@@ -206,16 +206,13 @@
   </div>
 </div>
 
-<!-- View-switch confirmation overlay (independent_owner only) -->
+<!-- View-switch confirm overlay — retained as no-op safety net, not used by merged pill -->
 <div class="view-confirm-overlay" id="view-confirm-overlay">
   <div class="view-confirm-box">
-    <div class="view-confirm-title" id="view-confirm-title">Switch to OPS view?</div>
-    <div class="view-confirm-sub" id="view-confirm-sub">
-      OPS view shows operational controls. Your queue will pause while you're here.
-    </div>
+    <div class="view-confirm-title" id="view-confirm-title">Switch view?</div>
+    <div class="view-confirm-sub" id="view-confirm-sub"></div>
     <div class="view-confirm-actions">
-      <button class="btn-confirm-switch" id="btn-confirm-switch" onclick="confirmViewSwitch()">Switch View</button>
-      <button class="btn-confirm-cancel" onclick="cancelViewSwitch()">Cancel</button>
+      <button class="btn-confirm-cancel" onclick="document.getElementById('view-confirm-overlay').classList.remove('open')">Cancel</button>
     </div>
   </div>
 </div>
@@ -228,41 +225,40 @@
   ← Back to Queue
 </button>
 
-<!-- Nav -->
+<!-- ─── NAV (CC-83 redesign) ─── -->
 <nav class="nav">
-  <div class="nav-brand">
+  <!-- Left: identity block — logo or wordmark + divider + MERCHANT TERMINAL label -->
+  <div class="nav-brand" id="nav-identity-left">
     <div class="nav-logo">Refueler</div>
     <div class="nav-divider"></div>
-    <div class="nav-page-label">Merchant Tablet</div>
+    <div class="nav-terminal-lbl">MERCHANT TERMINAL</div>
   </div>
+
+  <!-- Centre: empty -->
+  <div></div>
+
+  <!-- Right: merged pill + separator + theme pill -->
   <div class="nav-right">
-    <div id="venue-badge-slot"></div>
-    <!-- Owner button — nav-level, PIN-protected, visible after staff sign-in -->
-    <button class="nav-owner-btn" id="owner-affordance" onclick="openOwnerOverlay()">OWNER</button>
+    <!-- Merged pill: QUEUE · OPS · OWNER — rendered by JS after staff auth -->
+    <div class="merged-pill" id="merged-pill" style="display:none;"></div>
+
+    <!-- Separator -->
+    <div class="nav-pill-sep"></div>
+
+    <!-- Theme pill -->
     <div class="theme-pill">
       <button class="theme-pill-opt active" id="pill-paper" onclick="setTheme('paper')">PAPER</button>
       <button class="theme-pill-opt" id="pill-carbon" onclick="setTheme('carbon')">CARBON</button>
-    </div>
-    <div id="nav-auth-slot">
-      <!-- populated by JS after PIN/magic-link auth -->
     </div>
   </div>
 </nav>
 
 <!-- ─── HORIZON BAND — Darwin intelligence + Passenger arrival windows ─── -->
-<!--
-  Always-on operational instrument. Carbon dark in both Paper and Carbon themes.
-  Darwin section (LEFT): next arrival station + ETA. Landscape adds second window.
-  Horizon section (RIGHT): passenger count by arrival window (mock until real aggregation).
-  Beck gold node markers used as station/divider motif.
--->
 <div class="horizon-band" id="horizon-band">
 
   <!-- LEFT: Darwin live arrival -->
   <div class="hb-darwin" id="hb-darwin">
-    <!-- Beck motif: gold node marker as station indicator -->
     <div class="hb-beck-node" id="hb-beck-node"></div>
-
     <div class="hb-darwin-inner">
       <!-- Primary station window (portrait + landscape) -->
       <div class="hb-station-primary">
@@ -282,8 +278,7 @@
   <div class="hb-horizon">
     <div class="hb-horizon-label">ARRIVALS</div>
 
-    <!-- 0–3 min window -->
-    <div class="hb-window" id="hb-win-0" title="Passenger estimates not yet available">
+    <div class="hb-window" id="hb-win-0">
       <div class="hb-window-count" id="hb-count-0">—</div>
       <div class="hb-window-label">0–3 min</div>
       <div class="hb-window-unit">imminent</div>
@@ -291,17 +286,15 @@
 
     <div class="hb-window-sep"></div>
 
-    <!-- 3–7 min window -->
-    <div class="hb-window" id="hb-win-3" title="Passenger estimates not yet available">
+    <div class="hb-window" id="hb-win-3">
       <div class="hb-window-count" id="hb-count-3">—</div>
       <div class="hb-window-label">3–7 min</div>
-      <div class="hb-window-unit">inbound</div>
+      <div class="hb-window-unit">arriving</div>
     </div>
 
     <div class="hb-window-sep"></div>
 
-    <!-- 7–15 min window -->
-    <div class="hb-window" id="hb-win-7" title="Passenger estimates not yet available">
+    <div class="hb-window" id="hb-win-7">
       <div class="hb-window-count" id="hb-count-7">—</div>
       <div class="hb-window-label">7–15 min</div>
       <div class="hb-window-unit">horizon</div>
@@ -417,13 +410,11 @@
 
     <!-- Order queue (QUEUE view) -->
     <div class="order-queue" id="order-queue">
-      <!-- Signed-out state -->
       <div class="queue-signed-out" id="queue-signin-prompt">
         <div class="queue-empty-icon">⚡</div>
         <div class="queue-signed-out-title">Awaiting staff sign-in</div>
         <div class="queue-signed-out-sub">Enter the staff PIN on the lock screen to begin your shift.</div>
       </div>
-      <!-- Order tiles injected here by JS -->
     </div>
 
     <!-- OPS panel (independent_owner only — hidden by default) -->
@@ -441,7 +432,6 @@
             <span class="ops-toggle-track"></span>
           </label>
         </div>
-        <!-- Pre-orders only toggle: removed CC-21 pending CPO decision -->
       </div>
 
       <div class="ops-section">

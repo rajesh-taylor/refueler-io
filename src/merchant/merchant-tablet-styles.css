@@ -127,11 +127,12 @@ body {
   gap: 12px;
 }
 
-/* Theme pill */
+/* Theme pill — matched to merged pill height (42px) */
 .theme-pill {
   display: flex;
-  border: 0.5px solid var(--border);
-  border-radius: 20px;
+  height: 42px;
+  border: 0.5px solid var(--c-border-m);
+  border-radius: 24px;
   overflow: hidden;
   transition: border-color 0.35s;
 }
@@ -140,11 +141,11 @@ body {
   border: none;
   cursor: pointer;
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 500;
   letter-spacing: 0.1em;
   color: var(--text-tertiary);
-  padding: 4px 10px;
+  padding: 0 14px;
   transition: background 0.2s, color 0.2s;
 }
 .theme-pill-opt.active {
@@ -202,33 +203,78 @@ body {
   padding: 3px 8px;
 }
 
-/* ─── ROLE CHIP + VIEW SWITCHER (independent_owner only) ─── */
-.role-chip {
+/* ─── MERCHANT TERMINAL LABEL (CC-83b) ─── */
+.nav-terminal-lbl {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* ─── VENUE LOGO IN NAV (CC-83b — when logo_url present) ─── */
+.nav-venue-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 5px;
+  object-fit: cover;
+  background: #35373B; /* fallback before img loads */
+  flex-shrink: 0;
+}
+
+/* ─── MERGED PILL — QUEUE · OPS · OWNER (CC-83b) ─── */
+.merged-pill {
   display: flex;
   align-items: center;
-  gap: 6px;
-  border: 0.5px solid var(--border);
-  border-radius: 4px;
-  padding: 4px 10px;
-  cursor: pointer;
-  transition: border-color 0.2s;
-  user-select: none;
+  height: 42px;
+  border: 0.5px solid var(--c-border-m);
+  border-radius: 24px;
+  overflow: hidden;
 }
-.role-chip:hover { border-color: var(--accent-carbon); }
-.role-chip-label {
+.mp-seg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0 20px;
+  background: none;
+  border: none;
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-tertiary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  user-select: none;
+  white-space: nowrap;
 }
-.role-chip-view {
-  font-family: var(--mono);
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+.mp-seg-divider {
+  width: 0.5px;
+  height: 100%;
+  background: var(--border);
+  flex-shrink: 0;
+}
+/* QUEUE / OPS active state */
+.mp-seg.mp-active {
+  background: var(--border);
+  color: var(--text-primary);
+}
+/* OWNER segment — gold tint when hovered/active */
+.mp-seg.mp-owner {
+  color: var(--text-tertiary);
+}
+.mp-seg.mp-owner:hover {
+  background: rgba(200,169,110,0.10);
   color: var(--accent-carbon);
+}
+/* Separator between merged pill and theme pill */
+.nav-pill-sep {
+  width: 0.5px;
+  height: 22px;
+  background: var(--c-border-m);
+  flex-shrink: 0;
+  margin: 0 20px;
 }
 
 /* OPS panel */
@@ -422,6 +468,8 @@ body {
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  align-self: stretch;   /* S-7: fill full column height */
+  min-height: 100%;
   transition: background 0.35s, border-color 0.35s;
 }
 .sidebar::-webkit-scrollbar { width: 3px; }
@@ -584,7 +632,7 @@ body {
 }
 .queue-stat-value {
   font-family: var(--mono);
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 500;
   color: var(--text-primary);
   line-height: 1;
@@ -666,103 +714,100 @@ body {
   grid-column: 1 / -1;
 }
 
-/* Order tile */
+/* ─── ORDER TILE — CC-83 locked design ─── */
+/* Left colour bar removed (colour-blind concern — logged CC-83 for future with per-merchant
+   urgency distance params and TfL data path; see 8-min rule note in logic.js). */
 .order-tile {
-  background: var(--surface);
-  border: 0.5px solid var(--border);
-  border-radius: 10px;
-  padding: 14px 16px;
-  /* CC-20: margin-bottom removed — grid gap handles spacing */
+  background: #26282C;
+  border: 0.5px solid #35373B;
+  border-radius: 7px;
+  padding: 12px 16px;
   min-height: var(--tile-h);
   min-width: 160px;
-  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+  transition: border-color 0.2s, transform 0.15s;
   position: relative;
   overflow: hidden;
-}
-.order-tile::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 3px;
-  background: var(--accent-carbon);
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-.order-tile.pending::before { opacity: 1; background: var(--c-amber); }
-.order-tile.ready::before { opacity: 1; background: var(--c-green); }
-.order-tile.urgent::before { opacity: 1; background: var(--c-red); animation: urgentPulse 1.2s ease-in-out infinite; }
-
-@keyframes urgentPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
+/* Tile head: identity line + badge */
 .order-tile-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 8px;
-}
-.order-item-name {
-  font-family: var(--heading);
-  font-weight: 600;
-  font-size: 16px;
-  color: var(--text-primary);
-  letter-spacing: -0.01em;
-  line-height: 1.2;
-}
-.order-item-mods {
-  font-family: var(--sans);
-  font-size: 11px;
-  color: var(--text-secondary);
-  margin-top: 2px;
-}
-.order-status-badge {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  border-radius: 3px;
-  padding: 3px 8px;
-  flex-shrink: 0;
-  margin-left: 10px;
-}
-.badge-pending {
-  background: var(--c-amber-bg);
-  color: var(--c-amber);
-  border: 0.5px solid var(--c-amber);
-}
-.badge-ready {
-  background: var(--c-green-bg);
-  color: var(--c-green);
-  border: 0.5px solid var(--c-green);
-}
-.badge-urgent {
-  background: var(--c-red-bg);
-  color: var(--c-red);
-  border: 0.5px solid var(--c-red);
+  gap: 8px;
 }
 
-.order-meta {
+/* Identity line: [ID] · [items] */
+.order-tile-identity {
   display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 12px;
+  align-items: baseline;
+  gap: 0;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  min-width: 0;
 }
-.order-ref {
+.order-identifier {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 500;
+  color: #E4E2DC;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.order-id-sep {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: #C8A96E;
+  padding: 0 8px;
+  flex-shrink: 0;
+}
+.order-item-text {
+  font-family: var(--sans);
+  font-size: 14px;
+  color: #C8C9CB;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+/* Status badge — right side only */
+.order-status-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 4px;
+  padding: 6px 14px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.badge-pending {
+  background: rgba(200,169,110,0.10);
+  color: #C8A96E;
+  border: 0.5px solid rgba(200,169,110,0.40);
+}
+.badge-inprep {
+  background: rgba(120,153,212,0.12);
+  color: #7899D4;
+  border: 0.5px solid rgba(120,153,212,0.40);
+}
+.badge-ready {
+  background: rgba(61,202,122,0.10);
+  color: #3DCA7A;
+  border: 0.5px solid rgba(61,202,122,0.40);
+}
+
+/* Elapsed time row */
+.order-tile-time {
   font-family: var(--mono);
   font-size: 10px;
   color: var(--text-tertiary);
-  letter-spacing: 0.08em;
-}
-.order-time {
-  font-family: var(--mono);
-  font-size: 10px;
   letter-spacing: 0.06em;
 }
-.order-time.normal { color: var(--text-tertiary); }
-.order-time.warning { color: var(--c-amber); }
-.order-time.urgent { color: var(--c-red); font-weight: 500; }
 
 .order-actions {
   display: flex;
@@ -1442,7 +1487,7 @@ body {
  */
 .horizon-band {
   width: 100%;
-  height: 56px;
+  height: 64px; /* CC-83: up from 56px for kitchen readability */
   background: #1A1A1A;
   border-bottom: 0.5px solid #2E2E2E;
   display: flex;
@@ -1493,15 +1538,15 @@ body {
   white-space: nowrap;
 }
 .hb-station-name {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
-  font-weight: 500;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 15px;
+  font-weight: 400;
   color: #E4E2DC;
   letter-spacing: 0.01em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 140px;
+  max-width: 180px;
 }
 .hb-station-eta {
   font-family: 'IBM Plex Mono', monospace;
@@ -1522,7 +1567,7 @@ body {
 }
 .hb-darwin-label {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #5A5751;
@@ -1603,48 +1648,37 @@ body {
   min-width: 60px;
 }
 
-/* Active window: gold accent when imminent (0–3 min, or whichever is next) */
-.hb-window.hb-active {
-  background: rgba(200, 169, 110, 0.08);
-}
-.hb-window.hb-active .hb-window-count {
-  color: #C8A96E;
-}
-.hb-window.hb-active .hb-window-label {
-  color: #8A7A54;
-}
-.hb-window.hb-active .hb-window-unit {
-  color: #8A7A54;
-}
+/* CC-83: gold active-highlight (.hb-active) retired.
+   Urgency signalled by background tint on each window only (see _horizonSetWindowTints in logic.js).
+   Future: re-wire with per-merchant distance-to-venue urgency params + TfL data path. */
 
 .hb-window-count {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 16px;
   font-weight: 500;
-  color: #8A8680;
+  color: #A8A4A0; /* uniform — no gold on any count (CC-83) */
   letter-spacing: 0.02em;
   line-height: 1;
-  transition: color 0.2s;
 }
 .hb-window-label {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 9px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
   color: #5A5751;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   white-space: nowrap;
-  transition: color 0.2s;
 }
 .hb-window-unit {
-  display: none; /* shown only on wider viewports */
+  display: none;
 }
 
 /* Horizon section eyebrow label */
 .hb-horizon-label {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 8px;
+  font-size: 10px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #3A3A3A;
+  color: #8A8680;
   writing-mode: horizontal-tb;
   margin-right: 6px;
   white-space: nowrap;
