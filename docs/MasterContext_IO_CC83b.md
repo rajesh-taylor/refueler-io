@@ -1,4 +1,4 @@
-# Refueler Master Context — IO CC-83
+# Refueler Master Context — IO CC-83b
 *Updated: 2026-08-12 (CC-83 — Sonnet counted. Design-only session. Merchant terminal nav, horizon strip, order tiles, portrait layout, product architecture locked. No code written. CC-83b is next for production code.)*
 *Supersedes: Merchant-Sats-C*
 *Sync log: MasterContext_IO_CC83 — no schema changes this session. Nav and UI decisions locked. NumoPay fork scoped. refueler-app dev branch push pending.*
@@ -213,26 +213,46 @@ Single token source: `global.css`. No page defines its own `:root`. No body-leve
 **Issue:** `partners_public_read` policy on `venue_partners` has `qual: true` — entire table readable by anyone with project URL.
 **Fix (CC-83b Migration 1):** Drop `partners_public_read`. `merchant_select_own_venue` already covers `independent_owner`, `merchant`, `franchise_branch`. `franchise_hq_select_own_group_venues` covers franchise HQ. `admin_full_access_venue_partners` covers admin. Pass door-entry scenarios use service-role Edge Function — no public read needed.
 
+## S-2 root cause — resolved CC-83b
+
+`loadVenueDetails()` was selecting `address`, `lat`, `lng` — columns that do not exist on `venue_partners`.
+Actual column names: `address_line1`, `coords_lat`, `coords_lng`.
+PostgREST returned HTTP 400 on unknown columns; `res.ok` was false; function bailed silently → Active Site card stuck on "Loading venue…".
+
+The session token was passing correctly all along — the CC-83 "token passing" hypothesis was a red herring.
+
+Fix applied CC-83b: corrected select list in `loadVenueDetails()`. Added `logo_url` to the select. Removed the `|| SB_KEY` anon fallback from this function — `partners_public_read` is now dropped, so anon key returns empty for `venue_partners`; session JWT is mandatory.
+
+Note: steakhouse `coords_lat`/`coords_lng` are NULL — Active Site card resolves name and address correctly, but the map div stays empty until coordinates are entered in CC-84 onboarding.
+
+## 8-minute urgency rule — logged for future iteration
+
+Retired in CC-83b per CC-83 design lock. Future: re-wire urgency windows with per-merchant configurable
+walk time (station→venue distance varies by town and venue). TfL data path noted for tube-line
+expansion (far more tube runs than trains in London). Horizon strip is a key sales pitch asset —
+partner-facing materials should feature it. Wire back when per-merchant distance data is available.
+Competitive check: does Square/Toast/KDS offer per-merchant arrival-urgency intelligence? If not, differentiator.
+
 ---
 
 ## Snag list — active
 
 | ID | Item | Priority | Target |
 |---|---|---|---|
-| S-1 | PIN flash — ~1 frame of tablet-ui visible before gate renders | Medium | CC-83b |
-| S-2 | "Loading venue…" — investigate JS fetch/auth token passing for `independent_owner` | High | CC-83b |
-| S-3 | STEAKHOUSE nav badge → venue name from `venue_partners.name` | High | CC-83b |
-| S-4 | Queue/Ops mode switch → merged QUEUE·OPS·OWNER pill | High | CC-83b |
-| S-5 | Venue name/logo in nav — layout confirmed CC-83 | Medium | CC-83b |
-| S-6 | Horizon strip stat values ~20% size increase | Medium | CC-83b |
-| S-7 | Sidebar height — doesn't fill full column | Low | CC-83b |
+| S-1 | PIN flash — inline head guard applied | ✅ CC-83b | — |
+| S-2 | "Loading venue…" — column name mismatch fixed (`address_line1`, `coords_lat`, `coords_lng`) | ✅ CC-83b | — |
+| S-3 | STEAKHOUSE nav badge → identity block (wordmark + "MERCHANT TERMINAL") | ✅ CC-83b | — |
+| S-4 | Queue/Ops mode switch → merged QUEUE·OPS·OWNER pill | ✅ CC-83b | — |
+| S-5 | Venue name/logo in nav — `renderNavIdentity()` reads `logo_url` | ✅ CC-83b | — |
+| S-6 | Horizon strip: 64px height, station name IBM Plex Mono 15px, labels per spec | ✅ CC-83b | — |
+| S-7 | Sidebar height — `align-self:stretch; min-height:100%` | ✅ CC-83b | — |
 | S-8 | Owner/Staff PIN reset + Menu management — stubs in Owner View | High | Onboarding-A / CC-84 |
 | S-9 | Magic link email bare Supabase template — needs branded HTML | High | CC-85 |
 | S-10 | Export-1: PDF/print icon on Revenue + Orders panels | Low | Future |
 | S-11 | Dash-1: Orders over time + peak hours heatmap on franchise dashboard | Low | Post volume |
 | S-12 | `car_park_occupancy` strip from FEEDS array | Low | Next rail-signal-poll touch |
 | S-14 | `Costa Coffee HQ` category label fix | Low | Future |
-| S-15 | Small text audit: horizon band labels, mono labels, card sub-labels | Medium | CC-83b start, continue CC-84 |
+| S-15 | Small text audit: queue-stat-value 22px, horizon labels 10px done; card sub-labels continue | Medium | CC-84 |
 | S-16 | Portrait layout: Option 2 CSS-only sidebar stack | High | CC-84 |
 | S-17 | Landscape/portrait responsive system: single CSS breakpoint for tablet + NumoPay phone | High | CC-84, inform NumoPay fork |
 
@@ -348,10 +368,10 @@ Three-layer: Realtime + poll (3s, 5 min) + AppState foreground guard. Settled vi
 | ~~Block-5 Review~~ | Recalibrate Block 5 scope | Opus uncounted | ✅ Closed |
 | ~~Merchant-Sats-A/B/C~~ | Payment architecture, reward flow, UI spec | Opus uncounted | ✅ Closed |
 | ~~CC-83~~ | Terminal design decisions — nav, horizon, tiles, portrait | Sonnet counted | ✅ Closed — design only |
-| **CC-83b** | Block 5 production code — migrations, nav HTML/CSS/JS, S-1/S-6/S-7/S-15 | Sonnet counted | **Next** |
+| **CC-83b** | Block 5 production code — migrations, nav HTML/CSS/JS, S-1/S-6/S-7/S-15 | Sonnet counted | ✅ Closed |
 | **CC-83b-app** | Opus — refueler-app dev branch review, divergence analysis | Opus uncounted | After dev branch pushed |
 | **Onboarding-A** | Merchant onboarding flow + printed handover doc | Opus uncounted | Queued |
-| **CC-84** | Portrait layout, walk-in order entry, PIN self-service | Sonnet counted | Queued |
+| **CC-84** | Portrait layout, walk-in order entry, PIN self-service | Sonnet counted | **Next** |
 | **CC-85** | Branded magic link email, first full sim run | Sonnet counted | Queued |
 | **Block-5 Close** | Block 5 review and recalibration | Opus uncounted | Queued |
 | **Sim-Close** | Formal sign-off all 4 sim stages | Opus uncounted (up to 2) | Queued |

@@ -134,7 +134,30 @@ Sessions used to CC-83: ~84 counted + uncounted planning sessions.
 - NumoPay fork: in-house order taking, Lightning/Cashu native, waiter floor use.
 - Portrait + landscape both supported — one product, any form factor.
 
-**Session queue update:**
+### CC-83b — date: 2026-08-12
+**Scope:** Block 5 production code. Sonnet counted.
+
+**Migration 1 applied (single `apply_migration` — `cc83b_block5_schema`):**
+- `partners_public_read` policy dropped (qual:true — full table exposed to anon)
+- `venue_partners`: `logo_url TEXT`, `pin_bg_url TEXT`, `stamp_feature_enabled BOOLEAN DEFAULT false`
+- `orders`: `commission_status TEXT`, `reward_status TEXT`
+- Orphan `merchant_users` row deleted (independent_owner@rajeshtaylor.com, venue_id NULL)
+
+**S-2 root cause found and fixed:** `loadVenueDetails()` was selecting `address`, `lat`, `lng` — columns that don't exist. Actual: `address_line1`, `coords_lat`, `coords_lng`. PostgREST returned HTTP 400, function bailed → "Loading venue…" stuck. Token passing was correct all along. Fix: corrected select list. Anon SB_KEY fallback removed from `loadVenueDetails` (partners_public_read dropped; anon returns empty). Steakhouse coords_lat/lng are NULL — Active Site card will resolve name/address but map won't render until CC-84 onboarding.
+
+**Consumer app dependency check:** dev branch not pushed (PAT issue). App order flow uses create-order Edge Function (service role) — no direct anon reads of venue_partners. Safe to drop policy.
+
+**8-minute urgency rule retired** (per CC-83 design lock). Logged for future iteration: per-merchant configurable walk time (station→venue distance varies by town), TfL data path for tube lines, horizon strip as sales pitch asset. See comment block in `renderOrderTile()`.
+
+**Files delivered (3):** `src/merchant/index.html`, `src/merchant/merchant-tablet-logic.js`, `src/merchant/merchant-tablet-styles.css`
+
+**Snags closed: S-1, S-2, S-3, S-4, S-5, S-6, S-7, S-15 (partial)**
+
+**Commits this session:**
+- Migration: `cc83b_block5_schema` (Supabase)
+- [commit hash after placement and push]
+
+**Session queue updated — next: CC-84**
 
 | Session | Scope | Type | Status |
 |---|---|---|---|
@@ -144,10 +167,10 @@ Sessions used to CC-83: ~84 counted + uncounted planning sessions.
 | ~~Merchant-Sats-B~~ | Reward flow, stamp lifecycle, commission schema | Opus uncounted | ✅ Closed |
 | ~~Merchant-Sats-C~~ | Reward choice UI spec, ADR-MS-19–28 | Opus uncounted | ✅ Closed |
 | ~~CC-83~~ | Terminal design decisions — nav, horizon, tiles, portrait | Sonnet counted | ✅ This session — design only |
-| **CC-83b** | Block 5 production code — migrations, nav HTML/CSS/JS, S-1/S-6/S-7/S-15 fixes | Sonnet counted | **Next** |
-| **CC-83b-app** | Opus — refueler-app `dev` branch review, divergence analysis vs terminal design | Opus uncounted | After app branch pushed |
+| **CC-83b** | Block 5 production code — migrations, nav HTML/CSS/JS, S-1/S-6/S-7/S-15 fixes | Sonnet counted | ✅ Closed |
+| **CC-83b-app** | Opus — refueler-app `dev` branch review, divergence analysis vs terminal design | Opus uncounted | After app branch pushed | ✅ Closed |
 | **Onboarding-A** | Merchant onboarding flow + printed handover doc (stamp setup, logo, PIN bg) | Opus uncounted | Queued |
-| **CC-84** | Block 5 — onboarding flow build, portrait layout (S-16), walk-in order entry, PIN self-service | Sonnet counted | Queued |
+| **CC-84** | Block 5 — onboarding flow build, portrait layout (S-16), walk-in order entry, PIN self-service | Sonnet counted | Queued | **Next** |
 | **CC-85** | Block 5 — branded magic link email, first full sim run | Sonnet counted | Queued |
 | **Block-5 Close** | Block 5 review and recalibration | Opus uncounted | Queued |
 | **Sim-Close** | Formal sign-off all 4 sim stages | Opus uncounted (up to 2) | Queued |
