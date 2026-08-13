@@ -624,7 +624,7 @@ body {
 .queue-stat:last-child { border-right: none; }
 .queue-stat-label {
   font-family: var(--mono);
-  font-size: 8px;
+  font-size: 9px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-tertiary);
@@ -639,7 +639,7 @@ body {
 }
 .queue-stat-sub {
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 10px;
   color: var(--text-tertiary);
   margin-top: 2px;
 }
@@ -1362,7 +1362,7 @@ body {
 }
 .owner-stat-label {
   font-family: var(--mono);
-  font-size: 8px;
+  font-size: 9px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-tertiary);
@@ -1377,7 +1377,7 @@ body {
 }
 .owner-stat-sub {
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 10px;
   color: var(--text-tertiary);
   margin-top: 4px;
 }
@@ -1565,13 +1565,11 @@ body {
   text-transform: uppercase;
   margin-left: 2px;
 }
+/* hb-darwin-label removed from horizon strip — CC-84.
+   Strip height and ETA are the implicit liveness signal.
+   Label retained in HTML for JS use (DARWIN · OFFLINE state) but hidden by default. */
 .hb-darwin-label {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #5A5751;
-  white-space: nowrap;
+  display: none;
 }
 
 /* Second station window — landscape only (hidden in portrait) */
@@ -1729,3 +1727,350 @@ body {
     font-size: 18px;
   }
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   S-17 — BREAKPOINT ARCHITECTURE (CC-84)
+   ═══════════════════════════════════════════════════════════════════════════
+
+   Three layout targets:
+
+   1. LANDSCAPE TABLET (default — no media query)
+      Min-width: 820px, orientation: landscape.
+      Sidebar: vertical column, 340px fixed width, scrollable.
+      App: flex-row. Horizon strip: 64px, two station windows visible.
+      This is the existing layout — no changes.
+
+   2. PORTRAIT TABLET (media query below)
+      Max-width: 820px OR orientation: portrait.
+      Sidebar: collapses to horizontal-scroll card strip above .main.
+      App: flex-column. Horizon strip: 52px, one station window.
+      New Order bar: full-width CTA between sidebar strip and queue.
+      Cards: min-width 200px, height auto, horizontal scroll.
+
+   3. NUMOPAY PHONE (~390px portrait — documented, not built here)
+      Target breakpoint: max-width: 430px.
+      NumoPay fork is a separate Android app (rajesh-taylor/numo-fork).
+      This breakpoint is intentionally left unimplemented in this file.
+      When NumoPay-A planning session runs, the phone layout will be
+      designed in that repo using this document as a reference.
+      Key differences from portrait tablet:
+        — Horizon strip hidden entirely (no room; Darwin signal via
+          a persistent status badge on the queue header instead)
+        — Sidebar strip hidden (sidebar data surfaced via owner tab only)
+        — Single-column order queue, full width
+        — New Order button: full width, 52px tall, fixed bottom bar
+        — Stats row: 2-column grid (pending + ready only; today in header)
+
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+
+/* ─── NEW ORDER BAR (CC-84) — both orientations ─── */
+/* Promoted from queue-header to a dedicated full-width CTA bar.
+   Sits between the sidebar strip (portrait) or sidebar (landscape) and the queue.
+   Gold-outlined, not gold-filled — Refueler brand, not Square. */
+.new-order-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px 16px;
+  padding: 11px 16px;
+  border: 0.5px solid rgba(200,169,110,0.5);
+  border-radius: 6px;
+  background: rgba(200,169,110,0.07);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+  user-select: none;
+}
+.new-order-bar:hover {
+  background: rgba(200,169,110,0.13);
+  border-color: rgba(200,169,110,0.75);
+}
+.new-order-bar:active {
+  background: rgba(200,169,110,0.18);
+  transform: scale(0.99);
+}
+.new-order-bar-text {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #C8A96E;
+  font-weight: 500;
+}
+.new-order-bar-icon {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  color: #C8A96E;
+  line-height: 1;
+}
+
+
+/* ─── S-16: PORTRAIT LAYOUT (CC-84) ─── */
+/* Option A: sidebar collapses to horizontally-scrolling card strip above queue.
+   CSS-only — no JS required. Media query: orientation:portrait OR max-width:820px.
+   Layout order: nav → horizon band → sidebar card strip → new-order-bar → main. */
+
+@media (orientation: portrait), (max-width: 820px) {
+
+  /* App wrapper: column instead of row */
+  .app {
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  /* Sidebar: horizontal scroll strip */
+  .sidebar {
+    width: 100%;
+    min-height: unset;
+    height: auto;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-right: none;
+    border-bottom: 0.5px solid var(--border);
+    align-self: auto;
+    padding: 8px;
+    gap: 8px;
+    flex-shrink: 0;
+    /* Snap scrolling for card-by-card feel */
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .sidebar::-webkit-scrollbar { display: none; }
+
+  /* Cards: fixed-width tiles in the strip */
+  .card {
+    min-width: 200px;
+    max-width: 240px;
+    flex-shrink: 0;
+    margin-bottom: 0;
+    scroll-snap-align: start;
+    /* Height auto — no fixed height in the strip */
+    height: auto;
+  }
+
+  /* Active site card: green dot inline with label — address line hidden */
+  .site-address {
+    display: none;
+  }
+
+  /* Map: hide in portrait sidebar strip — too small to be useful */
+  #venue-map {
+    display: none;
+  }
+
+  /* Main: takes remaining height, scrollable */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+  }
+
+  /* Order queue: single column in portrait */
+  .order-queue {
+    grid-template-columns: 1fr;
+    padding: 12px;
+    gap: 8px;
+  }
+
+  /* Order tiles: no fixed min-height in portrait — auto height */
+  .order-tile {
+    min-height: unset;
+  }
+
+  /* Queue stats strip: tighter in portrait */
+  .queue-stats {
+    gap: 0;
+  }
+  .queue-stat {
+    padding: 8px 10px;
+  }
+  .queue-stat-value {
+    font-size: 18px;
+  }
+
+  /* Horizon band: single station window only (secondary hidden) */
+  .hb-station-secondary {
+    display: none !important;
+  }
+
+  /* Darwin section narrower in portrait */
+  .hb-darwin {
+    padding: 0 12px 0 14px;
+    min-width: unset;
+  }
+
+  /* Horizon windows: tighter padding */
+  .hb-window {
+    padding: 0 8px;
+    min-width: 52px;
+  }
+  .hb-window-count {
+    font-size: 14px;
+  }
+  .hb-window-label {
+    font-size: 9px;
+  }
+
+  /* Nav terminal label: hide in portrait to save space */
+  .nav-terminal-lbl {
+    display: none;
+  }
+  .nav-divider {
+    display: none;
+  }
+
+  /* Back-to-queue button: full width in portrait */
+  .btn-back-queue {
+    width: calc(100% - 32px);
+    left: 16px;
+  }
+}
+
+
+/* ─── WALK-IN ORDER OVERLAY (CC-84) ─── */
+/* Lightweight overlay — not a full-screen gate.
+   Dismissable via Cancel/back button or backdrop tap.
+   No Lightning invoice — payment via NumoPay fork or cash.
+   Inserts into merchant_orders with order_source='walkin'. */
+
+.walkin-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 800;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.walkin-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.walkin-box {
+  background: #26282C;
+  border: 0.5px solid #4A4D52;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  /* Scale-in on open */
+  transform: scale(0.97);
+  transition: transform 0.2s;
+}
+.walkin-overlay.open .walkin-box {
+  transform: scale(1);
+}
+
+.walkin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.walkin-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #E4E2DC;
+}
+.walkin-back {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: #5A5751;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.15s;
+}
+.walkin-back:hover { color: #8A8680; }
+.walkin-back-arrow {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.walkin-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.walkin-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #5A5751;
+}
+.walkin-input {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: #E4E2DC;
+  background: #1E1F22;
+  border: 0.5px solid #4A4D52;
+  border-radius: 5px;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+.walkin-input:focus {
+  border-color: rgba(200,169,110,0.6);
+}
+.walkin-input::placeholder {
+  color: #5A5751;
+}
+
+/* Identifier suggestions datalist styling handled by browser;
+   placeholder text guides staff to common inputs */
+
+.walkin-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  border: 0.5px solid rgba(200,169,110,0.5);
+  border-radius: 6px;
+  background: rgba(200,169,110,0.09);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #C8A96E;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  width: 100%;
+  margin-top: 4px;
+}
+.walkin-submit:hover {
+  background: rgba(200,169,110,0.15);
+  border-color: rgba(200,169,110,0.75);
+}
+.walkin-submit:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.walkin-error {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: #E05050;
+  letter-spacing: 0.06em;
+  display: none;
+  margin-top: -8px;
+}
+.walkin-error.show { display: block; }

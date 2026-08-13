@@ -704,9 +704,11 @@ function showSignedOutState() {
   document.getElementById('site-address').textContent = 'Waiting for owner sign-in…';
   document.getElementById('site-status-label').textContent = '—';
   document.getElementById('site-status-dot').className = 'site-status-dot';
-  // Hide merged pill until staff sign in
+  // Hide merged pill and New Order bar until staff sign in
   const pillEl = document.getElementById('merged-pill');
   if (pillEl) pillEl.style.display = 'none';
+  const nob = document.getElementById('new-order-bar');
+  if (nob) nob.style.display = 'none';
 }
 
 function showSignedInState() {
@@ -714,6 +716,9 @@ function showSignedInState() {
   document.getElementById('card-queue-summary').style.display = '';
   const prompt = document.getElementById('queue-signin-prompt');
   if (prompt) prompt.style.display = 'none';
+  // Show New Order bar — walk-ins are the primary flow for non-app customers
+  const nob = document.getElementById('new-order-bar');
+  if (nob) nob.style.display = '';
   // Render merged pill (role now known)
   renderMergedPill();
 }
@@ -878,6 +883,8 @@ function switchToOpsView() {
   document.getElementById('queue-header').style.display = 'none';
   document.getElementById('ops-panel').classList.add('visible');
   document.getElementById('btn-back-queue').classList.add('visible');
+  const nob = document.getElementById('new-order-bar');
+  if (nob) nob.style.display = 'none';
   if (_venueData) {
     const t = document.getElementById('ops-toggle-open');
     if (t) t.checked = _venueData.active === true;
@@ -890,6 +897,8 @@ function switchToQueueView() {
   document.getElementById('queue-header').style.display = '';
   document.getElementById('ops-panel').classList.remove('visible');
   document.getElementById('btn-back-queue').classList.remove('visible');
+  const nob = document.getElementById('new-order-bar');
+  if (nob) nob.style.display = '';
   updateMergedPillActive();
   refreshOrders();
 }
@@ -987,6 +996,115 @@ async function initAuth() {
 
   // Boot routing
   await routeGate();
+}
+
+// ─── WALK-IN ORDER OVERLAY (CC-84) ────────────────────────────
+// Opens a lightweight overlay for staff to enter a walk-in order.
+// No Lightning invoice — payment handled by NumoPay fork or cash.
+// Inserts into merchant_orders with order_source='walkin'.
+// Back button / backdrop tap closes without writing anything.
+
+function openWalkinOverlay() {
+  const overlay = document.getElementById('walkin-overlay');
+  if (!overlay) return;
+  // Reset fields
+  const idInput   = document.getElementById('walkin-identifier');
+  const itemInput = document.getElementById('walkin-item');
+  const noteInput = document.getElementById('walkin-notes');
+  const errEl     = document.getElementById('walkin-error');
+  if (idInput)   idInput.value   = '';
+  if (itemInput) itemInput.value = '';
+  if (noteInput) noteInput.value = '';
+  if (errEl)     errEl.classList.remove('show');
+  overlay.classList.add('open');
+  // Focus identifier field after transition
+  setTimeout(() => { if (idInput) idInput.focus(); }, 220);
+}
+
+function closeWalkinOverlay() {
+  const overlay = document.getElementById('walkin-overlay');
+  if (overlay) overlay.classList.remove('open');
+}
+
+async function submitWalkinOrder() {
+  const idInput   = document.getElementById('walkin-identifier');
+  const itemInput = document.getElementById('walkin-item');
+  const noteInput = document.getElementById('walkin-notes');
+  const errEl     = document.getElementById('walkin-error');
+  const submitBtn = document.getElementById('walkin-submit-btn');
+
+  const identifier = idInput   ? idInput.value.trim()   : '';
+  const itemName   = itemInput ? itemInput.value.trim()  : '';
+  const notes      = noteInput ? noteInput.value.trim()  : '';
+
+  // Validation: identifier and item are required
+  if (!identifier) {
+    if (errEl) { errEl.textContent = 'Enter a table number or name.'; errEl.classList.add('show'); }
+    if (idInput) idInput.focus();
+    return;
+  }
+  if (!itemName) {
+    if (errEl) { errEl.textContent = 'Enter at least one item.'; errEl.classList.add('show'); }
+    if (itemInput) itemInput.focus();
+    return;
+  }
+  if (errEl) errEl.classList.remove('show');
+
+  if (!_venueId) {
+    showToast('Venue not loaded — try refreshing.', 'err');
+    return;
+  }
+
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'ADDING ORDER…'; }
+
+  try {
+    const session = await getSbClient().auth.getSession();
+    const token   = session?.data?.session?.access_token;
+    if (!token) throw new Error('No session token');
+
+    const itemSummary = notes ? itemName + ' · ' + notes : itemName;
+
+    // CC-20: insert into merchant_orders only — never orders table.
+    // order_id is nullable (CC-84 migration) — walk-ins have no parent orders row.
+    const res = await fetch(`${SB_URL}/rest/v1/merchant_orders`, {
+      method: 'POST',
+      headers: {
+        'apikey':       SB_KEY,
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json',
+        'Prefer':       'return=minimal'
+      },
+      body: JSON.stringify({
+        venue_id:     _venueId,
+        status:       'pending',
+        payment_status: 'walkin',
+        order_source: 'walkin',
+        identifier:   identifier,
+        item_name:    itemName,
+        item_summary: itemSummary,
+        created_at:   new Date().toISOString(),
+        updated_at:   new Date().toISOString()
+      })
+    });
+
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error('HTTP ' + res.status + ' — ' + body);
+    }
+
+    closeWalkinOverlay();
+    showToast('Walk-in order added — ' + identifier, 'ok');
+    await refreshOrders();
+
+  } catch(e) {
+    console.error('[submitWalkinOrder]', e);
+    if (errEl) { errEl.textContent = 'Could not add order. Try again.'; errEl.classList.add('show'); }
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled  = false;
+      submitBtn.textContent = 'ADD TO QUEUE';
+    }
+  }
 }
 
 // ─── MAPBOX TOKEN ─────────────────────────────────────────────

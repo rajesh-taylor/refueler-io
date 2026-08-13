@@ -396,6 +396,13 @@
       </div>
     </div>
 
+    <!-- New Order bar — CC-84: promoted CTA, full-width, between stats and queue header.
+         Walk-ins are the majority flow for non-app customers paying fiat. -->
+    <div class="new-order-bar" id="new-order-bar" style="display:none;" onclick="openWalkinOverlay()" role="button" aria-label="Add a new walk-in order">
+      <span class="new-order-bar-icon" aria-hidden="true">+</span>
+      <span class="new-order-bar-text">New Order</span>
+    </div>
+
     <!-- Queue header -->
     <div class="queue-header" id="queue-header">
       <div class="queue-title">
@@ -465,6 +472,59 @@
 </div>
 
 </div><!-- /tablet-ui -->
+
+<!-- ─── WALK-IN ORDER OVERLAY (CC-84) ─── -->
+<!-- Backdrop tap closes overlay. Not a full-screen gate — dismissable. -->
+<div class="walkin-overlay" id="walkin-overlay" onclick="if(event.target===this)closeWalkinOverlay()">
+  <div class="walkin-box" role="dialog" aria-modal="true" aria-label="New walk-in order">
+
+    <div class="walkin-header">
+      <div class="walkin-title">New Order</div>
+      <button class="walkin-back" onclick="closeWalkinOverlay()" aria-label="Back">
+        <span class="walkin-back-arrow">←</span>
+        <span>Back</span>
+      </button>
+    </div>
+
+    <div class="walkin-field">
+      <label class="walkin-label" for="walkin-identifier">Table / Name / Number</label>
+      <input class="walkin-input" id="walkin-identifier"
+        type="text" autocomplete="off" autocorrect="off"
+        placeholder="e.g. Table 4, Counter, Sarah"
+        list="walkin-identifier-suggestions"
+        oninput="document.getElementById('walkin-error').classList.remove('show')">
+      <!-- Common identifier suggestions — staff type or tap -->
+      <datalist id="walkin-identifier-suggestions">
+        <option value="Table 1"><option value="Table 2"><option value="Table 3">
+        <option value="Table 4"><option value="Table 5"><option value="Table 6">
+        <option value="Table 7"><option value="Table 8"><option value="Table 9">
+        <option value="Table 10"><option value="Counter">
+      </datalist>
+    </div>
+
+    <div class="walkin-field">
+      <label class="walkin-label" for="walkin-item">Item(s)</label>
+      <input class="walkin-input" id="walkin-item"
+        type="text" autocomplete="off" autocorrect="off"
+        placeholder="e.g. Flat white, oat milk"
+        oninput="document.getElementById('walkin-error').classList.remove('show')">
+    </div>
+
+    <div class="walkin-field">
+      <label class="walkin-label" for="walkin-notes">Notes <span style="color:#5A5751;font-size:9px;">(optional)</span></label>
+      <input class="walkin-input" id="walkin-notes"
+        type="text" autocomplete="off" autocorrect="off"
+        placeholder="e.g. extra shot, no sugar">
+    </div>
+
+    <div class="walkin-error" id="walkin-error"></div>
+
+    <button class="walkin-submit" id="walkin-submit-btn" onclick="submitWalkinOrder()">
+      Add to Queue
+    </button>
+
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
