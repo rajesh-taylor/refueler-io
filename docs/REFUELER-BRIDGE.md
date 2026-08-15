@@ -1,5 +1,5 @@
 # REFUELER-BRIDGE.md — Refueler cross-project context
-> **Version:** 3.9 | **Created:** 28 July 2026 | **Updated:** CC-85 · 14 Aug 2026
+> **Version:** 4.0 | **Created:** 28 July 2026 | **Updated:** Onboarding-A · 15 Aug 2026
 > Lives in `refueler-share/` (root), `refueler-io/docs/`, `refueler-legend/` (root), and `refueler-pass/` (root). Committed to each at every block close.
 > This file is the handshake between Projects — not a substitute for repo-specific context files.
 > Higher MasterContext version number always wins on divergence.
@@ -87,6 +87,8 @@ Refueler is a suite of Bitcoin-native privacy products built by Rajesh Taylor (s
 **Project:** `tihgvdokeofnjxjkenmm`
 **All DDL via `apply_migration` only. `execute_sql` read-only. RLS on every table — no exceptions.**
 
+**Pending migration (Onboarding-A):** `venue_partners` additions — `lightning_address TEXT`, `onchain_address TEXT`, `silent_payment_address TEXT`, `mapbox_place_id TEXT`. Next counted Sonnet session.
+
 ### Schema state (post-CC-82, pre-CC-83b)
 Key tables: `venue_partners` · `merchant_users` · `orders` · `merchant_orders` · `stamp_programmes` · `merchant_billing`
 
@@ -151,7 +153,8 @@ Key tables: `venue_partners` · `merchant_users` · `orders` · `merchant_orders
 | CC-83b | refueler-io, Supabase | Production code: migrations, nav HTML/CSS/JS |
 | **CC-84** | refueler-io, Supabase | Portrait layout (S-16), walk-in overlay, New Order bar, cc84_walkin_schema migration, steakhouse coords. Commit d0defcc. |
 | **CC-85** | refueler-io | Branded magic link email, first full sim run. Commits 17ecb40, 306a587. |
-| **Onboarding-A (next)** | refueler-io | Merchant onboarding flow + printed handover document. Opus uncounted. |
+| **Onboarding-A** | refueler-io | Merchant onboarding flow + handover doc copy v3. Stages 0–7. TDP track. Schema additions logged. ✅ Closed. |
+| **Design-A (next)** | refueler-io | Merchant handover document — layout + styled HTML. Opus uncounted. |
 | **Pass-0** | refueler-pass | Founding scope session. PASS-MASTER.md v1.0, claude.md v1.0, SESSIONS-pass.md produced. Two-credential-class model locked. Events × Pass × Merchant arc established. |
 | **Pass-0b** | refueler-pass, refueler-io, refueler-share, refueler-legend | Housekeeping: BRIDGE v3.7 (Pass boundary added), SESSIONS-pass.md updated, claude.md updated. BRIDGE committed to all four repos. |
 | **Pass-1** | refueler-pass | Bitcoin Events × Pass × Merchant. PASS-MASTER.md v2.0: GDPR map, per-audience pitch, redemption data-flow audit, cross-merchant sub-token fix (P0 spike), credential data model, Fedimint/Madeira mechanics. claude.md v1.2, SESSIONS-pass updated. |
@@ -171,6 +174,13 @@ Key tables: `venue_partners` · `merchant_users` · `orders` · `merchant_orders
 - **[Pass]** New P0 spike: cross-merchant redemption unlinkability — per-offer single-use sub-tokens (NUT-29) — before any v2 build begins.
 - **[Pass]** New P1 spike: issuance timing-correlation resistance.
 - **[Pass]** New solicitor P1: GDPR controllership mapping — purchase record controller, credential outside personal-data perimeter, singling-out in organiser's hands.
+- **[Merchant terminal]** S-23 promoted to High: Queue view sign-out button — next Sonnet session, pre-go-live
+- **[Merchant terminal]** S-24 added: apple-touch-icon + favicon for tablet home screen bookmark — go-live prep
+- **[Merchant terminal]** Schema migration pending: lightning_address, onchain_address, silent_payment_address, mapbox_place_id on venue_partners
+- **[Merchant terminal]** 21-sat test payment to merchant Lightning address required at onboarding pre-flight
+- **[All products]** Privacy page update queued: sections 7, 8, 10 + merchant section + Legend free-tier paragraph
+- **[All products]** Docs ↔ UI sync rule active: at every block close touching merchant terminal, confirm handover doc currency
+- **[Planning]** TDP-A/B/C track established: Opus uncounted, after Sim-Close, before Menu Management v1
 
 ---
 
