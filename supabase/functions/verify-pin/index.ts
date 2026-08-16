@@ -1,4 +1,4 @@
-// verify-pin v1 — Refueler Edge Function
+// verify-pin v2 — Refueler Edge Function
 // Verifies staff or owner PIN against bcrypt hash stored in merchant_users.
 // Called by merchant terminal after magic-link auth. verify_jwt: false — JWT validated manually.
 //
@@ -11,7 +11,7 @@
 // to survive cold starts and scale across multiple Edge Function instances.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import * as bcrypt from 'https://deno.land/x/bcrypt@v0.4.1/mod.ts';
+import bcrypt from 'npm:bcryptjs@2.4.3';
 
 const SUPABASE_URL      = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
