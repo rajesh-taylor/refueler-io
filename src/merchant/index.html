@@ -21,6 +21,15 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
 <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
+<!-- Icons — S-24 -->
+<link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg" />
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/images/apple-touch-icon.png" />
+<link rel="manifest" href="/assets/manifest.json" />
+<!-- PWA: standalone mode on iOS home screen bookmark -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Refueler" />
+<meta name="theme-color" content="#1A1A1A" />
 <link rel="stylesheet" href="merchant-tablet-styles.css">
 <style>
 /* ── Darwin sidebar row styles (CC-24 patch) ── */
@@ -412,6 +421,8 @@
       <div style="display:flex;align-items:center;gap:12px;">
         <div class="queue-poll-status" id="queue-poll-status">—</div>
         <button class="queue-refresh-btn" onclick="refreshOrders()">↻ REFRESH</button>
+        <!-- S-23: sign-out path for all authenticated staff -->
+        <button class="btn-owner-signout" onclick="signOut()">SIGN OUT</button>
       </div>
     </div>
 

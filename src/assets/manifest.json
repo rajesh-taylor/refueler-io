@@ -1,0 +1,22 @@
+{
+  "name": "Refueler Merchant Terminal",
+  "short_name": "Refueler",
+  "description": "Merchant order queue and venue controls",
+  "start_url": "/merchant/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1A1A1A",
+  "theme_color": "#1A1A1A",
+  "icons": [
+    {
+      "src": "/assets/images/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/images/favicon-32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    }
+  ]
+}
