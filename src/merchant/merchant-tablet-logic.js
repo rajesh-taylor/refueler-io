@@ -17,17 +17,38 @@ let _venueMap        = null;
 let _lastPollTime    = null;
 let _userRole        = null;
 let _currentView     = 'queue'; // 'queue' | 'ops'
-let _staffPinHash    = null;
-let _ownerPinHash    = null;
 let _staffPinBuffer  = '';
 let _ownerPinBuffer  = '';
 let _darwinRowsCache = [];
 let _staffAuthenticated = false;
 
-// ─── PIN HASHING (SHA-256, browser native) ─────────────────
-async function sha256(str) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+// ─── PIN VERIFICATION (server-side via verify-pin Edge Function) ────────────
+// Client-side lockout: 5 failures → 30-second cooldown, per PIN type.
+// Server-side rate limit: 5 attempts per 5-minute window (in-memory, Edge Function).
+// 429 from server triggers client lockout immediately.
+const _pinAttempts = { staff: 0, owner: 0 };
+const _pinLocked   = { staff: false, owner: false };
+
+function _startPinLockout(type) {
+  _pinLocked[type] = true;
+  _pinAttempts[type] = 0;
+  const errId  = type === 'staff' ? 'pin-error'       : 'owner-pin-error';
+  const dotsId = type === 'staff' ? 'pin-dots'        : 'owner-pin-dots';
+  const errEl  = document.getElementById(errId);
+  const dotsEl = document.getElementById(dotsId);
+  if (dotsEl) { dotsEl.classList.add('shake'); setTimeout(() => dotsEl.classList.remove('shake'), 450); }
+  let remaining = 30;
+  function tick() {
+    if (errEl) { errEl.textContent = `Too many attempts — wait ${remaining}s`; errEl.classList.add('show'); }
+    if (remaining <= 0) {
+      _pinLocked[type] = false;
+      if (errEl) { errEl.classList.remove('show'); errEl.textContent = 'Incorrect PIN'; }
+      return;
+    }
+    remaining--;
+    setTimeout(tick, 1000);
+  }
+  tick();
 }
 
 // ─── THEME ─────────────────────────────────────────────────
@@ -134,20 +155,57 @@ function pinKey(val) {
 }
 
 async function verifyStaffPin(pin) {
-  const hash = await sha256(pin);
-  if (_staffPinHash && hash === _staffPinHash) {
+  if (_pinLocked.staff) {
+    _staffPinBuffer = '';
+    updatePinDots('pin-dots', 'pd', 0);
+    return;
+  }
+  const { data: sessionData } = await getSbClient().auth.getSession();
+  const token = sessionData?.session?.access_token;
+  if (!token) {
+    console.error('[verifyStaffPin] No session token');
+    _staffPinBuffer = '';
+    updatePinDots('pin-dots', 'pd', 0);
+    return;
+  }
+  let result;
+  try {
+    const res = await fetch(`${SB_URL}/functions/v1/verify-pin`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ pin_type: 'staff', pin })
+    });
+    if (res.status === 429) { _startPinLockout('staff'); _staffPinBuffer = ''; updatePinDots('pin-dots', 'pd', 0); return; }
+    result = await res.json();
+  } catch(e) {
+    console.error('[verifyStaffPin] Network error:', e);
+    _staffPinBuffer = '';
+    updatePinDots('pin-dots', 'pd', 0);
+    const errEl = document.getElementById('pin-error');
+    errEl.textContent = 'Connection error — try again';
+    errEl.classList.add('show');
+    setTimeout(() => { errEl.classList.remove('show'); errEl.textContent = 'Incorrect PIN'; }, 2500);
+    return;
+  }
+  if (result?.valid) {
+    _pinAttempts.staff = 0;
     _staffAuthenticated = true;
     hidePinGate();
     onStaffAuthenticated();
   } else {
+    _pinAttempts.staff++;
     _staffPinBuffer = '';
     updatePinDots('pin-dots', 'pd', 0);
-    const dotsEl = document.getElementById('pin-dots');
-    dotsEl.classList.add('shake');
-    setTimeout(() => dotsEl.classList.remove('shake'), 450);
-    const errEl = document.getElementById('pin-error');
-    errEl.classList.add('show');
-    setTimeout(() => errEl.classList.remove('show'), 2000);
+    if (_pinAttempts.staff >= 5) {
+      _startPinLockout('staff');
+    } else {
+      const dotsEl = document.getElementById('pin-dots');
+      dotsEl.classList.add('shake');
+      setTimeout(() => dotsEl.classList.remove('shake'), 450);
+      const errEl = document.getElementById('pin-error');
+      errEl.classList.add('show');
+      setTimeout(() => errEl.classList.remove('show'), 2000);
+    }
   }
 }
 
@@ -186,18 +244,55 @@ function ownerPinKey(val) {
   if (_ownerPinBuffer.length === 4) verifyOwnerPin(_ownerPinBuffer);
 }
 async function verifyOwnerPin(pin) {
-  const hash = await sha256(pin);
-  if (_ownerPinHash && hash === _ownerPinHash) {
+  if (_pinLocked.owner) {
+    _ownerPinBuffer = '';
+    updatePinDots('owner-pin-dots', 'opd', 0);
+    return;
+  }
+  const { data: sessionData } = await getSbClient().auth.getSession();
+  const token = sessionData?.session?.access_token;
+  if (!token) {
+    console.error('[verifyOwnerPin] No session token');
+    _ownerPinBuffer = '';
+    updatePinDots('owner-pin-dots', 'opd', 0);
+    return;
+  }
+  let result;
+  try {
+    const res = await fetch(`${SB_URL}/functions/v1/verify-pin`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ pin_type: 'owner', pin })
+    });
+    if (res.status === 429) { _startPinLockout('owner'); _ownerPinBuffer = ''; updatePinDots('owner-pin-dots', 'opd', 0); return; }
+    result = await res.json();
+  } catch(e) {
+    console.error('[verifyOwnerPin] Network error:', e);
+    _ownerPinBuffer = '';
+    updatePinDots('owner-pin-dots', 'opd', 0);
+    const errEl = document.getElementById('owner-pin-error');
+    errEl.textContent = 'Connection error — try again';
+    errEl.classList.add('show');
+    setTimeout(() => { errEl.classList.remove('show'); errEl.textContent = 'Incorrect PIN'; }, 2500);
+    return;
+  }
+  if (result?.valid) {
+    _pinAttempts.owner = 0;
     closeOwnerOverlay();
     openOwnerPanel();
   } else {
+    _pinAttempts.owner++;
     _ownerPinBuffer = '';
     updatePinDots('owner-pin-dots', 'opd', 0);
-    const dotsEl = document.getElementById('owner-pin-dots');
-    dotsEl.classList.add('shake');
-    setTimeout(() => dotsEl.classList.remove('shake'), 450);
-    document.getElementById('owner-pin-error').classList.add('show');
-    setTimeout(() => document.getElementById('owner-pin-error').classList.remove('show'), 2000);
+    if (_pinAttempts.owner >= 5) {
+      _startPinLockout('owner');
+    } else {
+      const dotsEl = document.getElementById('owner-pin-dots');
+      dotsEl.classList.add('shake');
+      setTimeout(() => dotsEl.classList.remove('shake'), 450);
+      document.getElementById('owner-pin-error').classList.add('show');
+      setTimeout(() => document.getElementById('owner-pin-error').classList.remove('show'), 2000);
+    }
   }
 }
 async function openOwnerPanel() {
@@ -368,24 +463,23 @@ async function resolveVenueAndPins(user) {
       console.error('[resolveVenueAndPins] No active session token — cannot proceed with RLS');
       return;
     }
-    // Step 1: merchant_users by user_id (UUID), not email
+    // Step 1: merchant_users_safe view by user_id (UUID), not email.
+    // Safe view excludes all hash columns — PIN verification is server-side via verify-pin Edge Function.
     const res = await fetch(
-      `${SB_URL}/rest/v1/merchant_users?user_id=eq.${encodeURIComponent(user.id)}&select=venue_id,role,staff_pin_hash,owner_pin_hash&limit=1`,
+      `${SB_URL}/rest/v1/merchant_users_safe?user_id=eq.${encodeURIComponent(user.id)}&select=venue_id,role&limit=1`,
       { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token } }
     );
     if (!res.ok) {
-      console.error('[resolveVenueAndPins] merchant_users fetch failed — HTTP', res.status);
+      console.error('[resolveVenueAndPins] merchant_users_safe fetch failed — HTTP', res.status);
       return;
     }
     const rows = await res.json();
     if (!rows || rows.length === 0) {
-      console.error('[resolveVenueAndPins] No merchant_users row found for user_id:', user.id);
+      console.error('[resolveVenueAndPins] No merchant_users_safe row found for user_id:', user.id);
       return;
     }
-    _venueId      = rows[0].venue_id        || null;
-    _userRole     = rows[0].role            || null;
-    _staffPinHash = rows[0].staff_pin_hash  || null;
-    _ownerPinHash = rows[0].owner_pin_hash  || null;
+    _venueId  = rows[0].venue_id || null;
+    _userRole = rows[0].role     || null;
 
     if (!_venueId) {
       console.error('[resolveVenueAndPins] merchant_users row has no venue_id for user_id:', user.id);
