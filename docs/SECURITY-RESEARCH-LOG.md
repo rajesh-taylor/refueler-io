@@ -5,6 +5,57 @@
 > **Sync rule:** At each block close, relevant entries are pulled into MasterContext (Session A notes, Legend S-4 notes), BRIDGE, and session queue entries receive one line: *"informed by SECURITY-RESEARCH-LOG.md [date]"*
 
 ---
+## 2026-08-17 — Hardening-A: Supabase-wide RLS and grant audit
+
+**Session type:** Hardening-A — Sonnet counted (execution only; plan from Sim-Close Opus).
+
+**Scope:** Full `information_schema` + `pg_policies` sweep across all 25 public tables prior to first real merchant go-live.
+
+---
+
+### Finding H-1 — merchant_users: inert write grants on credentials table
+
+`anon` and `authenticated` held INSERT/UPDATE/DELETE/TRUNCATE/TRIGGER/REFERENCES on `merchant_users` — the stock Supabase default pattern, never explicitly revoked. Inert because RLS is enabled and no permissive write policy exists for either role. Wrong posture for a table holding bcrypt PIN hashes regardless. Revoked in full. `authenticated` retains only the column-level SELECT grants applied at CC-90 (6 safe columns, no PIN columns). Duplicate SELECT policy (`merchant_users_safe_select_own`) dropped — identical to surviving `merchant_users_self_read`.
+
+**Confirmed safe before change:** No write path exists to `merchant_users` as `authenticated` or `anon`. Provisioning is dashboard/service_role. PIN reset routes through a dedicated Edge Function (future, per TDP-B).
+
+---
+
+### Finding H-2 — venue_partners: broad anon grant surface including wallet address columns
+
+`anon` held SELECT, INSERT, UPDATE, REFERENCES on every column of `venue_partners` — including `lightning_address`, `onchain_address`, `silent_payment_address`. This is the same latent-enumeration class as the former `partners_public_read` incident (dropped at an earlier session). Today it is masked by the absence of any anon SELECT row policy; it would become a full wallet-address leak the moment any anon read policy is added. Confirmed by reading the full `information_schema.column_privileges` output — 120+ column-level grant rows for `anon`.
+
+**Fix:** Table-level `REVOKE ALL ON venue_partners FROM anon` + `FROM authenticated`, then re-granted `SELECT, UPDATE TO authenticated` only. `anon` now holds zero grants on `venue_partners` at both table and column level. INSERT and DELETE remain `service_role` only.
+
+---
+
+### Finding H-3 — Deprecated telemetry tables: world-readable business data
+
+`log_entries` (site names, coordinates, vendor names, field-research notes), `live_transactions` (merchant names, order totals), and `sessions` (site names) all carried unconditional anon SELECT policies (`qual=true`). These were pre-pivot field-research and dev-console tables. Zero live code references confirmed across all HTML, JS, and Edge Function sources before dropping.
+
+**Fix:** All three tables dropped (`CASCADE` removed the orphaned `orders.session_id` FK). Dev console to be re-scoped around real operational metrics in a future session.
+
+---
+
+### Finding H-4 — SHA-256 PIN columns: dead weight on credentials table
+
+`staff_pin_hash` and `owner_pin_hash` (legacy PBKDF2/SHA-256 columns) still present alongside live `staff_pin_bcrypt` / `owner_pin_bcrypt`. `verify-pin` v2 confirmed (GitHub source read) to reference bcrypt columns only. Both legacy columns dropped.
+
+---
+
+### Finding H-5 — S-26: orders→venue_partners FK confirmed missing, added
+
+21 orders, 0 orphans. `orders_venue_id_fkey` constraint added. Dev-console relationship error resolved.
+
+---
+
+### Finding H-6 — subscribers table: confirmed sealed
+
+`deny_all_anon_subscribers` RESTRICTIVE policy with `qual=false` — the abandoned email list is fully blocked to anon and authenticated. No action required.
+
+**Migrations applied:** `hardening_a_merchant_users_grants` · `hardening_a_venue_partners_revoke_anon_addresses` (superseded by `hardening_a_venue_partners_grants_clean`) · `hardening_a_orders_venue_fk` · `hardening_a_remove_sha256_pin_columns` · `hardening_a_drop_deprecated_telemetry` · `hardening_a_venue_partners_grants_clean`
+
+---
 
 ## 2026-08-12 — Harmony ONE exploit (2026) + CipherStash/Supabase + Ordercli
 
