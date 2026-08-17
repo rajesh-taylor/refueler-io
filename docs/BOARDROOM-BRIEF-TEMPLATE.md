@@ -194,7 +194,14 @@ Any finding touching `refueler-mint`, `refueler-legend`, cross-repo security, or
 ## The reference session
 
 `BOARDROOM-BRIEF-2026-08-12.md` (Harmony ONE / CipherStash / Ordercli) is the calibration point for tone, depth, and action-item precision. The Harmony tweet receiving three sentences and a retweet of the person who broke the story was noted by the table with appropriate appreciation. The Head of Security filed it under "communications as a second attack surface."
-
+- `INCIDENT-PROTOCOL.md` — ecosystem-wide incident response protocol, 
+  `refueler-io/docs/`. Version 1.0, 2026-08-17. Governs all Refueler 
+  product surfaces on communication channels, severity tiers, and 
+  holding-statement discipline. Supersedes `legend-incident-protocol.md` 
+  for ecosystem-wide matters. The Legend file remains authoritative for 
+  FROST, canary operations, node seizure, and DKG procedures only. 
+  Attach both files when running a session — this document takes 
+  precedence on any cross-product incident question.
 ---PROMPT END---
 
 ---
