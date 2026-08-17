@@ -5,6 +5,124 @@
 > **Sync rule:** At each block close, relevant entries are pulled into MasterContext (Session A notes, Legend S-4 notes), BRIDGE, and session queue entries receive one line: *"informed by SECURITY-RESEARCH-LOG.md [date]"*
 
 ---
+
+## 2026-08-17 — Trezor breach / Payjoin 1.0 / rbitcoin / BIP461
+
+**Session type:** Weekly Boardroom Brief — ad-hoc uncounted. Week 1 (Q Branch lens).
+**Informed by:** BOARDROOM-BRIEF-2026-08-17.md
+
+> **Standing note on this log:**
+> Entries here are dated and immutable. Making an entry out of date is a sign of
+> progress. Update entries only by appending — never by editing existing text.
+> Reference and update this log when a session is materially about one of its findings.
+> Do not action these items outside their named sessions.
+
+**Sources reviewed:**
+- BleepingComputer — Trezor data breach (~14,000 customers, email addresses via support vendor)
+- BIP461 PR (`bitcoin/bips#2224`) — deterministic ECDSA low-r grinding via RFC 6979
+- payjoin.org — Payjoin 1.0 stable release announcement (2026-08-12)
+- rbitcoin — Rust Bitcoin node by reardencode; GitHub `reardencode/rbitcoin`, `rbitcoin.org`
+
+---
+
+### Finding 1 — Trezor: the breach surface is always the sub-processor
+
+**Mechanism:** ~14,000 customer email addresses leaked via a third-party support vendor. No seed phrases, no funds. The payload is: a list of people known to hold Bitcoin, with their contact addresses. Sufficient for targeted phishing and physical-risk profiling.
+
+**Applicable to:** All Refueler products. Magic link email delivery (Resend SMTP). Merchant onboarding docs. INCIDENT-PROTOCOL.md.
+
+**Lessons:**
+
+**1a — Resend is a sub-processor holding our de facto user list.**
+Magic links go out via Resend SMTP. Resend sees every merchant and user email address in transit. The "we have no email list" posture is technically true for Refueler's own storage; it is not true for Resend's logs. If Resend has a Trezor week, the leak metadata is "this address receives Refueler sign-in emails" — i.e., a list of Bitcoin-adjacent merchants and users. Action: audit Resend's data retention policy and add Resend as a sub-processor on the Article 30 processing record. Target: Privacy page update session.
+
+**1b — An email address is a lure, not a key — but merchants need to know that.**
+Refueler's auth architecture (single-use magic links, bcrypt PINs WF12, 12h JWT expiry) means a leaked email cannot directly compromise an account. The threat is social engineering: a convincing fake sign-in link. Merchants who know "Refueler will never send you a link you didn't request" are inoculated. Action: one-panel anti-phishing section in `merchant-onboarding-v1.html`. CMO to draft.
+
+**1c — The kill switch must be fast.**
+A compromised merchant terminal requires `venue_partners.active = false` in seconds. Currently a dashboard-only `[R]` operation. This is a named TDP-B item that this finding promotes to incident-critical. Action: TDP-B.
+
+**1d — No mass broadcast channel is a security posture.**
+The absence of a newsletter, forum, or social presence means there is no mass list to leak and no broadcast surface to hijack. For the current scale (testing, no live merchants), one-to-one Tuta + status page is correct, not primitive. Do not build a broadcast channel to solve a reach problem that does not yet exist.
+
+**Target sessions:** Privacy page update (Resend Article 30), TDP-B (kill switch), next merchant-docs iteration (anti-phishing panel), INCIDENT-PROTOCOL review (session-revocation runbook verification).
+
+---
+
+### Finding 2 — Payjoin 1.0: Legend's second differentiator leg
+
+**Mechanism:** Payjoin has the receiver contribute an input to the sender's transaction, breaking the common-input-ownership heuristic. A chain-analysis tool that assumes all inputs share an owner will actively mislabel Payjoin transactions. The Rust `payjoin` crate reached stable 1.0 in August 2026 — consumable in a Rust-heavy stack.
+
+**Applicable to:** Legend (primary), treasury/on-chain settlement tooling (secondary, unscoped).
+
+**Lessons:**
+
+**2a — Legend must handle Payjoin correctly to be honest about its own claim.**
+Silent Payments (BIP-352) is already a planned differentiator: Legend is the explorer that correctly displays SP static addresses and derived outputs. Payjoin is the second leg: Legend is the explorer that does not apply the naive common-input-ownership heuristic to Payjoin transactions. Most explorers do apply it — which means they actively lie about who owns what. Correct Payjoin handling is a v1+ feature, not a v1 claim. Feature before copy. Action: log against `legend-design-spec.md` as a v1+ item.
+
+**2b — The copy seed is "the explorer that doesn't lie about your privacy."**
+CMO spotted it. Silent Payments + Payjoin = two transaction types that existing explorers misrepresent. Legend's claim is that it does not misrepresent them. This is a factual architectural claim, not a marketing promise. CMO to produce three line options. Not in copy until the feature is implemented and tested.
+
+**2c — Payjoin as a treasury sweep privacy option.**
+The stable Rust crate is a consumable component for any future on-chain signing tooling. When the treasury sweep node is scoped (currently an architectural intention only, not yet a named session), Payjoin is in the toolkit. Log this against that planning session when it opens.
+
+**Target sessions:** Legend node-planning (feature scope), legend-design-spec.md update (v1+ item), CMO brief (copy seeds → notes-articles-list.md), treasury sweep node planning (when scoped).
+
+---
+
+### Finding 3 — rbitcoin: a watch-line against the electrs fork decision
+
+**Mechanism:** reardencode (high-signal Bitcoin contributor) is building a Rust full node exposing Electrum, Esplora, and Core RPC interfaces simultaneously. Not production-ready. Author uses Silent Payments on his own site — SP-sympathetic build.
+
+**Applicable to:** `refueler-multi-core` (BLAKE3-accelerated electrs fork), Legend node stack.
+
+**Lessons:**
+
+**3a — The electrs fork assumption is worth watching, not abandoning.**
+refueler-multi-core's niche is BLAKE3 + ARM. rbitcoin would not have BLAKE3 out of the box — the niche may hold. But a production-grade multi-interface Rust node could make maintaining the electrs fork not worth the candle. The question to hand to the Legend node-planning session: *maintain the BLAKE3 electrs fork vs. contribute BLAKE3 acceleration to / wrap rbitcoin?* Do not decide this at Boardroom Brief level.
+
+**3b — Licence is the first gate.**
+MIT or Apache 2.0: candidate. Copyleft: calculus changes entirely. Check before any further consideration.
+
+**3c — SP support trajectory is the second gate.**
+An SP-aware rbitcoin would be directly relevant to Legend's full-block scanning requirement. Monitor SP support progress in the repo; do not assume it will arrive on any timeline.
+
+**3d — External node is never a Legend trust root.**
+Whatever Legend runs as its indexer, Legend verifies the chain itself. No external node is inherited as gospel. This is the Harmony supply-API lesson applied to infrastructure.
+
+**Watch-line note:** The talent cohort building Rust-Bitcoin nodes (reardencode and adjacent engineers) is the profile Legend's indexer and refueler-mint will need in approximately two quarters. Role does not exist yet. Cohort is visible now in public repos. No action — awareness only.
+
+**Target sessions:** Legend node-planning (electrs fork decision question), rbitcoin licence + SP-support check (Bitcoin Advisor action before that session).
+
+---
+
+### Finding 4 — BIP461 / low-r ECDSA: watch-line only
+
+**Mechanism:** Standardises deterministic low-r grinding of ECDSA signatures via RFC 6979. Prevents the optional null-byte padding on `r` values with MSB set, producing uniform 71-byte DER signatures. Uniform signature size aids fee determinism and removes one fingerprinting bit from on-chain transactions.
+
+**Applicable to:** Treasury sweep / on-chain settlement tooling (unscoped). Irrelevant to Lightning (Blink signs), refueler-mint (BDHKE, not ECDSA), Legend FROST (Schnorr/BIP340, fixed 64 bytes).
+
+**Lesson:** Table-stakes wallet hygiene for whoever builds on-chain signing. Not a Refueler differentiator — it is the thing every competent wallet already does. One watch-line against the treasury/settlement node plan. No dedicated session.
+
+**Target sessions:** Treasury sweep node planning (when scoped) — one-line mention only.
+
+---
+
+## Action item summary — tied to session queue
+
+| # | Action | Target session | Status |
+|---|---|---|---|
+| 1 | Audit Resend data retention; add to Article 30 processing record | Privacy page update session | Queued |
+| 2 | Promote `venue_partners.active` kill-switch to incident-critical TDP-B item | TDP-B | Queued |
+| 3 | Anti-phishing panel in `merchant-onboarding-v1.html` — CMO draft | Next merchant-docs iteration | Queued |
+| 4 | Confirm session-revocation runbook vs INCIDENT-PROTOCOL merchant SEV-1/2 | INCIDENT-PROTOCOL review | Queued |
+| 5 | Log Payjoin as Legend v1+ feature against `legend-design-spec.md` | Legend node-planning / next legend-design-spec touch | Queued |
+| 6 | Log Payjoin as treasury sweep privacy option (when that session is scoped) | Treasury sweep node planning | Watch |
+| 7 | CMO copy seed: "the explorer that doesn't lie about your privacy" → notes-articles-list.md | CMO brief | Queued |
+| 8 | rbitcoin licence + SP-support check | Bitcoin Advisor → before Legend node-planning | Queued |
+| 9 | Frame electrs fork vs rbitcoin question for Legend node-planning session | Legend node-planning | Queued |
+| 10 | BIP461 watch-line against treasury/settlement on-chain signing plan | Treasury sweep node planning (when scoped) | Watch |
+
 ## 2026-08-17 — Hardening-A: Supabase-wide RLS and grant audit
 
 **Session type:** Hardening-A — Sonnet counted (execution only; plan from Sim-Close Opus).
