@@ -1,5 +1,5 @@
 # REFUELER-BRIDGE.md — Refueler cross-project context
-> **Version:** 4.7 | **Created:** 28 July 2026 | **Updated:** TDP-C · CC-98 · 2026-08-18
+> **Version:** 4.8 | **Created:** 28 July 2026 | **Updated:** NumoPay-A · CC-99 · 2026-08-18
 > Lives in `refueler-share/` (root), `refueler-io/docs/`, `refueler-legend/` (root), `refueler-pass/` (root), and `numo-fork/` (root).
 > This file is the handshake between Projects — not a substitute for repo-specific context files.
 > Higher MasterContext version number always wins on divergence.
@@ -128,35 +128,28 @@ Refueler is a suite of Bitcoin-native privacy products built by Rajesh Taylor (s
 
 ---
 
-## NumoPay fork — alignment findings (TDP-C, CC-98)
+## NumoPay fork — architecture decisions (NumoPay-A, CC-99)
+
+**ADR:** `numo-fork/NUMO-PAY-A-ADR.md` and `refueler-io/docs/NUMO-PAY-A-ADR.md`
 
 **Base:** cashubtc/Numo v1.8. **Package:** `io.refueler.merchant`. **Fork:** `rajesh-taylor/numo-fork`.
-**Hardening phases 1–3:** complete (EventModeManager, EncryptedSharedPreferences, Svix webhook).
-**Current state:** Clean v1.8 base with Refueler package name. No Supabase integration yet.
+**Hardening phases 1–3:** complete. **Hard fork:** permanent — no merge path back to upstream.
 
-**Key capabilities already in the fork (relevant to NumoPay-A):**
-- `OnboardingActivity` — first launch flow (needs replacing/wrapping for Supabase magic link auth)
-- `ModernPOSActivity` — main POS screen, portrait Android
-- `PinEntryActivity` / `PinSetupActivity` / `PinResetActivity` — PIN security built natively
-- `ItemListActivity` / `ItemEntryActivity` / `ItemSelectionActivity` / basket system — item catalogue built
-- `WebhookSettingsActivity` — webhook config UI exists
-- `PaymentRequestActivity` — NFC/QR/Lightning request (Cashu-native; payment routing needs adapting)
-- `InsightsActivity` / `PaymentsHistoryActivity` — history and analytics built
-- `AutoWithdrawSettingsActivity` — automatic withdrawal threshold
+**Governing decision (locked NumoPay-A):** NumoPay is a Supabase-backed order-entry terminal. It holds no funds and processes no payments of its own. The entire Cashu wallet ceremony, `CashuWalletManager`, `AutoWithdrawManager`, NFC HCE, and CDK dependency are deleted.
 
-**Stack:** OkHttp3 + Jackson + Gson (no Retrofit). `cdk-android:0.17.2-rc.1` — note `-rc.1` suffix, confirm vs stable before any Cashu work in NumoPay-A.
+**CDK return condition:** Block 8 / Pass floor-device redemption only. Must pin to stable `cdk-android:0.17.2` matching `refueler-mint` (lock 4s). `-rc.1` must never ship to a real merchant device.
 
-**NumoPay-A agenda items (locked TDP-C):**
+**Auth (locked):** Supabase magic link once (AM-assisted) → EncryptedSharedPreferences JWT → `verify-pin` v2 EF at shift-start → 30-min local grant. `FLAG_KEEP_SCREEN_ON`. No mid-shift re-auth. 12h JWT (43200s).
 
-| Item | Decision |
-|---|---|
-| Auth model | Replace/wrap `OnboardingActivity` with Supabase magic link + staff PIN. Screen-on flag; no mid-shift re-auth. Staff PIN only during shift. |
-| Payment routing | Order entry → `merchant_orders` via Supabase. Not Cashu melt for floor orders. |
-| Item catalogue source | Supabase `merchant_menu_items` (single source of truth). Study NumoPay's native catalogue UI/UX first. |
-| Noun/verb/handle taxonomy | Order code as universal join key across consumer app → terminal → NumoPay. |
-| Android theming | Map Refueler Carbon token set to `themes.xml` / `colors.xml` / `dimens.xml`. |
-| `cdk-android:0.17.2-rc.1` | Confirm -rc.1 vs stable before any Cashu work begins. |
-| Source files to attach | `OnboardingActivity`, `ModernPOSActivity`, `WebhookSettingsActivity` — attach manually at NumoPay-A open. |
+**Payment routing (locked):** Lightning walk-in → `create-order` EF → LNURL-pay to `venue_partners.lightning_address` → QR on device → Realtime poll for confirmation. Cash/card walk-in → record-only insert, `status: 'confirmed'` immediately. No Cashu melt.
+
+**Item catalogue (locked):** `merchant_menu_items` via PostgREST, read-only on floor device. `BitcoinPriceWorker` retained for indicative GBP→sats display. Write side on tablet terminal / Menu Management v1.
+
+**Noun/verb/handle (locked):** Order code (`RF-XXXX`) is the universal join key. `origin` field on `merchant_orders`: `'preorder'` (consumer app) · `'floor'` (NumoPay). DDL pending at NumoPay-B.
+
+**Android theming (locked):** `Theme.Refueler` replaces `Theme.Numo`. Carbon always-on. Status colours protected: Pending `#C8A96E` · In Prep `#7899D4` · Ready `#3DCA7A`.
+
+**Build sequence:** NumoPay-B (auth scaffold, CDK removal, theming) → NumoPay-C (catalogue, payment flows, history). Both Sonnet counted.
 
 ---
 
@@ -260,7 +253,8 @@ Pre-merchant gate list:
 ## NumoPay fork — context
 
 **Base:** cashubtc/Numo v1.8. **Fork:** `rajesh-taylor/numo-fork`. Hardening phases 1–3 complete.
-**Timing:** NumoPay-A after TDP-C. Attach `OnboardingActivity`, `ModernPOSActivity`, `WebhookSettingsActivity` source files manually at NumoPay-A open.
+**Status:** NumoPay-A complete (CC-99). ADR locked. Next: NumoPay-B (Sonnet counted).
+**ADR:** `numo-fork/NUMO-PAY-A-ADR.md` · `refueler-io/docs/NUMO-PAY-A-ADR.md`
 
 ---
 
