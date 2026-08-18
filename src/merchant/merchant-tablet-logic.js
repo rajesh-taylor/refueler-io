@@ -831,6 +831,50 @@ function renderRailTenant() {
     if (el) el.textContent = '—';
   });
   _horizonSetWindowTints(primaryTs);
+
+  // Mirror to owner horizon strip (same data, no extra fetch)
+  _mirrorHorizonToOwner(rows, primaryEta, primaryTs);
+}
+
+function _mirrorHorizonToOwner(rows, primaryEta, primaryTs) {
+  const ownerNode  = document.getElementById('owner-hb-beck-node');
+  const ownerLabel = document.getElementById('owner-hb-darwin-label');
+  const ownerName  = document.getElementById('owner-hb-station-name');
+  const ownerEta   = document.getElementById('owner-hb-station-eta');
+  const ownerName2 = document.getElementById('owner-hb-station-name-2');
+  const ownerEta2  = document.getElementById('owner-hb-station-eta-2');
+  if (!ownerName) return; // owner panel not open / not in DOM yet — no-op
+
+  if (!rows || rows.length === 0) {
+    if (ownerNode)  ownerNode.style.background  = '#5A5751';
+    if (ownerLabel) ownerLabel.textContent = 'DARWIN · OFFLINE';
+    if (ownerName)  ownerName.textContent  = 'OFFLINE';
+    if (ownerEta)   ownerEta.textContent   = '—';
+    return;
+  }
+
+  if (ownerNode)  ownerNode.style.background  = '#3DCA7A';
+  if (ownerLabel) ownerLabel.textContent = 'DARWIN · LIVE';
+  if (ownerName)  ownerName.textContent  = DARWIN_STATION_LABELS[rows[0].crs] || rows[0].crs;
+  if (ownerEta)   ownerEta.textContent   = primaryEta;
+
+  if (rows.length > 1) {
+    const sec   = rows[1];
+    const secTs = sec.actual_timestamp ? new Date(sec.actual_timestamp) : null;
+    const secEta = secTs
+      ? secTs.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false })
+      : '—';
+    if (ownerName2) ownerName2.textContent = DARWIN_STATION_LABELS[sec.crs] || sec.crs;
+    if (ownerEta2)  ownerEta2.textContent  = secEta;
+  }
+
+  // Window tints
+  const w0 = document.getElementById('owner-hb-win-0');
+  const w3 = document.getElementById('owner-hb-win-3');
+  const w7 = document.getElementById('owner-hb-win-7');
+  if (w0) w0.style.background = 'rgba(255,255,255,0.07)';
+  if (w3) w3.style.background = 'rgba(255,255,255,0.03)';
+  if (w7) w7.style.background = 'transparent';
 }
 
 function _horizonClearWindows() {
