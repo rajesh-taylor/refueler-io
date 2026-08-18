@@ -1,5 +1,5 @@
 # REFUELER-BRIDGE.md — Refueler cross-project context
-> **Version:** 4.3 | **Created:** 28 July 2026 | **Updated:** Sim-Close · 2026-08-17
+> **Version:** 4.4 | **Created:** 28 July 2026 | **Updated:** TDP-A · CC-95 · 2026-08-18
 > Lives in `refueler-share/` (root), `refueler-io/docs/`, `refueler-legend/` (root), and `refueler-pass/` (root). Committed to each at every block close.
 > This file is the handshake between Projects — not a substitute for repo-specific context files.
 > Higher MasterContext version number always wins on divergence.
@@ -13,6 +13,8 @@ Refueler is a suite of Bitcoin-native privacy products built by Rajesh Taylor (s
 **Products:** Share (anonymous encrypted file transfer, live at `refueler.io/share/`) · Legend (privacy-first Bitcoin block explorer, post-B9) · Merchant terminal (Fenchurch St line cafés and restaurants — tablet, counter/kitchen) · NumoPay fork (in-house order taking, Android phone, waiter/floor staff) · Refueler Pass (Lightning-native ticketing and venue access — own repo + Claude project) · Consumer app (React Native, Blink Lightning — customer-facing, pre-orders + Legend + Pass)
 
 **North star (internal only):** *Come for privacy, stay for Bitcoin.*
+
+**Merchant profile (locked TDP-A):** Small, family-run independent businesses — cafés, coffee shops, delis, local restaurants. Community relationships, care over throughput. Not multi-national franchises. Not high-volume kitchens. Not competing with Square/Toast/Lightspeed. First merchants likely in Essex (Southend, Leigh-on-Sea, Westcliff) before London corridor.
 
 **Local paths:** Main site + POS: `/Users/rajeshtaylor/Documents/refueler.io/` · Share: `/Users/rajeshtaylor/Documents/refueler-share/` · Legend: `/Users/rajeshtaylor/Documents/refueler-legend/` · NumoPay fork: `/Users/rajeshtaylor/Documents/refueler.io/terminals/numo-fork/` · Pass: `/Users/rajeshtaylor/Documents/refueler-pass/`
 
@@ -85,7 +87,7 @@ Refueler is a suite of Bitcoin-native privacy products built by Rajesh Taylor (s
 **Gold:** `#C8A96E` · **Success:** `#27AE60`
 **Fonts:** Satoshi (headings) · DM Sans (UI) · IBM Plex Mono (data) · Source Serif 4 (editorial)
 **Theme persistence:** `rs-theme` cookie, `.refueler.io`, 30-day rolling. Never localStorage.
-**Abolished:** `#F5820A` orange · `backdrop-filter` · `localStorage` theme · `rfTheme` · `--accent-action`
+**Abolished:** `#F5820A` orange · `#F7F4EF` (stale Paper) · `#1E1F22` (stale Carbon) · `backdrop-filter` · `localStorage` theme · `rfTheme` · `--accent-action`
 
 ---
 
@@ -98,24 +100,35 @@ Refueler is a suite of Bitcoin-native privacy products built by Rajesh Taylor (s
 
 ---
 
-## Merchant terminal — design locked CC-83
+## Merchant terminal — design locked CC-83, audited TDP-A (CC-95)
+
+**File locations (corrected TDP-A):** HTML: `src/merchant/index.html` (plain `.html`) · JS: `src/merchant/merchant-tablet-logic.js` · CSS: `src/merchant/merchant-tablet-styles.css`. All previous references to `merchant-tablet.html` are incorrect.
+
+**Philosophy (locked TDP-A):** Ambient awareness tool for craftspeople, not a throughput-management system. The horizon strip tells the merchant when their customer is arriving — they choose their own pace. Pending-gold status colour is deliberate; protect it. Learn text sizing from KDS incumbents; take almost nothing else from them.
 
 ### Nav
 - Default (no logo): Refueler wordmark (Satoshi 700, 16px, `#E4E2DC`) · divider · "MERCHANT TERMINAL" (IBM Plex Mono, 12px, `#C8C9CB`)
 - Right: QUEUE·OPS·OWNER merged pill (42px, OWNER gold tint) · separator · PAPER·CARBON pill
 
 ### Horizon strip
-- Always dark `#1A1A1A` · 64px height
+- Always dark `#1A1A1A` · 64px height ✅ confirmed live
 - Station name: IBM Plex Mono 15px `#E4E2DC` · ETA: gold · counts: `#A8A4A0` uniform
-- "DARWIN · LIVE" label hidden by default — strip height and ETA are the implicit liveness signal
+- "DARWIN · LIVE" label removed CC-84 ✅
 
 ### Order tiles
 - `[ID] · [items]` single line · status badge right only
 - PENDING gold · IN PREP blue `#7899D4` · READY green `#3DCA7A`
+- Type sizes: identifier north of 18px, item name 14–16px (TDP-philosophy to confirm)
+
+### Ops panel — under review (TDP-philosophy → TDP-B)
+Current two-toggle model is dishonest (both write `active`, coupled via JS). TDP-B will collapse to single honest toggle or introduce real `is_paused` column. Sidebar necessity, ops layout, stamp placement all open questions for TDP-philosophy session.
 
 ### Portrait layout (CC-84)
 - Option A: sidebar collapses to horizontal-scroll card strip above main. CSS-only.
 - `@media (orientation: portrait), (max-width: 820px)`
+
+### Security — S-27 (TDP-B fix)
+`venue_partners_merchant_pause_update` has no column restriction — merchant can write wallet address columns on own venue row. Column-level UPDATE grant restriction required: `active` + `pause_reason` only. TDP-B pre-merchant gate item.
 
 ---
 
@@ -178,6 +191,7 @@ Safari imposes an effective ~1.5 GB real-world ceiling on the current in-memory 
 | **Block-5 Close** | refueler-io | Block 5 review. Go-live pressure removed. Sim stages ratified. BRIDGE v4.2. ✅ Closed. |
 | **CC-92** | refueler-io, Supabase | Stage 3 payment sim PASSED. Migration cc92_steakhouse_activate_lightning_address. ✅ Closed. |
 | **Sim-Close** | refueler-io | Formal sign-off. INCIDENT-PROTOCOL.md. BRIDGE v4.3. ✅ Closed. |
+| **CC-95 / TDP-A** | refueler-io | Terminal audit. Eight drift findings. S-27 added. TDP-B gate list. Merchant profile locked. BRIDGE v4.4. ✅ Closed. |
 | Pass-0 | refueler-pass | Founding scope. Two-credential-class model locked. |
 | Pass-0b | refueler-pass, refueler-io, refueler-share, refueler-legend | BRIDGE v3.7. |
 | Pass-1 | refueler-pass | Bitcoin Events × Pass × Merchant. PASS-MASTER.md v2.0. |
@@ -188,7 +202,7 @@ Safari imposes an effective ~1.5 GB real-world ceiling on the current in-memory 
 
 - Push `refueler-app` dev branch ← CA-1 prerequisite
 - Disconnect `share.refueler.io` from Cloudflare Pages
-- Commit `INCIDENT-PROTOCOL.md` to `refueler-io/docs/` and push BRIDGE v4.3 to `refueler-share`, `refueler-legend`, `refueler-pass`
+- Push BRIDGE v4.4 to `refueler-share/`, `refueler-legend/`, `refueler-pass/` root and `refueler-io/docs/`
 - Upgrade Supabase to Pro when first real merchant goes live
 - Upgrade Cloudflare Workers to Paid ($5/month) before production volume
 - Send Mapbox coordinate accuracy email (drafted CC-84, in drafts)
