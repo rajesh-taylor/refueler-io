@@ -329,6 +329,12 @@ async function openOwnerPanel() {
   await loadOwnerStats();
   const badge = document.getElementById('owner-venue-badge');
   if (badge && _venueName) badge.textContent = _venueName.toUpperCase();
+  // Populate Lightning address in owner panel (behind owner PIN gate)
+  const lnDisplay = document.getElementById('owner-ln-display');
+  if (lnDisplay) lnDisplay.textContent = _venueData?.lightning_address || '—';
+  // Populate on-chain address (loaded from venue_partners — display only, [R] to change)
+  const onchainDisplay = document.getElementById('owner-onchain-display');
+  if (onchainDisplay) onchainDisplay.textContent = _venueData?.onchain_address || '—';
   const t = localStorage.getItem('rfTheme') || 'paper';
   ['owner-pill-paper'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.toggle('active', t === 'paper'); });
   ['owner-pill-carbon'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.toggle('active', t === 'carbon'); });
@@ -487,7 +493,7 @@ async function loadVenueDetails(venueId) {
     const token = sessionData?.session?.access_token;
     if (!token) { console.error('[loadVenueDetails] No session token'); return; }
     const res = await fetch(
-      `${SB_URL}/rest/v1/venue_partners?id=eq.${venueId}&select=id,name,address_line1,coords_lat,coords_lng,active,brand_primary,brand_secondary,venue_type,franchise_group_id,logo_url,lightning_address&limit=1`,
+      `${SB_URL}/rest/v1/venue_partners?id=eq.${venueId}&select=id,name,address_line1,coords_lat,coords_lng,active,brand_primary,brand_secondary,venue_type,franchise_group_id,logo_url,lightning_address,onchain_address&limit=1`,
       { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token } }
     );
     if (!res.ok) { console.error('[loadVenueDetails] venue_partners fetch failed — HTTP', res.status); return; }

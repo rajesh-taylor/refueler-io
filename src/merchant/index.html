@@ -122,10 +122,7 @@
   <div class="first-login-box">
     <div class="first-login-venue" id="first-login-venue-name">—</div>
     <div class="first-login-heading">Welcome to your terminal.</div>
-    <div class="first-login-body">
-      Staff sign in with their PIN. You access Owner settings with yours.<br>
-      Orders placed on the Refueler app appear here automatically.
-    </div>
+    <p class="first-login-body">Staff sign in with their PIN. You access Owner settings with yours. Orders placed on the Refueler app appear here automatically.</p>
     <button class="first-login-dismiss" onclick="dismissFirstLogin()">← Back to Queue</button>
   </div>
 </div>
@@ -134,7 +131,7 @@
 <div class="owner-overlay" id="owner-overlay">
   <div class="owner-pin-box">
     <div class="owner-pin-eyebrow">Owner Access</div>
-    <div class="owner-pin-heading">Enter owner PIN</div>
+    <div class="owner-pin-heading">Enter Owner PIN</div>
     <div class="pin-dots" id="owner-pin-dots">
       <div class="pin-dot-indicator" id="opd0"></div>
       <div class="pin-dot-indicator" id="opd1"></div>
@@ -215,6 +212,29 @@
       <div class="owner-stat-label">Avg Order Value</div>
       <div class="owner-stat-value" id="owner-stat-aov">—</div>
       <div class="owner-stat-sub">today's average</div>
+    </div>
+  </div>
+
+  <div class="owner-section">
+    <div class="owner-section-label">Lightning Address</div>
+    <div class="owner-menu-row">
+      <div>
+        <div class="owner-menu-label owner-ln-address" id="owner-ln-display">—</div>
+        <div class="owner-menu-sub">Customers pay invoices directly to this address</div>
+      </div>
+      <button class="ops-lightning-change-btn" onclick="openLnChangeFlow()">Change</button>
+    </div>
+  </div>
+
+  <div class="owner-section">
+    <div class="owner-section-label">On-Chain Address</div>
+    <div class="owner-menu-row owner-menu-row--col">
+      <div class="owner-menu-label owner-ln-address" id="owner-onchain-display">—</div>
+      <div class="owner-menu-sub">For payments settled on the Bitcoin base layer</div>
+      <div class="owner-privacy-nudge">
+        <span class="owner-privacy-nudge-icon">⚿</span>
+        For your privacy — each payment should use a fresh address. If you've received a payment to this address, contact <strong>support@refueler.io</strong> for a new one.
+      </div>
     </div>
   </div>
 
@@ -401,28 +421,19 @@
           </div>
         </div>
 
-        <!-- Card 2: Lightning address -->
-        <div class="ops-card">
-          <div class="ops-card-label">Lightning Address</div>
-          <div class="ops-card-content">
-            <div class="ops-lightning-address" id="ops-lightning-display">—</div>
-            <button class="ops-lightning-change-btn" onclick="openLnChangeFlow()">Change</button>
-          </div>
-        </div>
-
-        <!-- Card 3: Staff access (placeholder — no copy, space reserved) -->
+        <!-- Card 2: Staff access (placeholder — no copy, space reserved) -->
         <div class="ops-card ops-card-placeholder" id="ops-card-staff">
           <div class="ops-card-label">Staff Access</div>
           <div class="ops-card-content"></div>
         </div>
 
-        <!-- Card 4: Menu (placeholder — no copy, space reserved) -->
+        <!-- Card 3: Menu (placeholder — no copy, space reserved) -->
         <div class="ops-card ops-card-placeholder" id="ops-card-menu">
           <div class="ops-card-label">Menu</div>
           <div class="ops-card-content"></div>
         </div>
 
-        <!-- Card 5: Stamp programme (reserved — Block 8 / post-mint metrics) -->
+        <!-- Card 4: Stamp programme (reserved — Block 8 / post-mint metrics) -->
         <div class="ops-card ops-card-placeholder" id="ops-card-stamps">
           <div class="ops-card-label">Stamp Programme</div>
           <div class="ops-card-content"></div>
