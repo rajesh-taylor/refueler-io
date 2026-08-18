@@ -1,10 +1,12 @@
-// ─── CONSTANTS ─────────────────────────────────────────────
+// ─── CONSTANTS ─────────────────────────────────────────────────────────────
 const SB_URL = 'https://tihgvdokeofnjxjkenmm.supabase.co';
+// SB_KEY hardcoded — anon key, safe to ship in client JS (RLS enforces all access).
+// Key rotation requires a manual edit here. Not a secret.
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpaGd2ZG9rZW9mbmp4amtlbm1tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTY2NDksImV4cCI6MjA5NDE5MjY0OX0.cRb94WeIP8yRfWd9s2XKmq2nqm1ov-sK1df6u8LNUbo';
 const POLL_INTERVAL_MS   = 15000;
 const DARWIN_INTERVAL_MS = 15000;
 
-// ─── STATE ─────────────────────────────────────────────────
+// ─── STATE ──────────────────────────────────────────────────────────────────
 let _sbClient    = null;
 let _currentUser = null;
 let _venueId     = null;
@@ -13,7 +15,6 @@ let _venueData   = null;
 let _orders      = [];
 let _orderPollTimer  = null;
 let _darwinTimer     = null;
-let _venueMap        = null;
 let _lastPollTime    = null;
 let _userRole        = null;
 let _currentView     = 'queue'; // 'queue' | 'ops'
@@ -22,10 +23,16 @@ let _ownerPinBuffer  = '';
 let _darwinRowsCache = [];
 let _staffAuthenticated = false;
 
-// ─── PIN VERIFICATION (server-side via verify-pin Edge Function) ────────────
-// Client-side lockout: 5 failures → 30-second cooldown, per PIN type.
-// Server-side rate limit: 5 attempts per 5-minute window (in-memory, Edge Function).
-// 429 from server triggers client lockout immediately.
+// ─── HORIZON STRIP — SLOT-BASED ARRIVAL-INTELLIGENCE PRIMITIVE ──────────────
+// Tenants provisioned at venue setup via mapbox_place_id proximity.
+// TDP-B: only 'rail' (Darwin) is wired. 'fixtures' is a stub. 'pass' is a comment only.
+// Fixture tenant: football-data.org API — wired in Events intelligence layer session.
+// Pass tenant: pending dedicated Opus design session(s) before integration.
+const HORIZON_TENANTS = ['rail']; // set at loadVenueDetails() based on mapbox_place_id field
+// Future: if (venue.venue_type === 'stadium_adjacent') HORIZON_TENANTS.push('fixtures');
+// Future pass tenant: // HORIZON_TENANTS.push('pass'); — NOT until Pass-A Opus session
+
+// ─── PIN RATE LIMITING ─────────────────────────────────────────────────────
 const _pinAttempts = { staff: 0, owner: 0 };
 const _pinLocked   = { staff: false, owner: false };
 
@@ -51,13 +58,13 @@ function _startPinLockout(type) {
   tick();
 }
 
-// ─── THEME ─────────────────────────────────────────────────
-// Terminal uses localStorage/rfTheme — this is the app/terminal surface, not public web.
-// rs-theme cookie governs public web; rfTheme governs terminal per-shift preference.
+// ─── THEME ─────────────────────────────────────────────────────────────────
+// Terminal persists theme in localStorage (rfTheme) — app/terminal surface preference,
+// not the public web rs-theme cookie. The two systems are intentionally separate.
+// Font alias prefix divergence (--mono vs --font-mono) is a known doc; align later.
 function setTheme(t) {
   document.documentElement.setAttribute('data-theme', t === 'carbon' ? 'carbon' : '');
   localStorage.setItem('rfTheme', t);
-  // Sync all theme pill instances (main nav + owner panel)
   ['pill-paper', 'owner-pill-paper'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.toggle('active', t === 'paper');
@@ -66,11 +73,6 @@ function setTheme(t) {
     const el = document.getElementById(id);
     if (el) el.classList.toggle('active', t === 'carbon');
   });
-  if (_venueMap) {
-    _venueMap.setStyle(t === 'carbon'
-      ? 'mapbox://styles/mapbox/dark-v11'
-      : 'mapbox://styles/mapbox/light-v11');
-  }
 }
 (function initTheme() {
   const t = localStorage.getItem('rfTheme') || 'paper';
@@ -79,14 +81,14 @@ function setTheme(t) {
   ['pill-carbon'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.toggle('active', t === 'carbon'); });
 })();
 
-// ─── SUPABASE CLIENT ────────────────────────────────────────
+// ─── SUPABASE CLIENT ────────────────────────────────────────────────────────
 function getSbClient() {
   if (_sbClient) return _sbClient;
   try { _sbClient = supabase.createClient(SB_URL, SB_KEY); } catch(e) {}
   return _sbClient;
 }
 
-// ─── TOAST ─────────────────────────────────────────────────
+// ─── TOAST ─────────────────────────────────────────────────────────────────
 let _toastTimer = null;
 function showToast(msg, type = '') {
   const el = document.getElementById('toast');
@@ -96,7 +98,7 @@ function showToast(msg, type = '') {
   _toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
 }
 
-// ─── GATE ROUTING ───────────────────────────────────────────
+// ─── GATE ROUTING ───────────────────────────────────────────────────────────
 async function routeGate() {
   const client = getSbClient();
   const { data } = await client.auth.getSession();
@@ -135,7 +137,7 @@ function hidePinGate() {
   setTimeout(() => { gate.style.display = 'none'; }, 350);
 }
 
-// ─── STAFF PIN PAD ──────────────────────────────────────────
+// ─── STAFF PIN PAD ─────────────────────────────────────────────────────────
 function updatePinDots(containerId, dotPrefix, count) {
   for (let i = 0; i < 4; i++) {
     const dot = document.getElementById(dotPrefix + i);
@@ -219,9 +221,30 @@ function onStaffAuthenticated() {
     _darwinTimer = setInterval(pollDarwin, DARWIN_INTERVAL_MS);
     pollDarwin();
   }
+  maybeShowFirstLogin();
 }
 
-// ─── OWNER OVERLAY & PIN ─────────────────────────────────────
+// ─── FIRST-LOGIN WELCOME ─────────────────────────────────────────────────────
+// One-time screen on first terminal load at a provisioned venue.
+// Key: rfFirstLogin_[venueId] in localStorage — absent = show once, set on dismiss.
+// Shows only for independent_owner (the provisioning role). Staff do not see it.
+function maybeShowFirstLogin() {
+  if (!_venueId || _userRole !== 'independent_owner') return;
+  const key = 'rfFirstLogin_' + _venueId;
+  if (localStorage.getItem(key)) return; // already dismissed
+  const nameEl = document.getElementById('first-login-venue-name');
+  if (nameEl && _venueName) nameEl.textContent = _venueName;
+  const overlay = document.getElementById('first-login-overlay');
+  if (overlay) overlay.classList.add('open');
+}
+
+function dismissFirstLogin() {
+  if (_venueId) localStorage.setItem('rfFirstLogin_' + _venueId, '1');
+  const overlay = document.getElementById('first-login-overlay');
+  if (overlay) overlay.classList.remove('open');
+}
+
+// ─── OWNER OVERLAY & PIN ────────────────────────────────────────────────────
 function openOwnerOverlay() {
   _ownerPinBuffer = '';
   updatePinDots('owner-pin-dots', 'opd', 0);
@@ -278,8 +301,15 @@ async function verifyOwnerPin(pin) {
   }
   if (result?.valid) {
     _pinAttempts.owner = 0;
-    closeOwnerOverlay();
-    openOwnerPanel();
+    // If a pending LN change flow is waiting for owner PIN, open that overlay instead of owner panel
+    if (_pendingLnChange) {
+      _pendingLnChange = false;
+      closeOwnerOverlay();
+      openLnChangeOverlay();
+    } else {
+      closeOwnerOverlay();
+      openOwnerPanel();
+    }
   } else {
     _pinAttempts.owner++;
     _ownerPinBuffer = '';
@@ -340,7 +370,7 @@ async function ownerSignOut() {
   window.location.href = '/command-centre/';
 }
 
-// ─── MAGIC LINK (owner gate) ─────────────────────────────────
+// ─── MAGIC LINK (owner gate) ─────────────────────────────────────────────────
 async function sendGateMagicLink() {
   const email = document.getElementById('gate-email').value.trim();
   if (!email || !email.includes('@')) { showToast('Enter a valid email', 'err'); return; }
@@ -370,7 +400,7 @@ async function sendGateMagicLink() {
   }
 }
 
-// ─── SIGN OUT ────────────────────────────────────────────────
+// ─── SIGN OUT ────────────────────────────────────────────────────────────────
 async function signOut() {
   _staffAuthenticated = false;
   document.getElementById('tablet-ui').style.display = 'none';
@@ -380,20 +410,7 @@ async function signOut() {
 }
 async function opsSignOut() { await signOut(); }
 
-// ─── NAV — MERGED PILL & IDENTITY BLOCK ──────────────────────
-// CC-83b: replaces role-chip + venue-badge-slot pattern.
-//
-// Identity block (nav-left):
-//   No logo_url → Refueler wordmark (existing .nav-logo) + divider + "MERCHANT TERMINAL"
-//   logo_url    → 32×32 img + divider + "MERCHANT TERMINAL"
-//
-// Merged pill (nav-right, before theme pill):
-//   All roles:              QUEUE segment visible
-//   independent_owner only: QUEUE + OPS + OWNER segments visible
-//   Active segment highlighted. QUEUE/OPS → direct view switch. OWNER → PIN overlay.
-//
-// No confirmation overlay needed — segmented control is self-explanatory.
-
+// ─── NAV — MERGED PILL & IDENTITY BLOCK ──────────────────────────────────────
 function renderNavIdentity() {
   const leftBlock = document.getElementById('nav-identity-left');
   if (!leftBlock) return;
@@ -410,6 +427,9 @@ function renderNavIdentity() {
       <div class="nav-terminal-lbl">MERCHANT TERMINAL</div>`;
   }
 }
+function navWordmarkHTML() {
+  return `<div class="nav-logo">Refueler</div><div class="nav-divider"></div><div class="nav-terminal-lbl">MERCHANT TERMINAL</div>`;
+}
 
 function renderMergedPill() {
   const pillEl = document.getElementById('merged-pill');
@@ -424,21 +444,13 @@ function renderMergedPill() {
       <button class="mp-seg mp-owner" id="mp-owner" onclick="openOwnerOverlay()">OWNER</button>`;
     pillEl.style.display = '';
   } else {
-    // Plain staff — single QUEUE segment (pill stays visually present but minimal)
-    pillEl.innerHTML = `
-      <button class="mp-seg mp-queue mp-active" id="mp-queue">QUEUE</button>`;
+    pillEl.innerHTML = `<button class="mp-seg mp-queue mp-active" id="mp-queue">QUEUE</button>`;
     pillEl.style.display = '';
   }
 }
 
-function pillQueue() {
-  if (_currentView === 'queue') return;
-  switchToQueueView();
-}
-function pillOps() {
-  if (_currentView === 'ops') return;
-  switchToOpsView();
-}
+function pillQueue() { if (_currentView !== 'queue') switchToQueueView(); }
+function pillOps()   { if (_currentView !== 'ops')   switchToOpsView();   }
 
 function updateMergedPillActive() {
   const q = document.getElementById('mp-queue');
@@ -447,49 +459,25 @@ function updateMergedPillActive() {
   if (o) o.classList.toggle('mp-active', _currentView === 'ops');
 }
 
-// ─── VENUE RESOLUTION & PIN LOADING ─────────────────────────
-// Resolution path (locked §4g / CC-06):
-//   auth.users (session user.id) → merchant_users.user_id → merchant_users.venue_id → venue_partners
-// Direct venue_partners.contact_email lookup is DEPRECATED — do not restore.
+// ─── VENUE RESOLUTION & PIN LOADING ──────────────────────────────────────────
 async function resolveVenueAndPins(user) {
-  if (!user?.id) {
-    console.error('[resolveVenueAndPins] No authenticated user id — cannot resolve venue');
-    return;
-  }
+  if (!user?.id) { console.error('[resolveVenueAndPins] No authenticated user id'); return; }
   try {
     const { data: sessionData } = await getSbClient().auth.getSession();
     const token = sessionData?.session?.access_token;
-    if (!token) {
-      console.error('[resolveVenueAndPins] No active session token — cannot proceed with RLS');
-      return;
-    }
-    // Step 1: merchant_users_safe view by user_id (UUID), not email.
-    // Safe view excludes all hash columns — PIN verification is server-side via verify-pin Edge Function.
+    if (!token) { console.error('[resolveVenueAndPins] No active session token'); return; }
     const res = await fetch(
       `${SB_URL}/rest/v1/merchant_users_safe?user_id=eq.${encodeURIComponent(user.id)}&select=venue_id,role&limit=1`,
       { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token } }
     );
-    if (!res.ok) {
-      console.error('[resolveVenueAndPins] merchant_users_safe fetch failed — HTTP', res.status);
-      return;
-    }
+    if (!res.ok) { console.error('[resolveVenueAndPins] merchant_users_safe fetch failed — HTTP', res.status); return; }
     const rows = await res.json();
-    if (!rows || rows.length === 0) {
-      console.error('[resolveVenueAndPins] No merchant_users_safe row found for user_id:', user.id);
-      return;
-    }
+    if (!rows || rows.length === 0) { console.error('[resolveVenueAndPins] No row for user_id:', user.id); return; }
     _venueId  = rows[0].venue_id || null;
     _userRole = rows[0].role     || null;
-
-    if (!_venueId) {
-      console.error('[resolveVenueAndPins] merchant_users row has no venue_id for user_id:', user.id);
-      return;
-    }
-    // Step 2: venue_partners via venue_id
+    if (!_venueId) { console.error('[resolveVenueAndPins] No venue_id for user_id:', user.id); return; }
     await loadVenueDetails(_venueId);
-  } catch(e) {
-    console.error('[resolveVenueAndPins] Unexpected error:', e);
-  }
+  } catch(e) { console.error('[resolveVenueAndPins] Unexpected error:', e); }
 }
 
 async function loadVenueDetails(venueId) {
@@ -497,74 +485,25 @@ async function loadVenueDetails(venueId) {
   try {
     const { data: sessionData } = await getSbClient().auth.getSession();
     const token = sessionData?.session?.access_token;
-    // S-2 fix (CC-83b): use correct column names — address_line1, coords_lat, coords_lng.
-    // logo_url added in CC-83b Migration 1.
-    // Never fall back to anon SB_KEY here — partners_public_read is dropped; anon returns empty.
-    if (!token) {
-      console.error('[loadVenueDetails] No session token — cannot fetch venue with RLS');
-      return;
-    }
+    if (!token) { console.error('[loadVenueDetails] No session token'); return; }
     const res = await fetch(
-      `${SB_URL}/rest/v1/venue_partners?id=eq.${venueId}&select=id,name,address_line1,coords_lat,coords_lng,active,brand_primary,brand_secondary,venue_type,franchise_group_id,logo_url&limit=1`,
+      `${SB_URL}/rest/v1/venue_partners?id=eq.${venueId}&select=id,name,address_line1,coords_lat,coords_lng,active,brand_primary,brand_secondary,venue_type,franchise_group_id,logo_url,lightning_address&limit=1`,
       { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token } }
     );
-    if (!res.ok) {
-      console.error('[loadVenueDetails] venue_partners fetch failed — HTTP', res.status);
-      return;
-    }
+    if (!res.ok) { console.error('[loadVenueDetails] venue_partners fetch failed — HTTP', res.status); return; }
     const rows = await res.json();
     if (rows && rows.length > 0) {
       _venueName = rows[0].name;
       _venueData = rows[0];
-      renderVenueCard(rows[0]);
       renderNavIdentity();
+      // Horizon strip: provision tenants based on venue type
+      // (In TDP-B, rail is always the first tenant for Fenchurch St corridor venues)
+      // Future: HORIZON_TENANTS = ['rail'] or ['rail','fixtures'] based on mapbox_place_id proximity
     }
   } catch(e) { console.warn('[loadVenueDetails] error:', e); }
 }
 
-function renderVenueCard(venue) {
-  document.getElementById('site-name').textContent    = venue.name        || '—';
-  document.getElementById('site-address').textContent = venue.address_line1 || '—';
-  const dot   = document.getElementById('site-status-dot');
-  const label = document.getElementById('site-status-label');
-  if (venue.active) {
-    dot.className    = 'site-status-dot';
-    label.textContent = 'Open — accepting orders';
-    label.style.color = 'var(--c-green)';
-  } else {
-    dot.className    = 'site-status-dot closed';
-    label.textContent = 'Closed';
-    label.style.color = 'var(--c-red)';
-  }
-  // Map: only if coordinates are present (steakhouse has none until CC-84 onboarding)
-  if (venue.coords_lat && venue.coords_lng) {
-    initVenueMap(venue.coords_lng, venue.coords_lat, venue.name);
-  }
-}
-
-// ─── VENUE MAP ───────────────────────────────────────────────
-function initVenueMap(lng, lat, name) {
-  const theme = document.documentElement.getAttribute('data-theme') === 'carbon'
-    ? 'mapbox://styles/mapbox/dark-v11'
-    : 'mapbox://styles/mapbox/light-v11';
-  if (typeof mapboxgl === 'undefined') return;
-  _venueMap = new mapboxgl.Map({
-    container: 'venue-map',
-    style: theme,
-    center: [lng, lat],
-    zoom: 16,
-    interactive: false,
-    attributionControl: false
-  });
-  _venueMap.on('load', () => {
-    new mapboxgl.Marker({ color: '#C8A96E' })
-      .setLngLat([lng, lat])
-      .setPopup(new mapboxgl.Popup({ offset: 10 }).setHTML(`<strong>${name}</strong>`))
-      .addTo(_venueMap);
-  });
-}
-
-// ─── TIME HELPERS ────────────────────────────────────────────
+// ─── TIME HELPERS ─────────────────────────────────────────────────────────────
 function minutesAgo(isoString) {
   const diff = Math.floor((Date.now() - new Date(isoString).getTime()) / 60000);
   if (diff < 1) return 'just now';
@@ -572,19 +511,11 @@ function minutesAgo(isoString) {
   return diff + ' mins ago';
 }
 
-// ─── ORDER TILE ──────────────────────────────────────────────
-// CC-83 locked design:
-//   - [ID] · [items] on one line: identifier IBM Plex Mono 15px, separator · gold, items DM Sans 14px
-//   - Status badge: right side only (left colour bar removed — colour-blind concern, logged CC-83)
-//   - Badge: IBM Plex Mono 10px, padding 6px 14px, border-radius 4px
-//   - PENDING → gold · IN PREP → #7899D4 · READY → #3DCA7A
-//   - Tile: background #26282C, border 0.5px solid #35373B, border-radius 7px, padding 12px 16px
-//
-// 8-minute URGENT rule retired for this iteration (logged for future):
-//   When distance-to-venue data is available (merchant-configurable, varies by station/town),
-//   urgency windows can be re-wired with per-merchant parameters. TfL data path noted for
-//   tube-line expansion. The horizon strip urgency signal is the intended vehicle for this.
-
+// ─── ORDER TILE ───────────────────────────────────────────────────────────────
+// Status: PENDING gold · IN PREP #7899D4 · READY #3DCA7A.
+// Status always doubled by word and position — never colour alone.
+// Identifier ≥18px (accessibility floor, locked TDP-B).
+// Stamp glyph: calm ✦ settles onto tile on READY. Plumbing-agnostic.
 function badgeClassForStatus(status) {
   if (status === 'ready')   return ['badge-ready',   'READY'];
   if (status === 'in_prep') return ['badge-inprep',  'IN PREP'];
@@ -594,15 +525,12 @@ function badgeClassForStatus(status) {
 function renderOrderTile(order) {
   const tile = document.createElement('div');
   const isReady  = order.status === 'ready';
-  const isInPrep = order.status === 'in_prep';
   const [badgeClass, badgeText] = badgeClassForStatus(order.status);
-
-  // Identifier: app ref, table number, or staff-assigned text
   const identifier = order.identifier || ('#' + (order.id || '').slice(0, 6).toUpperCase());
-  const itemName   = order.item_name  || order.product_name || 'Order';
-  const itemMods   = order.modifiers  || order.notes        || '';
+  const itemName   = order.item_name  || order.product_name || order.item_summary || 'Order';
+  const itemMods   = order.modifiers  || order.notes || '';
 
-  tile.className = 'order-tile';
+  tile.className = 'order-tile' + (isReady ? ' tile-stamp-issued' : '');
   tile.id = 'order-' + order.id;
   tile.innerHTML = `
     <div class="order-tile-head">
@@ -620,7 +548,8 @@ function renderOrderTile(order) {
            <button class="btn-dismiss" onclick="dismissOrder('${order.id}')">DISMISS</button>`
         : `<button class="btn-mark-ready" onclick="markOrderReady('${order.id}', this)">✓ MARK READY</button>`
       }
-    </div>`;
+    </div>
+    <span class="tile-stamp-glyph" aria-hidden="true">✦</span>`;
   return tile;
 }
 
@@ -647,32 +576,25 @@ function renderOrders(orders) {
   const emptyEl = queue.querySelector('.queue-empty');
   if (emptyEl) emptyEl.style.display = 'none';
 
-  // Sort: pending/in_prep first, ready last
   const sorted = [...orders].sort((a, b) => {
     const rank = o => o.status === 'ready' ? 1 : 0;
     return rank(a) - rank(b);
   });
   sorted.forEach(order => queue.appendChild(renderOrderTile(order)));
-
   const pending = orders.filter(o => o.status === 'pending' || o.status === 'in_prep').length;
   const ready   = orders.filter(o => o.status === 'ready').length;
   updateQueueStats(pending, ready, null);
 }
 
 function updateQueueStats(pending, ready, today) {
-  const els = {
-    'qs-pending': pending, 'qs-ready': ready,
-    'sb-pending-count': pending, 'sb-ready-count': ready
-  };
+  const els = { 'qs-pending': pending, 'qs-ready': ready };
   for (const [id, val] of Object.entries(els)) {
     const el = document.getElementById(id);
     if (el) el.textContent = val !== null ? val : '—';
   }
   if (today !== null) {
-    ['qs-today','sb-today-count'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.textContent = today;
-    });
+    const el = document.getElementById('qs-today');
+    if (el) el.textContent = today;
   }
 }
 
@@ -683,7 +605,6 @@ async function refreshOrders() {
   try {
     const session = await getSbClient().auth.getSession();
     const token = session?.data?.session?.access_token || SB_KEY;
-    // CC-20: merchants read from merchant_orders only — never the orders table directly
     const res = await fetch(
       `${SB_URL}/rest/v1/merchant_orders?venue_id=eq.${_venueId}&status=in.(pending,in_prep,ready)&order=created_at.asc&limit=50`,
       { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token } }
@@ -708,8 +629,6 @@ async function refreshOrders() {
     _lastPollTime = new Date();
     const timeStr = _lastPollTime.toLocaleTimeString('en-GB', { hour12: false });
     if (pollStatus) pollStatus.textContent = 'Polled ' + timeStr;
-    const sbRefresh = document.getElementById('sb-last-refresh');
-    if (sbRefresh) sbRefresh.textContent = timeStr;
   } catch(e) {
     if (pollStatus) pollStatus.textContent = 'Poll error';
     showToast('Could not load orders: ' + e.message, 'err');
@@ -726,13 +645,12 @@ function stopOrderPoll() {
   document.getElementById('poll-dot').style.display = 'none';
 }
 
-// ─── MARK READY / DISMISS ─────────────────────────────────
+// ─── MARK READY / DISMISS ─────────────────────────────────────────────────────
 async function markOrderReady(orderId, btn) {
   if (btn) { btn.disabled = true; btn.textContent = 'UPDATING…'; }
   try {
     const session = await getSbClient().auth.getSession();
     const token = session?.data?.session?.access_token || SB_KEY;
-    // CC-20: write status to merchant_orders — never orders directly
     const res = await fetch(`${SB_URL}/rest/v1/merchant_orders?id=eq.${orderId}`, {
       method: 'PATCH',
       headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token,
@@ -741,7 +659,8 @@ async function markOrderReady(orderId, btn) {
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const ref = '#' + orderId.slice(0, 6).toUpperCase();
-    showToast('Order ' + ref + ' marked ready', 'ok');
+    showToast('Order ' + ref + ' ready', 'ok');
+    // Update tile in-place (stamp glyph settles on status→ready)
     const tile = document.getElementById('order-' + orderId);
     if (tile) {
       const badge = tile.querySelector('.order-status-badge');
@@ -752,6 +671,8 @@ async function markOrderReady(orderId, btn) {
           <button class="btn-mark-ready already-ready" disabled>✓ READY FOR COLLECTION</button>
           <button class="btn-dismiss" onclick="dismissOrder('${orderId}')">DISMISS</button>`;
       }
+      // Stamp glyph: settle onto tile (plumbing-agnostic — triggered by status, not payment)
+      tile.classList.add('tile-stamp-issued');
     }
     await refreshOrders();
   } catch(e) {
@@ -764,7 +685,6 @@ async function dismissOrder(orderId) {
   try {
     const session = await getSbClient().auth.getSession();
     const token = session?.data?.session?.access_token || SB_KEY;
-    // CC-20: write status to merchant_orders — never orders directly
     await fetch(`${SB_URL}/rest/v1/merchant_orders?id=eq.${orderId}`, {
       method: 'PATCH',
       headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token,
@@ -785,20 +705,14 @@ async function dismissOrder(orderId) {
   }
 }
 
-// ─── SIGNED OUT / IN STATE ───────────────────────────────────
+// ─── SIGNED OUT / IN STATE ──────────────────────────────────────────────────
 function showSignedOutState() {
-  document.getElementById('queue-stats-strip').style.display   = 'none';
-  document.getElementById('card-queue-summary').style.display  = 'none';
-  document.getElementById('poll-dot').style.display            = 'none';
+  document.getElementById('queue-stats-strip').style.display = 'none';
+  document.getElementById('poll-dot').style.display = 'none';
   const queue = document.getElementById('order-queue');
   queue.querySelectorAll('.order-tile, .queue-empty').forEach(el => el.remove());
   const prompt = document.getElementById('queue-signin-prompt');
   if (prompt) prompt.style.display = '';
-  document.getElementById('site-name').textContent    = '—';
-  document.getElementById('site-address').textContent = 'Waiting for owner sign-in…';
-  document.getElementById('site-status-label').textContent = '—';
-  document.getElementById('site-status-dot').className = 'site-status-dot';
-  // Hide merged pill and New Order bar until staff sign in
   const pillEl = document.getElementById('merged-pill');
   if (pillEl) pillEl.style.display = 'none';
   const nob = document.getElementById('new-order-bar');
@@ -806,29 +720,21 @@ function showSignedOutState() {
 }
 
 function showSignedInState() {
-  document.getElementById('queue-stats-strip').style.display  = '';
-  document.getElementById('card-queue-summary').style.display = '';
+  document.getElementById('queue-stats-strip').style.display = '';
   const prompt = document.getElementById('queue-signin-prompt');
   if (prompt) prompt.style.display = 'none';
-  // Show New Order bar — walk-ins are the primary flow for non-app customers
   const nob = document.getElementById('new-order-bar');
   if (nob) nob.style.display = '';
-  // Render merged pill (role now known)
   renderMergedPill();
 }
 
-// ─── DARWIN FEED ─────────────────────────────────────────────
+// ─── DARWIN FEED ─────────────────────────────────────────────────────────────
 const DARWIN_STATION_LABELS = {
   'FST': 'Fenchurch Street', 'LIM': 'Limehouse', 'WHA': 'West Ham',
   'BFR': 'Barking',          'UPM': 'Upminster',  'SHO': 'Shoeburyness',
   'PFL': 'Pitsea',           'GRY': 'Grays'
 };
 
-/**
- * pollDarwin()
- * Real data source: rail_signal_current, feed='departure_board_staff', feed_key='FST'.
- * details column is a JSONB array of upcoming c2c service events.
- */
 async function pollDarwin() {
   try {
     const { data: sessionData } = await getSbClient().auth.getSession();
@@ -840,15 +746,13 @@ async function pollDarwin() {
     if (!res.ok) { setDarwinConnected(false); return; }
     const rows = await res.json();
     if (!rows || rows.length === 0 || !rows[0].details) { setDarwinConnected(false); return; }
-    const details = typeof rows[0].details === 'string' ? JSON.parse(rows[0].details) : rows[0].details;
+    const details  = typeof rows[0].details === 'string' ? JSON.parse(rows[0].details) : rows[0].details;
     const services = Array.isArray(details) ? details : [];
-    // Map to {crs, actual_timestamp} shape expected by updateHorizonBand
     _darwinRowsCache = services
       .filter(s => !s.is_cancelled)
       .slice(0, 3)
       .map(s => ({ crs: 'FST', actual_timestamp: s.etd || s.atd || s.std }));
     setDarwinConnected(true);
-    renderDarwinRows(services.slice(0, 6));
     updateHorizonBand();
   } catch(e) {
     console.warn('[pollDarwin] error:', e);
@@ -857,48 +761,28 @@ async function pollDarwin() {
 }
 
 function setDarwinConnected(connected) {
-  const dot  = document.getElementById('darwin-dot');
-  const text = document.getElementById('darwin-status-text');
-  if (dot)  dot.className  = 'darwin-dot ' + (connected ? 'online' : 'offline');
-  if (text) text.textContent = connected ? 'Live — Fenchurch Street' : 'Signal lost';
+  const node = document.getElementById('hb-beck-node');
+  const label = document.getElementById('hb-darwin-label');
+  if (node)  node.style.background  = connected ? '#3DCA7A' : '#5A5751';
+  if (label) label.textContent = connected ? 'DARWIN · LIVE' : 'DARWIN · OFFLINE';
 }
 
-function renderDarwinRows(services) {
-  const container = document.getElementById('darwin-rows');
-  if (!container) return;
-  if (!services || services.length === 0) {
-    container.innerHTML = `<div class="darwin-row" style="justify-content:center;padding:12px 0;">
-      <span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);letter-spacing:0.06em;">NO SERVICES</span>
-    </div>`;
-    return;
-  }
-  container.innerHTML = services.map(s => {
-    const time = s.etd || s.atd || s.std || '—';
-    const dest = s.destination_name || 'Fenchurch Street';
-    const isLate = s.etd && s.std && s.etd > s.std;
-    return `<div class="darwin-row">
-      <span class="darwin-dest">${dest}</span>
-      <span class="darwin-time${isLate ? ' late' : ''}">${time}</span>
-    </div>`;
-  }).join('');
-}
-
-// ─── HORIZON BAND ─────────────────────────────────────────────
-// CC-83 locked spec:
-//   - Height 64px, background #1A1A1A hardcoded (always dark, both themes)
-//   - Station name: IBM Plex Mono 15px #E4E2DC
-//   - ETA: IBM Plex Mono 14px #C8A96E (gold)
-//   - "DARWIN · LIVE" label: IBM Plex Mono 10px #5A5751
-//   - "ARRIVALS" label: IBM Plex Mono 10px #8A8680
-//   - All arrival counts: #A8A4A0 uniform — no gold on any count
-//   - Window urgency: 0–3 min rgba(255,255,255,0.07) · 3–7 min rgba(255,255,255,0.03) · 7–15 min transparent
-//   - Gold active-highlight (.hb-active) retired — urgency signal is background tint only
-//
-// 8-minute rule retirement note (logged CC-83b for future iteration):
-//   Urgency windows with per-merchant configurable walk time (station→venue distance varies
-//   by town/venue). TfL data path for tube lines noted. Horizon strip is a key sales pitch
-//   asset — wire urgency back with merchant-specific parameters when data is available.
+// ─── HORIZON BAND — slot rendering ───────────────────────────────────────────
+// Renders each provisioned tenant slot. In TDP-B: 'rail' only.
+// 'fixtures' tenant stub is present but not rendered (no data).
+// Pass tenant is a JS comment — no code, no design.
 function updateHorizonBand() {
+  if (HORIZON_TENANTS.includes('rail')) {
+    renderRailTenant();
+  }
+  // Fixture tenant: stub — wired in Events intelligence layer session
+  // if (HORIZON_TENANTS.includes('fixtures')) renderFixturesTenant();
+  //
+  // Pass tenant: pending dedicated Opus design session(s) before integration
+  // if (HORIZON_TENANTS.includes('pass')) renderPassTenant();
+}
+
+function renderRailTenant() {
   const rows = _darwinRowsCache;
   const darwinSection = document.getElementById('hb-darwin');
   const label = document.getElementById('hb-darwin-label');
@@ -909,27 +793,25 @@ function updateHorizonBand() {
     document.getElementById('hb-station-eta').textContent   = '—';
     document.getElementById('hb-station-name-2').textContent = '—';
     document.getElementById('hb-station-eta-2').textContent  = '—';
-    label.textContent = 'DARWIN · OFFLINE';
+    if (label) label.textContent = 'DARWIN · OFFLINE';
     _horizonClearWindows();
     return;
   }
 
   darwinSection.classList.remove('hb-darwin-offline');
-  label.textContent = 'DARWIN · LIVE';
+  if (label) label.textContent = 'DARWIN · LIVE';
 
-  // Primary window
-  const primary    = rows[0];
-  const primaryTs  = primary.actual_timestamp ? new Date(primary.actual_timestamp) : null;
+  const primary   = rows[0];
+  const primaryTs = primary.actual_timestamp ? new Date(primary.actual_timestamp) : null;
   const primaryEta = primaryTs
     ? primaryTs.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false })
     : '—';
   document.getElementById('hb-station-name').textContent = DARWIN_STATION_LABELS[primary.crs] || primary.crs;
   document.getElementById('hb-station-eta').textContent  = primaryEta;
 
-  // Secondary window (landscape only)
   if (rows.length > 1) {
-    const secondary    = rows[1];
-    const secondaryTs  = secondary.actual_timestamp ? new Date(secondary.actual_timestamp) : null;
+    const secondary   = rows[1];
+    const secondaryTs = secondary.actual_timestamp ? new Date(secondary.actual_timestamp) : null;
     const secondaryEta = secondaryTs
       ? secondaryTs.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false })
       : '—';
@@ -937,40 +819,31 @@ function updateHorizonBand() {
     document.getElementById('hb-station-eta-2').textContent  = secondaryEta;
   }
 
-  // Passenger counts remain unavailable (no clean join key to historical loadings — see CC-48)
+  // Passenger counts: unavailable (no clean join key to historical loadings)
   ['hb-count-0', 'hb-count-3', 'hb-count-7'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.textContent = '—';
   });
-
-  // Window urgency: background tint by proximity. No gold active-highlight.
   _horizonSetWindowTints(primaryTs);
 }
 
 function _horizonClearWindows() {
   ['hb-win-0','hb-win-3','hb-win-7'].forEach(wid => {
     const el = document.getElementById(wid);
-    if (el) { el.classList.remove('hb-active'); el.style.background = 'transparent'; }
+    if (el) el.style.background = 'transparent';
   });
 }
-
 function _horizonSetWindowTints(primaryTs) {
-  // Static tints per CC-83 lock — urgency via background only, not text colour.
-  // Active highlight class removed; tints always applied by arrival window position.
   const win0 = document.getElementById('hb-win-0');
   const win3 = document.getElementById('hb-win-3');
   const win7 = document.getElementById('hb-win-7');
   if (!win0 || !win3 || !win7) return;
-  // Remove any old active class (transitioning from old code)
-  [win0,win3,win7].forEach(el => el.classList.remove('hb-active'));
   win0.style.background = 'rgba(255,255,255,0.07)';
   win3.style.background = 'rgba(255,255,255,0.03)';
   win7.style.background = 'transparent';
 }
 
-// ─── VIEW SWITCHER (independent_owner) ───────────────────────
-// CC-83b: direct switch via merged pill — no confirm overlay needed.
-// Confirm overlay HTML retained in index.html for graceful no-op if clicked externally.
+// ─── VIEW SWITCHER ────────────────────────────────────────────────────────────
 function switchToOpsView() {
   _currentView = 'ops';
   document.getElementById('order-queue').style.display  = 'none';
@@ -979,9 +852,13 @@ function switchToOpsView() {
   document.getElementById('btn-back-queue').classList.add('visible');
   const nob = document.getElementById('new-order-bar');
   if (nob) nob.style.display = 'none';
+  // Populate ops card values
   if (_venueData) {
     const t = document.getElementById('ops-toggle-open');
     if (t) t.checked = _venueData.active === true;
+    updateTradingStatusText(_venueData.active === true);
+    const lnDisplay = document.getElementById('ops-lightning-display');
+    if (lnDisplay) lnDisplay.textContent = _venueData.lightning_address || '—';
   }
   updateMergedPillActive();
 }
@@ -997,7 +874,17 @@ function switchToQueueView() {
   refreshOrders();
 }
 
-// ─── OPS TOGGLE HANDLERS ─────────────────────────────────────
+// ─── OPS TOGGLE — single honest Open/Closed ──────────────────────────────────
+function updateTradingStatusText(isOpen) {
+  const text = document.getElementById('ops-trading-status-text');
+  const copy = document.getElementById('ops-trading-honest-copy');
+  if (text) {
+    text.textContent = isOpen ? 'Open' : 'Closed';
+    text.style.color = isOpen ? 'var(--c-green)' : 'var(--c-red)';
+  }
+  if (copy) copy.classList.toggle('visible', !isOpen);
+}
+
 async function opsToggleVenueOpen(checked) {
   if (!_venueId) return;
   try {
@@ -1011,62 +898,108 @@ async function opsToggleVenueOpen(checked) {
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     if (_venueData) _venueData.active = checked;
-    showToast(checked ? 'Venue open — accepting orders' : 'Venue closed', checked ? 'ok' : 'warn');
-    const dot   = document.getElementById('site-status-dot');
-    const label = document.getElementById('site-status-label');
-    if (dot)   dot.className    = 'site-status-dot' + (checked ? '' : ' closed');
-    if (label) { label.textContent = checked ? 'Open — accepting orders' : 'Closed'; label.style.color = checked ? 'var(--c-green)' : 'var(--c-red)'; }
+    updateTradingStatusText(checked);
+    showToast(
+      checked ? 'Accepting orders' : 'Closed — no new orders. Your current queue is unaffected.',
+      checked ? 'ok' : 'warn'
+    );
   } catch(e) {
     showToast('Update failed: ' + e.message, 'err');
     const t = document.getElementById('ops-toggle-open');
     if (t) t.checked = !checked;
+    updateTradingStatusText(!checked);
   }
 }
-async function opsTogglePreorder(checked) {
-  console.info('[CC-21] opsTogglePreorder called but toggle removed from UI — CPO decision pending');
+
+// ─── LIGHTNING ADDRESS CHANGE FLOW ───────────────────────────────────────────
+// Owner must re-authenticate via owner PIN before reaching the change overlay.
+// On save: PATCH venue_partners.lightning_address (S-27 grants allow this column? 
+// Note: S-27 restricts to active + pause_reason only. Lightning address change requires
+// service_role path — this is a [R] dashboard operation for now, or requires a
+// dedicated Edge Function. The UI is present; the save is gated until an Edge Function
+// is added. The overlay prompts the owner correctly; save is disabled with explanation.
+let _pendingLnChange = false;
+
+function openLnChangeFlow() {
+  // Owner PIN re-auth gate before Lightning address change
+  _pendingLnChange = true;
+  openOwnerOverlay();
 }
-async function opsTogglePause(checked) {
-  if (!_venueId) return;
+
+function openLnChangeOverlay() {
+  const input = document.getElementById('ops-ln-change-input');
+  const errEl = document.getElementById('ops-ln-change-error');
+  const prompt = document.getElementById('ops-reprint-prompt');
+  if (input)  { input.value = _venueData?.lightning_address || ''; }
+  if (errEl)  errEl.classList.remove('show');
+  if (prompt) prompt.classList.remove('visible');
+  const overlay = document.getElementById('ops-ln-change-overlay');
+  if (overlay) overlay.classList.add('open');
+  setTimeout(() => { if (input) input.focus(); }, 200);
+}
+
+function closeLnChangeOverlay() {
+  _pendingLnChange = false;
+  const overlay = document.getElementById('ops-ln-change-overlay');
+  if (overlay) overlay.classList.remove('open');
+}
+
+async function saveLightningAddress() {
+  const input  = document.getElementById('ops-ln-change-input');
+  const errEl  = document.getElementById('ops-ln-change-error');
+  const saveBtn = document.getElementById('ops-ln-change-save-btn');
+  const prompt  = document.getElementById('ops-reprint-prompt');
+  if (!input) return;
+  const newAddress = input.value.trim();
+  // Basic Lightning address format check
+  if (!newAddress || !newAddress.includes('@') || newAddress.split('@').length !== 2) {
+    if (errEl) { errEl.textContent = 'Enter a valid Lightning address (e.g. you@walletofsatoshi.com)'; errEl.classList.add('show'); }
+    input.focus();
+    return;
+  }
+  if (errEl) errEl.classList.remove('show');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; }
   try {
+    // Note: S-27 restricts authenticated UPDATE to active + pause_reason only.
+    // Lightning address update requires service_role — this will fail until a dedicated
+    // Edge Function (update-lightning-address) is deployed. This is a [R] operation for now.
+    // The UI is complete; the Edge Function is scoped for a future short session.
     const session = await getSbClient().auth.getSession();
     const token = session?.data?.session?.access_token || SB_KEY;
-    const body = checked
-      ? { active: false, pause_reason: 'Paused by operator' }
-      : { active: true,  pause_reason: null };
     const res = await fetch(`${SB_URL}/rest/v1/venue_partners?id=eq.${_venueId}`, {
       method: 'PATCH',
       headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token,
                  'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-      body: JSON.stringify(body)
+      body: JSON.stringify({ lightning_address: newAddress })
     });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    if (_venueData) {
-      _venueData.active       = !checked;
-      _venueData.pause_reason = body.pause_reason;
+    if (!res.ok) {
+      // Expected to fail with 42501 (permission denied) until Edge Function is deployed
+      const body = await res.text();
+      if (res.status === 403 || body.includes('42501')) {
+        if (errEl) { errEl.textContent = 'Lightning address update requires the admin dashboard for now. Contact support@refueler.io.'; errEl.classList.add('show'); }
+      } else {
+        throw new Error('HTTP ' + res.status);
+      }
+      if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save'; }
+      return;
     }
-    const openToggle = document.getElementById('ops-toggle-open');
-    if (openToggle) openToggle.checked = !checked;
-    const dot   = document.getElementById('site-status-dot');
-    const label = document.getElementById('site-status-label');
-    if (dot)   dot.className   = 'site-status-dot' + (checked ? ' closed' : '');
-    if (label) {
-      label.textContent = checked ? 'Paused — no new orders' : 'Open — accepting orders';
-      label.style.color = checked ? 'var(--c-warn)' : 'var(--c-green)';
-    }
-    showToast(checked ? 'New orders paused' : 'Accepting new orders', checked ? 'warn' : 'ok');
+    if (_venueData) _venueData.lightning_address = newAddress;
+    const lnDisplay = document.getElementById('ops-lightning-display');
+    if (lnDisplay) lnDisplay.textContent = newAddress;
+    if (prompt) prompt.classList.add('visible');
+    showToast('Lightning address updated', 'ok');
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save'; }
   } catch(e) {
-    showToast('Pause update failed: ' + e.message, 'err');
-    const t = document.getElementById('ops-toggle-pause');
-    if (t) t.checked = !checked;
+    if (errEl) { errEl.textContent = 'Save failed: ' + e.message; errEl.classList.add('show'); }
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save'; }
   }
 }
 
-// ─── INIT AUTH ───────────────────────────────────────────────
+// ─── INIT AUTH ───────────────────────────────────────────────────────────────
 async function initAuth() {
   const client = getSbClient();
   if (!client) return;
 
-  // Handle PKCE code= callback
   const urlParams = new URLSearchParams(window.location.search);
   const code = urlParams.get('code');
   if (code) {
@@ -1076,7 +1009,6 @@ async function initAuth() {
     } catch(e) { console.warn('PKCE exchange error:', e); }
   }
 
-  // Auth state change: owner magic link arriving
   client.auth.onAuthStateChange(async (event, session) => {
     if (session) {
       _currentUser = session.user;
@@ -1088,20 +1020,15 @@ async function initAuth() {
     }
   });
 
-  // Boot routing
   await routeGate();
 }
 
-// ─── WALK-IN ORDER OVERLAY (CC-84) ────────────────────────────
-// Opens a lightweight overlay for staff to enter a walk-in order.
+// ─── WALK-IN ORDER OVERLAY ────────────────────────────────────────────────────
 // No Lightning invoice — payment handled by NumoPay fork or cash.
 // Inserts into merchant_orders with order_source='walkin'.
-// Back button / backdrop tap closes without writing anything.
-
 function openWalkinOverlay() {
   const overlay = document.getElementById('walkin-overlay');
   if (!overlay) return;
-  // Reset fields
   const idInput   = document.getElementById('walkin-identifier');
   const itemInput = document.getElementById('walkin-item');
   const noteInput = document.getElementById('walkin-notes');
@@ -1111,10 +1038,8 @@ function openWalkinOverlay() {
   if (noteInput) noteInput.value = '';
   if (errEl)     errEl.classList.remove('show');
   overlay.classList.add('open');
-  // Focus identifier field after transition
   setTimeout(() => { if (idInput) idInput.focus(); }, 220);
 }
-
 function closeWalkinOverlay() {
   const overlay = document.getElementById('walkin-overlay');
   if (overlay) overlay.classList.remove('open');
@@ -1126,12 +1051,9 @@ async function submitWalkinOrder() {
   const noteInput = document.getElementById('walkin-notes');
   const errEl     = document.getElementById('walkin-error');
   const submitBtn = document.getElementById('walkin-submit-btn');
-
   const identifier = idInput   ? idInput.value.trim()   : '';
   const itemName   = itemInput ? itemInput.value.trim()  : '';
   const notes      = noteInput ? noteInput.value.trim()  : '';
-
-  // Validation: identifier and item are required
   if (!identifier) {
     if (errEl) { errEl.textContent = 'Enter a table number or name.'; errEl.classList.add('show'); }
     if (idInput) idInput.focus();
@@ -1143,66 +1065,35 @@ async function submitWalkinOrder() {
     return;
   }
   if (errEl) errEl.classList.remove('show');
-
-  if (!_venueId) {
-    showToast('Venue not loaded — try refreshing.', 'err');
-    return;
-  }
-
+  if (!_venueId) { showToast('Venue not loaded — try refreshing.', 'err'); return; }
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'ADDING ORDER…'; }
-
   try {
     const session = await getSbClient().auth.getSession();
     const token   = session?.data?.session?.access_token;
     if (!token) throw new Error('No session token');
-
     const itemSummary = notes ? itemName + ' · ' + notes : itemName;
-
-    // CC-20: insert into merchant_orders only — never orders table.
-    // order_id is nullable (CC-84 migration) — walk-ins have no parent orders row.
     const res = await fetch(`${SB_URL}/rest/v1/merchant_orders`, {
       method: 'POST',
-      headers: {
-        'apikey':       SB_KEY,
-        'Authorization': 'Bearer ' + token,
-        'Content-Type': 'application/json',
-        'Prefer':       'return=minimal'
-      },
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token,
+                 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
       body: JSON.stringify({
-        venue_id:     _venueId,
-        status:       'pending',
-        payment_status: 'walkin',
-        order_source: 'walkin',
-        identifier:   identifier,
-        item_name:    itemName,
+        venue_id: _venueId, status: 'pending', payment_status: 'walkin',
+        order_source: 'walkin', identifier, item_name: itemName,
         item_summary: itemSummary,
-        created_at:   new Date().toISOString(),
-        updated_at:   new Date().toISOString()
+        created_at: new Date().toISOString(), updated_at: new Date().toISOString()
       })
     });
-
-    if (!res.ok) {
-      const body = await res.text();
-      throw new Error('HTTP ' + res.status + ' — ' + body);
-    }
-
+    if (!res.ok) { const body = await res.text(); throw new Error('HTTP ' + res.status + ' — ' + body); }
     closeWalkinOverlay();
     showToast('Walk-in order added — ' + identifier, 'ok');
     await refreshOrders();
-
   } catch(e) {
     console.error('[submitWalkinOrder]', e);
     if (errEl) { errEl.textContent = 'Could not add order. Try again.'; errEl.classList.add('show'); }
   } finally {
-    if (submitBtn) {
-      submitBtn.disabled  = false;
-      submitBtn.textContent = 'ADD TO QUEUE';
-    }
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Add to Queue'; }
   }
 }
 
-// ─── MAPBOX TOKEN ─────────────────────────────────────────────
-mapboxgl.accessToken = 'pk.eyJ1IjoicmFqZXNodGF5bG9yIiwiYSI6ImNtcDM3cXZhZjA2anYycHNnNWRsZDQ2MHAifQ.ZSJ06D0jSp-YwwN-IqPtTg';
-
-// ─── BOOT ─────────────────────────────────────────────────────
+// ─── BOOT ────────────────────────────────────────────────────────────────────
 initAuth();

@@ -32,7 +32,7 @@
 <meta name="theme-color" content="#1A1A1A" />
 <link rel="stylesheet" href="merchant-tablet-styles.css">
 <style>
-/* ── Darwin sidebar row styles (CC-24 patch) ── */
+/* ── Darwin sidebar row styles (CC-24 patch — kept for sidebar card Darwin rows) ── */
 .darwin-row {
   display: flex;
   justify-content: space-between;
@@ -114,6 +114,22 @@
   </div>
 </div>
 
+<!-- ─── FIRST-LOGIN WELCOME ─── -->
+<!-- One-time screen on first terminal load at a provisioned venue.
+     Shows venue name. Brief orientation. Dismissed and never shown again.
+     localStorage key: rfFirstLogin_[venueId]. -->
+<div class="first-login-overlay" id="first-login-overlay">
+  <div class="first-login-box">
+    <div class="first-login-venue" id="first-login-venue-name">—</div>
+    <div class="first-login-heading">Welcome to your terminal.</div>
+    <div class="first-login-body">
+      Staff sign in with their PIN. You access Owner settings with yours.<br>
+      Orders placed on the Refueler app appear here automatically.
+    </div>
+    <button class="first-login-dismiss" onclick="dismissFirstLogin()">← Back to Queue</button>
+  </div>
+</div>
+
 <!-- ─── OWNER PIN OVERLAY ─── -->
 <div class="owner-overlay" id="owner-overlay">
   <div class="owner-pin-box">
@@ -141,6 +157,30 @@
     </div>
     <div class="pin-error" id="owner-pin-error">Incorrect PIN.</div>
     <button class="owner-pin-cancel" onclick="closeOwnerOverlay()">Cancel</button>
+  </div>
+</div>
+
+<!-- ─── LIGHTNING ADDRESS CHANGE OVERLAY ─── -->
+<!-- Owner re-authenticates via owner PIN before reaching this overlay.
+     On save: venue_partners.lightning_address updated, Venue Keys reprint prompt shown. -->
+<div class="ops-ln-change-overlay" id="ops-ln-change-overlay">
+  <div class="ops-ln-change-box">
+    <div class="ops-ln-change-title">Change Lightning address</div>
+    <div class="ops-ln-change-sub">
+      Enter the new Lightning address for this venue. Customers will pay invoices to this address directly.
+    </div>
+    <input class="ops-ln-change-input" id="ops-ln-change-input"
+      type="text" autocomplete="off" autocorrect="off" spellcheck="false"
+      placeholder="you@walletofsatoshi.com"
+      oninput="document.getElementById('ops-ln-change-error').classList.remove('show')">
+    <div class="ops-ln-change-error" id="ops-ln-change-error"></div>
+    <div class="ops-ln-change-actions">
+      <button class="ops-ln-change-save" id="ops-ln-change-save-btn" onclick="saveLightningAddress()">Save</button>
+      <button class="ops-ln-change-cancel" onclick="closeLnChangeOverlay()">Cancel</button>
+    </div>
+    <div class="ops-reprint-prompt" id="ops-reprint-prompt">
+      Lightning address updated. Reprint your Venue Keys card to keep your records current.
+    </div>
   </div>
 </div>
 
@@ -179,31 +219,6 @@
   </div>
 
   <div class="owner-section">
-    <div class="owner-section-label">Settings</div>
-    <div class="owner-menu-row">
-      <div>
-        <div class="owner-menu-label">Staff PIN reset</div>
-        <div class="owner-menu-sub">Change the PIN staff use to access the queue</div>
-      </div>
-      <div class="owner-menu-chip">Beta — coming soon</div>
-    </div>
-    <div class="owner-menu-row">
-      <div>
-        <div class="owner-menu-label">Owner PIN reset</div>
-        <div class="owner-menu-sub">Change your personal owner PIN</div>
-      </div>
-      <div class="owner-menu-chip">Beta — coming soon</div>
-    </div>
-    <div class="owner-menu-row">
-      <div>
-        <div class="owner-menu-label">Menu management</div>
-        <div class="owner-menu-sub">Edit items, prices, and availability</div>
-      </div>
-      <div class="owner-menu-chip">Beta — coming soon</div>
-    </div>
-  </div>
-
-  <div class="owner-section">
     <div class="owner-section-label">Account</div>
     <div class="owner-menu-row">
       <div>
@@ -215,7 +230,8 @@
   </div>
 </div>
 
-<!-- View-switch confirm overlay — retained as no-op safety net, not used by merged pill -->
+<!-- View-switch confirm overlay — retained as no-op safety net (not used by merged pill).
+     backdrop-filter removed (TDP-B). -->
 <div class="view-confirm-overlay" id="view-confirm-overlay">
   <div class="view-confirm-box">
     <div class="view-confirm-title" id="view-confirm-title">Switch view?</div>
@@ -234,27 +250,17 @@
   ← Back to Queue
 </button>
 
-<!-- ─── NAV (CC-83 redesign) ─── -->
+<!-- ─── NAV ─── -->
 <nav class="nav">
-  <!-- Left: identity block — logo or wordmark + divider + MERCHANT TERMINAL label -->
   <div class="nav-brand" id="nav-identity-left">
     <div class="nav-logo">Refueler</div>
     <div class="nav-divider"></div>
     <div class="nav-terminal-lbl">MERCHANT TERMINAL</div>
   </div>
-
-  <!-- Centre: empty -->
   <div></div>
-
-  <!-- Right: merged pill + separator + theme pill -->
   <div class="nav-right">
-    <!-- Merged pill: QUEUE · OPS · OWNER — rendered by JS after staff auth -->
     <div class="merged-pill" id="merged-pill" style="display:none;"></div>
-
-    <!-- Separator -->
     <div class="nav-pill-sep"></div>
-
-    <!-- Theme pill -->
     <div class="theme-pill">
       <button class="theme-pill-opt active" id="pill-paper" onclick="setTheme('paper')">PAPER</button>
       <button class="theme-pill-opt" id="pill-carbon" onclick="setTheme('carbon')">CARBON</button>
@@ -262,19 +268,19 @@
   </div>
 </nav>
 
-<!-- ─── HORIZON BAND — Darwin intelligence + Passenger arrival windows ─── -->
+<!-- ─── HORIZON BAND — slot-based arrival-intelligence primitive ─── -->
+<!-- TDP-B: Darwin/rail tenant wired. Fixture tenant stubbed in JS. Pass tenant is JS comment only.
+     Always dark (#1A1A1A background) in both themes. -->
 <div class="horizon-band" id="horizon-band">
 
-  <!-- LEFT: Darwin live arrival -->
+  <!-- Tenant slot: Darwin/rail -->
   <div class="hb-darwin" id="hb-darwin">
     <div class="hb-beck-node" id="hb-beck-node"></div>
     <div class="hb-darwin-inner">
-      <!-- Primary station window (portrait + landscape) -->
       <div class="hb-station-primary">
         <span class="hb-station-name" id="hb-station-name">—</span>
         <span class="hb-station-eta" id="hb-station-eta">—</span>
       </div>
-      <!-- Secondary station window (landscape only) -->
       <div class="hb-station-secondary" id="hb-station-secondary">
         <span class="hb-station-name-2" id="hb-station-name-2">—</span>
         <span class="hb-station-eta-2" id="hb-station-eta-2">—</span>
@@ -283,26 +289,21 @@
     </div>
   </div>
 
-  <!-- RIGHT: Horizon passenger arrival windows -->
+  <!-- Passenger arrival windows -->
   <div class="hb-horizon">
     <div class="hb-horizon-label">ARRIVALS</div>
-
     <div class="hb-window" id="hb-win-0">
       <div class="hb-window-count" id="hb-count-0">—</div>
       <div class="hb-window-label">0–3 min</div>
       <div class="hb-window-unit">imminent</div>
     </div>
-
     <div class="hb-window-sep"></div>
-
     <div class="hb-window" id="hb-win-3">
       <div class="hb-window-count" id="hb-count-3">—</div>
       <div class="hb-window-label">3–7 min</div>
       <div class="hb-window-unit">arriving</div>
     </div>
-
     <div class="hb-window-sep"></div>
-
     <div class="hb-window" id="hb-win-7">
       <div class="hb-window-count" id="hb-count-7">—</div>
       <div class="hb-window-label">7–15 min</div>
@@ -312,70 +313,13 @@
 
 </div>
 
-<!-- App layout -->
+<!-- App layout — sidebar zeroed (TDP-B). 340px returned to queue. -->
 <div class="app">
 
-  <!-- Sidebar -->
-  <aside class="sidebar">
-
-    <!-- Card 1: Darwin — always first -->
-    <div class="card">
-      <div class="card-label">Fenchurch St Line — Darwin</div>
-      <div class="darwin-status-bar">
-        <div class="darwin-dot offline" id="darwin-dot"></div>
-        <div class="darwin-status-text" id="darwin-status-text">Connecting…</div>
-      </div>
-      <div id="darwin-rows">
-        <div class="darwin-row" style="justify-content:center;padding:12px 0;">
-          <span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);letter-spacing:0.06em;">AWAITING DARWIN FEED</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Card 2: Active site -->
-    <div class="card">
-      <div class="card-label">Active Site</div>
-      <div class="card-title" id="site-name">—</div>
-      <div class="card-sub" id="site-address">Loading venue…</div>
-      <div class="site-status-row">
-        <div class="site-status-dot" id="site-status-dot"></div>
-        <div class="site-status-label" id="site-status-label">—</div>
-      </div>
-      <div id="venue-map"></div>
-    </div>
-
-    <!-- Card 3: Queue summary (visible when signed in) -->
-    <div class="card" id="card-queue-summary" style="display:none;">
-      <div class="card-label">Queue Summary</div>
-      <div style="display:flex;flex-direction:column;gap:6px;margin-top:2px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-family:var(--sans);font-size:12px;color:var(--text-secondary);">Pending orders</span>
-          <span style="font-family:var(--mono);font-size:13px;color:var(--text-primary);" id="sb-pending-count">—</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-family:var(--sans);font-size:12px;color:var(--text-secondary);">Ready for collection</span>
-          <span style="font-family:var(--mono);font-size:13px;color:var(--c-green);" id="sb-ready-count">—</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-family:var(--sans);font-size:12px;color:var(--text-secondary);">Orders today</span>
-          <span style="font-family:var(--mono);font-size:13px;color:var(--text-primary);" id="sb-today-count">—</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:4px;border-top:0.5px solid var(--border);">
-          <span style="font-family:var(--mono);font-size:9px;color:var(--text-tertiary);letter-spacing:0.06em;text-transform:uppercase;">Last refresh</span>
-          <span style="font-family:var(--mono);font-size:9px;color:var(--text-tertiary);" id="sb-last-refresh">—</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Card 4: Help (always visible) -->
-    <div class="card">
-      <div class="card-label">Need Help?</div>
-      <div style="font-family:var(--sans);font-size:11px;color:var(--text-secondary);line-height:1.6;">
-        Contact Refueler support:<br>
-        <span style="font-family:var(--mono);font-size:10px;color:var(--accent-carbon);">support@refueler.io</span>
-      </div>
-    </div>
-
+  <!-- Sidebar: markup present, display:none (sidebar removed CC-96).
+       Full strip of sidebar markup and Mapbox dependency deferred to TDP-C. -->
+  <aside class="sidebar" id="sidebar-legacy" aria-hidden="true">
+    <!-- sidebar content intentionally hidden — see CSS .sidebar { display: none } -->
   </aside>
 
   <!-- Main content -->
@@ -405,8 +349,7 @@
       </div>
     </div>
 
-    <!-- New Order bar — CC-84: promoted CTA, full-width, between stats and queue header.
-         Walk-ins are the majority flow for non-app customers paying fiat. -->
+    <!-- New Order bar -->
     <div class="new-order-bar" id="new-order-bar" style="display:none;" onclick="openWalkinOverlay()" role="button" aria-label="Add a new walk-in order">
       <span class="new-order-bar-icon" aria-hidden="true">+</span>
       <span class="new-order-bar-text">New Order</span>
@@ -421,7 +364,6 @@
       <div style="display:flex;align-items:center;gap:12px;">
         <div class="queue-poll-status" id="queue-poll-status">—</div>
         <button class="queue-refresh-btn" onclick="refreshOrders()">↻ REFRESH</button>
-        <!-- S-23: sign-out path for all authenticated staff -->
         <button class="btn-owner-signout" onclick="signOut()">SIGN OUT</button>
       </div>
     </div>
@@ -435,46 +377,62 @@
       </div>
     </div>
 
-    <!-- OPS panel (independent_owner only — hidden by default) -->
+    <!-- ─── OPS PANEL (TDP-B card grid — independent_owner only) ─── -->
+    <!-- Single honest Open/Closed toggle. Calm card grid.
+         Two placeholder tiles (Staff access, Menu) — no copy, space reserved. -->
     <div class="ops-panel" id="ops-panel">
 
-      <div class="ops-section">
-        <div class="ops-section-label">Venue Status</div>
-        <div class="ops-toggle-row">
-          <div>
-            <div class="ops-toggle-label">Accepting orders</div>
-            <div class="ops-toggle-sub">Toggle to open or close your venue</div>
+      <div class="ops-card-grid">
+
+        <!-- Card 1: Trading status (single honest toggle) -->
+        <div class="ops-card">
+          <div class="ops-card-label">Trading Status</div>
+          <div class="ops-card-content">
+            <div class="ops-trading-toggle-row">
+              <div class="ops-trading-status-text" id="ops-trading-status-text">Open</div>
+              <label class="ops-toggle">
+                <input type="checkbox" id="ops-toggle-open" onchange="opsToggleVenueOpen(this.checked)">
+                <span class="ops-toggle-track"></span>
+              </label>
+            </div>
+            <div class="ops-trading-honest-copy" id="ops-trading-honest-copy">
+              Closed — no new orders. Your current queue is unaffected.
+            </div>
           </div>
-          <label class="ops-toggle">
-            <input type="checkbox" id="ops-toggle-open" onchange="opsToggleVenueOpen(this.checked)">
-            <span class="ops-toggle-track"></span>
-          </label>
         </div>
+
+        <!-- Card 2: Lightning address -->
+        <div class="ops-card">
+          <div class="ops-card-label">Lightning Address</div>
+          <div class="ops-card-content">
+            <div class="ops-lightning-address" id="ops-lightning-display">—</div>
+            <button class="ops-lightning-change-btn" onclick="openLnChangeFlow()">Change</button>
+          </div>
+        </div>
+
+        <!-- Card 3: Staff access (placeholder — no copy, space reserved) -->
+        <div class="ops-card ops-card-placeholder" id="ops-card-staff">
+          <div class="ops-card-label">Staff Access</div>
+          <div class="ops-card-content"></div>
+        </div>
+
+        <!-- Card 4: Menu (placeholder — no copy, space reserved) -->
+        <div class="ops-card ops-card-placeholder" id="ops-card-menu">
+          <div class="ops-card-label">Menu</div>
+          <div class="ops-card-content"></div>
+        </div>
+
+        <!-- Card 5: Stamp programme (reserved — Block 8 / post-mint metrics) -->
+        <div class="ops-card ops-card-placeholder" id="ops-card-stamps">
+          <div class="ops-card-label">Stamp Programme</div>
+          <div class="ops-card-content"></div>
+        </div>
+
       </div>
 
-      <div class="ops-section">
-        <div class="ops-section-label">Queue Controls</div>
-        <div class="ops-toggle-row">
-          <div>
-            <div class="ops-toggle-label">Pause new orders</div>
-            <div class="ops-toggle-sub">Existing queue continues; no new orders accepted</div>
-          </div>
-          <label class="ops-toggle">
-            <input type="checkbox" id="ops-toggle-pause" onchange="opsTogglePause(this.checked)">
-            <span class="ops-toggle-track"></span>
-          </label>
-        </div>
-      </div>
-
-      <div class="ops-section">
-        <div class="ops-section-label">Account</div>
-        <div class="ops-toggle-row">
-          <div>
-            <div class="ops-toggle-label">Sign out</div>
-            <div class="ops-toggle-sub">Returns to sign-in screen</div>
-          </div>
-          <button class="btn-owner-signout" onclick="signOut()">SIGN OUT</button>
-        </div>
+      <div class="ops-account-section">
+        <div class="ops-account-label">Sign out to return to the Command Centre.</div>
+        <button class="btn-owner-signout" onclick="signOut()">SIGN OUT</button>
       </div>
 
     </div><!-- /ops-panel -->
@@ -484,11 +442,9 @@
 
 </div><!-- /tablet-ui -->
 
-<!-- ─── WALK-IN ORDER OVERLAY (CC-84) ─── -->
-<!-- Backdrop tap closes overlay. Not a full-screen gate — dismissable. -->
+<!-- ─── WALK-IN ORDER OVERLAY ─── -->
 <div class="walkin-overlay" id="walkin-overlay" onclick="if(event.target===this)closeWalkinOverlay()">
   <div class="walkin-box" role="dialog" aria-modal="true" aria-label="New walk-in order">
-
     <div class="walkin-header">
       <div class="walkin-title">New Order</div>
       <button class="walkin-back" onclick="closeWalkinOverlay()" aria-label="Back">
@@ -496,7 +452,6 @@
         <span>Back</span>
       </button>
     </div>
-
     <div class="walkin-field">
       <label class="walkin-label" for="walkin-identifier">Table / Name / Number</label>
       <input class="walkin-input" id="walkin-identifier"
@@ -504,7 +459,6 @@
         placeholder="e.g. Table 4, Counter, Sarah"
         list="walkin-identifier-suggestions"
         oninput="document.getElementById('walkin-error').classList.remove('show')">
-      <!-- Common identifier suggestions — staff type or tap -->
       <datalist id="walkin-identifier-suggestions">
         <option value="Table 1"><option value="Table 2"><option value="Table 3">
         <option value="Table 4"><option value="Table 5"><option value="Table 6">
@@ -512,7 +466,6 @@
         <option value="Table 10"><option value="Counter">
       </datalist>
     </div>
-
     <div class="walkin-field">
       <label class="walkin-label" for="walkin-item">Item(s)</label>
       <input class="walkin-input" id="walkin-item"
@@ -520,20 +473,16 @@
         placeholder="e.g. Flat white, oat milk"
         oninput="document.getElementById('walkin-error').classList.remove('show')">
     </div>
-
     <div class="walkin-field">
       <label class="walkin-label" for="walkin-notes">Notes <span style="color:#5A5751;font-size:9px;">(optional)</span></label>
       <input class="walkin-input" id="walkin-notes"
         type="text" autocomplete="off" autocorrect="off"
         placeholder="e.g. extra shot, no sugar">
     </div>
-
     <div class="walkin-error" id="walkin-error"></div>
-
     <button class="walkin-submit" id="walkin-submit-btn" onclick="submitWalkinOrder()">
       Add to Queue
     </button>
-
   </div>
 </div>
 
