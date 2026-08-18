@@ -1,5 +1,5 @@
 # REFUELER-BRIDGE.md — Refueler cross-project context
-> **Version:** 4.5 | **Created:** 28 July 2026 | **Updated:** TDP-philosophy · CC-96 · 2026-08-18
+> **Version:** 4.6 | **Created:** 28 July 2026 | **Updated:** TDP-B · CC-97 · 2026-08-18
 > Lives in `refueler-share/` (root), `refueler-io/docs/`, `refueler-legend/` (root), and `refueler-pass/` (root). Committed to each at every block close.
 > This file is the handshake between Projects — not a substitute for repo-specific context files.
 > Higher MasterContext version number always wins on divergence.
@@ -64,7 +64,7 @@ Refueler is a suite of Bitcoin-native privacy products built by Rajesh Taylor (s
 **Pass credential classes:**
 - **Access credential** — non-monetary, closed-loop, no melt path. Bearer (NUT-00) or bound (NUT-11 P2PK).
 - **Reward token** — monetary, spendable sats. LNURL-withdraw (v1) → Cashu NUT-00 (v2, post-mint).
-- **Proxy pickup credential** (logged CC-96) — bearer or named authorisation for delegated order collection. 6-digit code or NFC tap. Pass primitive, not a stamp primitive. Use cases: gift/refer-a-friend, delegated pickup, pub rounds. Log against Pass-A scope and Bitcoin Events × Pass × Merchant arc.
+- **Proxy pickup credential** (logged CC-96) — bearer or named authorisation for delegated order collection. 6-digit code or NFC tap. Pass primitive, not a stamp primitive.
 
 ### NumoPay fork boundary
 | `refueler-io` | `numo-fork` |
@@ -87,8 +87,8 @@ Refueler is a suite of Bitcoin-native privacy products built by Rajesh Taylor (s
 **Carbon (app/terminal default):** `--bg: #1A1A1A` · `--fg: #E8E2D8` · `--surface: #242424`
 **Gold:** `#C8A96E` · **Success:** `#27AE60`
 **Fonts:** Satoshi (headings) · DM Sans (UI) · IBM Plex Mono (data) · Source Serif 4 (editorial)
-**Theme persistence:** `rs-theme` cookie, `.refueler.io`, 30-day rolling. Never localStorage.
-**Abolished:** `#F5820A` orange · `#F7F4EF` (stale Paper) · `#1E1F22` (stale Carbon) · `backdrop-filter` · `localStorage` theme · `rfTheme` · `--accent-action`
+**Theme persistence:** `rs-theme` cookie (web, `.refueler.io`, 30-day rolling) · `rfTheme` localStorage (terminal only).
+**Abolished:** `#F5820A` orange · `#F7F4EF` (stale Paper) · `#1E1F22` (stale Carbon) · `backdrop-filter` · `localStorage` for web theme · `rfTheme` on web · `--accent-action`
 
 ---
 
@@ -100,70 +100,56 @@ Refueler is a suite of Bitcoin-native privacy products built by Rajesh Taylor (s
 
 **The terminal gets quieter and clearer under load, not louder.**
 
-**Sidebar:** Removed. Darwin promoted to horizon strip. 340px reclaimed for queue.
+**Sidebar:** Removed CC-97. Darwin promoted to horizon strip. 340px reclaimed for queue. Mapbox dependency removal deferred TDP-C.
 
-**Horizon strip — slot-based arrival-intelligence primitive:**
-Not a Darwin component. Tenants provisioned at venue setup by `mapbox_place_id` proximity:
-- Darwin/rail (Fenchurch St corridor and station-adjacent venues)
-- Fixtures (football-data.org, venues near stadia)
-- Both (venues in both catchments — two rows or two segments)
-- Pass (future tenant — pending its own Opus design session(s) before integration)
+**Horizon strip — slot-based arrival-intelligence primitive (locked CC-96, built CC-97):**
+`HORIZON_TENANTS = ['rail']`. Dispatches to `renderRailTenant()`. Fixture tenant stub present. Pass tenant is a comment only. Strip mirrored to Owner tab via `_mirrorHorizonToOwner()` — no extra fetch. Darwin/fixtures UI toggle deferred to CC-98 / Events intelligence layer session.
 
-TDP-B builds the slot primitive. The fixture tenant is stubbed. Pass is a comment only.
+**Payment architecture — locked CC-97:**
+`create-order` v10 uses LNURL-pay. Invoices go to `venue_partners.lightning_address` directly. Refueler's Blink account is never in the consumer→merchant path. Blink float = Refueler operating sats only (reward payouts). Fiat commission → Stripe → bank account (Revolut Business recommended).
+
+**Owner tab (behind Owner PIN gate):**
+- Stats, horizon strip (mirrored), Lightning address (display + change flow), on-chain address (display + privacy nudge), sign out.
+- Lightning address change requires `update-lightning-address` Edge Function (service_role) — outstanding.
+- Legend Owner tab integration (embedded balance/tx panel) — dedicated session, post-B9 when Legend API is live.
 
 **Stamps:**
-- Silent, passive issuance. Trigger: FULFILLED (READY status). Not paid.
-- Calm glyph settles onto tile on completion. No merchant action required.
-- Plumbing-agnostic: same visual for LNURL-withdraw (v1) and Cashu NUT-00 (v2). The mint swap is a backend event; must never surface as a merchant-facing change.
-- Stamp metrics: privacy-preserving aggregates (not individual tracking). Reserved in Owner tab. Not built until Block 8 / post-mint.
-
-**Accessibility principles (six, not WCAG):**
-1. Legible at two feet without spectacles. Identifier ≥18px floor.
-2. Status never colour alone — always word + position.
-3. Nothing critical depends on hearing.
-4. No motion that demands. No urgency timers.
-5. Generous targets, forgiving taps.
-6. The terminal never implies the merchant is late.
+- Silent, passive issuance. Trigger: FULFILLED (READY status). `✦` glyph settles on tile.
+- Plumbing-agnostic: same visual for LNURL-withdraw (v1) and Cashu NUT-00 (v2).
+- Stamp metrics: reserved in Owner tab. Not built until Block 8 / post-mint.
 
 ---
 
 ## Incident response — locked Sim-Close
 
-**Protocol:** `INCIDENT-PROTOCOL.md` in `refueler-io/docs/`. Ecosystem-wide. Version 1.0, 2026-08-17.
-**Relationship to `legend-incident-protocol.md`:** INCIDENT-PROTOCOL.md is the ecosystem parent.
+**Protocol:** `INCIDENT-PROTOCOL.md` in `refueler-io/docs/`.
 **Internal channel:** Signal. **External (merchants):** Tuta `hello@refueler.io`. **Public:** `refueler.io/status/` only.
-**Core rule:** Internal → contain → public. Never announce on the channel attackers are watching.
+**Core rule:** Internal → contain → public.
 
 ---
 
 ## Merchant handover documents — locked Design-A
 
-**Files committed to `refueler-io/docs/`:**
-- `merchant-onboarding-v1.html` — User Guide, 6 A4 pages (commit `f0157ef`)
-- `merchant-venue-keys-v1.html` — Venue Keys card, 1 A4 page (commit `f0157ef`)
-- `merchant-onboarding-process-v1.html` — Internal process doc (commit `a5cc342`)
-- `INCIDENT-PROTOCOL.md` — Ecosystem-wide incident response (Sim-Close)
-
-**Docs ↔ UI sync rule (active):** Confirm currency at every block close touching terminal UI.
+Files in `refueler-io/docs/`: `merchant-onboarding-v1.html`, `merchant-venue-keys-v1.html`, `merchant-onboarding-process-v1.html`, `INCIDENT-PROTOCOL.md`.
+**Docs ↔ UI sync rule (active):** confirm currency at every block close touching terminal UI.
 
 ---
 
 ## Sim-Close — DECLARED COMPLETE (2026-08-17)
 
 Pre-merchant gate list:
-- **G-1** (hard blocker): merchant settlement wiring. TDP-B gate item.
-- **G-2** (hard blocker): Menu Management v1. After TDP-B.
+- **G-1** ✅ CLEARED CC-97 — LNURL-pay, `create-order` v10, invoices to merchant LN address directly.
+- **G-2** (hard blocker): Menu Management v1. After TDP-C.
 - **G-3**: iPad physical check. Before first real merchant.
 - **G-4**: ✅ Hardening-A — cleared CC-94.
 - **G-5**: ✅ S-26 FK — cleared CC-94.
 
 ---
 
-## Share — platform notes (logged Block-5 Close · 2026-08-16)
+## Share — platform notes
 
-**Pay-per-use API (planning — pre-AD-2):** Metered API for professional photographers and legal. Recipient flywheel: download page is a growth asset. Full plan in a dedicated Share API planning session.
-
-**Safari upload ceiling:** ~1.5 GB real-world ceiling on current in-memory upload path. Fix: chunked streaming encryption. Do not headline large-file capability on Safari.
+**Pay-per-use API (planning — pre-AD-2):** Metered API for professional photographers and legal. Full plan in a dedicated Share API planning session.
+**Safari upload ceiling:** ~1.5 GB real-world ceiling on current in-memory upload path. Do not headline large-file capability on Safari.
 
 ---
 
@@ -174,15 +160,15 @@ Pre-merchant gate list:
 | CSS-4 through CSS-7b | refueler-io | CSS rationalisation track — complete |
 | CC-83b | refueler-io, Supabase | Production code: migrations, nav HTML/CSS/JS |
 | CC-84 | refueler-io, Supabase | Portrait layout, walk-in overlay. Commit d0defcc. |
-| CC-85 | refueler-io | Magic link email, first full sim run. Commits 17ecb40, 306a587. |
-| Onboarding-A | refueler-io | Merchant onboarding flow + handover copy v3. ✅ Closed. |
+| CC-85 | refueler-io | Magic link email, first full sim run. |
 | Design-A | refueler-io | Two merchant handover docs. Commit f0157ef. ✅ Closed. |
-| **Block-5 Close** | refueler-io | Block 5 review. Sim stages ratified. BRIDGE v4.2. ✅ Closed. |
+| **Block-5 Close** | refueler-io | Block 5 review. Sim stages ratified. ✅ Closed. |
 | **CC-92** | refueler-io, Supabase | Stage 3 payment sim PASSED. ✅ Closed. |
-| **Sim-Close** | refueler-io | Formal sign-off. INCIDENT-PROTOCOL.md. BRIDGE v4.3. ✅ Closed. |
-| **CC-94 / Hardening-A** | refueler-io, Supabase | Six migrations. G-4, G-5 cleared. BRIDGE v4.3. ✅ Closed. |
-| **CC-95 / TDP-A** | refueler-io | Terminal audit. Eight drift findings. S-27 added. BRIDGE v4.4. ✅ Closed. |
-| **CC-96 / TDP-philosophy** | refueler-io | Design philosophy locked. Keystone. Sidebar removed. Strip promoted. Stamp architecture locked. Proxy pickup credential logged. BRIDGE v4.5. ✅ Closed. |
+| **Sim-Close** | refueler-io | Formal sign-off. INCIDENT-PROTOCOL.md. ✅ Closed. |
+| **CC-94 / Hardening-A** | refueler-io, Supabase | Six migrations. G-4, G-5 cleared. ✅ Closed. |
+| **CC-95 / TDP-A** | refueler-io | Terminal audit. Eight drift findings. S-27 added. ✅ Closed. |
+| **CC-96 / TDP-philosophy** | refueler-io | Design philosophy locked. Keystone. Sidebar removed. Strip promoted. ✅ Closed. |
+| **CC-97 / TDP-B** | refueler-io, Supabase | Terminal redesign. G-1 cleared. S-27 deployed. All 10 gate items. BRIDGE v4.6. ✅ Closed. |
 | Pass-0 | refueler-pass | Founding scope. Two-credential-class model locked. |
 | Pass-1 | refueler-pass | Bitcoin Events × Pass × Merchant. PASS-MASTER.md v2.0. |
 
@@ -190,9 +176,11 @@ Pre-merchant gate list:
 
 ## Active action items (Rajesh)
 
+- **Open Revolut Business account** ← Stripe fiat commission payout destination (before first real merchant)
+- Add test `onchain_address` to Raj's Steakhouse in Supabase dashboard (verify Owner tab display)
 - Push `refueler-app` dev branch ← CA-1 prerequisite
 - Disconnect `share.refueler.io` from Cloudflare Pages
-- Push BRIDGE v4.5 to `refueler-share/`, `refueler-legend/`, `refueler-pass/` root and `refueler-io/docs/`
+- Push BRIDGE v4.6 to `refueler-share/`, `refueler-legend/`, `refueler-pass/` root and `refueler-io/docs/`
 - Upgrade Supabase to Pro when first real merchant goes live
 - Upgrade Cloudflare Workers to Paid ($5/month) before production volume
 - Send Mapbox coordinate accuracy email (drafted CC-84, in drafts)
