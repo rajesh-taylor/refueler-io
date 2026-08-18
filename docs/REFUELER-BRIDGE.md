@@ -1,5 +1,5 @@
 # REFUELER-BRIDGE.md — Refueler cross-project context
-> **Version:** 4.4 | **Created:** 28 July 2026 | **Updated:** TDP-A · CC-95 · 2026-08-18
+> **Version:** 4.5 | **Created:** 28 July 2026 | **Updated:** TDP-philosophy · CC-96 · 2026-08-18
 > Lives in `refueler-share/` (root), `refueler-io/docs/`, `refueler-legend/` (root), and `refueler-pass/` (root). Committed to each at every block close.
 > This file is the handshake between Projects — not a substitute for repo-specific context files.
 > Higher MasterContext version number always wins on divergence.
@@ -64,6 +64,7 @@ Refueler is a suite of Bitcoin-native privacy products built by Rajesh Taylor (s
 **Pass credential classes:**
 - **Access credential** — non-monetary, closed-loop, no melt path. Bearer (NUT-00) or bound (NUT-11 P2PK).
 - **Reward token** — monetary, spendable sats. LNURL-withdraw (v1) → Cashu NUT-00 (v2, post-mint).
+- **Proxy pickup credential** (logged CC-96) — bearer or named authorisation for delegated order collection. 6-digit code or NFC tap. Pass primitive, not a stamp primitive. Use cases: gift/refer-a-friend, delegated pickup, pub rounds. Log against Pass-A scope and Bitcoin Events × Pass × Merchant arc.
 
 ### NumoPay fork boundary
 | `refueler-io` | `numo-fork` |
@@ -91,85 +92,78 @@ Refueler is a suite of Bitcoin-native privacy products built by Rajesh Taylor (s
 
 ---
 
-## Incident response — locked Sim-Close
+## Terminal design philosophy — locked CC-96
 
-**Protocol:** `INCIDENT-PROTOCOL.md` in `refueler-io/docs/`. Ecosystem-wide. Version 1.0, 2026-08-17.
-**Relationship to `legend-incident-protocol.md`:** INCIDENT-PROTOCOL.md is the ecosystem parent. `legend-incident-protocol.md` governs Legend-specific matters (FROST, canary, DKG, node seizure). On ecosystem-wide matters (channels, severity tiers, holding statements), INCIDENT-PROTOCOL.md governs.
-**Internal channel:** Signal (moves to self-hosted SimpleX when staff are onboarded).
-**Core rule:** Internal → contain → public. Never announce on the channel attackers are watching.
+**Keystone:** The terminal is an arrival instrument, not an order-management system. Its job is to tell a craftsperson when their customer is about to walk in. If a surface does not help the merchant know who is coming, serve them well, or run their own shop on their own terms, it does not belong on this terminal.
+
+**Register test:** It should behave like a good maître d' — present when needed, invisible when not, never flustered, always a half-step ahead, working for the merchant rather than the other way round.
+
+**The terminal gets quieter and clearer under load, not louder.**
+
+**Sidebar:** Removed. Darwin promoted to horizon strip. 340px reclaimed for queue.
+
+**Horizon strip — slot-based arrival-intelligence primitive:**
+Not a Darwin component. Tenants provisioned at venue setup by `mapbox_place_id` proximity:
+- Darwin/rail (Fenchurch St corridor and station-adjacent venues)
+- Fixtures (football-data.org, venues near stadia)
+- Both (venues in both catchments — two rows or two segments)
+- Pass (future tenant — pending its own Opus design session(s) before integration)
+
+TDP-B builds the slot primitive. The fixture tenant is stubbed. Pass is a comment only.
+
+**Stamps:**
+- Silent, passive issuance. Trigger: FULFILLED (READY status). Not paid.
+- Calm glyph settles onto tile on completion. No merchant action required.
+- Plumbing-agnostic: same visual for LNURL-withdraw (v1) and Cashu NUT-00 (v2). The mint swap is a backend event; must never surface as a merchant-facing change.
+- Stamp metrics: privacy-preserving aggregates (not individual tracking). Reserved in Owner tab. Not built until Block 8 / post-mint.
+
+**Accessibility principles (six, not WCAG):**
+1. Legible at two feet without spectacles. Identifier ≥18px floor.
+2. Status never colour alone — always word + position.
+3. Nothing critical depends on hearing.
+4. No motion that demands. No urgency timers.
+5. Generous targets, forgiving taps.
+6. The terminal never implies the merchant is late.
 
 ---
 
-## Merchant terminal — design locked CC-83, audited TDP-A (CC-95)
+## Incident response — locked Sim-Close
 
-**File locations (corrected TDP-A):** HTML: `src/merchant/index.html` (plain `.html`) · JS: `src/merchant/merchant-tablet-logic.js` · CSS: `src/merchant/merchant-tablet-styles.css`. All previous references to `merchant-tablet.html` are incorrect.
-
-**Philosophy (locked TDP-A):** Ambient awareness tool for craftspeople, not a throughput-management system. The horizon strip tells the merchant when their customer is arriving — they choose their own pace. Pending-gold status colour is deliberate; protect it. Learn text sizing from KDS incumbents; take almost nothing else from them.
-
-### Nav
-- Default (no logo): Refueler wordmark (Satoshi 700, 16px, `#E4E2DC`) · divider · "MERCHANT TERMINAL" (IBM Plex Mono, 12px, `#C8C9CB`)
-- Right: QUEUE·OPS·OWNER merged pill (42px, OWNER gold tint) · separator · PAPER·CARBON pill
-
-### Horizon strip
-- Always dark `#1A1A1A` · 64px height ✅ confirmed live
-- Station name: IBM Plex Mono 15px `#E4E2DC` · ETA: gold · counts: `#A8A4A0` uniform
-- "DARWIN · LIVE" label removed CC-84 ✅
-
-### Order tiles
-- `[ID] · [items]` single line · status badge right only
-- PENDING gold · IN PREP blue `#7899D4` · READY green `#3DCA7A`
-- Type sizes: identifier north of 18px, item name 14–16px (TDP-philosophy to confirm)
-
-### Ops panel — under review (TDP-philosophy → TDP-B)
-Current two-toggle model is dishonest (both write `active`, coupled via JS). TDP-B will collapse to single honest toggle or introduce real `is_paused` column. Sidebar necessity, ops layout, stamp placement all open questions for TDP-philosophy session.
-
-### Portrait layout (CC-84)
-- Option A: sidebar collapses to horizontal-scroll card strip above main. CSS-only.
-- `@media (orientation: portrait), (max-width: 820px)`
-
-### Security — S-27 (TDP-B fix)
-`venue_partners_merchant_pause_update` has no column restriction — merchant can write wallet address columns on own venue row. Column-level UPDATE grant restriction required: `active` + `pause_reason` only. TDP-B pre-merchant gate item.
+**Protocol:** `INCIDENT-PROTOCOL.md` in `refueler-io/docs/`. Ecosystem-wide. Version 1.0, 2026-08-17.
+**Relationship to `legend-incident-protocol.md`:** INCIDENT-PROTOCOL.md is the ecosystem parent.
+**Internal channel:** Signal. **External (merchants):** Tuta `hello@refueler.io`. **Public:** `refueler.io/status/` only.
+**Core rule:** Internal → contain → public. Never announce on the channel attackers are watching.
 
 ---
 
 ## Merchant handover documents — locked Design-A
 
 **Files committed to `refueler-io/docs/`:**
-- `merchant-onboarding-v1.html` — User Guide, 6 A4 pages, print-ready standalone (commit `f0157ef`)
-- `merchant-venue-keys-v1.html` — Venue Keys card, 1 A4 page, print-ready standalone (commit `f0157ef`)
+- `merchant-onboarding-v1.html` — User Guide, 6 A4 pages (commit `f0157ef`)
+- `merchant-venue-keys-v1.html` — Venue Keys card, 1 A4 page (commit `f0157ef`)
 - `merchant-onboarding-process-v1.html` — Internal process doc (commit `a5cc342`)
-- `INCIDENT-PROTOCOL.md` — Ecosystem-wide incident response (Sim-Close, 2026-08-17)
+- `INCIDENT-PROTOCOL.md` — Ecosystem-wide incident response (Sim-Close)
 
-**Key rules:**
-- Standalone HTML files. Each prints independently as its own PDF.
-- Gold on section h2 dividers and warn-banner left-border only.
-- All sensitive values (Owner PIN, wallet addresses, Staff PIN) handwritten at handover — never typed.
-- Open in Chrome for cleanest PDF output.
-- Docs will iterate. Do not print full runs until design is stable.
-- Docs ↔ UI sync rule active: confirm currency at every block close touching terminal UI.
+**Docs ↔ UI sync rule (active):** Confirm currency at every block close touching terminal UI.
 
 ---
 
 ## Sim-Close — DECLARED COMPLETE (2026-08-17)
 
-All four stages confirmed. Pre-merchant gate list:
-- **G-1** (hard blocker): merchant settlement wiring — `create-order` must invoice to `venue_partners.lightning_address`. Named TDP-B gate item.
-- **G-2** (hard blocker): Menu Management v1 — queued after TDP-B.
-- **G-3**: iPad physical check — before first real merchant.
-- **G-4**: Hardening-A — slotted immediately post-Sim-Close.
-- **G-5**: S-26 FK — fold into Hardening-A.
-
-Three-wallet sim setup: WoS (merchant) · Blink (Refueler treasury) · Minibits (customer).
+Pre-merchant gate list:
+- **G-1** (hard blocker): merchant settlement wiring. TDP-B gate item.
+- **G-2** (hard blocker): Menu Management v1. After TDP-B.
+- **G-3**: iPad physical check. Before first real merchant.
+- **G-4**: ✅ Hardening-A — cleared CC-94.
+- **G-5**: ✅ S-26 FK — cleared CC-94.
 
 ---
 
 ## Share — platform notes (logged Block-5 Close · 2026-08-16)
 
-**Pay-per-use API (planning — pre-AD-2):**
-A metered pay-per-use Share API is scoped ahead of AD-2. Initial v1 segments: **professional photographers** (deliver large shoots to clients who needn't hold an account) and **legal** (transfer survives sender closing laptop; recipient needn't be sophisticated — the two-axis category, AP-7). Staging: v1 metered API for these segments → v2 broaden → v3 white-label option (partner-branded Share). **Recipient flywheel:** every anonymous recipient is a latent sender — the download page is a growth asset, not a dead end. Full plan in a dedicated Share API planning session (queue after foundational terminal work, before AD-2).
+**Pay-per-use API (planning — pre-AD-2):** Metered API for professional photographers and legal. Recipient flywheel: download page is a growth asset. Full plan in a dedicated Share API planning session.
 
-**Safari upload ceiling (constraint):**
-Safari imposes an effective ~1.5 GB real-world ceiling on the current in-memory upload path, well below the advertised 4 GB free-tier figure. **Fix:** chunked streaming encryption (encrypt-and-upload per chunk rather than whole-file in memory) lifts the ceiling toward the true tier limit. **Copy implication:** do not headline large-file capability on Safari; the "4 GB free" claim must not imply a 4 GB Safari upload works today.
+**Safari upload ceiling:** ~1.5 GB real-world ceiling on current in-memory upload path. Fix: chunked streaming encryption. Do not headline large-file capability on Safari.
 
 ---
 
@@ -178,22 +172,18 @@ Safari imposes an effective ~1.5 GB real-world ceiling on the current in-memory 
 | Session | Repos touched | Notes |
 |---|---|---|
 | CSS-4 through CSS-7b | refueler-io | CSS rationalisation track — complete |
-| CC-66 | refueler-io, Supabase | Schema hardening |
-| CC-69 | refueler-io, refueler-app, Supabase | Consumer app ↔ terminal connection |
-| CC-81 | refueler-io, Supabase | Franchise dashboard |
-| CC-82 | refueler-io, Supabase | Block 5 pre-work, test env, E2E |
-| CC-83 | refueler-io (design only) | Terminal nav/UI design locked |
 | CC-83b | refueler-io, Supabase | Production code: migrations, nav HTML/CSS/JS |
-| CC-84 | refueler-io, Supabase | Portrait layout, walk-in overlay, New Order bar. Commit d0defcc. |
+| CC-84 | refueler-io, Supabase | Portrait layout, walk-in overlay. Commit d0defcc. |
 | CC-85 | refueler-io | Magic link email, first full sim run. Commits 17ecb40, 306a587. |
 | Onboarding-A | refueler-io | Merchant onboarding flow + handover copy v3. ✅ Closed. |
 | Design-A | refueler-io | Two merchant handover docs. Commit f0157ef. ✅ Closed. |
-| **Block-5 Close** | refueler-io | Block 5 review. Go-live pressure removed. Sim stages ratified. BRIDGE v4.2. ✅ Closed. |
-| **CC-92** | refueler-io, Supabase | Stage 3 payment sim PASSED. Migration cc92_steakhouse_activate_lightning_address. ✅ Closed. |
+| **Block-5 Close** | refueler-io | Block 5 review. Sim stages ratified. BRIDGE v4.2. ✅ Closed. |
+| **CC-92** | refueler-io, Supabase | Stage 3 payment sim PASSED. ✅ Closed. |
 | **Sim-Close** | refueler-io | Formal sign-off. INCIDENT-PROTOCOL.md. BRIDGE v4.3. ✅ Closed. |
-| **CC-95 / TDP-A** | refueler-io | Terminal audit. Eight drift findings. S-27 added. TDP-B gate list. Merchant profile locked. BRIDGE v4.4. ✅ Closed. |
+| **CC-94 / Hardening-A** | refueler-io, Supabase | Six migrations. G-4, G-5 cleared. BRIDGE v4.3. ✅ Closed. |
+| **CC-95 / TDP-A** | refueler-io | Terminal audit. Eight drift findings. S-27 added. BRIDGE v4.4. ✅ Closed. |
+| **CC-96 / TDP-philosophy** | refueler-io | Design philosophy locked. Keystone. Sidebar removed. Strip promoted. Stamp architecture locked. Proxy pickup credential logged. BRIDGE v4.5. ✅ Closed. |
 | Pass-0 | refueler-pass | Founding scope. Two-credential-class model locked. |
-| Pass-0b | refueler-pass, refueler-io, refueler-share, refueler-legend | BRIDGE v3.7. |
 | Pass-1 | refueler-pass | Bitcoin Events × Pass × Merchant. PASS-MASTER.md v2.0. |
 
 ---
@@ -202,7 +192,7 @@ Safari imposes an effective ~1.5 GB real-world ceiling on the current in-memory 
 
 - Push `refueler-app` dev branch ← CA-1 prerequisite
 - Disconnect `share.refueler.io` from Cloudflare Pages
-- Push BRIDGE v4.4 to `refueler-share/`, `refueler-legend/`, `refueler-pass/` root and `refueler-io/docs/`
+- Push BRIDGE v4.5 to `refueler-share/`, `refueler-legend/`, `refueler-pass/` root and `refueler-io/docs/`
 - Upgrade Supabase to Pro when first real merchant goes live
 - Upgrade Cloudflare Workers to Paid ($5/month) before production volume
 - Send Mapbox coordinate accuracy email (drafted CC-84, in drafts)
@@ -221,7 +211,6 @@ Safari imposes an effective ~1.5 GB real-world ceiling on the current in-memory 
 
 **Base:** `cashubtc/Numo` v1.8. **Fork:** `rajesh-taylor/numo-fork` v1.6 — clean, no changes.
 **Timing:** NumoPay-A after TDP-C.
-**Competitive angle:** No dedicated hardware vs Square KDS. Tablet they already own.
 
 ---
 
