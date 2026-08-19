@@ -241,3 +241,7 @@ If still failing after transforms cleared → rename `Theme_Numo` alias to `Them
 | — | **Session A (CDK mint)** | CDK mint architecture | Opus uncounted | After Block 8 |
 | — | **Status page** | `refueler.io/status/` | Sonnet counted | After first real merchant |
 | — | **September User Guide update** | LN address change section, anti-phishing, AM checklist | Sonnet counted | September |
+
+## NFC — deferred capabilities (logged CC-102)
+1. NumoPay NFC payment acceptance — floor staff tap customer device at table. NFC HCE class deleted NumoPay-B (softened to android:required=false). Re-introduce at NumoPay-D or dedicated session post-stable build. Enables table service without customer walking to counter.
+2. Pass NFC credential — tap to enter venue/event. Pass-A scope. Separate credential class from payment NFC. Do not conflate.
