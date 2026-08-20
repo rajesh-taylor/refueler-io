@@ -2,7 +2,7 @@
 /* TDP-B CC-97: token migration to canonical CSS-1a values.
    D-1: Paper --bg #F7F4EF → #E8E2D8
    D-2: Paper --surface #EDEAE4 → #DAD4CA
-   D-3: Carbon --bg #1E1F22 → #1A1A1A, Carbon --surface #26282C → #242424
+   D-3: Carbon --bg #1E1F22 → #1A1917, Carbon --surface #26282C → #242424
         Carbon --inset-rule gold → var(--border) (neutral)
    S-25: order tile bg resolves automatically (var(--surface) now canonical)
    backdrop-filter: abolished on all surfaces
@@ -51,7 +51,7 @@
 }
 
 [data-theme="carbon"] {
-  --bg:            #1A1A1A;
+  --bg:            #1A1917;
   --surface:       #242424;
   --text-primary:  #E4E2DC;
   --text-secondary:#8A8680;
@@ -96,7 +96,7 @@ body {
 .pin-gate {
   position: fixed;
   inset: 0;
-  background: #1A1A1A;
+  background: #1A1917;
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -193,7 +193,7 @@ body {
 .auth-gate {
   position: fixed;
   inset: 0;
-  background: #1A1A1A;
+  background: #1A1917;
   z-index: 9998;
   display: flex;
   align-items: center;
@@ -291,7 +291,7 @@ body {
 .first-login-overlay {
   position: fixed;
   inset: 0;
-  background: #1A1A1A;
+  background: #1A1917;
   z-index: 9500;
   display: flex;
   align-items: center;
@@ -990,12 +990,12 @@ nav.nav {
 .theme-pill-opt.active { color: var(--text-primary); background: var(--bg); }
 
 /* ─── HORIZON BAND ─── */
-/* Always dark background (#1A1A1A) in both themes.
+/* Always dark background (#1A1917) in both themes.
    TDP-B: slot-based primitive. Only Darwin/rail tenant is wired.
    Fixture tenant stub present (not rendered). Pass tenant is a comment only.
    See HORIZON_TENANTS config in merchant-tablet-logic.js. */
 .horizon-band {
-  background: #1A1A1A;
+  background: #1A1917;
   height: 64px;
   display: flex;
   align-items: stretch;

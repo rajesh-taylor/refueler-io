@@ -74,8 +74,8 @@
 
 /* ─── Carbon override ────────────────────────────────────────────────────── */
 [data-theme="carbon"] {
-  /* Backgrounds */
-  --bg:                 #1A1A1A;
+  /* Backgrounds — warm carbon trial (#1A1917, CC-103) */
+  --bg:                 #1A1917;
   --surface:            #26282C;
   --surface-raised:     #2E3035;
 
@@ -94,7 +94,7 @@
   --input-border:       rgba(245,240,232,0.18);
 
   /* Nav */
-  --nav-bg:             #1A1A1A;
+  --nav-bg:             #1A1917;
 
   /* Utility */
   --divider-color:      rgba(245,240,232,0.14);
