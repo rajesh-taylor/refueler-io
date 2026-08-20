@@ -254,6 +254,20 @@
     </div>
   </div>
 
+  <div class="owner-stats-grid owner-stats-grid--alltime">
+    <div class="owner-stat-card">
+      <div class="owner-stat-label">All-Time Orders</div>
+      <div class="owner-stat-value owner-stat-value--sm" id="owner-stat-alltime-orders">—</div>
+      <div class="owner-stat-sub">confirmed &amp; fulfilled</div>
+    </div>
+    <div class="owner-stat-card">
+      <div class="owner-stat-label">All-Time Sats</div>
+      <div class="owner-stat-value owner-stat-value--sm" id="owner-stat-alltime-sats">—</div>
+      <div class="owner-stat-sub">total received</div>
+    </div>
+  </div>
+  <div class="owner-last-order" id="owner-last-order-ts">Last order: —</div>
+
   <div class="owner-section">
     <div class="owner-section-label">Lightning Address</div>
     <div class="owner-menu-row">
@@ -274,6 +288,34 @@
         <span class="owner-privacy-nudge-icon">⚿</span>
         For your privacy — each payment should use a fresh address. If you've received a payment to this address, contact <strong>support@refueler.io</strong> for a new one.
       </div>
+    </div>
+  </div>
+
+  <div class="owner-section">
+    <div class="owner-section-label">Venue Status</div>
+    <div class="owner-menu-row owner-menu-row--toggle">
+      <div>
+        <div class="owner-menu-label" id="owner-venue-status-label">Open — accepting orders</div>
+        <div class="owner-menu-sub">Pause to stop new orders arriving at this terminal</div>
+      </div>
+      <label class="owner-toggle">
+        <input type="checkbox" id="owner-venue-status-toggle" onchange="toggleVenueStatus(this.checked)" checked>
+        <span class="owner-toggle-track"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="owner-section">
+    <div class="owner-section-label">Arrival Strip</div>
+    <div class="owner-menu-row owner-menu-row--toggle">
+      <div>
+        <div class="owner-menu-label">Show arrival strip</div>
+        <div class="owner-menu-sub">Darwin departure board — Fenchurch Street line</div>
+      </div>
+      <label class="owner-toggle">
+        <input type="checkbox" id="owner-horizon-toggle" onchange="toggleHorizonVisibility(this.checked)" checked>
+        <span class="owner-toggle-track"></span>
+      </label>
     </div>
   </div>
 

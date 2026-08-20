@@ -217,10 +217,7 @@ function onStaffAuthenticated() {
   renderMergedPill();
   showSignedInState();
   startOrderPoll();
-  if (!_darwinTimer) {
-    _darwinTimer = setInterval(pollDarwin, DARWIN_INTERVAL_MS);
-    pollDarwin();
-  }
+  initHorizonToggle();
   maybeShowFirstLogin();
 }
 
@@ -352,6 +349,8 @@ async function loadOwnerStats() {
     todayStart.setHours(0, 0, 0, 0);
     const session = await getSbClient().auth.getSession();
     const token = session?.data?.session?.access_token || SB_KEY;
+
+    // Today's stats
     const res = await fetch(
       `${SB_URL}/rest/v1/merchant_orders?venue_id=eq.${_venueId}&created_at=gte.${todayStart.toISOString()}&payment_status=eq.paid&select=amount_gbp`,
       { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token } }
@@ -365,7 +364,118 @@ async function loadOwnerStats() {
       document.getElementById('owner-stat-revenue').textContent = '£' + total.toFixed(2);
       document.getElementById('owner-stat-aov').textContent     = count > 0 ? '£' + aov.toFixed(2) : '—';
     }
+
+    // All-time stats (Item 1)
+    const resAll = await fetch(
+      `${SB_URL}/rest/v1/merchant_orders?venue_id=eq.${_venueId}&status=in.(confirmed,fulfilled)&select=settled_sats`,
+      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token } }
+    );
+    if (resAll.ok) {
+      const allRows = await resAll.json();
+      const allCount = allRows.length;
+      const allSats  = allRows.reduce((s, r) => s + (parseInt(r.settled_sats) || 0), 0);
+      const elOrders = document.getElementById('owner-stat-alltime-orders');
+      const elSats   = document.getElementById('owner-stat-alltime-sats');
+      if (elOrders) elOrders.textContent = allCount.toLocaleString();
+      if (elSats)   elSats.textContent   = allSats.toLocaleString() + ' sats';
+    }
+
+    // Last order timestamp (Item 2)
+    const resLast = await fetch(
+      `${SB_URL}/rest/v1/merchant_orders?venue_id=eq.${_venueId}&order=created_at.desc&limit=1&select=created_at`,
+      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token } }
+    );
+    if (resLast.ok) {
+      const lastRows = await resLast.json();
+      const elLast = document.getElementById('owner-last-order-ts');
+      if (elLast && lastRows.length > 0) {
+        const d = new Date(lastRows[0].created_at);
+        const today = new Date();
+        const sameDay = d.toDateString() === today.toDateString();
+        elLast.textContent = 'Last order: ' + (sameDay
+          ? d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+          : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }));
+      } else if (elLast) {
+        elLast.textContent = 'Last order: —';
+      }
+    }
+
+    // Venue status toggle state (Item 3)
+    const venueActive = _venueData?.active !== false;
+    const toggle = document.getElementById('owner-venue-status-toggle');
+    if (toggle) toggle.checked = venueActive;
+    _updateVenueStatusLabel(venueActive);
+
   } catch(e) { console.warn('loadOwnerStats error:', e); }
+}
+
+function _updateVenueStatusLabel(active) {
+  const label = document.getElementById('owner-venue-status-label');
+  if (label) label.textContent = active ? 'Open — accepting orders' : 'Paused — not accepting orders';
+}
+
+async function toggleVenueStatus(active) {
+  if (!_venueId) return;
+  try {
+    const session = await getSbClient().auth.getSession();
+    const token = session?.data?.session?.access_token;
+    if (!token) { showToast('Session expired — sign in again', 'err'); return; }
+    const res = await fetch(
+      `${SB_URL}/rest/v1/venue_partners?id=eq.${_venueId}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'apikey': SB_KEY,
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ active })
+      }
+    );
+    if (res.ok) {
+      if (_venueData) _venueData.active = active;
+      _updateVenueStatusLabel(active);
+      showToast(active ? 'Venue reopened' : 'Venue paused', active ? 'ok' : 'warn');
+    } else {
+      showToast('Could not update venue status', 'err');
+      // Revert toggle
+      const toggle = document.getElementById('owner-venue-status-toggle');
+      if (toggle) toggle.checked = !active;
+    }
+  } catch(e) {
+    console.warn('toggleVenueStatus error:', e);
+    showToast('Could not update venue status', 'err');
+  }
+}
+
+// Item 4 — Darwin/fixtures horizon toggle
+function initHorizonToggle() {
+  const stored = localStorage.getItem('refueler_horizon_visible');
+  const visible = stored === null ? true : stored === 'true';
+  _applyHorizonVisibility(visible);
+  const toggle = document.getElementById('owner-horizon-toggle');
+  if (toggle) toggle.checked = visible;
+}
+
+function toggleHorizonVisibility(visible) {
+  localStorage.setItem('refueler_horizon_visible', visible);
+  _applyHorizonVisibility(visible);
+}
+
+function _applyHorizonVisibility(visible) {
+  const main   = document.getElementById('horizon-band');
+  const owner  = document.getElementById('owner-horizon-band');
+  const display = visible ? '' : 'none';
+  if (main)  main.style.display  = display;
+  if (owner) owner.style.display = display;
+  if (!visible && _darwinTimer) {
+    clearInterval(_darwinTimer);
+    _darwinTimer = null;
+  } else if (visible && !_darwinTimer) {
+    _darwinTimer = setInterval(pollDarwin, DARWIN_INTERVAL_MS);
+    pollDarwin();
+  }
 }
 
 async function ownerSignOut() {
