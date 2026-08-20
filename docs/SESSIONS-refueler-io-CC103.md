@@ -1,113 +1,60 @@
 # SESSIONS — refueler-io
-*Last updated: CC-103 · 2026-08-20 (numo-fork build fix closed. Darwin RLS applied. Owner tab enrichment complete. All items 0–4 done.)*
+*Last updated: CC-103 · 2026-08-20 — build fix, Darwin RLS, Owner tab enrichment, warm carbon, product naming, Owner tab redesign spec, G-3 cleared.*
 
 ---
 
 ## Session allocation
-
-Primary: 500 · Buffer: 50 · Total: 550
-Planning/Opus sessions: uncounted. Buffer untouchable until a block overruns.
-
-Sessions used to CC-103: ~99 counted + uncounted planning sessions.
+Primary: 500 · Buffer: 50 · Total: 550. Planning/Opus uncounted.
+Sessions used to CC-103: ~99 counted + uncounted planning.
 
 ---
 
 ## Block map
 
-| Block | Scope | Status |
-|---|---|---|
-| Block 0 | Theme default, footer stamp, banner fixes | ✅ CC-65 |
-| Block 1 | Schema hardening: RLS, PIN RLS | ✅ CC-66 |
-| Block 2 | Consumer app ↔ merchant tablet live connection | ✅ CC-69 |
-| Block 4 | Dev console hardening + investor telemetry | ✅ CC-65 |
-| Block M | Share migration → `refueler.io/share/` | ✅ M-3 |
-| Block 3 | Franchise dashboard | ✅ CC-81 |
-| **Block 5** | Merchant onboarding + simulation discipline | ✅ Block-5 Close |
-| **Sim-Close** | Formal simulation sign-off | ✅ DECLARED COMPLETE 2026-08-17 |
-| **Hardening-A** | Supabase-wide security hardening | ✅ CC-94 |
-| **TDP-A** | Terminal audit + design philosophy framing | ✅ CC-95 |
-| **TDP-philosophy** | Terminal design philosophy deep-dive | ✅ CC-96 |
-| **TDP-B** | Terminal redesign execution | ✅ CC-97 |
-| **TDP-C** | `update-lightning-address` EF + NumoPay alignment | ✅ CC-98 |
-| **NumoPay-A** | Fork architecture decisions record | ✅ CC-99 |
-| **NumoPay-B** | Auth scaffold, CDK removal, theming | ✅ CC-100 |
-| **NumoPay-C** | Catalogue, payment flows, history, strings | ✅ CC-101 |
-| **CC-102** | numo-fork build fix attempt (partial) | ✅ Superseded by CC-103 |
-| **CC-103** | numo-fork build fix + Darwin RLS + Owner tab enrichment | ✅ CLOSED |
-| **CC-104 — Menu Management v1** | `merchant_menu_items` DDL · CSV import · terminal UI | 🟡 Next |
-| **Block 8** | Fiat → sats rewards | 🟡 After Menu Management v1 |
-| Pass-A/B | Pass planning sessions | 🟡 After CC-104 |
-| Block 9 | LNBits integration | ⚪ Deferred post Block 8 |
+| Block | Status |
+|---|---|
+| Block 0–4, Block M | ✅ Complete |
+| Block 3 | ✅ CC-81 |
+| Block 5 + Sim-Close | ✅ Complete 2026-08-17 |
+| Hardening-A · TDP-A · TDP-philosophy · TDP-B · TDP-C | ✅ CC-94–98 |
+| NumoPay-A · B · C | ✅ CC-99–101 |
+| CC-102 | ✅ Superseded by CC-103 |
+| CSS-1 through CSS-7b | ✅ Complete |
+| **CC-103** | ✅ CLOSED |
+| **CC-104 — Menu Management v1** | 🟡 Next |
+| **Web-Touch-1** | 🟡 After CC-104 |
+| Block 8 · Pass-A/B · Block 9 | 🟡/⚪ Queued/Deferred |
 
 ---
 
-## CSS rationalisation track — complete
-
-CSS-1 through CSS-7b all closed.
-
----
-
-## Session log
-
-### CC-103 — date: 2026-08-20
-**Type:** Sonnet counted. **Status: ✅ CLOSED.**
+## CC-103 — 2026-08-20 · CLOSED
 
 **Commits:**
 | Repo | Commit | What |
 |---|---|---|
-| `numo-fork` | `54b15de` | fix: resolve Theme_Numo symbol collision — dot-notation aliases only, no underscore duplicates |
-| `refueler-io` | `9a2ea73` | feat: Owner tab enrichment — all-time stats, last order, venue status toggle, Darwin toggle, Darwin RLS fix |
-| `refueler-io` | `01cebc2` | feat: Owner tab enrichment CSS — toggle, all-time stats, last order |
+| `numo-fork` | `54b15de` | fix: Theme_Numo symbol collision — dot-notation aliases only |
+| `refueler-io` | `9a2ea73` | feat: Owner tab enrichment Items 0–4 + Darwin RLS fix |
+| `refueler-io` | `01cebc2` | feat: Owner tab enrichment CSS |
+| `refueler-io` | `67afc2e` | design: warm carbon — #1A1917 replaces #1A1A1A for Carbon bg |
+| `refueler-io` | `039962e` | docs: MasterContext + SESSIONS CC-103 (first close, pre-extended session) |
 
-**Part A — Build fix:**
-- Root cause: `values/themes.xml` had both `<style name="Theme.Numo">` (dot-notation) and `<style name="Theme_Numo">` (underscore-notation) — Android's ResourceValuesXmlParser treats these as the same symbol, raises duplicate error.
-- Fix: dot-notation aliases only in `values/themes.xml`. Kotlin `R.style.Theme_Numo` resolves to `Theme.Numo` automatically.
-- Confirmed BUILD SUCCESSFUL. Installed on Pixel 9a — `RefuelerAuthActivity` launches correctly.
+**Decisions locked this session:**
+- Product names: floor staff app = **Relay**, consumer app = **Refill**
+- Carbon bg token: `#1A1917` (warm) — 2-week trial
+- Terminal orientation confirmed: landscape for counter tablet, portrait for Relay
+- G-3 cleared: iPad physical check done at Apple Store
+- Owner tab redesign spec locked (S-32) — see MasterContext for full layout spec
+- Shutdown merchant terminal: local `_terminalShutdown` flag, not `venue_partners.active`
+- Toggle spec: green `#3DCA7A` on, amber `#C8943A` off, both themes
+- Lightning address: single line, ellipsis, gold lock icon → owner PIN re-auth
+- PAPER/CARBON pill: always far right of owner nav, Back to Queue left of it
 
-**Part B — Owner tab enrichment:**
-- Item 0: Migration `cc103_rail_signal_anon_read` — anon SELECT on `rail_signal_current`. S-Darwin closed.
-- Item 1: All-time stats row — total orders + total sats (status IN confirmed/fulfilled).
-- Item 2: Last order timestamp — "Last order: HH:MM" or "DD Mon".
-- Item 3: Venue status toggle — authenticated PostgREST PATCH on `venue_partners.active`. No new EF needed (S-27 grants already in place).
-- Item 4: Darwin/fixtures toggle — `localStorage` key `refueler_horizon_visible`. Stops/starts `_darwinTimer`. `initHorizonToggle()` called from `onStaffAuthenticated()`.
+**Snags logged:**
+- S-28: Privacy page right-edge padding (portrait/narrow)
+- S-29: Share nav wordmark/breadcrumb separator
+- S-32: Owner tab full redesign
 
-**Pending (non-blocking):**
-- `values-v31/themes.xml` + `values-night-v31/themes.xml` reference `@color/numo_navy` — clean up at next numo-fork session (S-numo-v31).
-
----
-
-### CC-102 — date: 2026-08-19
-**Type:** Sonnet counted. **Status: ✅ Superseded by CC-103.**
-Build fix attempt — resolved resource linking errors but `Theme_Numo` symbol collision remained. Owner tab enrichment not started.
-
-### CC-101 — date: 2026-08-19
-**Type:** Sonnet counted (NumoPay-C). **CLOSED.** Commit `def2883`.
-
-### CC-100 — date: 2026-08-19
-**Type:** Sonnet counted (NumoPay-B). **CLOSED.** Commit `8b217d1`.
-
-### CC-99 — date: 2026-08-18
-**Type:** Opus uncounted (NumoPay-A). **CLOSED.**
-
----
-
-## Session queue — forward plan
-
-| # | Session | Scope | Type | Status |
-|---|---|---|---|---|
-| 1 | **CC-104 — Menu Management v1** | `merchant_menu_items` DDL · CSV import · terminal UI | Sonnet counted | **Next** |
-| — | **CA-1** | Consumer App Track. Prerequisite: dev branch push. | Opus uncounted | After CC-104 |
-| — | **Block 8** | Fiat → sats rewards | Sonnet counted | After Menu Management v1 |
-| — | **Pass-A** | Proxy pickup credential, credential structure | Opus uncounted | After CC-104 |
-| — | **Events intelligence layer** | Football fixtures, Darwin toggle, horizon strip tenants | Sonnet counted | Gap |
-| — | **Staff Management v1** | Per-staff accounts, AM Blink wallet, ops monitoring | Sonnet counted | Gap |
-| — | **Commission planning** | Rate / double-ask model | Opus uncounted | Before first real merchant |
-| — | **Privacy page update** | Sections 7, 8, 10 + merchant GDPR + Resend Article 30 | Sonnet counted | Gap |
-| — | **Share API planning** | Pay-per-use API v1 | Opus uncounted | Before AD-2 |
-| — | **AD-2** | Share admin dashboard | Sonnet counted | After Share API planning |
-| — | **Session A (CDK mint)** | CDK mint architecture | Opus uncounted | After Block 8 |
-| — | **Status page** | `refueler.io/status/` | Sonnet counted | After first real merchant |
-| — | **September User Guide update** | LN address change section, anti-phishing, AM checklist | Sonnet counted | September |
+**Darwin diagnosis deferred:** Anon policy live but terminal still shows offline. Diagnose at CC-104 open.
 
 ---
 
@@ -118,17 +65,25 @@ CC-104 — Menu Management v1
 Type: Sonnet counted
 Context files: refueler-io/docs/MasterContext_IO_CC103.md · SESSIONS-refueler-io-CC103.md
 
-Scope: merchant_menu_items — DDL, CSV import path, terminal UI integration.
+OPEN FIRST — Darwin diagnosis (5 min max):
+  execute_sql: SELECT COUNT(*), MAX(fetched_at) FROM rail_signal_current WHERE feed = 'departure_board_staff' AND feed_key = 'FST';
+  If 0 rows: cron hasn't run. Check pg_cron job status.
+  If rows present but terminal shows offline: JS issue — note and defer.
+  Do not spend more than 2 prompts on this before moving to Menu Management.
 
-Read MasterContext in full before starting.
-numo-fork is green at 54b15de — no build work this session.
+MAIN SCOPE — Menu Management v1 (G-2, hard blocker):
+  1. apply_migration: merchant_menu_items table
+     Columns: id (uuid pk), venue_id (uuid fk venue_partners), name (text), description (text),
+     price_gbp (numeric(10,2)), category (text), available (bool default true),
+     position (int default 0), created_at, updated_at
+     RLS: authenticated SELECT (own venue), service_role INSERT/UPDATE/DELETE
+  2. CSV import path: owner uploads CSV in Owner tab → parse client-side →
+     POST via authenticated PostgREST INSERT (batch). Max 100 items.
+     CSV columns: name, description, price_gbp, category
+  3. Terminal UI: item list in queue view (or separate tab) grouped by category,
+     available toggle per item. Read-only on Relay (already wired NumoPay-C).
+     Write side (toggle available, add/edit/delete) is terminal Owner tab only.
+
+Read live files from GitHub before writing any code.
 Present full plan before writing any code.
-
-Key constraints:
-- All DDL via apply_migration only
-- merchant_menu_items is read-only on floor device (NumoPay) — write side is terminal only
-- Menu items need: id, venue_id, name, description, price_gbp, category, available (bool), position (int)
-- CSV import: owner uploads CSV via terminal Owner tab — parse client-side, POST to Supabase via service_role EF or direct insert
-- Terminal UI: item list grouped by category, available toggle per item, drag-to-reorder deferred
-- NumoPay reads merchant_menu_items via PostgREST (already wired in NumoPay-C catalogue screen)
 ```
