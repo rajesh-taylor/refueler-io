@@ -1,5 +1,5 @@
 # REFUELER-BRIDGE.md — Refueler cross-project context
-> **Version:** 4.8 | **Created:** 28 July 2026 | **Updated:** NumoPay-A · CC-99 · 2026-08-18
+> **Version:** 4.9 | **Created:** 28 July 2026 | **Updated:** CC-103 planning · 2026-08-20
 > Lives in `refueler-share/` (root), `refueler-io/docs/`, `refueler-legend/` (root), `refueler-pass/` (root), and `numo-fork/` (root).
 > This file is the handshake between Projects — not a substitute for repo-specific context files.
 > Higher MasterContext version number always wins on divergence.
@@ -10,7 +10,9 @@
 
 Refueler is a suite of Bitcoin-native privacy products built by Rajesh Taylor (solo founder, London). Operating within UK jurisdictional law. Not a fintech product. Not a loyalty app.
 
-**Products:** Share (anonymous encrypted file transfer, live at `refueler.io/share/`) · Legend (privacy-first Bitcoin block explorer, post-B9) · Merchant terminal (Fenchurch St line cafés and restaurants — tablet, counter/kitchen) · NumoPay fork (in-house order taking, Android phone, waiter/floor staff) · Refueler Pass (Lightning-native ticketing and venue access — own repo + Claude project) · Consumer app (React Native, Blink Lightning — customer-facing, pre-orders + Legend + Pass)
+**Products:** Share (anonymous encrypted file transfer, live at `refueler.io/share/`) · Legend (privacy-first Bitcoin block explorer, post-B9) · Merchant terminal (Fenchurch St line cafés and restaurants — tablet, counter/kitchen, landscape) · **Relay** (`io.refueler.merchant`, formerly NumoPay fork — in-venue order entry, Android phone, floor/waiter staff, portrait) · Refueler Pass (Lightning-native ticketing and venue access — own repo + Claude project) · **Refill** (consumer app, React Native, Blink Lightning — commuter pre-orders + Legend + Pass)
+
+**Product names locked CC-103:** Floor staff Android app = Relay ("Relay by Refueler"). Consumer app = Refill. Both names tie to the Refueler ecosystem without requiring explanation.
 
 **North star (internal only):** *Come for privacy, stay for Bitcoin.*
 
@@ -198,6 +200,26 @@ Pre-merchant gate list:
 
 ---
 
+## Legend — post-B9 scope additions (locked CC-103 planning · 20 Aug 2026)
+
+**Legend is a block explorer. Not a charting tool, not a news aggregator, not a price terminal.** No live price charting in the UI. No news section. Every feature is tested against: does this help a user understand the chain privately, without logging, without a custodian?
+
+**Verified estate report (v3) — contextual metrics pages added:**
+The £150 full report gains a contextual section generated at report creation time. Point-in-time signed document, FT Lex register. Includes: supply position vs 21M cap (from Legend's own chain scan), power law at generation time (Burger methodology, cited), 4/8/12-year return windows vs gold/S&P/gilts (data API called at generation, cited), EO 6102 note (one factual paragraph on historical gold confiscation precedent and what cryptographic self-custody changes). Data API is a separate scoping session — not live UI charting. Legend stays a block explorer.
+
+**Haiku chain-state helper (paid tier, post-B9):**
+Paid clients get a Claude Haiku integration that explains what Legend found — in plain English, without logging the query, without projecting prices. Explains: last movement, holding period, KYC exchange interaction history, power law context, Silent Payments and Payjoin flags. Does not give investment advice. Query goes user → Legend indexer → Haiku → response. Nothing persists.
+
+**Non-bitcoiner audience:**
+The finance-professional-gold-bug profile is a formal target for paid tiers alongside Bitcoin-native family offices. Four metrics move this profile: (1) supply audit — verify 21M independently; (2) power law — physicist's entry point; (3) return windows — Alex's own methodology applied to a new asset; (4) EO 6102 — closes the gold trapdoor. Estate report and Haiku are the tools. Legend makes no investment claims.
+
+**Sparrow Wallet (Phase 8):**
+Esplora-compatible endpoint → one URL paste for Sparrow users. Distribution channel and trust signal. Do not build before Phase 2 privacy architecture is stable.
+
+**What Legend never becomes:** news section · live price terminal · portfolio tracker requiring account creation · social layer · comparison tool with third-party price feeds in the UI.
+
+---
+
 ## Share — platform notes
 
 **Pay-per-use API (planning — pre-AD-2):** Metered API for professional photographers and legal. Full plan in a dedicated Share API planning session.
@@ -221,6 +243,12 @@ Pre-merchant gate list:
 | **CC-96 / TDP-philosophy** | refueler-io | Design philosophy locked. Sidebar removed. Strip promoted. ✅ Closed. |
 | **CC-97 / TDP-B** | refueler-io, Supabase | Terminal redesign. G-1 cleared. S-27 deployed. ✅ Closed. |
 | **CC-98 / TDP-C** | refueler-io, Supabase, numo-fork | `update-lightning-address` v1 deployed. NumoPay alignment. BRIDGE v4.7. ✅ Closed. |
+| **CC-99 / NumoPay-A** | numo-fork | ADR locked. Hard fork confirmed. ✅ Closed. |
+| **CC-100 / NumoPay-B** | numo-fork | Auth scaffold, CDK removal, Carbon theming. ✅ Closed. |
+| **CC-101 / NumoPay-C** | numo-fork | Catalogue, payment flows, history. Commit `def2883`. ✅ Closed. |
+| **CC-102** | numo-fork | Build fix partial. S-NumoC-2 open. Owner tab not started. |
+| **CC-103** | refueler-io, Supabase, numo-fork | Build fix. Darwin RLS. Owner tab enrichment. Warm carbon. Product naming (Relay/Refill). BRIDGE v4.9. ✅ Closed. |
+| **CC-103 planning** | refueler-legend | Legend post-B9 scope: Haiku helper, estate report contextual metrics, non-bitcoiner audience, Sparrow. Logged. |
 | Pass-0 | refueler-pass | Founding scope. Two-credential-class model locked. |
 | Pass-1 | refueler-pass | Bitcoin Events × Pass × Merchant. PASS-MASTER.md v2.0. |
 
@@ -229,19 +257,19 @@ Pre-merchant gate list:
 ## Active action items (Rajesh)
 
 - **Open Revolut Business account** ← Stripe fiat commission payout destination (before first real merchant)
-- **Open Blink ops wallet ("Refueler Ops")** ← second BTC wallet in Blink mobile app, for onboarding/testing
-- **Create Refueler Crypto Ops Ledger** ← sats + GBP equivalent columns; separate from fiat ledger
-- Push updated BRIDGE v4.7 to `numo-fork/` root (re-run after numo-fork rebase resolves)
-- Push BRIDGE v4.7 to `refueler-share/`, `refueler-legend/`, `refueler-pass/` root and `refueler-io/docs/`
-- Add test `onchain_address` to Raj's Steakhouse in Supabase dashboard (verify Owner tab display)
+- **Open Blink ops wallet ("Refueler Ops")** ← second BTC wallet in Blink mobile app
+- **Create Refueler Crypto Ops Ledger** ← sats + GBP equivalent columns
+- **Push BRIDGE v4.9** to `numo-fork/` root, `refueler-share/`, `refueler-legend/`, `refueler-pass/` root, `refueler-io/docs/`
+- Add test `onchain_address` to Raj's Steakhouse in Supabase dashboard
 - Push `refueler-app` dev branch ← CA-1 prerequisite
 - Disconnect `share.refueler.io` from Cloudflare Pages
-- Upgrade Supabase to Pro when first real merchant goes live
+- Upgrade Supabase to Pro at first real merchant
 - Upgrade Cloudflare Workers to Paid ($5/month) before production volume
-- Send Mapbox coordinate accuracy email (drafted CC-84, in drafts)
-- Visit Apple Store — iPad 10.9″ portrait layout check (G-3, before first real merchant)
-- New Anthropic API key → rotate before csuite briefing reuse
-- football-data.org API key held by Rajesh — ready for Events intelligence layer session
+- Send Mapbox coordinate accuracy email (in drafts)
+- Rotate Anthropic API key before csuite briefing reuse
+- Football-data.org API key held by Rajesh — ready for Events intelligence layer session
+- Commission rate planning conversation before first real merchant
+- **[Legend]** Legend planning session — family estate planning, miniscript/multisig, Silent Payments, Payjoin, CoinJoin — for those who have used privacy tools AND those who haven't. Sparrow Wallet integration path. Scoped post-B9.
 - **[Pass]** Solicitor briefing brief to draft before appointment
 - **[Pass]** P0 spike: cross-merchant redemption unlinkability (NUT-29) before v2 build
 - **[Pass]** P1 spike: issuance timing-correlation resistance
@@ -250,11 +278,13 @@ Pre-merchant gate list:
 
 ---
 
-## NumoPay fork — context
+## Relay (numo-fork) — context
 
-**Base:** cashubtc/Numo v1.8. **Fork:** `rajesh-taylor/numo-fork`. Hardening phases 1–3 complete.
-**Status:** NumoPay-A complete (CC-99). ADR locked. Next: NumoPay-B (Sonnet counted).
+**Name locked CC-103:** Relay ("Relay by Refueler"). Floor/waiter staff. Android phone, portrait.
+**Base:** cashubtc/Numo v1.8. **Fork:** `rajesh-taylor/numo-fork`. Package: `io.refueler.merchant`. Hardening phases 1–3 complete.
+**Build state (CC-103):** BUILD SUCCESSFUL. Commit `54b15de`. Installed on Pixel 9a.
 **ADR:** `numo-fork/NUMO-PAY-A-ADR.md` · `refueler-io/docs/NUMO-PAY-A-ADR.md`
+**Next:** Web-Touch-1 → Icon-B (Relay app icon, Android only). S-numo-v31 (numo_navy refs) pending.
 
 ---
 
