@@ -1674,3 +1674,73 @@ nav.nav {
   border-top: 0.5px solid rgba(255,255,255,0.06);
   margin-bottom: 0;
 }
+
+/* ─── OWNER TAB ENRICHMENT — CC-103 ─────────────────────────────────────── */
+
+/* All-time stats row — 2-col, smaller value font */
+.owner-stats-grid--alltime {
+  grid-template-columns: repeat(2, 1fr);
+  padding-top: 0;
+  margin-top: -8px;
+}
+.owner-stat-value--sm {
+  font-size: 16px;
+}
+
+/* Last order timestamp — single line below stats */
+.owner-last-order {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-tertiary);
+  padding: 0 20px 16px;
+  letter-spacing: 0.04em;
+}
+
+/* Toggle row layout */
+.owner-menu-row--toggle {
+  align-items: center;
+}
+
+/* Toggle switch — pill style, gold when on */
+.owner-toggle {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+  margin-left: 16px;
+}
+.owner-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+.owner-toggle-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: var(--border);
+  border: 0.5px solid var(--border);
+  transition: background 0.2s, border-color 0.2s;
+  cursor: pointer;
+}
+.owner-toggle-track::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--text-tertiary);
+  transition: transform 0.2s, background 0.2s;
+}
+.owner-toggle input:checked + .owner-toggle-track {
+  background: rgba(200, 169, 110, 0.18);
+  border-color: var(--accent);
+}
+.owner-toggle input:checked + .owner-toggle-track::after {
+  transform: translateX(20px);
+  background: var(--accent);
+}
