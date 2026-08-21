@@ -848,9 +848,14 @@ function showSignedInState() {
 
 // ─── DARWIN FEED ─────────────────────────────────────────────────────────────
 const DARWIN_STATION_LABELS = {
-  'FST': 'Fenchurch Street', 'LIM': 'Limehouse', 'WHA': 'West Ham',
-  'BFR': 'Barking',          'UPM': 'Upminster',  'SHO': 'Shoeburyness',
-  'PFL': 'Pitsea',           'GRY': 'Grays'
+  'FST': 'Fenchurch Street', 'LIM': 'Limehouse',        'WHA': 'West Ham',
+  'BFR': 'Barking',          'UPM': 'Upminster',         'GRY': 'Grays',
+  'TIL': 'Tilbury Town',     'EBD': 'East Tilbury',      'SOR': 'Stanford-le-Hope',
+  'PFL': 'Pitsea',           'BAS': 'Basildon',          'LES': 'Laindon',
+  'SOC': 'Southend Central', 'SRY': 'Shoeburyness',      'CHF': 'Chafford Hundred',
+  'OCK': 'Ockendon',         'COR': 'Corringham',        'SLH': 'Stanford-le-Hope',
+  'WCF': 'West Horndon',     'LEI': 'Leigh-on-Sea',      'CHO': 'Chalkwell',
+  'SOB': 'Southend-on-Sea',  'PRI': 'Prittlewell',       'ROC': 'Rochford'
 };
 
 async function pollDarwin() {
@@ -1522,7 +1527,7 @@ async function handleMenuCSV(input) {
   const descIdx  = headers.indexOf('description');
 
   if (nameIdx === -1 || priceIdx === -1 || catIdx === -1) {
-    if (statusEl) { statusEl.textContent = 'CSV must include columns: name, price_gbp, category'; statusEl.className = 'menu-import-status menu-import-status--err'; }
+    if (statusEl) { statusEl.textContent = 'Columns not found. In Numbers: File → Export To → CSV. Required columns: name, price_gbp, category'; statusEl.className = 'menu-import-status menu-import-status--err'; }
     input.value = '';
     return;
   }
