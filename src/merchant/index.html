@@ -193,7 +193,7 @@
         <button class="theme-pill-opt" id="owner-pill-paper" onclick="setTheme('paper')">PAPER</button>
         <button class="theme-pill-opt" id="owner-pill-carbon" onclick="setTheme('carbon')">CARBON</button>
       </div>
-      <button class="owner-panel-close" onclick="closeOwnerPanel()">← Back to Queue</button>
+      <button class="owner-panel-close" onclick="pillQueue()">← Queue</button>
     </div>
   </div>
 
@@ -346,11 +346,6 @@
 <!-- ─── TABLET UI — hidden until PIN accepted ─── -->
 <div id="tablet-ui" style="display:none;">
 
-<!-- Back to Queue — always visible in OPS view -->
-<button class="btn-back-queue" id="btn-back-queue" onclick="switchToQueueView()">
-  ← Back to Queue
-</button>
-
 <!-- ─── NAV ─── -->
 <nav class="nav">
   <div class="nav-brand" id="nav-identity-left">
@@ -462,12 +457,16 @@
         <span class="poll-dot" id="poll-dot" style="display:none;"></span>
         Order Queue
       </div>
-      <div style="display:flex;align-items:center;gap:12px;">
+      <div style="display:flex;align-items:center;gap:10px;">
         <div class="queue-poll-status" id="queue-poll-status">—</div>
+        <button class="queue-menu-btn" id="menu-toggle-btn" onclick="toggleMenuPanel()">MENU ▾</button>
         <button class="queue-refresh-btn" onclick="refreshOrders()">↻ REFRESH</button>
         <button class="btn-owner-signout" onclick="signOut()">SIGN OUT</button>
       </div>
     </div>
+
+    <!-- ─── MENU CHIP PANEL — collapsible, read-only for staff ─── -->
+    <div class="menu-chip-panel" id="menu-chip-panel"></div>
 
     <!-- Order queue (QUEUE view) -->
     <div class="order-queue" id="order-queue">
@@ -508,7 +507,7 @@
           <div class="ops-card-content"></div>
         </div>
 
-        <!-- Card 3: Menu (placeholder — no copy, space reserved) -->
+        <!-- Card 3: Menu — populated by _renderMenuOpsCard() on load -->
         <div class="ops-card ops-card-placeholder" id="ops-card-menu">
           <div class="ops-card-label">Menu</div>
           <div class="ops-card-content"></div>
@@ -530,6 +529,68 @@
     </div><!-- /ops-panel -->
 
   </main>
+</div>
+
+<!-- ─── MENU OVERLAY — landscape two-pane, owner only ─── -->
+<div class="menu-overlay" id="menu-overlay">
+  <div class="menu-overlay-inner">
+
+    <!-- LEFT PANE 40% — import + item list -->
+    <div class="menu-overlay-left">
+      <div class="mo-pane-title">Menu</div>
+
+      <div class="mo-upload-area" onclick="triggerMenuFileInput()" role="button" tabindex="0" aria-label="Upload menu CSV">
+        <i class="ti ti-upload mo-upload-icon" aria-hidden="true"></i>
+        <div>
+          <div class="mo-upload-text">Upload CSV to replace menu</div>
+          <div class="mo-upload-spec">name · description · price_gbp · category</div>
+        </div>
+      </div>
+      <input type="file" id="menu-csv-input" accept=".csv,text/csv" style="display:none" onchange="handleMenuCSV(this)">
+      <div class="menu-import-status" id="menu-import-status"></div>
+
+      <div class="mo-item-list" id="menu-overlay-list"></div>
+    </div>
+
+    <!-- VERTICAL DIVIDER -->
+    <div class="menu-overlay-divider"></div>
+
+    <!-- RIGHT PANE 60% — 2×2 at-a-glance grid -->
+    <div class="menu-overlay-right">
+      <div class="mo-pane-title">At a glance</div>
+      <div class="mo-cards-grid">
+
+        <!-- Top left: Top items today -->
+        <div class="mo-card" id="menu-card-top-items">
+          <div class="mc-eyebrow">Top items today</div>
+          <div class="mc-empty">Loading…</div>
+        </div>
+
+        <!-- Top right: Last import -->
+        <div class="mo-card" id="menu-card-last-import">
+          <div class="mc-eyebrow">Last import</div>
+          <div class="mc-empty">No import recorded</div>
+        </div>
+
+        <!-- Bottom left: Currently unavailable -->
+        <div class="mo-card" id="menu-card-unavailable">
+          <div class="mc-eyebrow">Currently unavailable</div>
+          <div class="mc-empty">Loading…</div>
+        </div>
+
+        <!-- Bottom right: Reserved -->
+        <div class="mo-card mo-card--placeholder">
+          <div class="mc-eyebrow">Reserved</div>
+          <div class="mc-placeholder-inner">
+            <i class="ti ti-layout-grid mc-placeholder-icon" aria-hidden="true"></i>
+            <div class="mc-placeholder-txt">Menu v2</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
 </div>
 
 </div><!-- /tablet-ui -->

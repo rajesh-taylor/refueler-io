@@ -219,6 +219,7 @@ function onStaffAuthenticated() {
   startOrderPoll();
   initHorizonToggle();
   maybeShowFirstLogin();
+  loadMenuItems();
 }
 
 // ─── FIRST-LOGIN WELCOME ─────────────────────────────────────────────────────
@@ -324,6 +325,7 @@ async function verifyOwnerPin(pin) {
 }
 async function openOwnerPanel() {
   await loadOwnerStats();
+  loadMenuItems();
   const badge = document.getElementById('owner-venue-badge');
   if (badge && _venueName) badge.textContent = _venueName.toUpperCase();
   // Populate Lightning address in owner panel (behind owner PIN gate)
@@ -1009,7 +1011,7 @@ function switchToOpsView() {
   document.getElementById('order-queue').style.display  = 'none';
   document.getElementById('queue-header').style.display = 'none';
   document.getElementById('ops-panel').classList.add('visible');
-  document.getElementById('btn-back-queue').classList.add('visible');
+  // btn-back-queue removed CC-104 — nav pill handles navigation
   const nob = document.getElementById('new-order-bar');
   if (nob) nob.style.display = 'none';
   // Populate ops card values
@@ -1023,11 +1025,11 @@ function switchToOpsView() {
   updateMergedPillActive();
 }
 function switchToQueueView() {
+  closeMenuOverlay();
   _currentView = 'queue';
   document.getElementById('order-queue').style.display  = '';
   document.getElementById('queue-header').style.display = '';
   document.getElementById('ops-panel').classList.remove('visible');
-  document.getElementById('btn-back-queue').classList.remove('visible');
   const nob = document.getElementById('new-order-bar');
   if (nob) nob.style.display = '';
   updateMergedPillActive();
@@ -1257,3 +1259,381 @@ async function submitWalkinOrder() {
 
 // ─── BOOT ────────────────────────────────────────────────────────────────────
 initAuth();
+
+
+// ─── MENU MANAGEMENT — CC-104 ────────────────────────────────────────────────
+
+let _menuItems    = [];
+let _menuExpanded = false;
+
+// ── Load & render ─────────────────────────────────────────────────────────────
+
+async function loadMenuItems() {
+  if (!_venueId) return;
+  try {
+    const session = await getSbClient().auth.getSession();
+    const token   = session?.data?.session?.access_token || SB_KEY;
+    const res = await fetch(
+      `${SB_URL}/rest/v1/merchant_menu_items?venue_id=eq.${_venueId}&order=category.asc,position.asc,name.asc&select=id,name,price_gbp,category,available,unavailable_since`,
+      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token } }
+    );
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    _menuItems = await res.json();
+    _renderMenuChips();
+    _renderMenuOverlayList();
+    _renderMenuOpsCard();
+    _renderTopItemsToday();
+    _renderUnavailableCard();
+  } catch(e) {
+    console.warn('[loadMenuItems]', e);
+  }
+}
+
+function _groupByCategory(items) {
+  const map = {};
+  items.forEach(item => {
+    const cat = item.category || 'Uncategorised';
+    if (!map[cat]) map[cat] = [];
+    map[cat].push(item);
+  });
+  return map;
+}
+
+// ── Chip panel (queue view) ───────────────────────────────────────────────────
+
+function _renderMenuChips() {
+  const panel = document.getElementById('menu-chip-panel');
+  if (!panel) return;
+  if (!_menuItems.length) {
+    panel.innerHTML = '<div class="menu-chip-empty">No menu items — add via Owner → Menu</div>';
+    return;
+  }
+  const grouped = _groupByCategory(_menuItems);
+  let html = '';
+  Object.entries(grouped).forEach(([cat, items]) => {
+    html += `<div class="menu-chip-cat">
+      <span class="menu-chip-cat-label">${cat}</span>
+      <div class="menu-chip-row">`;
+    items.forEach(item => {
+      const off = !item.available;
+      html += `<div class="menu-chip${off ? ' menu-chip--off' : ''}">
+        <span class="menu-chip-dot${off ? ' menu-chip-dot--off' : ''}"></span>
+        <span class="menu-chip-name">${item.name}</span>
+        <span class="menu-chip-price">£${parseFloat(item.price_gbp).toFixed(2)}</span>
+      </div>`;
+    });
+    html += '</div></div>';
+  });
+  panel.innerHTML = html;
+}
+
+function toggleMenuPanel() {
+  _menuExpanded = !_menuExpanded;
+  const panel = document.getElementById('menu-chip-panel');
+  const btn   = document.getElementById('menu-toggle-btn');
+  if (panel) panel.classList.toggle('menu-chip-panel--open', _menuExpanded);
+  if (btn)   btn.textContent = _menuExpanded ? 'MENU ▴' : 'MENU ▾';
+}
+
+// ── Ops card ─────────────────────────────────────────────────────────────────
+
+function _renderMenuOpsCard() {
+  const card = document.getElementById('ops-card-menu');
+  if (!card) return;
+  const total   = _menuItems.length;
+  const cats    = new Set(_menuItems.map(i => i.category || 'Uncategorised')).size;
+  const unavail = _menuItems.filter(i => !i.available).length;
+  if (total === 0) {
+    card.innerHTML = `
+      <div class="ops-card-label">Menu</div>
+      <div class="ops-card-content">
+        <div class="ops-menu-empty">No items yet</div>
+        <button class="ops-menu-manage-btn" onclick="openMenuOverlay()">Add Menu ↗</button>
+      </div>`;
+  } else {
+    card.innerHTML = `
+      <div class="ops-card-label">Menu</div>
+      <div class="ops-card-content">
+        <div class="ops-menu-count">${total} item${total !== 1 ? 's' : ''}</div>
+        <div class="ops-menu-meta">${cats} categor${cats !== 1 ? 'ies' : 'y'}${unavail > 0 ? ` · <span class="ops-menu-unavail">${unavail} unavailable</span>` : ''}</div>
+        <button class="ops-menu-manage-btn" onclick="openMenuOverlay()">Manage ↗</button>
+      </div>`;
+  }
+  card.classList.remove('ops-card-placeholder');
+}
+
+// ── Menu overlay ──────────────────────────────────────────────────────────────
+
+function openMenuOverlay() {
+  const overlay = document.getElementById('menu-overlay');
+  if (overlay) overlay.classList.add('open');
+  _renderMenuOverlayList();
+  _renderTopItemsToday();
+  _renderUnavailableCard();
+  _renderLastImportCard();
+}
+
+function closeMenuOverlay() {
+  const overlay = document.getElementById('menu-overlay');
+  if (overlay) overlay.classList.remove('open');
+}
+
+function _renderMenuOverlayList() {
+  const list = document.getElementById('menu-overlay-list');
+  if (!list) return;
+  if (!_menuItems.length) {
+    list.innerHTML = '<div class="menu-overlay-empty">Upload a CSV to add items</div>';
+    return;
+  }
+  const grouped = _groupByCategory(_menuItems);
+  let html = '';
+  Object.entries(grouped).forEach(([cat, items]) => {
+    html += `<div class="mo-cat-label">${cat}</div>`;
+    items.forEach(item => {
+      const on = item.available;
+      html += `<div class="mo-item-row">
+        <div class="mo-item-left">
+          <span class="mo-item-name">${item.name}</span>
+          <span class="mo-item-price">£${parseFloat(item.price_gbp).toFixed(2)}</span>
+        </div>
+        <label class="owner-toggle" aria-label="${on ? 'Mark unavailable' : 'Mark available'}">
+          <input type="checkbox" ${on ? 'checked' : ''} onchange="toggleItemAvailable('${item.id}', this.checked)">
+          <span class="owner-toggle-track"></span>
+        </label>
+      </div>`;
+    });
+  });
+  list.innerHTML = html;
+}
+
+// ── Right panel cards ─────────────────────────────────────────────────────────
+
+async function _renderTopItemsToday() {
+  const card = document.getElementById('menu-card-top-items');
+  if (!card) return;
+  if (!_venueId) return;
+  try {
+    const session = await getSbClient().auth.getSession();
+    const token   = session?.data?.session?.access_token || SB_KEY;
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const res = await fetch(
+      `${SB_URL}/rest/v1/merchant_orders?venue_id=eq.${_venueId}&created_at=gte.${todayStart.toISOString()}&payment_status=eq.paid&select=item_name`,
+      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token } }
+    );
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const rows = await res.json();
+    if (!rows.length) {
+      card.innerHTML = '<div class="mc-eyebrow">Top items today</div><div class="mc-empty">No paid orders yet today</div>';
+      return;
+    }
+    const counts = {};
+    rows.forEach(r => {
+      const name = (r.item_name || 'Unknown').trim();
+      counts[name] = (counts[name] || 0) + 1;
+    });
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 4);
+    const max    = sorted[0][1];
+    let html = '<div class="mc-eyebrow">Top items today</div>';
+    sorted.forEach(([name, count]) => {
+      const pct = Math.round((count / max) * 100);
+      html += `<div class="mc-top-row">
+        <span class="mc-top-name">${name}</span>
+        <div class="mc-top-bar-wrap"><div class="mc-top-bar" style="width:${pct}%"></div></div>
+        <span class="mc-top-count">${count}</span>
+      </div>`;
+    });
+    card.innerHTML = html;
+  } catch(e) {
+    console.warn('[_renderTopItemsToday]', e);
+  }
+}
+
+function _renderUnavailableCard() {
+  const card = document.getElementById('menu-card-unavailable');
+  if (!card) return;
+  const unavail = _menuItems.filter(i => !i.available);
+  let html = '<div class="mc-eyebrow">Currently unavailable</div>';
+  if (!unavail.length) {
+    html += '<div class="mc-empty">All items available</div>';
+  } else {
+    unavail.forEach(item => {
+      let since = '';
+      if (item.unavailable_since) {
+        const d = new Date(item.unavailable_since);
+        since = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      }
+      html += `<div class="mc-unavail-row">
+        <span class="mc-unavail-dot"></span>
+        <span class="mc-unavail-name">${item.name}</span>
+        <span class="mc-unavail-since">${since ? 'since ' + since : ''}</span>
+      </div>`;
+    });
+  }
+  card.innerHTML = html;
+}
+
+function _renderLastImportCard() {
+  const card = document.getElementById('menu-card-last-import');
+  if (!card) return;
+  const key  = `menu_last_import_${_venueId}`;
+  const data = JSON.parse(localStorage.getItem(key) || 'null');
+  let html = '<div class="mc-eyebrow">Last import</div>';
+  if (!data) {
+    html += '<div class="mc-empty">No import recorded</div>';
+  } else {
+    const d     = new Date(data.ts);
+    const label = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    html += `
+      <div class="mc-import-row"><span class="mc-import-label">Date</span><span class="mc-import-val">${label}</span></div>
+      <div class="mc-import-row"><span class="mc-import-label">Items loaded</span><span class="mc-import-val">${data.count}</span></div>
+      <div class="mc-import-row"><span class="mc-import-label">Categories</span><span class="mc-import-val">${data.cats}</span></div>
+      <div class="mc-import-row"><span class="mc-import-label">Unavailable</span><span class="mc-import-val${data.unavail > 0 ? ' mc-import-val--warn' : ''}">${data.unavail}</span></div>`;
+  }
+  card.innerHTML = html;
+}
+
+// ── CSV import ────────────────────────────────────────────────────────────────
+
+function triggerMenuFileInput() {
+  const input = document.getElementById('menu-csv-input');
+  if (input) input.click();
+}
+
+async function handleMenuCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById('menu-import-status');
+  if (statusEl) { statusEl.textContent = 'Parsing…'; statusEl.className = 'menu-import-status'; }
+
+  const text  = await file.text();
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if (lines.length < 2) {
+    if (statusEl) { statusEl.textContent = 'CSV must have a header row and at least one item.'; statusEl.className = 'menu-import-status menu-import-status--err'; }
+    input.value = '';
+    return;
+  }
+
+  const headers  = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/^"|"$/g, ''));
+  const nameIdx  = headers.indexOf('name');
+  const priceIdx = headers.indexOf('price_gbp');
+  const catIdx   = headers.indexOf('category');
+  const descIdx  = headers.indexOf('description');
+
+  if (nameIdx === -1 || priceIdx === -1 || catIdx === -1) {
+    if (statusEl) { statusEl.textContent = 'CSV must include columns: name, price_gbp, category'; statusEl.className = 'menu-import-status menu-import-status--err'; }
+    input.value = '';
+    return;
+  }
+
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols  = _parseCSVLine(lines[i]);
+    const name  = (cols[nameIdx]  || '').replace(/^"|"$/g, '').trim();
+    const price = parseFloat((cols[priceIdx] || '').replace(/^"|"$/g, '').trim());
+    const cat   = (cols[catIdx]   || '').replace(/^"|"$/g, '').trim();
+    const desc  = descIdx >= 0 ? (cols[descIdx] || '').replace(/^"|"$/g, '').trim() : '';
+    if (!name || isNaN(price)) continue;
+    rows.push({ venue_id: _venueId, name, description: desc || null, price_gbp: price, category: cat, position: i - 1 });
+  }
+
+  if (!rows.length) {
+    if (statusEl) { statusEl.textContent = 'No valid rows found. Check name and price_gbp columns.'; statusEl.className = 'menu-import-status menu-import-status--err'; }
+    input.value = '';
+    return;
+  }
+  if (rows.length > 100) {
+    if (statusEl) { statusEl.textContent = `Too many items (${rows.length}). Maximum 100 per import.`; statusEl.className = 'menu-import-status menu-import-status--err'; }
+    input.value = '';
+    return;
+  }
+
+  if (statusEl) statusEl.textContent = `Importing ${rows.length} items…`;
+
+  try {
+    const session = await getSbClient().auth.getSession();
+    const token   = session?.data?.session?.access_token;
+    if (!token) throw new Error('Not authenticated');
+
+    const delRes = await fetch(
+      `${SB_URL}/rest/v1/merchant_menu_items?venue_id=eq.${_venueId}`,
+      { method: 'DELETE', headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token, 'Prefer': 'return=minimal' } }
+    );
+    if (!delRes.ok) throw new Error('Delete failed: HTTP ' + delRes.status);
+
+    const insRes = await fetch(
+      `${SB_URL}/rest/v1/merchant_menu_items`,
+      {
+        method: 'POST',
+        headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify(rows)
+      }
+    );
+    if (!insRes.ok) throw new Error('Insert failed: HTTP ' + insRes.status);
+
+    const cats = new Set(rows.map(r => r.category)).size;
+    localStorage.setItem(`menu_last_import_${_venueId}`, JSON.stringify({ ts: new Date().toISOString(), count: rows.length, cats, unavail: 0 }));
+
+    if (statusEl) { statusEl.textContent = `${rows.length} items imported.`; statusEl.className = 'menu-import-status menu-import-status--ok'; }
+    showToast(`Menu updated — ${rows.length} items`, 'ok');
+    await loadMenuItems();
+    _renderLastImportCard();
+  } catch(e) {
+    console.error('[handleMenuCSV]', e);
+    if (statusEl) { statusEl.textContent = 'Import failed: ' + e.message; statusEl.className = 'menu-import-status menu-import-status--err'; }
+    showToast('Menu import failed', 'err');
+  }
+  input.value = '';
+}
+
+function _parseCSVLine(line) {
+  const result = [];
+  let cur = '', inQuote = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"')              { inQuote = !inQuote; }
+    else if (ch === ',' && !inQuote) { result.push(cur); cur = ''; }
+    else                         { cur += ch; }
+  }
+  result.push(cur);
+  return result;
+}
+
+// ── Toggle item available — immediate save ────────────────────────────────────
+
+async function toggleItemAvailable(id, available) {
+  if (!_venueId) return;
+  try {
+    const session = await getSbClient().auth.getSession();
+    const token   = session?.data?.session?.access_token;
+    if (!token) throw new Error('Not authenticated');
+    const res = await fetch(
+      `${SB_URL}/rest/v1/merchant_menu_items?id=eq.${id}`,
+      {
+        method: 'PATCH',
+        headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ available })
+      }
+    );
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const item = _menuItems.find(i => i.id === id);
+    if (item) {
+      item.available        = available;
+      item.unavailable_since = available ? null : new Date().toISOString();
+    }
+    _renderMenuChips();
+    _renderUnavailableCard();
+    const key  = `menu_last_import_${_venueId}`;
+    const data = JSON.parse(localStorage.getItem(key) || 'null');
+    if (data) {
+      data.unavail = _menuItems.filter(i => !i.available).length;
+      localStorage.setItem(key, JSON.stringify(data));
+      _renderLastImportCard();
+    }
+    _renderMenuOpsCard();
+  } catch(e) {
+    console.warn('[toggleItemAvailable]', e);
+    showToast('Update failed', 'err');
+    await loadMenuItems();
+  }
+}
