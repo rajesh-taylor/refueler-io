@@ -1720,8 +1720,8 @@ nav.nav {
   position: absolute;
   inset: 0;
   border-radius: 12px;
-  background: var(--border);
-  border: 0.5px solid var(--border);
+  background: #C8943A;
+  border: 0.5px solid #C8943A;
   transition: background 0.2s, border-color 0.2s;
   cursor: pointer;
 }
@@ -1733,16 +1733,15 @@ nav.nav {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: var(--text-tertiary);
-  transition: transform 0.2s, background 0.2s;
+  background: #ffffff;
+  transition: transform 0.2s;
 }
 .owner-toggle input:checked + .owner-toggle-track {
-  background: rgba(200, 169, 110, 0.18);
-  border-color: var(--accent);
+  background: #3DCA7A;
+  border-color: #3DCA7A;
 }
 .owner-toggle input:checked + .owner-toggle-track::after {
   transform: translateX(20px);
-  background: var(--accent);
 }
 
 

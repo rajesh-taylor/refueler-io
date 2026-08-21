@@ -567,8 +567,8 @@ function renderMergedPill() {
   }
 }
 
-function pillQueue() { if (_currentView !== 'queue') switchToQueueView(); }
-function pillOps()   { if (_currentView !== 'ops')   switchToOpsView();   }
+function pillQueue() { closeOwnerPanel(); if (_currentView !== 'queue') switchToQueueView(); }
+function pillOps()   { closeOwnerPanel(); if (_currentView !== 'ops')   switchToOpsView();   }
 
 function updateMergedPillActive() {
   const q = document.getElementById('mp-queue');
@@ -858,7 +858,7 @@ async function pollDarwin() {
     const { data: sessionData } = await getSbClient().auth.getSession();
     const token = sessionData?.session?.access_token || SB_KEY;
     const res = await fetch(
-      `${SB_URL}/rest/v1/rail_signal_current?feed=eq.departure_board_staff&feed_key=eq.FST&select=details,fetched_at&limit=1`,
+      `${SB_URL}/rest/v1/rail_signal_current?feed=eq.departure_board_staff&feed_key=eq.FST&select=details,source_updated_at&limit=1`,
       { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token } }
     );
     if (!res.ok) { setDarwinConnected(false); return; }
@@ -866,10 +866,11 @@ async function pollDarwin() {
     if (!rows || rows.length === 0 || !rows[0].details) { setDarwinConnected(false); return; }
     const details  = typeof rows[0].details === 'string' ? JSON.parse(rows[0].details) : rows[0].details;
     const services = Array.isArray(details) ? details : [];
+    // Map destination_crs so strip shows where each train is heading, not FST origin
     _darwinRowsCache = services
       .filter(s => !s.is_cancelled)
       .slice(0, 3)
-      .map(s => ({ crs: 'FST', actual_timestamp: s.etd || s.atd || s.std }));
+      .map(s => ({ crs: s.destination_crs || 'FST', actual_timestamp: s.etd || s.atd || s.std }));
     setDarwinConnected(true);
     updateHorizonBand();
   } catch(e) {
