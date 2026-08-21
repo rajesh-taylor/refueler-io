@@ -161,7 +161,7 @@ html, body {
 }
 .wordmark-divider {
   font-weight: 300;
-  opacity: 0.3;
+  opacity: 0.5;
   margin: 0 0.5rem;
 }
 .wordmark-section {
@@ -204,6 +204,7 @@ html, body {
   transition: border-color 0.2s, color 0.2s;
   white-space: nowrap;
   user-select: none;
+  flex-shrink: 0;
 }
 .theme-pill:hover {
   border-color: var(--fg-muted);
@@ -384,6 +385,12 @@ input[type="email"]:focus { border-color: var(--fg-muted); }
 @media (prefers-reduced-motion: reduce) {
   .progress-bar, .btn, .slider, .slider::before,
   html, body { transition: none; }
+}
+
+/* ─── Tablet nav — 960px: tighten gap, hide low-priority links ────────────── */
+@media (max-width: 960px) {
+  .site-nav { gap: 1.25rem; }
+  .site-nav a.nav-secondary { display: none; }
 }
 
 /* ─── Mobile nav collapse — canonical 640px breakpoint ───────────────────── */

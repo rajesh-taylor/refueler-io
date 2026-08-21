@@ -27,8 +27,9 @@ main a:hover,
 
 /* ── Hero ─────────────────────────────────────────────────────────────────── */
 .hero {
-  padding: 80px 40px 64px;
+  padding: 80px clamp(1.25rem, 4vw, 3rem) 64px;
   max-width: 900px;
+  margin: 0 auto;
 }
 
 .hero h1 {
@@ -52,7 +53,9 @@ main a:hover,
 
 /* ── Anchor nav ───────────────────────────────────────────────────────────── */
 .anchor-nav {
-  padding: 0 40px 56px;
+  padding: 0 clamp(1.25rem, 4vw, 3rem) 56px;
+  max-width: 900px;
+  margin: 0 auto;
   border-bottom: var(--border-weight) solid var(--border);
 }
 
@@ -409,9 +412,9 @@ main {
 
 /* ── Responsive ───────────────────────────────────────────────────────────── */
 @media (max-width: 720px) {
-  .hero { padding: 48px 20px 40px; }
-  .anchor-nav { padding: 0 20px 40px; }
-  main { padding: 0 20px; }
+  .hero { padding: 48px clamp(1.25rem, 4vw, 2rem) 40px; }
+  .anchor-nav { padding: 0 clamp(1.25rem, 4vw, 2rem) 40px; }
+  main { padding: 0 clamp(1.25rem, 4vw, 2rem); }
 
   .policy-section {
     grid-template-columns: 1fr;

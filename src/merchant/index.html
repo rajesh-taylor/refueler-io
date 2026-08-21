@@ -268,67 +268,85 @@
   </div>
   <div class="owner-last-order" id="owner-last-order-ts">Last order: —</div>
 
-  <div class="owner-section">
-    <div class="owner-section-label">Lightning Address</div>
-    <div class="owner-menu-row">
-      <div>
-        <div class="owner-menu-label owner-ln-address" id="owner-ln-display">—</div>
-        <div class="owner-menu-sub">Customers pay invoices directly to this address</div>
-      </div>
-      <button class="ops-lightning-change-btn" onclick="openLnChangeFlow()">Change</button>
-    </div>
-  </div>
+  <!-- ── Owner two-column layout (S-32) ───────────────────────────────── -->
+  <div class="owner-columns-grid">
 
-  <div class="owner-section">
-    <div class="owner-section-label">On-Chain Address</div>
-    <div class="owner-menu-row owner-menu-row--col">
-      <div class="owner-menu-label owner-ln-address" id="owner-onchain-display">—</div>
-      <div class="owner-menu-sub">For payments settled on the Bitcoin base layer</div>
-      <div class="owner-privacy-nudge">
-        <span class="owner-privacy-nudge-icon">⚿</span>
-        For your privacy — each payment should use a fresh address. If you've received a payment to this address, contact <strong>support@refueler.io</strong> for a new one.
-      </div>
-    </div>
-  </div>
+    <!-- Left: address + operational toggles -->
+    <div class="owner-col owner-col--left">
 
-  <div class="owner-section">
-    <div class="owner-section-label">Venue Status</div>
-    <div class="owner-menu-row owner-menu-row--toggle">
-      <div>
-        <div class="owner-menu-label" id="owner-venue-status-label">Open — accepting orders</div>
-        <div class="owner-menu-sub">Pause to stop new orders arriving at this terminal</div>
+      <div class="owner-col-section">
+        <div class="owner-col-label">Lightning Address</div>
+        <div class="owner-col-row">
+          <div>
+            <div class="owner-menu-label owner-ln-address" id="owner-ln-display">—</div>
+            <div class="owner-menu-sub">Customers pay invoices directly to this address</div>
+          </div>
+          <button class="ops-lightning-change-btn" onclick="openLnChangeFlow()">&#128274;</button>
+        </div>
       </div>
-      <label class="owner-toggle">
-        <input type="checkbox" id="owner-venue-status-toggle" onchange="toggleVenueStatus(this.checked)" checked>
-        <span class="owner-toggle-track"></span>
-      </label>
-    </div>
-  </div>
 
-  <div class="owner-section">
-    <div class="owner-section-label">Arrival Strip</div>
-    <div class="owner-menu-row owner-menu-row--toggle">
-      <div>
-        <div class="owner-menu-label">Show arrival strip</div>
-        <div class="owner-menu-sub">Darwin departure board — Fenchurch Street line</div>
+      <div class="owner-col-section">
+        <div class="owner-col-label">On-Chain Address</div>
+        <div class="owner-menu-label owner-ln-address" id="owner-onchain-display">—</div>
+        <div class="owner-menu-sub">For payments settled on the Bitcoin base layer</div>
+        <div class="owner-privacy-nudge">
+          <span class="owner-privacy-nudge-icon">⚿</span>
+          Each payment should use a fresh address. Contact <strong>support@refueler.io</strong> for a new one.
+        </div>
       </div>
-      <label class="owner-toggle">
-        <input type="checkbox" id="owner-horizon-toggle" onchange="toggleHorizonVisibility(this.checked)" checked>
-        <span class="owner-toggle-track"></span>
-      </label>
-    </div>
-  </div>
 
-  <div class="owner-section">
-    <div class="owner-section-label">Account</div>
-    <div class="owner-menu-row">
-      <div>
-        <div class="owner-menu-label">Sign out</div>
-        <div class="owner-menu-sub">Ends this owner session — returns to Command Centre</div>
+      <div class="owner-col-section">
+        <div class="owner-col-label">Venue Status</div>
+        <div class="owner-col-toggle-row">
+          <div>
+            <div class="owner-menu-label" id="owner-venue-status-label">Open — accepting orders</div>
+            <div class="owner-menu-sub">Pause to stop new orders arriving</div>
+          </div>
+          <label class="owner-toggle">
+            <input type="checkbox" id="owner-venue-status-toggle" onchange="toggleVenueStatus(this.checked)" checked>
+            <span class="owner-toggle-track"></span>
+          </label>
+        </div>
       </div>
-      <button class="btn-owner-signout" onclick="ownerSignOut()">Sign Out</button>
-    </div>
-  </div>
+
+      <div class="owner-col-section">
+        <div class="owner-col-label">Arrival Strip</div>
+        <div class="owner-col-toggle-row">
+          <div>
+            <div class="owner-menu-label">Show arrival strip</div>
+            <div class="owner-menu-sub">Darwin — Fenchurch Street line</div>
+          </div>
+          <label class="owner-toggle">
+            <input type="checkbox" id="owner-horizon-toggle" onchange="toggleHorizonVisibility(this.checked)" checked>
+            <span class="owner-toggle-track"></span>
+          </label>
+        </div>
+      </div>
+
+    </div><!-- /owner-col--left -->
+
+    <!-- Right: terminal controls + reserved -->
+    <div class="owner-col owner-col--right">
+
+      <div class="owner-col-section">
+        <div class="owner-col-label">Terminal</div>
+        <div class="owner-col-toggle-row">
+          <div>
+            <div class="owner-menu-label">Sign out</div>
+            <div class="owner-menu-sub">Ends this owner session — returns to Command Centre</div>
+          </div>
+          <button class="btn-owner-signout" onclick="ownerSignOut()">Sign Out</button>
+        </div>
+      </div>
+
+      <div class="owner-col-section owner-col-section--reserved">
+        <div class="owner-col-label">Stamps &amp; Rewards</div>
+        <div class="owner-menu-label" style="opacity:0.35;">Available after Block 8</div>
+      </div>
+
+    </div><!-- /owner-col--right -->
+
+  </div><!-- /owner-columns-grid -->
 </div>
 
 <!-- View-switch confirm overlay — retained as no-op safety net (not used by merged pill).

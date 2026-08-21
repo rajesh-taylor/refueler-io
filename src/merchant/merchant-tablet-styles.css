@@ -2057,3 +2057,85 @@ nav.nav {
 }
 .mc-placeholder-icon { font-size: 24px; color: var(--text-tertiary); }
 .mc-placeholder-txt { font-size: 11px; color: var(--text-tertiary); font-family: var(--mono); letter-spacing: 0.06em; }
+
+
+/* ─── S-32 OWNER TWO-COLUMN LAYOUT ──────────────────────────────────────── */
+
+.owner-columns-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  padding: 0 20px 24px;
+  border-top: 0.5px solid var(--border);
+  margin-top: 4px;
+}
+
+.owner-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-top: 16px;
+}
+
+.owner-col--left {
+  padding-right: 20px;
+  border-right: 0.5px solid var(--border);
+}
+
+.owner-col--right {
+  padding-left: 20px;
+}
+
+.owner-col-section {
+  padding-bottom: 20px;
+  border-bottom: 0.5px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.owner-col-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.owner-col-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 10px;
+}
+
+/* Row with text on left, control (button or toggle) on right */
+.owner-col-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.owner-col-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Gold lock icon button for Lightning address change */
+.ops-lightning-change-btn {
+  font-size: 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--accent-carbon);
+  padding: 4px;
+  flex-shrink: 0;
+  line-height: 1;
+  touch-action: manipulation;
+}
+
+/* Reserved / coming-soon section */
+.owner-col-section--reserved {
+  opacity: 0.6;
+}
