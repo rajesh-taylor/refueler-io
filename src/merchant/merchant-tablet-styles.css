@@ -2069,35 +2069,28 @@ nav.nav {
   border-top: 0.5px solid var(--border);
   margin-top: 4px;
 }
-
 .owner-col {
   display: flex;
   flex-direction: column;
-  gap: 0;
   padding-top: 16px;
 }
-
 .owner-col--left {
   padding-right: 20px;
   border-right: 0.5px solid var(--border);
 }
-
 .owner-col--right {
   padding-left: 20px;
 }
-
 .owner-col-section {
   padding-bottom: 20px;
   border-bottom: 0.5px solid var(--border);
   margin-bottom: 20px;
 }
-
 .owner-col-section:last-child {
   border-bottom: none;
   margin-bottom: 0;
   padding-bottom: 0;
 }
-
 .owner-col-label {
   font-family: var(--mono);
   font-size: 9px;
@@ -2106,36 +2099,37 @@ nav.nav {
   color: var(--text-tertiary);
   margin-bottom: 10px;
 }
-
-/* Row with text on left, control (button or toggle) on right */
 .owner-col-row {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
 }
-
 .owner-col-toggle-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
-
-/* Gold lock icon button for Lightning address change */
+.owner-col-section--reserved { opacity: 0.45; }
+.owner-col-reserved-txt {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+/* Gold CHANGE button — inline in left col */
 .ops-lightning-change-btn {
-  font-size: 16px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--accent-carbon);
-  padding: 4px;
+  background: transparent;
+  border: 0.5px solid var(--accent-carbon);
+  border-radius: 5px;
+  padding: 6px 10px;
+  cursor: pointer;
   flex-shrink: 0;
-  line-height: 1;
   touch-action: manipulation;
+  transition: opacity 0.15s;
 }
-
-/* Reserved / coming-soon section */
-.owner-col-section--reserved {
-  opacity: 0.6;
-}
+.ops-lightning-change-btn:hover { opacity: 0.75; }

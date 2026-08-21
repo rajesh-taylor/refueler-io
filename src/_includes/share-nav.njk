@@ -1,4 +1,4 @@
-<header class="site-header">
+<header class="site-header" id="site-header">
   <div class="header-inner">
     <a href="/" class="wordmark">
       Refueler
@@ -8,9 +8,19 @@
     <nav class="site-nav">
       <a href="/share/plans/"{% if activePage == 'plans' %} class="active"{% endif %}>Plans</a>
       <a href="/notes/"{% if activePage == 'notes' %} class="active"{% endif %}>Notes</a>
-      <a href="/support/">Support</a>
-      <a href="/privacy/"{% if activePage == 'privacy' %} class="active"{% endif %}>Privacy</a>
+      <a href="/support/"{% if activePage == 'support' %} class="active"{% else %} class="nav-secondary"{% endif %}>Support</a>
+      <a href="/privacy/"{% if activePage == 'privacy' %} class="active"{% else %} class="nav-secondary"{% endif %}>Privacy</a>
+      <button class="nav-hamburger" id="navHamburger" aria-label="Menu" onclick="toggleNavDrawer()">
+        <span></span><span></span><span></span>
+      </button>
       <button class="theme-pill" id="themePill" onclick="toggleTheme()">Paper / Carbon</button>
     </nav>
+  </div>
+  <div class="nav-drawer" id="navDrawer">
+    <a href="/share/plans/"{% if activePage == 'plans' %} class="active"{% endif %}>Plans</a>
+    <a href="/notes/"{% if activePage == 'notes' %} class="active"{% endif %}>Notes</a>
+    <a href="/support/"{% if activePage == 'support' %} class="active"{% endif %}>Support</a>
+    <a href="/privacy/"{% if activePage == 'privacy' %} class="active"{% endif %}>Privacy</a>
+    <a href="/">Refueler</a>
   </div>
 </header>

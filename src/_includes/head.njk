@@ -68,5 +68,15 @@
       {% if stripeThemeRemount %}if (typeof remountStripeForTheme === 'function') remountStripeForTheme();{% endif %}
     };
     applyTheme(getCookie('rs-theme') || 'paper');
+    window.toggleNavDrawer = function () {
+      var h = document.getElementById('site-header');
+      if (h) h.classList.toggle('nav-open');
+    };
+    document.addEventListener('click', function (e) {
+      var h = document.getElementById('site-header');
+      if (h && h.classList.contains('nav-open') && !h.contains(e.target)) {
+        h.classList.remove('nav-open');
+      }
+    });
   }());
 </script>

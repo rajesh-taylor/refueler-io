@@ -387,15 +387,73 @@ input[type="email"]:focus { border-color: var(--fg-muted); }
   html, body { transition: none; }
 }
 
+/* ─── Hamburger button (hidden above 960px) ──────────────────────────────── */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: transparent;
+  border: var(--border-weight) solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.2s;
+}
+.nav-hamburger:hover { border-color: var(--fg-muted); }
+.nav-hamburger span {
+  display: block;
+  width: 16px;
+  height: 1.5px;
+  background: var(--fg-muted);
+  border-radius: 1px;
+  transition: background 0.2s;
+}
+.nav-hamburger:hover span { background: var(--fg); }
+
+/* Nav drawer — hidden by default, shown when .nav-open on header ────────── */
+.nav-drawer {
+  display: none;
+  position: fixed;
+  top: 56px;
+  left: 0;
+  right: 0;
+  background: var(--nav-bg);
+  border-bottom: var(--border-weight) solid var(--border);
+  padding: 16px clamp(1.25rem, 4vw, 3rem);
+  z-index: 99;
+  flex-direction: column;
+  gap: 0;
+  transition: background var(--theme-transition) ease;
+}
+.nav-drawer a {
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  text-decoration: none;
+  padding: 14px 0;
+  border-bottom: var(--border-weight) solid var(--border);
+  transition: color 0.2s;
+}
+.nav-drawer a:last-child { border-bottom: none; }
+.nav-drawer a:hover,
+.nav-drawer a.active { color: var(--fg); }
+.site-header.nav-open .nav-drawer { display: flex; }
+
 /* ─── Tablet nav — 960px: tighten gap, hide low-priority links ────────────── */
 @media (max-width: 960px) {
   .site-nav { gap: 1.25rem; }
   .site-nav a.nav-secondary { display: none; }
+  .nav-hamburger { display: flex; }
 }
 
 /* ─── Mobile nav collapse — canonical 640px breakpoint ───────────────────── */
 @media (max-width: 640px) {
   .site-header { padding: 0 24px; }
   .site-nav a:not(.active) { display: none; }
-  .site-nav { gap: 1.25rem; }
+  .site-nav { gap: 0.75rem; }
 }
