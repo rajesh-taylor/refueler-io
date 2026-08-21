@@ -533,6 +533,23 @@
 
 <!-- ─── MENU OVERLAY — landscape two-pane, owner only ─── -->
 <div class="menu-overlay" id="menu-overlay">
+
+  <!-- Overlay nav — mirrors main nav, always visible -->
+  <div class="menu-overlay-nav">
+    <div class="nav-brand">
+      <div class="nav-logo">Refueler</div>
+      <div class="nav-divider"></div>
+      <div class="nav-terminal-lbl">MENU MANAGEMENT</div>
+    </div>
+    <div class="nav-right">
+      <div class="theme-pill">
+        <button class="theme-pill-opt" id="mo-pill-paper" onclick="setTheme('paper')">PAPER</button>
+        <button class="theme-pill-opt" id="mo-pill-carbon" onclick="setTheme('carbon')">CARBON</button>
+      </div>
+      <button class="menu-overlay-close-btn" onclick="closeMenuOverlay()">← Back</button>
+    </div>
+  </div>
+
   <div class="menu-overlay-inner">
 
     <!-- LEFT PANE 40% — import + item list -->
