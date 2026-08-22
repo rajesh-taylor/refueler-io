@@ -102,8 +102,8 @@ main {
 
 .policy-section {
   display: grid;
-  grid-template-columns: 28% 72%;
-  gap: 0 48px;
+  grid-template-columns: 20% 80%;
+  gap: 0 36px;
   padding: 52px 0;
   border-top: var(--border-weight) solid var(--border);
 }
@@ -411,6 +411,11 @@ main {
 }
 
 /* ── Responsive ───────────────────────────────────────────────────────────── */
+@media (max-width: 960px) {
+  .policy-section { grid-template-columns: 24% 76%; gap: 0 28px; }
+  .rights-grid .right-item { grid-template-columns: 160px 1fr; }
+}
+
 @media (max-width: 720px) {
   .hero { padding: 48px clamp(1.25rem, 4vw, 2rem) 40px; }
   .anchor-nav { padding: 0 clamp(1.25rem, 4vw, 2rem) 40px; }

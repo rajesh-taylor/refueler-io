@@ -2116,15 +2116,15 @@ nav.nav {
   font-size: 12px;
   color: var(--text-tertiary);
 }
-/* Gold CHANGE button — inline in left col */
+/* Gold CHANGE button — inline in left col (S-34: 1px border for Carbon legibility) */
 .ops-lightning-change-btn {
   font-family: var(--mono);
   font-size: 9px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--accent-carbon);
+  color: #C8A96E;
   background: transparent;
-  border: 0.5px solid var(--accent-carbon);
+  border: 1px solid #C8A96E;
   border-radius: 5px;
   padding: 6px 10px;
   cursor: pointer;
@@ -2132,4 +2132,4 @@ nav.nav {
   touch-action: manipulation;
   transition: opacity 0.15s;
 }
-.ops-lightning-change-btn:hover { opacity: 0.75; }
+.ops-lightning-change-btn:hover { opacity: 0.7; }
