@@ -18,23 +18,13 @@ permalink: /legend/index.html
   {% include "nav.njk" %}
 
   <main class="legend-main" id="legend-root">
-    <div class="legend-holding">
-
-      <span class="legend-wordmark">Legend</span>
-
-      <p class="legend-hero">
-        Public block explorers are surveillance tools with a search bar. Legend is the alternative.
-      </p>
-
-      <p class="legend-launch">
-        Explorer launching soon — follow progress in
-        <a href="/notes/" class="legend-notes-link">Notes</a>&thinsp;→
-      </p>
-
-    </div>
+    <!-- SPA mounts here — legend-spa.js owns everything inside this element -->
+    <div id="legend-spa-mount"></div>
   </main>
 
   {% include "footer.njk" %}
+
+  <script src="/assets/js/legend-spa.js" defer></script>
 
 </body>
 </html>
