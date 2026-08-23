@@ -140,8 +140,8 @@
   font-size: 1.125rem;
   font-weight: 400;
   color: var(--fg);
-  line-height: 1.6;
-  max-width: 560px;
+  line-height: 1.75;
+  max-width: 480px;
   margin: 0 0 1.5rem;
 }
 
