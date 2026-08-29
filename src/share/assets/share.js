@@ -59,6 +59,7 @@ const shareCard        = $('share-card');
 const shareLinkDisplay = $('share-link-display');
 const copyBtn          = $('copy-btn');
 const newUploadBtn     = $('new-upload-btn');
+const qrWrap           = $('qr-wrap');
 const unlockScreen     = $('unlock-screen');
 const unlockInput      = $('unlock-input');
 const unlockError      = $('unlock-error');
@@ -67,8 +68,6 @@ const downloadCard     = $('download-card');
 const dlStageTag       = $('dl-stage-tag');
 const dlPct            = $('dl-pct');
 const dlBar            = $('dl-bar');
-const dlDetail         = $('dl-detail');
-const shareSuccessMeta = $('share-success-meta');
 const dlSignoff        = $('dl-signoff');
 const dropMultiMsg     = $('drop-multi-msg');
 const folderInput      = $('folder-input');
@@ -639,15 +638,34 @@ async function startUpload() {
   showSharePanel(shareUrl, !!p2shHashHex);
 }
 
+function renderQr(url) {
+  const isDark = document.documentElement.dataset.theme === 'carbon';
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  qrWrap.appendChild(svg);
+  QrCreator.render({
+    text: url,
+    radius: 0,
+    ecLevel: 'M',
+    fill:       isDark ? '#F7F4EF' : '#3D3A36',
+    background: isDark ? '#111316' : '#F7F4EF',
+    size: 200,
+  }, svg);
+}
+
 function showSharePanel(url, isProtected) {
   shareCard.classList.remove('hidden');
   shareLinkDisplay.textContent = url;
-  if (shareSuccessMeta) shareSuccessMeta.textContent = 'Uploaded · expires in 7 days';
   if (isProtected) {
     const note = document.createElement('p');
     note.className = 'muted small mt8';
     note.textContent = '🔐 Password protected — share the password separately.';
     shareLinkDisplay.insertAdjacentElement('afterend', note);
+  }
+  qrWrap.innerHTML = '';
+  // qr-creator renders to SVG — crisp at any DPR, no canvas blur.
+  // Guard: if self-hosted script didn't load, skip QR silently — link is still copyable.
+  if (typeof QrCreator !== 'undefined') {
+    renderQr(url);
   }
 }
 
@@ -720,38 +738,9 @@ async function enterDownloadMode({ uuid, key, iv }) {
 
   receiverCard.style.display = 'flex';
 
-  // ── A/B USP variant (S47c) ───────────────────────────────────────────────
-  const USP_VARIANTS = {
-    A: `Reading your files is not technically possible for us.\nThe key never leaves your browser. The server stores encrypted noise.\nFiles delete themselves. No account. No trace. No data to sell.`,
-    B: `This link expires and deletes itself — no trace remains.\nNo account. No email. No history.\nYour data. Not ours.`,
-  };
-  let uspVariant;
-  try {
-    uspVariant = sessionStorage.getItem('rs-usp-variant');
-    if (!uspVariant) {
-      uspVariant = Math.random() > 0.5 ? 'B' : 'A';
-      sessionStorage.setItem('rs-usp-variant', uspVariant);
-    }
-  } catch {
-    uspVariant = Math.random() > 0.5 ? 'B' : 'A';
-  }
-  uspText.textContent = USP_VARIANTS[uspVariant];
+  // ── USP copy — Variant B locked (A/B test retired, B won) ─────────────────
+  uspText.textContent = 'No account. No email. No history. Your data. Not ours.';
   uspBlock.classList.remove('hidden');
-  logReceiverEvent('receiver_ab_shown', uspVariant);
-
-  // ── Capability warning on receiver card if FSAA unavailable ─────────────
-  const WARN_AMBER_BYTES = 300 * 1024 * 1024;
-  const WARN_RED_BYTES   = 1024 * 1024 * 1024;
-  const hasFSAA = typeof showSaveFilePicker !== 'undefined';
-  const totalBytes = meta.total_bytes || 0;
-
-  if (!hasFSAA && totalBytes > WARN_AMBER_BYTES) {
-    const isRed = totalBytes > WARN_RED_BYTES;
-    dlCompatWarn.className = `dl-compat-warn ${isRed ? 'red' : 'amber'}`;
-    dlCompatWarn.innerHTML = `<strong>Streaming downloads aren't supported in this browser</strong> — this transfer may be slow or fail for large files. Chrome gives the best experience.`;
-    dlCompatWarn.offsetHeight; // eslint-disable-line no-unused-expressions
-    dlCompatWarn.classList.add('visible');
-  }
 
   // ── Wire Download button ─────────────────────────────────────────────────
   rcDownloadBtn.addEventListener('click', async () => {
@@ -835,7 +824,6 @@ async function startDownloadStream(uuid, meta, fileHandle) {
   dlStageTag.textContent = 'Downloading';
   dlPct.textContent = '0%';
   dlBar.style.width = '0%';
-  if (dlDetail) dlDetail.textContent = '';
 
   let writable;
   try {
@@ -913,12 +901,10 @@ async function startDownloadStream(uuid, meta, fileHandle) {
       const pct = Math.round(((i + 1) / totalChunks) * 100);
       dlBar.style.width = pct + '%';
       dlPct.textContent = pct + '%';
-      if (dlDetail) dlDetail.textContent = `chunk ${i + 1} of ${totalChunks}`;
     }
 
     await writable.close();
     dlStageTag.textContent = 'Complete';
-    if (dlDetail) dlDetail.textContent = '';
     dlBar.style.width = '100%';
     dlPct.textContent = '100%';
     uspBlock.classList.add('hidden');
@@ -956,7 +942,6 @@ async function startDownload(uuid, meta) {
   dlStageTag.textContent = 'Downloading';
   dlPct.textContent = '0%';
   dlBar.style.width = '0%';
-  if (dlDetail) dlDetail.textContent = '';
 
   const totalBytes = (meta.total_bytes && meta.total_bytes > 0) ? meta.total_bytes : 0;
   const fileName = meta?.file_name || `refueler-${uuid.slice(0, 8)}`;
@@ -990,11 +975,9 @@ async function startDownload(uuid, meta) {
       : Math.round(((i + 1) / totalChunks) * 50);
     dlBar.style.width = pct + '%';
     dlPct.textContent = pct + '%';
-    if (dlDetail) dlDetail.textContent = `chunk ${i + 1} of ${totalChunks}`;
   }
 
   dlStageTag.textContent = 'Decrypting';
-  if (dlDetail) dlDetail.textContent = 'Verifying integrity…';
   const decrypted = [];
   for (let i = 0; i < chunks.length; i++) {
     try {
@@ -1027,7 +1010,6 @@ async function startDownload(uuid, meta) {
   setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
 
   dlStageTag.textContent = 'Complete';
-  if (dlDetail) dlDetail.textContent = '';
   dlBar.style.width = '100%';
   dlPct.textContent = '100%';
   uspBlock.classList.add('hidden');
