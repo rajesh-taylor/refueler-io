@@ -16,15 +16,6 @@ permalink: /notes/what-a-subpoena-gets/index.html
 <link rel="stylesheet" href="/notes/notes.css">
 <style>
   /* ── Article-specific additions ── */
-  .table-note {
-    font-family: var(--font-serif);
-    font-size: 0.875rem;
-    line-height: 1.6;
-    color: var(--text-tertiary);
-    margin-top: 0.75rem;
-    font-style: italic;
-  }
-
   .table-label {
     font-family: var(--font-heading);
     font-size: 0.6875rem;
@@ -38,6 +29,15 @@ permalink: /notes/what-a-subpoena-gets/index.html
 
   .table-group {
     margin-bottom: 2.5rem;
+  }
+
+  .table-transition {
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    font-style: italic;
   }
 
   .cell-yes   { color: var(--text-primary); font-weight: 500; }
@@ -123,9 +123,13 @@ permalink: /notes/what-a-subpoena-gets/index.html
 
     <p>This piece skips the policy and goes straight to the question that matters: if someone served a valid legal order to your file transfer provider tomorrow, what would they actually hand over? A production order in England and Wales, a subpoena in US proceedings — the mechanism varies by jurisdiction; the question is the same.</p>
 
-    <p>Nine services. Two tables. No marketing copy.</p>
+    <h2>The identity question</h2>
 
-    <h2>The tables</h2>
+    <p>Two things can be handed to a court: what you sent, and who sent it. Most privacy discussions focus on the first. The second is just as consequential.</p>
+
+    <p>An account is a persistent identity anchor — every file, every access event, every IP address hangs off it and can be correlated. A court order that cannot read your files can still prove you sent them. WeTransfer logs your email address. Smash logs your email or your IP. SwissTransfer logs your IP. Even Proton, whose encryption is genuinely strong, ties your files to an account identity. Content protection and identity protection are not the same property.</p>
+
+    <p>For services without accounts, the legal order has no identity to request — because none was collected. OnionShare achieves this via Tor, which also masks IP addresses at the network layer. For users who want equivalent network-layer anonymity without requiring recipients to run Tor Browser, a VPN closes most of the gap — Mullvad requires no account email at signup, accepts Bitcoin and Monero, and covers five devices. Refueler Share requires no account either. That is a design choice, not an accident. It has costs: no account means no recovery, no persistent history. Paid tiers add transfer controls — expiry, revocation, storage — without attaching an identity to them.</p>
 
     <div class="table-group">
       <p class="table-label">Services where the operator can read your files</p>
@@ -166,6 +170,8 @@ permalink: /notes/what-a-subpoena-gets/index.html
         </table>
       </div>
     </div>
+
+    <p class="table-transition">The three services above are the simple case — the operator holds the encryption keys, so a valid legal order produces your files in plaintext. The picture below is more varied: content is protected, but the trade-offs on identity and metadata differ considerably.</p>
 
     <div class="table-group">
       <p class="table-label">Services where content is protected from the operator</p>
@@ -252,16 +258,6 @@ permalink: /notes/what-a-subpoena-gets/index.html
     <p>Swiss law does require a valid Swiss court order to compel disclosure — a higher bar than a production order under the Police and Criminal Evidence Act in England and Wales, or a federal subpoena in US proceedings. But if the company holds your encryption keys, jurisdiction determines the <em>process</em> for getting your files, not whether they're gettable. A sufficiently motivated court in any jurisdiction that can reach the company will eventually produce a valid order. The flag on the website describes the legal process surface, not the cryptographic one.</p>
 
     <p>Architecture protects your content. Jurisdiction shapes the paperwork required to ask for it.</p>
-
-    <h2>The identity question</h2>
-
-    <p>Most services in this table require an account to send. An account is a persistent identity anchor — every file, every access event, every IP address hangs off it and can be correlated. Even Proton, whose encryption is genuinely strong, ties your files to an account identity. A court order that cannot read your files can still prove you sent them.</p>
-
-    <p>WeTransfer's free tier accepts a sender email address. That email is logged. Smash logs the address you provide, or your IP if you don't provide one. SwissTransfer logs your IP.</p>
-
-    <p>OnionShare and Refueler Share require no account. For services without accounts, the legal order has no identity to request — because none was collected. OnionShare achieves this via Tor, which also masks IP addresses at the network layer. For users who want the same network-layer anonymity without requiring recipients to run Tor Browser, a VPN closes most of the gap. Mullvad is the standard recommendation in this space — no account email required at signup, five devices per subscription, and payment accepted in Bitcoin and Monero for a pseudonymous purchase.</p>
-
-    <p>This is a design choice, not an accident. It has costs: no account means no recovery, no history, no admin console. Some buyers want those things. For buyers to whom identity linkage is the risk, the absence of an account is the feature.</p>
 
     <h2>What a court order gets from Refueler Share</h2>
 
