@@ -31,14 +31,6 @@ permalink: /notes/what-a-subpoena-gets/index.html
     margin-bottom: 2.5rem;
   }
 
-  .table-transition {
-    font-family: var(--font-serif);
-    font-size: 1rem;
-    line-height: 1.7;
-    color: var(--text-secondary);
-    margin-bottom: 2rem;
-  }
-
   .cell-yes   { color: var(--text-primary); font-weight: 500; }
   .cell-no    { color: var(--text-tertiary); }
   .cell-maybe { color: var(--text-secondary); }
@@ -173,7 +165,7 @@ permalink: /notes/what-a-subpoena-gets/index.html
       </div>
     </div>
 
-    <p class="table-transition">The three services above are the simple case — the operator holds the encryption keys, so a valid legal order produces your files in plaintext. The picture below is more varied: content is protected, but the trade-offs on identity and metadata differ considerably.</p>
+    <p>The three services above are the simple case — the operator holds the encryption keys, so a valid legal order produces your files in plaintext. The picture below is more varied: content is protected, but the trade-offs on identity and metadata differ considerably.</p>
 
     <div class="table-group">
       <p class="table-label">Services where content is protected from the operator</p>
@@ -271,11 +263,11 @@ permalink: /notes/what-a-subpoena-gets/index.html
 
     <p>If you sent a file yesterday and deleted the link, the file is still in our storage until its expiry date — but it is, practically speaking, unreadable by anyone without the fragment. Including us.</p>
 
-    <h2>The one thing these tables don't tell you</h2>
+    <h2>What no service can do</h2>
 
-    <p>None of these services protect against endpoint compromise. If the device you're using is already compromised, the file was readable before it was encrypted. Client-side encryption is not a substitute for device security; it's a protection against server-side failure. Every provider in this table, including us, has the same answer to that threat: we cannot help you.</p>
+    <p>None of these services protect against endpoint compromise. If the device you're using is already compromised, the file was readable before encryption touched it. Client-side encryption protects against server-side failure — a breach, a court order, a motivated employee. It is not a substitute for device security, and no provider in this space claims otherwise.</p>
 
-    <p>OnionShare publishes a specific list of what their software does not protect against. We intend to do the same.</p>
+    <p>Understanding the boundary is part of understanding the tool.</p>
 
     <div class="article-cta">
       <p class="cta-label">Refueler Share</p>
