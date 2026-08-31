@@ -1,23 +1,22 @@
 ---
 title: "refueler share — encrypted file transfer"
 description: "Anonymous, encrypted file transfer. No account. No email. No history."
-permalink: /share/
+permalink: /index.html
 activePage: ""
 ---
 <!DOCTYPE html>
 <html lang="en">
 <head>
 {% set extraHead %}
-<link rel="stylesheet" href="/share/assets/share-tokens.css">
-<link rel="stylesheet" href="/share/assets/share.css">
+<link rel="stylesheet" href="/share.css">
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad" defer></script>
 {% endset %}
 {% include "head.njk" %}
-<!-- ── Status banner (hidden until JS populates from /share/status/) ──────── -->
+<!-- ── Status banner (hidden until JS populates from /status) ─────────────── -->
 <div class="status-banner hidden" id="status-banner" role="alert" aria-live="polite">
   <span class="status-banner-icon" id="status-banner-icon"></span>
   <span class="status-banner-text" id="status-banner-text"></span>
-  <a class="status-banner-link" href="/share/status/" id="status-banner-link">View status →</a>
+  <a class="status-banner-link" href="/status.html" id="status-banner-link">View status →</a>
   <button class="status-banner-dismiss" id="status-banner-dismiss" aria-label="Dismiss">✕</button>
 </div>
 
@@ -38,7 +37,7 @@ function formatMaintenanceText(status) {
   return status.message ?? 'Maintenance in progress.';
 }
 
-// ── Maintenance modal (index only, maintenance state only) ────────────────────
+// ── Maintenance modal (index.html only, maintenance state only) ───────────────
 const MODAL_DISMISS_KEY = 'rs-maint-modal-dismissed';
 
 function showMaintenanceModal(status) {
@@ -122,11 +121,12 @@ function showMaintenanceModal(status) {
 })();
 </script>
 
+{% include "shared-styles.njk" %}
 </head>
 
 <body>
 
-{% include "share-nav.njk" %}
+{% include "nav.njk" %}
 
 <!-- ── Main shell ────────────────────────────────────────────────────── -->
 <div class="shell">
@@ -169,10 +169,9 @@ function showMaintenanceModal(status) {
     </div>
 
     <!-- Cap warning + upgrade nudge -->
-    <!-- CSS-7: href updated /share/upgrade/ → /share/plans/ (CSS-1b lock) -->
     <div id="cap-warning" class="card hidden">
       <p class="cap-warn">This file is over the 4 GB free limit.</p>
-      <p class="muted small mt4">Paid plans support transfers up to 100 GB — <a href="/share/plans/" class="upgrade-nudge-link">see plans →</a></p>
+      <p class="muted small mt4">Creative Premium supports transfers up to 100 GB — <a href="/upgrade.html" class="upgrade-nudge-link">see plans →</a></p>
     </div>
 
     <!-- Options card (shown after file selected) -->
@@ -222,31 +221,21 @@ function showMaintenanceModal(status) {
       <div class="progress-label mt4" id="progress-detail"></div>
     </div>
 
-    <!-- Share link panel — upload complete state -->
-    <!-- CSS-7: resolved hierarchy. Filled circle mark, file name echo,      -->
-    <!-- expiry reminder, full-width copy button, ghost new-upload.           -->
-    <!-- CSS-7b: QR removed — professional buyers don't use QR codes.        -->
+    <!-- Share link panel -->
     <div class="card hidden" id="share-card">
-      <div class="share-success-header">
-        <div class="share-success-mark" aria-hidden="true">✓</div>
-        <div>
-          <div class="share-success-title">Uploaded</div>
-          <div class="share-success-meta" id="share-success-meta">Expires in 7 days</div>
-        </div>
+      <div class="flex-row">
+        <span class="success-txt small mono">✓</span>
+        <span style="font-size:14px;font-weight:500">Ready to share</span>
       </div>
       <div class="link-box" id="share-link-display"></div>
       <div class="share-btn-row mt12">
-        <button class="btn btn-primary" id="copy-btn">
-          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:-1px;margin-right:5px" aria-hidden="true"><rect x="4" y="4" width="8" height="8" rx="1.2" stroke="currentColor" stroke-width="1.25"/><path d="M3 9H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>Copy link
-        </button>
+        <button class="btn btn-primary" id="copy-btn"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:-1px;margin-right:5px" aria-hidden="true"><rect x="4" y="4" width="8" height="8" rx="1.2" stroke="currentColor" stroke-width="1.25"/><path d="M3 9H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>Copy link</button>
         <button class="btn btn-ghost" id="new-upload-btn">New upload</button>
       </div>
+      <div id="qr-wrap"></div>
     </div>
 
     <!-- Receiver landing card (S47c) — shown before any download starts -->
-    <!-- CSS-7: trust line added below meta grid. Download button copy    -->
-    <!-- is plain "Download" — no decoration. rc-meta uses --fg not       -->
-    <!-- --text-primary (alias, but explicit for clarity post-CSS-6).     -->
     <div class="card" id="receiver-card" style="display:none">
       <div class="rc-file-row">
         <span class="rc-file-icon" id="rc-file-icon">📄</span>
@@ -268,11 +257,8 @@ function showMaintenanceModal(status) {
       <div id="rc-passphrase-row" class="hidden">
         <span class="rc-passphrase-badge">🔐 Password protected</span>
       </div>
-      <!-- Trust line: one plain sentence. Source Serif 4, --fg-subtle.   -->
-      <!-- Not salesly. States exactly what the architecture does.         -->
-      <p class="rc-trust-line">Encrypted in transit. The server cannot read this file.</p>
       <button class="btn btn-primary" id="rc-download-btn">Download</button>
-      <div class="dl-compat-warn" id="dl-compat-warn" role="alert" aria-live="polite"></div>
+
       <div id="usp-block" class="hidden"><p class="usp-text" id="usp-text"></p></div>
     </div>
 
@@ -289,7 +275,6 @@ function showMaintenanceModal(status) {
     </div>
 
     <!-- Download progress -->
-    <!-- CSS-7: dl-detail label added to match upload/zip pattern.        -->
     <div class="card hidden" id="download-card">
       <div class="flex-row">
         <span class="tag" id="dl-stage-tag">Downloading</span>
@@ -298,17 +283,10 @@ function showMaintenanceModal(status) {
       <div class="progress-bar-wrap">
         <div class="progress-bar" id="dl-bar"></div>
       </div>
-      <div class="progress-label mt4" id="dl-detail"></div>
     </div>
 
     <!-- Post-download sign-off (colophon) -->
-    <!-- CSS-7: left-border corrected from --accent (gold) to --border.   -->
-    <!-- CSS-7b: color lightened from --fg-subtle to --fg-muted.          -->
-    <div class="hidden" id="dl-signoff">
-      <p class="dl-signoff-line">Encrypted in your browser.</p>
-      <p class="dl-signoff-line">Deleted when it expires.</p>
-      <p class="dl-signoff-line dl-signoff-link"><a href="https://refueler.io" style="color:inherit;text-decoration:none">refueler.io</a></p>
-    </div>
+    <div class="hidden" id="dl-signoff"><p class="dl-signoff-secondary"><a href="https://refueler.io" style="color:inherit;text-decoration:none">REFUELER.IO</a></p></div>
 
     <!-- Drop zone multi-file rejection message -->
     <div class="hidden" id="drop-multi-msg" role="alert"></div>
@@ -316,12 +294,12 @@ function showMaintenanceModal(status) {
   </main>
 </div>
 
-{% include "share-footer.njk" %}
+{% include "footer.njk" %}
 
-<!-- fflate self-hosted (S56 — cdnjs blocked). Blocking script so global       -->
-<!-- is defined before the module script executes.                              -->
-<!-- CSS-7b: qr-creator.min.js removed — QR feature removed as product decision. -->
-<script src="/share/assets/fflate.min.js"></script>
-<script type="module" src="/share/assets/share.js"></script>
+<!-- fflate + qr-creator self-hosted (S56 — cdnjs blocked). Blocking scripts so  -->
+<!-- globals are defined before the module script executes.                        -->
+<script src="/fflate.min.js"></script>
+<script src="/qr-creator.min.js"></script>
+<script type="module" src="/share.js"></script>
 </body>
 </html>

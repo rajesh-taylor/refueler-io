@@ -1,3 +1,8 @@
+/* GENERATED FILE - do not edit directly
+   Canonical: refueler-share/frontend/
+   Mirror:    refueler.io/src/share/assets/
+   Tool:      bin/sync-share.sh
+   Edit the canonical, then run bin/sync-share.sh to propagate. */
 // ── share.js — extracted from src/index.njk at S51 ──────────────────────────
 // DO NOT edit inline JS in index.njk — edit this file only.
 // Loaded as <script type="module" src="/share.js"></script>
