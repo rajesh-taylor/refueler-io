@@ -1,14 +1,14 @@
 ---
 title: "refueler share — encrypted file transfer"
 description: "Anonymous, encrypted file transfer. No account. No email. No history."
-permalink: /share/index.html
+permalink: /index.html
 activePage: ""
 ---
 <!DOCTYPE html>
 <html lang="en">
 <head>
 {% set extraHead %}
-<link rel="stylesheet" href="/share/assets/share.css">
+<link rel="stylesheet" href="/share.css">
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad" defer></script>
 {% endset %}
 {% include "head.njk" %}
@@ -132,11 +132,19 @@ function showMaintenanceModal(status) {
 <div class="shell">
   <main id="app">
 
-    <!-- Info card -->
+    <!-- Info card — lock line (existing) -->
     <div class="info-card" id="info-card">
       <span class="info-icon">🔒</span>
       <span>No account. No email. No history. Files are encrypted in your browser before upload. Only you hold the key.</span>
       <button class="info-card-dismiss" id="dismiss-info" aria-label="Dismiss">✕</button>
+    </div>
+
+    <!-- Async framing card — recipient problem (HQ2) ────────────────────────
+         Second line in this region, not a replacement for the lock line above.
+         Shown to all visitors; dismissed separately from the lock line.        -->
+    <div class="async-card" id="async-card">
+      <span class="async-card-dismiss" id="dismiss-async" role="button" aria-label="Dismiss" tabindex="0">✕</span>
+      <p class="async-body">Send now. Your file waits in encrypted storage until your recipient is ready — close the tab, shut the laptop, get on a plane. Nothing depends on both of you being online at the same moment. Most 'instant' transfer tools quietly need the sender to sit and wait. This one doesn't.</p>
     </div>
 
     <!-- File inputs — outside the drop zone so they never intercept drag events   -->
@@ -156,6 +164,15 @@ function showMaintenanceModal(status) {
       </div>
     </div>
 
+    <!-- Secondary nav — Plans + Status (HQ2) ──────────────────────────────────
+         Sits below the drop zone. Hidden when a file is selected (share.js adds
+         the 'hidden' class to #share-subnav alongside #info-card + #async-card). -->
+    <div class="share-subnav" id="share-subnav">
+      <a href="/upgrade.html" class="share-subnav-link">Plans</a>
+      <span class="share-subnav-dot">·</span>
+      <a href="/status.html" class="share-subnav-link">Status</a>
+    </div>
+
     <!-- Zip progress card (shown while compressing a folder, before upload progress) -->
     <div class="card hidden" id="zip-progress-card">
       <div class="flex-row">
@@ -169,6 +186,7 @@ function showMaintenanceModal(status) {
     </div>
 
     <!-- Resume card (RU1) — shown on page load if an interrupted transfer is found in IndexedDB.
+     Place this immediately AFTER the zip-progress-card div in index.njk.
      Hidden by default; revealed by checkResumeState() in share.js. -->
   <div id="resume-card" class="card hidden" style="margin-top: 1rem;">
   <div class="card-inner" style="padding: 1.25rem 1.5rem;">
@@ -177,12 +195,14 @@ function showMaintenanceModal(status) {
       <span style="font-family:var(--mono); font-size:0.8rem; color:var(--muted);">Transfer paused</span>
     </div>
     <p id="resume-detail" style="font-family:var(--mono); font-size:0.82rem; color:var(--text); margin:0 0 1rem; line-height:1.5;"></p>
+        <p id="resume-note" class="hidden" style="font-family:var(--mono); font-size:0.78rem; color:var(--muted); margin:0 0 0.75rem; font-style:italic;">Chunks already sent are encrypted.</p>
     <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
       <button id="resume-notice-btn" class="btn btn-primary" style="min-width:7rem;">Resume</button>
       <button id="resume-discard-btn" class="btn btn-ghost" style="min-width:7rem;">Discard</button>
     </div>
   </div>
 </div>
+
 
     <!-- Cap warning + upgrade nudge -->
     <div id="cap-warning" class="card hidden">
@@ -310,12 +330,52 @@ function showMaintenanceModal(status) {
   </main>
 </div>
 
+<!-- ── HTTP/3 infrastructure whisper — HQ2 ──────────────────────────────── -->
+<!-- Static, always visible. Above footer. Not part of the upload flow.       -->
+<div class="http3-whisper">
+  <span class="http3-whisper-text">Delivered over Cloudflare HTTP/3.</span>
+</div>
+
 {% include "footer.njk" %}
 
 <!-- fflate + qr-creator self-hosted (S56 — cdnjs blocked). Blocking scripts so  -->
 <!-- globals are defined before the module script executes.                        -->
-<script src="/share/assets/fflate.min.js"></script>
-<script src="/share/assets/qr-creator.min.js"></script>
-<script type="module" src="/share/assets/share.js"></script>
+<script src="/fflate.min.js"></script>
+<script src="/qr-creator.min.js"></script>
+<script type="module" src="/share.js"></script>
+
+<script>
+// ── Async card dismiss — HQ2 ─────────────────────────────────────────────────
+(function () {
+  const ASYNC_DISMISS_KEY = 'rs-async-card-dismissed';
+  const card = document.getElementById('async-card');
+  const btn  = document.getElementById('dismiss-async');
+  if (!card || !btn) return;
+
+  // Hide immediately if previously dismissed
+  try { if (sessionStorage.getItem(ASYNC_DISMISS_KEY)) { card.style.display = 'none'; return; } } catch {}
+
+  btn.addEventListener('click', () => {
+    card.style.display = 'none';
+    try { sessionStorage.setItem(ASYNC_DISMISS_KEY, '1'); } catch {}
+  });
+  btn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') btn.click(); });
+})();
+
+// ── Share subnav hide on file select — HQ2 ───────────────────────────────────
+// Watches for options-card becoming visible (share.js removes 'hidden' class).
+// When a file is selected the subnav hides with the rest of the pre-upload chrome.
+(function () {
+  const subnav     = document.getElementById('share-subnav');
+  const optionsCard = document.getElementById('options-card');
+  if (!subnav || !optionsCard) return;
+
+  const observer = new MutationObserver(() => {
+    const fileSelected = !optionsCard.classList.contains('hidden');
+    subnav.classList.toggle('hidden', fileSelected);
+  });
+  observer.observe(optionsCard, { attributes: true, attributeFilter: ['class'] });
+})();
+</script>
 </body>
 </html>
