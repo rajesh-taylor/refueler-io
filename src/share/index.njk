@@ -1,14 +1,14 @@
 ---
 title: "refueler share — encrypted file transfer"
 description: "Anonymous, encrypted file transfer. No account. No email. No history."
-permalink: /share/index.html
-activePage: "share"
+permalink: /index.html
+activePage: ""
 ---
 <!DOCTYPE html>
 <html lang="en">
 <head>
 {% set extraHead %}
-<link rel="stylesheet" href="/share/assets/share.css">
+<link rel="stylesheet" href="/share.css">
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad" defer></script>
 {% endset %}
 {% include "head.njk" %}
@@ -132,19 +132,10 @@ function showMaintenanceModal(status) {
 <div class="shell">
   <main id="app">
 
-    <!-- Info card — lock line (existing) -->
+    <!-- Info card — lock line -->
     <div class="info-card" id="info-card">
       <span class="info-icon">🔒</span>
       <span>No account. No email. No history. Files are encrypted in your browser before upload. Only you hold the key.</span>
-      <button class="info-card-dismiss" id="dismiss-info" aria-label="Dismiss">✕</button>
-    </div>
-
-    <!-- Async framing card — recipient problem (HQ2) ────────────────────────
-         Second line in this region, not a replacement for the lock line above.
-         Shown to all visitors; dismissed separately from the lock line.        -->
-    <div class="async-card" id="async-card">
-      <span class="async-card-dismiss" id="dismiss-async" role="button" aria-label="Dismiss" tabindex="0">✕</span>
-      <p class="async-body">Send now. Your file waits in encrypted storage until your recipient is ready — close the tab, shut the laptop, get on a plane. Nothing depends on both of you being online at the same moment. Most 'instant' transfer tools quietly need the sender to sit and wait. This one doesn't.</p>
     </div>
 
     <!-- File inputs — outside the drop zone so they never intercept drag events   -->
@@ -165,8 +156,13 @@ function showMaintenanceModal(status) {
     </div>
 
     <!-- Secondary nav — Plans + Status (HQ2) ──────────────────────────────────
-         Sits below the drop zone. Hidden when a file is selected (share.js adds
-         the 'hidden' class to #share-subnav alongside #info-card + #async-card). -->
+         Sits below the drop zone. Hidden when a file is selected.
+         Styled to match .site-nav register — display, uppercase, fg-muted.     -->
+    <div class="share-subnav" id="share-subnav">
+      <a href="/share/plans/" class="share-subnav-link">Plans</a>
+      <span class="share-subnav-dot">·</span>
+      <a href="/share/status/" class="share-subnav-link">Status</a>
+    </div>
 
     <!-- Zip progress card (shown while compressing a folder, before upload progress) -->
     <div class="card hidden" id="zip-progress-card">
@@ -325,12 +321,6 @@ function showMaintenanceModal(status) {
   </main>
 </div>
 
-<!-- ── HTTP/3 infrastructure whisper — HQ2 ──────────────────────────────── -->
-<!-- Static, always visible. Above footer. Not part of the upload flow.       -->
-<div class="http3-whisper">
-  <span class="http3-whisper-text">Delivered over Cloudflare HTTP/3.</span>
-</div>
-
 {% include "footer.njk" %}
 
 <!-- fflate + qr-creator self-hosted (S56 — cdnjs blocked). Blocking scripts so  -->
@@ -340,23 +330,6 @@ function showMaintenanceModal(status) {
 <script type="module" src="/share.js"></script>
 
 <script>
-// ── Async card dismiss — HQ2 ─────────────────────────────────────────────────
-(function () {
-  const ASYNC_DISMISS_KEY = 'rs-async-card-dismissed';
-  const card = document.getElementById('async-card');
-  const btn  = document.getElementById('dismiss-async');
-  if (!card || !btn) return;
-
-  // Hide immediately if previously dismissed
-  try { if (sessionStorage.getItem(ASYNC_DISMISS_KEY)) { card.style.display = 'none'; return; } } catch {}
-
-  btn.addEventListener('click', () => {
-    card.style.display = 'none';
-    try { sessionStorage.setItem(ASYNC_DISMISS_KEY, '1'); } catch {}
-  });
-  btn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') btn.click(); });
-})();
-
 // ── Share subnav hide on file select — HQ2 ───────────────────────────────────
 // Watches for options-card becoming visible (share.js removes 'hidden' class).
 // When a file is selected the subnav hides with the rest of the pre-upload chrome.
