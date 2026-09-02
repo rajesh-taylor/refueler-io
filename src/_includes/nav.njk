@@ -10,6 +10,10 @@
       <a href="/editorial/"{% if activePage == 'editorial' %} class="active"{% else %} class="nav-secondary"{% endif %}>Editorial</a>
       <a href="/support/"{% if activePage == 'support' %} class="active"{% else %} class="nav-secondary"{% endif %}>Support</a>
       <a href="/privacy/"{% if activePage == 'privacy' %} class="active"{% else %} class="nav-secondary"{% endif %}>Privacy</a>
+      {% if activePage == 'share' or activePage == 'plans' or activePage == 'status' %}
+      <a href="/share/plans/"{% if activePage == 'plans' %} class="active"{% else %} class="nav-secondary"{% endif %}>Plans</a>
+      <a href="/share/status/"{% if activePage == 'status' %} class="active"{% else %} class="nav-secondary"{% endif %}>Status</a>
+      {% endif %}
       <button class="nav-hamburger" id="navHamburger" aria-label="Menu" onclick="toggleNavDrawer()">
         <span></span><span></span><span></span>
       </button>
@@ -23,5 +27,9 @@
     <a href="/editorial/"{% if activePage == 'editorial' %} class="active"{% endif %}>Editorial</a>
     <a href="/support/"{% if activePage == 'support' %} class="active"{% endif %}>Support</a>
     <a href="/privacy/"{% if activePage == 'privacy' %} class="active"{% endif %}>Privacy</a>
+    {% if activePage == 'share' or activePage == 'plans' or activePage == 'status' %}
+    <a href="/share/plans/"{% if activePage == 'plans' %} class="active"{% endif %}>Plans</a>
+    <a href="/share/status/"{% if activePage == 'status' %} class="active"{% endif %}>Status</a>
+    {% endif %}
   </div>
 </header>
