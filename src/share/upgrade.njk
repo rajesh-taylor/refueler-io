@@ -136,8 +136,8 @@ stripeThemeRemount: true
     <!-- Free -->
     <div class="tier-card free-card">
       <div class="current-plan-tag">Current</div>
-      <div class="tier-label">Free</div>
-      <div class="tier-name">Skint Tog</div>
+      <div class="tier-label">Citizen</div>
+      <div class="tier-name">Citizen</div>
       <div class="tier-price">
         <span class="tier-price-main">£0</span>
         <span class="tier-price-period">/ forever</span>
@@ -151,30 +151,11 @@ stripeThemeRemount: true
       </ul>
     </div>
 
-    <!-- Creative Premium -->
-    <div class="tier-card coming-soon" id="card-creative">
-      <div class="coming-soon-tag">Coming Soon</div>
-      <div class="tier-label gold">Creative</div>
-      <div class="tier-name">Creative Premium</div>
-      <div class="tier-price">
-        <span class="tier-price-main" id="price-creative">£12</span>
-        <span class="tier-price-period" id="period-creative">/ month</span>
-      </div>
-      <div class="tier-yearly" id="yearly-creative">or £144/yr</div>
-      <ul class="tier-features">
-        <li>100 GB per transfer</li>
-        <li>1 / 7 / 30 day expiry</li>
-        <li>End-to-end encrypted</li>
-        <li>Passphrase download gate</li>
-        <li>Lightning payments</li>
-      </ul>
-    </div>
-
-    <!-- Production Max -->
+    <!-- Sovereign -->
     <div class="tier-card coming-soon" id="card-max">
       <div class="coming-soon-tag">Coming Soon</div>
-      <div class="tier-label gold">Professional</div>
-      <div class="tier-name">Production Max</div>
+      <div class="tier-label gold">Sovereign</div>
+      <div class="tier-name">Sovereign</div>
       <div class="tier-price">
         <span class="tier-price-main" id="price-max">£24</span>
         <span class="tier-price-period" id="period-max">/ month</span>
@@ -196,7 +177,7 @@ stripeThemeRemount: true
   <div class="payment-section" id="paymentSection">
     <div class="payment-header">
       <div class="payment-title">Payment</div>
-      <div class="payment-summary" id="paymentSummary">Creative Premium — £12/month</div>
+      <div class="payment-summary" id="paymentSummary">Sovereign — £24/month</div>
     </div>
 
     <div class="payment-tabs">
@@ -327,7 +308,7 @@ function selectTier(tier) {
 }
 
 function updateSummary() {
-  const names   = { creative: 'Creative Premium', max: 'Production Max' };
+  const names   = { max: 'Sovereign' };
   const billing = billingYearly ? 'yearly' : 'monthly';
   const d       = PRICES_DISPLAY[selectedTier][billing];
   document.getElementById('paymentSummary').textContent =
