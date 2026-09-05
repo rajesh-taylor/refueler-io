@@ -12,6 +12,7 @@ let lastMetrics  = null;
 let lastAe       = null;
 let lastSnapshot = null;
 let clientErrorsDetail = []; // S73a — detail rows from AE client_errors_detail
+let lastDockBadgeCount = null; // S-TG-4b — badge_count from /admin/execution-dock
 
 // ── Theme ──────────────────────────────────────────────────────────────────
 function getTheme() {
@@ -293,6 +294,7 @@ const MODAL_DEFS = {
   'free-users':         { label: 'Free users',                plain: 'Total accounts on free tier' },
   'client-errors':      { label: 'Client errors (24h)',       plain: 'Browser-side failures reported' },
   farming:              { label: 'Farming signal',            plain: 'Credential-to-upload ratio (normal: 0.8–1.2 · alarm: >3.0)' },
+  'execution-dock-kpi': { label: 'Uncollected expired',        plain: 'Transfers past expiry awaiting manual destruction' },
   lightning:            { label: 'Lightning settlement',      plain: 'Sats vs fiat payment mix' },
 };
 
@@ -525,6 +527,15 @@ function openModal(key, triggerEl) {
         sub = `${farmIssued} issued · ${farmCompleted} uploads completed · proxy — B6`;
         colorClass = ratio > 3.0 || ratio < 0.5 ? ' red' : ratio >= 1.2 ? ' amber' : ' green';
       } else { value = 'n/a'; isNA = true; sub = 'No credential issuances in last 24h'; }
+      break;
+    }
+    case 'execution-dock-kpi': {
+      const cnt = lastDockBadgeCount;
+      if (cnt !== null && cnt !== undefined) {
+        value = String(cnt);
+        colorClass = cnt > 5 ? ' red' : cnt > 0 ? ' amber' : ' green';
+      } else { value = 'n/a'; isNA = true; }
+      sub = cnt === 0 ? 'No expired uncollected transfers' : cnt === 1 ? '1 expired transfer not yet destroyed' : `${cnt} expired transfers not yet destroyed`;
       break;
     }
     case 'lightning': {
@@ -929,6 +940,14 @@ async function loadExecutionDock() {
 
   const transfers  = data.transfers ?? [];
   const badgeCount = data.badge_count ?? 0;
+  lastDockBadgeCount = badgeCount;
+
+  // Update KPI snap-metric in System Summary
+  const snapDock   = document.getElementById('snap-dock-expired');
+  if (snapDock) {
+    snapDock.textContent = String(badgeCount);
+    snapDock.className   = 'sm-value' + (badgeCount > 5 ? ' red' : badgeCount > 0 ? ' amber' : ' green');
+  }
 
   if (badge) {
     if (badgeCount > 0) {

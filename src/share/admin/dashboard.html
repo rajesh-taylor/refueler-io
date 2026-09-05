@@ -173,6 +173,11 @@
           <div class="sm-plain">Sats vs fiat mix</div>
           <div class="sm-value amber">—</div>
         </div>
+        <div class="snap-metric" tabindex="0" onclick="openModal('execution-dock-kpi', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('execution-dock-kpi', this)">
+          <div class="sm-label">Uncollected expired</div>
+          <div class="sm-plain">Transfers past expiry</div>
+          <div class="sm-value amber" id="snap-dock-expired">—</div>
+        </div>
         <div class="snap-metric" tabindex="0" onclick="openModal('farming', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('farming', this)">
           <div class="sm-label">Farming signal</div>
           <div class="sm-plain">Credentials per upload</div>
