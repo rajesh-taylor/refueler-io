@@ -192,8 +192,63 @@
         Copy JSON
       </button>
     </div>
+
+    <!-- ─── Execution Dock ─────────────────────────────────────────────────
+         Outgoing standard transfers only. Completely separate from Silent
+         Drop (incoming transfers, SD4/SD4a). Internal ops view — not user-facing.
+    ──────────────────────────────────────────────────────────────────────── -->
+    <div class="dock-section" id="execution-dock">
+
+      <div class="dock-header">
+        <div class="dock-header-row">
+          <span class="section-title">Outgoing Transfers</span>
+          <span class="dock-badge hidden" id="dock-badge">0</span>
+        </div>
+        <p class="dock-desc">
+          Standard transfers sent outbound. Refueler moves files — not a storage service.
+          Transfers not collected before expiry appear here.
+        </p>
+        <p class="dock-clarification">
+          Outgoing only · not Silent Drop · not user-facing
+        </p>
+      </div>
+
+      <div class="dock-state" id="dock-loading">
+        <span class="dock-state-text">Loading transfers…</span>
+      </div>
+      <div class="dock-state hidden" id="dock-empty">
+        <span class="dock-state-text">No outgoing transfers on record yet.</span>
+      </div>
+      <div class="dock-state hidden" id="dock-error">
+        <span class="dock-state-text dock-state-error">Could not load transfers — try refreshing.</span>
+      </div>
+
+      <div class="dock-list hidden" id="dock-list" role="list"></div>
+
+    </div>
+
   </div>
 </div>
+
+<!-- ─── Execution Dock row template ───────────────────────────────────────── -->
+<template id="dock-row-tpl">
+  <div class="dock-row" role="listitem">
+    <div class="dock-row-inner">
+      <div class="dock-row-left">
+        <span class="dock-filename"></span>
+        <span class="dock-uuid"></span>
+      </div>
+      <div class="dock-row-right">
+        <span class="dock-pill"></span>
+        <span class="dock-expiry-label"></span>
+        <button class="dock-destroy hidden" type="button">Destroy now</button>
+      </div>
+    </div>
+    <div class="dock-nudge hidden">
+      <span class="dock-nudge-text"></span>
+    </div>
+  </div>
+</template>
 
 <!-- ─── Modal ─── -->
 <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-plain">

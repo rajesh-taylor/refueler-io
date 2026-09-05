@@ -621,3 +621,193 @@ body {
   border-radius: 3px;
   border: 0.5px solid var(--border);
 }
+
+/* ── Execution Dock (S-TG-4) ─────────────────────────────────────────────── */
+.dock-section {
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 0.5px solid var(--border);
+}
+
+.dock-header { margin-bottom: 1.25rem; }
+
+.dock-header-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+/* Amber badge — sits beside the section-title label */
+.dock-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: var(--c-amber);
+  color: var(--bg);
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 600;
+  border-radius: 99px;
+  letter-spacing: 0.02em;
+}
+
+.dock-desc {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin: 0 0 4px;
+  line-height: 1.5;
+}
+
+.dock-clarification {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  color: var(--text-tertiary);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* Loading / empty / error states */
+.dock-state { padding: 1rem 0; }
+
+.dock-state-text {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+}
+
+.dock-state-error { color: var(--c-red); }
+
+/* Transfer list */
+.dock-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Transfer row */
+.dock-row {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  transition: border-color 0.15s;
+}
+
+.dock-row[data-status="active_nudge"] { border-color: var(--c-amber); }
+.dock-row[data-status="collected"]    { opacity: 0.45; }
+.dock-row[data-status="expired"]      { opacity: 0.5; }
+
+.dock-row-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dock-row-left {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.dock-filename {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 380px;
+}
+
+.dock-uuid {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  color: var(--text-tertiary);
+  letter-spacing: 0.05em;
+}
+
+.dock-row-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Status pill */
+.dock-pill {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 3px;
+  border: 0.5px solid currentColor;
+}
+
+.dock-pill[data-status="active"]       { color: var(--text-tertiary); border-color: var(--border-mid); }
+.dock-pill[data-status="active_nudge"] { color: var(--c-amber);       border-color: var(--c-amber); }
+.dock-pill[data-status="collected"]    { color: var(--c-green);        border-color: var(--c-green); }
+.dock-pill[data-status="expired"]      { color: var(--text-tertiary);  border-color: var(--border-mid); }
+
+/* Expiry / collected date label */
+.dock-expiry-label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+/* Destroy button — red variant of existing .toggle-btn pattern */
+.dock-destroy {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--c-red);
+  background: transparent;
+  border: 0.5px solid var(--c-red);
+  border-radius: 4px;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.dock-destroy:hover:not(:disabled) {
+  background: var(--c-red);
+  color: var(--bg);
+}
+.dock-destroy:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Nudge strip — amber, shown below the row for active_nudge transfers */
+.dock-nudge {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 0.5px solid var(--border);
+}
+.dock-nudge-text {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--c-amber);
+  line-height: 1.5;
+}
+
+.hidden { display: none !important; }
+
+@media (max-width: 900px) {
+  .dock-row-inner { flex-direction: column; align-items: flex-start; }
+  .dock-filename  { max-width: 100%; }
+}

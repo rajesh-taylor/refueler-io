@@ -87,7 +87,7 @@ async function refreshAll() {
   clearInterval(refreshTimer);
   countdown = 60;
   updateCountdown();
-  const [m, ae, snap] = await Promise.all([fetchMetrics(), fetchAeMetrics(), fetchSnapshot()]);
+  const [m, ae, snap] = await Promise.all([fetchMetrics(), fetchAeMetrics(), fetchSnapshot(), loadExecutionDock()]);
   if (m)    { lastMetrics  = m;    renderMetrics(m); }
   if (ae)   { lastAe       = ae;   renderAeMetrics(ae); }
   if (snap) { lastSnapshot = snap; renderSnapshot(snap); }
@@ -757,3 +757,196 @@ window.smokeTest = async function() {
   console.groupEnd();
   return { pass, deferred, fail };
 };
+
+// ── Execution Dock (S-TG-4) ───────────────────────────────────────────────
+// Outgoing standard transfers view. Internal ops only — not user-facing.
+// Not Silent Drop (incoming transfers live at SD4/SD4a).
+// Uses module-level `adminKey` set by the gate handler.
+
+const DOCK_STATUS_LABELS = {
+  active:       'Awaiting',
+  active_nudge: 'Awaiting',
+  collected:    'Collected',
+  expired:      'Expired',
+};
+
+function dockFormatDate(unixSeconds) {
+  if (!unixSeconds) return '—';
+  return new Date(unixSeconds * 1000).toLocaleDateString('en-GB', {
+    day: 'numeric', month: 'short', year: 'numeric',
+  });
+}
+
+function dockTruncateFilename(name, max = 44) {
+  if (!name) return 'Unnamed file';
+  if (name.length <= max) return name;
+  const ext = name.includes('.') ? name.slice(name.lastIndexOf('.')) : '';
+  return name.slice(0, max - ext.length - 1) + '…' + ext;
+}
+
+function dockNudgeText(transfer) {
+  if (transfer.status !== 'active_nudge') return null;
+  const days = transfer.days_remaining ?? 0;
+  if (days === 0) return 'Expires today — not yet collected. Resend the link or destroy the transfer.';
+  if (days === 1) return '1 day remaining — not yet collected. Resend the link or destroy the transfer.';
+  return `${days} days remaining — not yet collected. Resend the link or destroy the transfer.`;
+}
+
+function dockRenderRow(transfer) {
+  const tpl   = document.getElementById('dock-row-tpl');
+  const clone = tpl.content.cloneNode(true);
+  const row   = clone.querySelector('.dock-row');
+
+  row.dataset.status = transfer.status;
+  row.dataset.uuid   = transfer.uuid;
+
+  clone.querySelector('.dock-filename').textContent =
+    dockTruncateFilename(transfer.file_name);
+
+  clone.querySelector('.dock-uuid').textContent =
+    transfer.uuid ? transfer.uuid.slice(0, 8) + '…' : '—';
+
+  const pill         = clone.querySelector('.dock-pill');
+  pill.textContent   = DOCK_STATUS_LABELS[transfer.status] ?? transfer.status;
+  pill.dataset.status = transfer.status;
+
+  const expiryEl = clone.querySelector('.dock-expiry-label');
+  if (transfer.status === 'collected') {
+    expiryEl.textContent = `Collected ${dockFormatDate(transfer.collected_at)}`;
+  } else if (transfer.status === 'expired') {
+    expiryEl.textContent = `Expired ${dockFormatDate(transfer.expiry_timestamp)}`;
+  } else {
+    expiryEl.textContent = `Expires ${dockFormatDate(transfer.expiry_timestamp)}`;
+  }
+
+  // [Destroy now] — active/active_nudge only; file still exists on R2
+  const btn = clone.querySelector('.dock-destroy');
+  if (transfer.status === 'active' || transfer.status === 'active_nudge') {
+    btn.classList.remove('hidden');
+    btn.addEventListener('click', () => dockHandleDestroy(transfer.uuid, row));
+  }
+
+  // Nudge strip — active_nudge only
+  const nudgeRow  = clone.querySelector('.dock-nudge');
+  const nudgeText = dockNudgeText(transfer);
+  if (nudgeText) {
+    nudgeRow.classList.remove('hidden');
+    clone.querySelector('.dock-nudge-text').textContent = nudgeText;
+  }
+
+  return clone;
+}
+
+async function dockHandleDestroy(uuid, rowEl) {
+  const btn = rowEl.querySelector('.dock-destroy');
+  if (!btn || btn.disabled) return;
+
+  btn.disabled    = true;
+  btn.textContent = 'Destroying…';
+
+  try {
+    const res = await fetch(`${WORKER}/transfer/${uuid}`, {
+      method:  'DELETE',
+      headers: { 'X-Admin-Key': adminKey },
+    });
+
+    if (res.ok) {
+      rowEl.style.transition = 'opacity 0.3s';
+      rowEl.style.opacity    = '0';
+      setTimeout(() => {
+        rowEl.remove();
+        dockUpdateBadge();
+        const listEl = document.getElementById('dock-list');
+        if (listEl && listEl.querySelectorAll('.dock-row').length === 0) {
+          listEl.classList.add('hidden');
+          const emptyEl = document.getElementById('dock-empty');
+          if (emptyEl) emptyEl.classList.remove('hidden');
+        }
+      }, 320);
+    } else if (res.status === 410) {
+      // Already destroyed — idempotent, treat as done
+      rowEl.dataset.status = 'expired';
+      rowEl.style.opacity  = '0.5';
+      btn.textContent      = 'Already destroyed';
+      dockUpdateBadge();
+    } else {
+      btn.disabled    = false;
+      btn.textContent = 'Destroy now';
+      showError(`Destroy failed: ${res.status}`);
+    }
+  } catch (e) {
+    btn.disabled    = false;
+    btn.textContent = 'Destroy now';
+    showError(`Destroy error: ${e.message}`);
+  }
+}
+
+function dockUpdateBadge() {
+  const listEl = document.getElementById('dock-list');
+  const badge  = document.getElementById('dock-badge');
+  if (!listEl || !badge) return;
+  const count = listEl.querySelectorAll('.dock-row[data-status="active_nudge"]').length;
+  if (count > 0) {
+    badge.textContent = String(count);
+    badge.classList.remove('hidden');
+  } else {
+    badge.classList.add('hidden');
+  }
+}
+
+async function loadExecutionDock() {
+  if (!adminKey) return;
+
+  const loadingEl = document.getElementById('dock-loading');
+  const emptyEl   = document.getElementById('dock-empty');
+  const errorEl   = document.getElementById('dock-error');
+  const listEl    = document.getElementById('dock-list');
+  const badge     = document.getElementById('dock-badge');
+
+  if (!loadingEl) return;
+
+  loadingEl.classList.remove('hidden');
+  emptyEl.classList.add('hidden');
+  errorEl.classList.add('hidden');
+  listEl.classList.add('hidden');
+
+  let data;
+  try {
+    const res = await fetch(`${WORKER}/admin/execution-dock`, {
+      headers: { 'X-Admin-Key': adminKey },
+    });
+    if (res.status === 401) { sessionStorage.removeItem('dash_key'); location.reload(); return; }
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    data = await res.json();
+  } catch (e) {
+    loadingEl.classList.add('hidden');
+    errorEl.classList.remove('hidden');
+    showError(`/admin/execution-dock: ${e.message}`);
+    return;
+  }
+
+  loadingEl.classList.add('hidden');
+
+  const transfers  = data.transfers ?? [];
+  const badgeCount = data.badge_count ?? 0;
+
+  if (badge) {
+    if (badgeCount > 0) {
+      badge.textContent = String(badgeCount);
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
+  }
+
+  if (transfers.length === 0) {
+    emptyEl.classList.remove('hidden');
+    return;
+  }
+
+  listEl.innerHTML = '';
+  for (const transfer of transfers) {
+    listEl.appendChild(dockRenderRow(transfer));
+  }
+  listEl.classList.remove('hidden');
+}
