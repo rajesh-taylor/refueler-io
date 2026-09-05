@@ -23,10 +23,10 @@
     <div class="sb-section">Overview</div>
     <a class="sb-item active">System Summary</a>
     <div class="sb-section">Metrics</div>
-    <a class="sb-item stub">Upload latency</a>
-    <a class="sb-item stub">Download latency</a>
-    <a class="sb-item stub">Token security</a>
-    <a class="sb-item stub">Client errors</a>
+    <a class="sb-item" onclick="openModal('upload-speed')" style="cursor:pointer">Upload latency</a>
+    <a class="sb-item" onclick="openModal('download-speed')" style="cursor:pointer">Download latency</a>
+    <a class="sb-item" onclick="openModal('uniqueness')" style="cursor:pointer">Token security</a>
+    <a class="sb-item" onclick="openModal('client-errors')" style="cursor:pointer">Client errors</a>
     <div class="sb-section">Data</div>
     <a class="sb-item stub">Transfers</a>
     <a class="sb-item stub">Subscribers</a>
@@ -76,7 +76,7 @@
   <div class="card-value" id="lightning-toggle-state">—</div>
   <div class="card-sub" id="lightning-toggle-sub">checking…</div>
   <div class="lightning-toggle-controls">
-    <button class="toggle-btn" id="btn-lightning-blink"  data-value="blink">Blink (live)</button>
+    <button class="toggle-btn" id="btn-lightning-blink"  data-value="blink">phoenixd (future)</button>
     <button class="toggle-btn" id="btn-lightning-true"   data-value="true">On (any)</button>
     <button class="toggle-btn" id="btn-lightning-false"  data-value="false">Off</button>
   </div>
@@ -172,11 +172,6 @@
           <div class="sm-label">Lightning settlement<span class="b7-badge">B7</span></div>
           <div class="sm-plain">Sats vs fiat mix</div>
           <div class="sm-value amber">—</div>
-        </div>
-        <div class="snap-metric" tabindex="0" onclick="openModal('execution-dock-kpi', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('execution-dock-kpi', this)">
-          <div class="sm-label">Uncollected expired</div>
-          <div class="sm-plain">Transfers past expiry</div>
-          <div class="sm-value amber" id="snap-dock-expired">—</div>
         </div>
         <div class="snap-metric" tabindex="0" onclick="openModal('farming', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('farming', this)">
           <div class="sm-label">Farming signal</div>
