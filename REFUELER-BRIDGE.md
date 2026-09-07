@@ -1,5 +1,5 @@
 # REFUELER-BRIDGE.md — Refueler cross-project context
-> **Version:** 8.1 | **Created:** 28 July 2026 | **Updated:** TH-0 · 2026-09-06
+> **Version:** 8.5 | **Created:** 28 July 2026 | **Updated:** SW-Opus-3 · 2026-09-07
 > Lives in `refueler-share/` (root), `refueler-io/docs/`, `refueler-legend/` (root), `refueler-pass/` (root), and `numo-fork/` (root).
 > This file is the handshake between Projects — not a substitute for repo-specific context files.
 > Higher MasterContext version number always wins on divergence.
@@ -152,29 +152,11 @@ Never place a Claude-generated `index.njk` without running this pass. Template c
 | Session | Repos touched | Notes |
 |---|---|---|
 | CSS-4 through CSS-7b | refueler-io | CSS rationalisation track — complete |
-| CC-84 through CC-103 | refueler-io, Supabase, numo-fork | See previous BRIDGE versions for detail. All complete. |
-| Pass-0 / Pass-1 | refueler-pass | Founding scope. Two-credential-class model locked. |
-| **Multi-[n]** | refueler-legend, refueler-share, refueler-pass, refueler-io | Share×Legend distress integration. Pass×Legend address watch. Recovery Coordination Layer v3. BRIDGE v5.0. |
-| **AD-HOC · 27 Aug 2026** | refueler-share, refueler-pass | Silent Drop spec + Stripe vs Lightning tier split + BOLT12-inspired Option A + NUT-00 v3 + NUT-10 v3 Nutroot secrets + Pass×Nutroot use cases. BRIDGE v5.1. |
-| **S73 · 28 Aug 2026** | refueler-share | Blink checklist. Blink discontinuing UK custodial Aug 31. BRIDGE v5.2. |
-| **pre-Opus-2 · 28 Aug 2026** | all repos | Lightning provider locked: LNbits on Hetzner. Boltz dead. BRIDGE v5.3. |
-| **Opus-2 · 29 Aug 2026** | refueler-share + all repos | B7 resequenced. NB-series. phoenixd confirmed. Instance topology. SD-block placement. SYNC-1 inserted. BRIDGE v5.4. |
-| **S73b / NB-1 · 29 Aug 2026** | refueler-share | Node bootstrap runbook locked. 5-phase NB-series. Wallet structure. Extension policy. API layering. Backup strategy. BRIDGE v5.5. |
-| **SYNC-1 · 31 Aug 2026** | refueler-share, refueler.io | Dual-repo asset sync resolved. Canonical: `refueler-share/frontend/`. Mirror: `refueler.io/src/share/assets/`. Sync tool: `bin/sync-share.sh`. GENERATED headers stamped in mirror. Zero dual-homing found in other repos. Embedded git repos (`refueler-app`, `terminals/numo-fork`) cleaned from `refueler.io`. BRIDGE v5.6. |
-| **AP-BRAND · 31 Aug 2026** | all repos | Brand vocabulary locked. London Thames geography canonical. Silent Drop product decisions locked. Harbourmaster dashboard spec. Merchant-issues-Quays feature named. Notification architecture (no email, ever). Two authentication paths. Dr Chen→Dr Okafor case study locked. Raven replaces canary. Legend under Tower of London. Tower Bridge tier metaphor. Port Authority replaces "mint" in product contexts. Quay/Key and Locke/Lock double-meanings confirmed. Westminster geography reserved for future products. BRIDGE v5.7. |
-| **AP-ARCH · 31 Aug 2026** | all repos | Three Liberties governance model locked. Three independent mints, seeds, Ravens. Port Authority (Share) · Guildhall (Pass) · Tower of London geography (Legend, mint name TBD Opus-3). Raven = warrant canaries only; mint health = status page plain language. Ceremony of the Keys = keyset rotation only. Locke = credential-as-object, P2PK bound, Deed recovery, passkey storage exception. Vocabulary matrix locked (four deployment contexts). Templar prior art argument locked for whitepaper. Reserved geography catalogued. Opus-3 scope defined. BRIDGE v5.8. |
-| **Opus-3 · 31 Aug 2026** | all repos | **Geographic reshuffle — four Liberties made literal, west to east.** Share → Tower of London + **Royal Mint** (mint). Pass → Westminster + Black Rod. Legend → City of London / Temple (Guildhall + St Paul's). Merchant → Royal Exchange + the Exchange. Port Authority repurposed → admission-control layer (denylist + rate-limit gate). Rotation ceremonies split per-Liberty: Warder/Ceremony of the Keys (Share) · Black Rod (Pass) · Silent Ceremony (Legend, confirmed) · The Proclamation / Common Crier (Merchant). Legend St Paul's landmarks: Whispering Gallery (metadata leak, w/ Temple of Mithras) · Triforium (deep ledger) · floating staircase (Merkle, WP+presentation only). St Paul's dome metaphor retired. Bank of England → whitepaper foil (use with care). Royal Exchange → Merchant home (the Exchange mint). Temple → unowned (Cashu spiritual home / Templar headwater / Legend brand ground). Status page: "Royal Mint: operational" replaces "Port Authority". Constitutional line updated to four stations west-to-east. BRIDGE v5.9. |
-| **Opus-3b · 31 Aug 2026** | all repos | Fourth rotation ceremony named: **The Proclamation** (Royal Exchange / Merchant), read by the Common Crier (optional colour). Platform whitepaper section outline locked — argument flow + geography placement, four Liberties, honest-claims boundary. Raven metaphor (canary→Raven etymology) locked for whitepaper §5. Raven governance extended to four Liberties. Rotation-ceremony admin changelog template + whitepaper §Key lifecycle language locked (four ceremonies). Constitutional line confirmed: Westminster → Temple → Royal Exchange → Tower. VPN recommendation locked (Mullvad named, multi-hop noted). "The pilgrim's society" held as future proper noun. Pass + Merchant vocabulary session flagged as a small Sonnet session (geographic terms for reward tokens / live melt path). BRIDGE v6.1. |
-| **Opus-3a · 1 Sep 2026** | all repos | **Liberty mint reconciliation — both provisional names resolved.** Pass mint: **Jewel Tower** (locked). Legend mint: **Guildhall** (locked). Temple Treasury retired completely. Melt-hygiene mnemonic locked. Four Liberties mint column fully locked. BRIDGE v6.2. |
-| **Pass-Vocab-1 · 1 Sep 2026** | all repos | **Pass geographic vocabulary locked.** Reward token UI name: **a Pass**. Live melt path event: **Redemption**. Integrity verification metaphor: **Trial of the Pyx**. BRIDGE v6.3. |
-| **Merchant-Vocab-1 · 1 Sep 2026** | all repos | **Merchant geographic vocabulary locked.** Reward stamp instrument: **a Note**. Live melt path event: **Clearance**. Mint name **the Exchange** locked. BRIDGE v6.4. |
-| **S89 · 3 Sep 2026** | all repos | **Tier rename locked.** Free → Citizen. Creative Premium retired. Production Max → Sovereign. Crown retires to brand/institutional vocabulary only. Rail model: both rails at Sovereign; identity-free features gated by Lightning rail, not tier. BRIDGE v6.8. |
-| **AD-HOC · 4 Sep 2026** | all repos | EIC promoted to named villain (whitepaper/closed-door only). Muscovy Company provenance clause added. Freedom of the City / impressment locked for §Compulsion argument. St. Peter ad Vincula locked as prose texture only. City Wall / Posterns locked as prose texture. The Tower walk locked as opening geography paragraph candidate. BRIDGE v6.9. |
-| **AP-10 · 3 Sep 2026** | refueler-share + all repos | Roadmap resequenced (no Hetzner required for TG-block, TH-series, SW, B8). Traitor's Gate, Tidal Window, Execution Dock, Three Tides, Dragon status vocabulary all locked. Editorial atoms locked. BRIDGE v6.7. |
-| **S-TG-4a/4b · 5 Sep 2026** | refueler-share, refueler-io | TG-4 complete: `handleExecutionDock` + `GET /admin/execution-dock` + `dock_index` KV write + `handleOwnerDelete`. Execution Dock KPI card in System Summary. BRIDGE v7.1. |
-| **S88 · 4 Sep 2026** | refueler-share | Silent Drop full design session (Opus). All SD-block decisions locked. BRIDGE v7.0. |
 | **TH-Opus-2 · 6 Sep 2026** | all repos | **Tower Hill — Legend price locked. Cross-product entitlement architecture locked. Legend native verifier design locked. Pass timestamping pattern locked. Monument / ti-fectar introduced.** See §TH-Opus-2 decisions below. BRIDGE v8.0. |
 | **TH-0 · 6 Sep 2026** | refueler-share | **OTS bundle spike — javascript-opentimestamps killed (601 KB gzipped, no fetch path). Hand-rolled approach confirmed GO.** Calendars reachable (2/2 from host; Cloudflare egress to confirm at TH-1 start). Round-trip clean. Committed-value construction identified as load-bearing for Legend verifier and Pass hashlock: `SHA-256(blake3_root \|\| url_fragment_nonce)`. Share×Pass×Legend three-product proof-of-receipt primitive identified — see §Share×Pass×Legend forward note. BRIDGE v8.1. |
+| **SW-Opus-1 · 7 Sep 2026** | refueler-share + all repos | **Platform API + white-label architecture locked.** Three-tier model confirmed (Citizen / Sovereign / API — Business + Enterprise demolished). Sovereign Teams → SW-Opus-2. Rail model extended to API tier: identity rail (Stripe/invoice) and anonymous rail (Lightning/sats) mutually exclusive per relationship; rail declared by principal at onboarding, never inferred from payment. Mandatory pre-payment disclosure of both irreversibles (account loss + prepaid balance loss) locked for four surfaces: user agreement, initial call/email, website. Model B (platform credit pool) selected — only model that survives the anonymous rail. Two substrates: identity rail = server ledger; anonymous rail = client-held bearer Cashu credit tokens. Rate card versioned per product. Term protection = identity-rail feature only. API v1 features: capability discovery, OTS-confirmation webhook, acceptance + collection receipts. "Proof of delivery" retired as a phrase. API v2 features gated per dependency. MCP v1 tools: `refueler_capabilities`, `refueler_send_file`, `refueler_check_transfer`, `refueler_quote` — MCP runs in agent's trust domain, handles ciphertext only (invariant). Policy-encoded transfers locked as Nutroot three-product forward commitment. BOLT12 locked as B9+ forward commitment; credit-issuance contract must accept arbitrary-amount pay-then-mint. Sandbox: credential-limited, no time cap, both rails, `rfs_test_` prefix. BRIDGE v8.3. |
+| **SW-Opus-2 · 7 Sep 2026** | all repos | **Unit economics, rate-card v1.0, GBP invoicing policy, credit blocks, margin model, treasury policy, Sovereign Teams structure, GTM reframe, rate-card notification wording. BRIDGE v8.4.** |
+| **SW-Opus-3 · 7 Sep 2026** | all repos | **Identity-API access fee locked (flat £99 / Professional £249 defined-but-unbuilt, banded on service level not allowance, both prices subject to review). DPA mandatory for all identity-rail clients by default; Refueler provides standard Art. 28 addendum; client-paper review gated to Professional band. GDPR framing narrowed: anonymous rail = controller-of-metadata, not "outside GDPR." AM role defined: onboarding call, rail-declaration sign-off, DPA coordination, security-incident notification, Raven canary explanation, quarterly usage review, rate-card change notification; AM function named in agreement, personal name at onboarding only, no SLA. Four-surface pre-payment disclosure wording locked (both rails, bracketed placeholders slot at SW7). SW table in share-sessions.md overwritten to match Master-Context. IT handover PDF session dropped by intent. SW1 confirmed ready. BRIDGE v8.5.** |
 
 ---
 
@@ -197,7 +179,15 @@ Never place a Claude-generated `index.njk` without running this pass. Template c
 - **[Legend]** UC-9 Opus session — Recovery Coordination Layer. Load: CLAUDE.md · SESSIONS.md · MASTER.md · legend-use-cases.md.
 - **[Legend] Create Stripe product/price objects for Legend: £50/mo + £480/yr** — at Legend subscription flow build session.
 - **[Share] Add `LEGEND_ENTITLEMENT_PUBKEY` Worker secret** — at Legend cross-product entitlement build session (post-Legend subscription flow live).
-- **[Share] Run TH-Opus-3a + TH-Opus-3b (Opus, Share project)** before TH-1 build session — stress-test committed-value construction, Pass hashlock forward note, privacy model, whitepaper treatment. Two sessions. See §Share×Pass×Legend forward note.
+- ~~**[Share] Run TH-Opus-3a + TH-Opus-3b**~~ ✅ TH-series complete · 6 Sep 2026.
+- **[Share] Run SW-Opus-2** before SW build sessions — unit economics, rate-card numbers, Sovereign Teams sizing, family office GTM. See SW-Opus-1 decisions in CLAUDE.md.
+- **[Share / AM] Pre-payment disclosure — four surfaces. ✅ Wording locked SW-Opus-3.** Both rails. Bracketed placeholders ([recovery credential], [anonymous standing-receive]) slot at SW7. Principal must declare rail before AP is involved — one-way door. Anonymous rail: "signed digital tokens held by client," never "ecash" in client-facing copy.
+- **[Share / AM] Accountant-arrival disclosure.** Add to identity-rail initial-call talking points and follow-up email: principal must declare rail before sharing payment details with accounts team. Fiat payment arriving after rail is locked does not flip the rail — but creates a paper trail pointing at an anonymous-intent service. Decision sequencing is the privacy protection.
+- **[All products / Legend] Legend node costs.** When Legend infrastructure is scoped: attribute a share of node operating costs to Share and Pass, both of which depend on Legend for OTS verification and block queries. Accounting convention for margin model — resolve at Legend scoping Opus.
+- **[Legend / pricing] Pleb-Bitcoiner design principle.** Free tier must be genuinely useful, not a nag screen. Sovereign tier priced for Bitcoin conviction, not compliance budget. API is where commercial weight sits. Lock formally at Legend planning session and Pass-Vocab-2.
+- **[Share] Engage solicitor for standard Art. 28 DPA addendum** before first identity-API client. Priority review items: §4 (no-uptime SLA) and §5 (DPA). Client-paper review (bespoke DPA) is a Professional-band service, not included at £99.
+- **[Share] SW table in share-sessions.md** — overwrite to Master-Context version. ✅ Confirmed SW-Opus-3.
+- **[Share vocabulary track] API/MCP whitepaper atom descriptors.** , / need London-register naming before B9 whitepaper. Not urgent — allocate at a naming session.
 
 ---
 
@@ -584,6 +574,264 @@ Friend-group soft launch: founder + 2–3 close contacts, 7-day observation wind
 This is a stronger story than revealing products sequentially — it tells the user they are early. Carry as a founding constraint into the Refill app scoping session. Do not impose on SD-block or any current build sessions.
 
 ---
+
+## SW-Opus-1 decisions — locked 7 Sep 2026
+
+| **SW-Opus-2 · 7 Sep 2026** | all repos | **Unit economics, rate-card v1.0, GBP invoicing policy, credit blocks, margin model, treasury policy, Sovereign Teams structure, GTM reframe, rate-card notification wording. BRIDGE v8.4.** |
+
+## SW-Opus-2 decisions — locked 7 Sep 2026
+
+### Rate card v1.0
+
+| Action | Product | Sat cost |
+|---|---|---|
+| File transfer — base | Share | 10 / transfer |
+| File transfer — volume | Share | +100 / GB |
+| Permanent record (OTS anchor) | Share | 20 / transfer |
+| OTS confirmation webhook | Share | 0 (bundled — never gate a notification on a transfer already paid for) |
+| Legend private query | Legend | 10 / lookup |
+| Pass credential issuance | Pass | 50 / credential |
+| Capability discovery (`GET /capabilities`) | All | 0 (free — discovery must never be gated) |
+
+**Reference peg:** v1.0 issued at £50k BTC reference. Stated on the rate card.
+
+**Rate-card governance (locked):**
+- Mandatory review when 30-day trailing average BTC/GBP crosses a checkpoint.
+- First review trigger: **£100k BTC**. Subsequent: each doubling (£200k, £400k…) or halving (£30k, £20k…).
+- At review: if the GBP-equivalent of flagship actions has drifted >±40% from the issue-date band, publish a new version.
+- Direction of drift determines direction of revision: BTC appreciation → sat cost cut (credit stretches further, early holders rewarded); BTC crash → sat cost rise (abuse friction maintained).
+- Rate-card re-versioning does **not** break the anonymous rail's "no term lock" rule — current card always applies. Identity-rail term-locked clients are unaffected until their term expires.
+
+### GBP invoicing on identity rail
+
+Sat costs are the internal accounting unit. The GBP figure on an identity-rail invoice is derived once, at rate-card-version publication, using a fixed reference rate Refueler sets — never live spot. The client never sees a sat figure and never carries BTC volatility. Annual terms lock that GBP figure for 12 months; monthly gets 30 days' notice. This is costless to give: all identity-rail costs are GBP, all identity-rail revenue is GBP, no conversion exposure exists.
+
+### Credit block sizes (anonymous rail)
+
+**Contract:** accepts arbitrary-amount pay-then-mint above a 10,000-sat dust floor. BOLT12 forward-commitment invariant — blocks cannot be enforced in the contract.
+**Dust floor:** 10,000 sats minimum top-up. Applies to top-up only, not per-action spend.
+**v1 UI presets:** 10k · 50k · 200k sats + Custom (≥10k). Arbitrary amounts accepted.
+
+### Margin model
+
+Identity-rail API tier: **access fee of £99/mo minimum** (covers DPA, invoice, AM relationship, support overhead), with metered usage layered above. Metered-only is not viable for identity-rail — usage at typical law-firm/clinic volume (£10–15/mo metered) cannot sustain the commercial relationship. Access fee is the real revenue; metering captures genuine heavy users.
+
+Anonymous rail: pure prepaid-metered, no access fee, no relationship by design.
+
+**Contribution margin estimates (£40/mo fixed platform cost):**
+- 10 identity-rail API @ £99 access + light metered: ~£1,030/mo
+- 50 anonymous-rail API @ ~£25 credit avg: ~£1,190/mo
+- 100 Sovereign single-seat @ £24: ~£2,300/mo
+
+**Break-even:** Hetzner = one anonymous top-up. All fixed costs = two Sovereign subs.
+**First meaningful milestone: £1k MRR** (~40 Sovereign subs or 10 identity-API clients).
+
+### Treasury / volatility policy (locked)
+
+- Identity rail → GBP in, GBP costs out. No conversion, no exposure.
+- Anonymous rail + Lightning Sovereign → sats held in phoenixd, swept to cold storage (Sparrow, Payjoin v2) only when balance exceeds ops reserve.
+- GBP revenue (even 2 Sovereign subs) covers all GBP platform costs — never liquidate sats to pay opex.
+- Each sweep = CGT disposal event under current UK treatment. Review with crypto accountant regularly.
+- No fixed sweep %, no mandatory liquidation schedule. Sweeps are treasury moves only.
+
+### Sovereign Teams — structure locked, build deferred to cross-product Opus
+
+**Storage:** shared 100 GB pool per firm (not per-seat). Storage packs sold separately for genuine volume.
+**Seat definition:** one Locke keypair + one Sovereign entitlement per seat, all under one firm Stripe customer. Flat seats under one firm account for v1.
+**Pricing bands (UI-only, no API):**
+
+| SKU | Seats | Price/mo | Effective/seat |
+|---|---|---|---|
+| Teams S | up to 5 | £49 | £9.80 |
+| Teams M | up to 10 | £89 | £8.90 |
+| Teams L | up to 20 | £169 | £8.45 |
+| Beyond 20 | — | API / custom | — |
+
+1/3/12 cadence at identical per-month rate (Mullvad rule holds). Annual benefit = term-lock, not discount.
+**Stripe:** separate price objects per band (share-teams-s-monthly etc.), not a quantity field.
+**Build session:** SW-Teams-1 — scoped in a **cross-product Opus in the `refueler.io` project**, not a Share-only session. Seat/delegation is a cross-product primitive (same shape as Pass organiser → cohort, Merchant owner → staff tills, Legend firm → shared sub). Share Teams is its first consumer. Master-Locke-issues-sub-Lockes deferred to B12 (nutroot `threshold` leaves).
+
+### GTM reframe — HNW + accountant
+
+"Family office" (US term) dropped. UK reframe: **Bitcoin-native high-net-worth individuals and their accountants.** The accountant is both the sensitive-document counterparty and the warm-intro vector. Use case: "send this to my accountant privately" — one person's financial privacy end to end. Legend + Share bundle (£50/mo carries Share entitlement). Positioning stays closed-door — not on the website, not in the public whitepaper section. Outreach: warm intro only, via BHODL co-founder or Bitcoin-policy contacts. First outreach = a real Silent Drop link, not a deck.
+
+### Rate-card update notification wording (locked)
+
+**Identity rail** (user agreement, invoice, website, call):
+> "Your pricing is fixed for the length of your term. Monthly plans receive at least 30 days' written notice of any rate-card change before it takes effect; annual plans are locked to the rate-card version in force on the day you subscribe, for the full twelve months."
+
+**Anonymous rail** (credit-purchase surface — also discharges bearer/non-recoverable disclosure):
+> "Top up your credit and spend as you go. It's held by you, not in a recoverable account. If you lose it, we can't refund it. Buy what you plan to use soon."
+
+### Tier model
+
+**Three tiers confirmed: Citizen / Sovereign / API.** Business and Enterprise demolished entirely. API tier IS the business tier — no separate label.
+
+**Sovereign** ships in two SKUs:
+- **Sovereign** — single-seat, UI-only, no API.
+- **Sovereign Teams** — N-seat, shared pool, one bill, UI-only, no API. Sizing → SW-Opus-2.
+
+**API ⊃ UI** (one-directional): API key holder may also use the web interface. **Sovereign ⊅ API**: Sovereign subscribers never get API access. Price-enforced — API sits clearly above Sovereign.
+
+**API tier is invoiceable** — preserves PO/invoice path for firms that cannot pay by card or Lightning.
+
+### Rail model extended to API tier
+
+Identity rail (Stripe/invoice) and anonymous rail (Lightning/prepaid sats) are mutually exclusive per credential relationship — same physics as the consumer tier split.
+
+- **Identity rail:** recoverable credentials, invoice, DPA, accounts-payable-friendly. No identity-free features. No anonymous Silent Drop provisioning.
+- **Anonymous rail:** unlocks Silent Drop provisioning and anonymous machine-to-machine primitives. No recovery beyond the Deed, no invoice (an invoice is an identity artefact).
+- **Rail is declared by the client's principal at onboarding** — not inferred from how payment happened. Payment habit can never silently reconfigure the product.
+- **DO NOT add Supabase row or email field to anonymous-rail API credentials** — same invariant as Lightning consumer path.
+
+**Mandatory pre-payment disclosure** of both irreversibles (aimed at principal, before AP handoff): identity rail forecloses identity-free features; anonymous rail has no recovery and prepaid balance loss is permanent. Disclosure appears in: user agreement, initial call/meeting, email, and website — four surfaces.
+
+### Pricing model
+
+**Model B (platform credit pool).** Models A and C rejected — neither survives the anonymous rail.
+
+**Two substrates, one rate card:**
+- Identity rail: server-held recovering ledger, auditable, invoiceable, optional itemised view.
+- Anonymous rail: client-held bearer Cashu credit tokens (blind-signed, unlinkable, non-recoverable). Balance is a stack of ecash — not a server record. Losing the token stack = losing the balance, permanently.
+
+**Rate card versioned** (v1.0, v1.1…): action → sat cost per product. Product cost rises → new rate-card version for that product only; credit value unchanged.
+
+**Term protection is an identity-rail feature.** Annual prepay locked at purchase-version for 12 months; monthly gets 30 days' notice. Anonymous rail: current rate card always.
+
+**Deferred to SW-Opus-2:** unit economics (sat figures per action, credit block sizes), GBP denomination boundary, BTC/GBP volatility treasury question, keyset-versioned rate-lock for anonymous rail.
+
+### API features — v1 (buildable on current stack, ships in SW block)
+
+- `GET /api/v1/capabilities` — tier, rail, feature set, current rate-card version. Build first.
+- OTS-confirmation webhook — fires on `timestamp_state: pending → complete`. HMAC-signed via `rfs_whsec_`.
+- Acceptance receipts + collection receipts. **"Proof of delivery" retired as a phrase — unprovable, never claim it.**
+
+### API features — v2 (each with explicit gate)
+
+| Feature | Gate |
+|---|---|
+| Silent Drop provisioning via API | SD-block shipped (Hetzner) |
+| Agent-to-agent transfers | SD provisioning live |
+| Verifiable agent identity (NUT-11 Mode 2) | B8 — `bind_pubkey` field reserved in voucher now |
+| Batch credential issuance | Pass API (Q4) |
+| Composable receipts | v1 if free off credit-token work, else v2 |
+
+### API features — forward commitments (document, do not build)
+
+**Policy-encoded transfers** via the Nutroot three-product flow (gates: Nutroot PR #421 merge + B8 + Pass + B12). There is no honest Worker-side version — the Worker never holds keys. The policy is encoded in Pass Nutroot leaves, Legend verifies the block condition, the leaf satisfies. Document; do not fake.
+
+**Transfer chaining:** research direction. Not committed.
+
+### MCP v1 tool list
+
+| Tool | Purpose | Status |
+|---|---|---|
+| `refueler_capabilities` | Capability discovery — first call any agent makes | v1, build when API ships |
+| `refueler_send_file` | Encrypt and upload — runs in agent's trust domain, ciphertext only | v1 |
+| `refueler_check_transfer` | Poll transfer status | v1 |
+| `refueler_quote` | Action cost + current balance | v1 |
+
+Remaining tools (inbox, timestamp verify, Pass issuance, Legend query) locked as contracts; each ships the day its backing product comes online.
+
+**MCP architectural constraint (invariant):** MCP server runs in the agent's trust domain and handles ciphertext only. Never a Refueler-hosted plaintext endpoint.
+
+**Whitepaper naming:** `refueler_capabilities`, `refueler_quote`/`refueler_balance` need London-register atom descriptors. Vocabulary track item — not urgent.
+
+### BOLT12 / MCP agent payment — B9+ forward commitment
+
+phoenixd already supports BOLT12 — no new infrastructure. SW constraints that must not foreclose this:
+1. Credit-issuance contract accepts arbitrary-amount pay-then-mint (not blocks-only).
+2. MCP response envelope can carry `payment_required` + offer field without breaking change.
+
+### Sandbox spec
+
+Credential-limited, no time cap. Model-B test-credits; both rails walkable with real HMAC. `rfs_test_`-prefixed keys (never `rfs_live_` or `rfs_sign_` in test files — GitHub scanner). Non-anonymous by design (observable for debugging) — "do not send real cargo to the sandbox" stated plainly in the sandbox itself.
+
+---
+## SW-Opus-3 decisions — locked 7 Sep 2026
+
+### Identity-API access fee
+
+**Flat £99/month at launch.** Covers: named account contact; email support (business hours, async, best-effort — not a hotline); itemised dashboard access; DPA addendum (standard, default, not opt-in); capability discovery (free per rate card); OTS-confirmation webhook (free, bundled). One invoice line in normal operation. Metered sat usage is an abuse ceiling, not a billing mechanism — at v1.0 prices, realistic identity-rail clients (law firm, GP clinic) generate <£3/month metered equivalent; treat identity-rail revenue as access-fee-only for planning purposes.
+
+**Professional £249/month** — defined, not built. Activates when a real client requests: priority support, custom webhook retry policy, additional AM time, or review of client's own bespoke DPA paper. No second Stripe object until a client pulls it into existence. Both prices subject to upward review as Legend node infrastructure costs are attributed across products.
+
+**Invoicing cadence:** access fee monthly in advance + metered reconciliation on same invoice monthly in arrears. One invoice, two possible line items. Second line reads £0.00 for essentially all v1 clients.
+
+**Annual rate-card lock:** identical per-month rate (Mullvad rule), 12-month rate-card version lock. Term protection is identity-rail feature; monthly gets 30 days' notice. Anonymous rail: current card always.
+
+### DPA
+
+**Mandatory by default for every identity-rail API client.** Not opt-in, not self-certified. Refueler provides a short standard Art. 28 addendum (controller-to-processor or processor-to-sub-processor depending on role). Signable via DocuSign or wet ink. Client-paper review (bespoke DPA) is a Professional-band service — not included at £99.
+
+**Solicitor must draft standard addendum before first identity-API client.** Priority review items: §4 (no-uptime SLA) and §5 (DPA). Engage before first Business-tier client.
+
+### GDPR framing — anonymous rail (narrowed from "outside GDPR")
+
+> On the anonymous rail Refueler establishes no identity, no account, no email, and no database row for the client, and enters no controller-processor relationship — so no Art. 28 DPA counterparty exists and none is required. Refueler's only GDPR footprint on this rail is as controller of minimal service metadata (IP, file size, chunk count, timestamps) under its own privacy notice, on a legitimate-interest basis (security/abuse prevention), minimally retained. Users wanting to remove IP from that footprint tunnel their own VPN — the standing Mullvad recommendation.
+
+Use this wording in the user agreement and whitepaper threat model. Not "outside UK GDPR."
+
+### AM role
+
+**Who:** Rajesh for first 3–6 months. Presented under founder's name — not dressed as a team. "Your account contact is the founder" is a trust feature for sensitive-data clients.
+
+**Scope:** onboarding call; rail-declaration sign-off; DPA coordination; security-incident notification (AM is the named human who delivers breach notification); Raven canary explanation at onboarding (client understands absence = compromise); quarterly usage review; rate-card change notification.
+
+**Out of scope explicitly:** uptime SLA, 24/7 availability. Async, business-hours, best-effort. Guards §4.
+
+**In agreement:** AM function named ("each identity-API client has a named account contact"). Personal name delivered privately at onboarding — not on the public website.
+
+### Pre-payment disclosure wording — locked (both rails, four surfaces)
+
+Bracketed placeholders slot at SW7: `[recovery credential]` and `[anonymous standing-receive]`.
+"Ecash" never appears in client-facing copy. Use: "signed digital tokens held by you."
+
+#### Identity rail
+
+**User agreement (legal register)**
+> The identity rail provides a recoverable account, invoiced billing in pounds sterling, and a data-processing agreement. In exchange, it does not provide Refueler's identity-free capabilities, including [anonymous standing-receive] and anonymous machine-to-machine transfer, which by design require the absence of any account. The rail is declared once by the client's principal at onboarding and is not inferred from, or altered by, the method by which any invoice is subsequently settled.
+
+**Website (public)**
+> The identity rail gives you a recoverable account, an invoice, and a data-processing agreement — everything a firm's finance and compliance teams need. It cannot offer our identity-free features, which only exist where there is no account to recover.
+
+**Initial call/meeting (talking points)**
+> — If your accounts team will ever need to pay an invoice, the identity rail is the only rail that works for them — and it forecloses the anonymous features. Decide the rail before the accountant enters the picture, not after.
+> — Identity rail = recovery, invoicing, DPA; you give up the identity-free features.
+> — It's a one-way door set at onboarding. Nothing about how you pay later can change it.
+> — Whoever pays the invoice mustn't be the one who decides the rail.
+
+**Follow-up email**
+> To confirm the point from our call: choosing the identity rail gives you a recoverable account, invoiced billing, and a DPA, and means you won't have access to our identity-free features (such as [anonymous standing-receive]). This is a deliberate one-way choice made by you at onboarding — it isn't set by how the invoice is later paid, so it's worth deciding it consciously now rather than letting a payment method decide it for you.
+>
+> One thing worth sorting before you share our details with your finance team: if they'll ever need to raise a purchase order or pay by bank transfer, the identity rail is the one that supports that — and it's worth knowing that choice forecloses the anonymous features. The rail is set at onboarding, not by how the first invoice gets paid. Better to have that conversation now than when accounts payable is already holding the bank details.
+
+#### Anonymous rail
+
+**User agreement (legal register)**
+> The anonymous rail establishes no account, no identity record, and no invoiced relationship. Access depends solely on client-held credentials; there is no recovery mechanism beyond the [recovery credential] the client retains, and its loss is permanent. Prepaid balance is held by the client in the form of signed digital tokens — it is not a balance in a recoverable account held by Refueler, and its loss is an irreversible loss of that balance with no refund possible. The rail is declared once by the client's principal at onboarding.
+
+**Website (public)**
+> The anonymous rail has no account and no invoice — access and balance live only where you keep them. If you lose your credentials, there is no recovery and no refund, by design.
+
+**Initial call/meeting (talking points)**
+> — No account means no recovery: if you lose your [recovery credential], we cannot restore access — there's no back door, which is the point.
+> — Your credit is held by you as digital tokens, not kept in an account with us; lose them and the balance is gone, no refund.
+> — Buy credit you plan to use soon.
+> — This rail unlocks the identity-free features; it's your choice, not your finance team's.
+
+**Follow-up email**
+> Confirming the two things we can't undo on the anonymous rail: there is no account, so if you lose your [recovery credential] we cannot recover your access; and your prepaid credit is held by you, not kept as a recoverable balance with us, so losing it is permanent and cannot be refunded. These aren't defects — they're the absence of the very records that would otherwise compromise your anonymity — but they mean the rail is worth choosing deliberately, and topping up only what you'll use soon.
+
+### Sat economics — identity-rail planning principle (locked)
+
+At rate-card v1.0 (£50k BTC reference peg): 1 sat = £0.00050. Metered usage for realistic identity-rail clients (law firm / GP clinic doing hundreds of transfers/month) generates <£3/month equivalent. **Plan identity-rail revenue as access-fee-only.** Sat allowance functions as an abuse ceiling, not a billing meter. Both rails have a 402 backstop: anonymous rail burns prepaid tokens; identity rail hits a generous sat ceiling with AM follow-up.
+
+**Salary target reference (founder planning only):** £150k/yr (≈2.1 BTC at September 2026 price) requires approximately: 130 identity-API clients at £99, or 20 API + 300 Sovereign + 100 Legend subscriptions. 18–24 month target on conservative trajectory. Legend entitlement-includes-Share bundle is load-bearing in this model.
+
+### SW build block — confirmed ready
+
+No open architectural blockers for SW1–SW9. SW7 inputs (DPA wording, four-surface disclosure, rail-declaration gate) locked in this session. Sandbox spec (SW6) unchanged from SW-Opus-1. IT handover PDF session dropped by intent — folded into SW7 onboarding flow. share-sessions.md SW table overwritten to match Master-Context (authoritative). SW-Teams-1 correctly scoped to refueler.io project as cross-product Opus — not part of SW1–SW9. SW1 prompt confirmed ready to run.
 
 ## Upstream protocol monitoring — Cashu
 
