@@ -1,8 +1,3 @@
-/* GENERATED FILE - do not edit directly
-   Canonical: refueler-share/frontend/
-   Mirror:    refueler.io/src/share/assets/
-   Tool:      bin/sync-share.sh
-   Edit the canonical, then run bin/sync-share.sh to propagate. */
 /* ── share-tokens.css — brand tokens for share.refueler.io ──────────────────
    Single token source for all Share pages. Equivalent of global.css on
    refueler.io. Loaded via head.njk <link> on every Eleventy Share page and
