@@ -4,7 +4,7 @@
  * No setTheme(), no theme= cookie, no rfTheme, no localStorage.
  * ─────────────────────────────────────────────────────────────────────────── */
 
-const WORKER = 'https://refueler-share.rt-fc4.workers.dev';
+const WORKER = 'https://api.share.refueler.io';
 let adminKey    = '';
 let refreshTimer = null;
 let countdown   = 60;
