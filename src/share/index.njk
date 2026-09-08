@@ -132,11 +132,11 @@ function showMaintenanceModal(status) {
 <div class="shell">
   <main id="app">
 
-    <!-- Info card — lock line -->
+    <!-- Info card — lock line (existing) -->
     <div class="info-card" id="info-card">
       <span class="info-icon">🔒</span>
       <span>No account. No email. No history. Files are encrypted in your browser before upload. Only you hold the key.</span>
-      <button class="info-dismiss" id="dismiss-info" aria-label="Dismiss">✕</button>
+      <button class="info-card-dismiss" id="dismiss-info" aria-label="Dismiss">✕</button>
     </div>
 
     <!-- File inputs — outside the drop zone so they never intercept drag events   -->
@@ -159,6 +159,11 @@ function showMaintenanceModal(status) {
     <!-- Secondary nav — Plans + Status (HQ2) ──────────────────────────────────
          Sits below the drop zone. Hidden when a file is selected.
          Styled to match .site-nav register — display, uppercase, fg-muted.     -->
+    <div class="share-subnav" id="share-subnav">
+      <a href="/share/plans/" class="share-subnav-link">Plans</a>
+      <span class="share-subnav-dot">·</span>
+      <a href="/share/status/" class="share-subnav-link">Status</a>
+    </div>
 
     <!-- Zip progress card (shown while compressing a folder, before upload progress) -->
     <div class="card hidden" id="zip-progress-card">
@@ -315,6 +320,12 @@ function showMaintenanceModal(status) {
     <div class="hidden" id="drop-multi-msg" role="alert"></div>
 
   </main>
+</div>
+
+<!-- ── HTTP/3 infrastructure whisper — HQ2 ──────────────────────────────── -->
+<!-- Static, always visible. Above footer. Not part of the upload flow.       -->
+<div class="http3-whisper">
+  <span class="http3-whisper-text">Delivered over Cloudflare HTTP/3.</span>
 </div>
 <div data-refueler-badge="compact"></div>
 {% include "footer.njk" %}
