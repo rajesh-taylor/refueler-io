@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="paper">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harbourmaster — Refueler Share</title>
+  <meta name="robots" content="noindex, nofollow">
+
+  <!-- ── Fonts (Bunny for privacy) ── -->
+  <link rel="preconnect" href="https://fonts.bunny.net">
+  <link href="https://fonts.bunny.net/css?family=ibm-plex-mono:400,500|dm-sans:300,400,500|source-serif-4:300,400&display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ═══════════════════════════════════════════════════════════════
+       DESIGN TOKENS — Paper/Carbon (DESIGN-TOKENS.md v1.0)
+       ═══════════════════════════════════════════════════════════════ */
+    :root {
+      --bg:             #F7F4EF;
+      --surface:        #EDEAE4;
+      --surface-raised: #E4E1DA;
+      --text-primary:   #3D3A36;
+      --text-secondary: #5A5751;
+      --text-tertiary:  #9A948D;
+      --border:         #D6D1C8;
+      --border-mid:     #B8B2A8;
+      --inset-rule:     var(--border);
+      --accent:         #C8A96E;
+      --accent-hover:   #E0C48A;
+      /* No --accent-action on internal surfaces (DESIGN-TOKENS.md rule) */
+      --c-green:        #1C7C4A;
+      --c-green-bg:     #EBF7F0;
+      --c-amber:        #B85C00;
+      --c-amber-bg:     #FEF3E6;
+      --c-red:          #C0392B;
+      --c-red-bg:       #FDF0EE;
+      --warn:           #B87333;
+
+      --mono:    'IBM Plex Mono', monospace;
+      --sans:    'DM Sans', sans-serif;
+      --serif:   'Source Serif 4', Georgia, serif;
+      --heading: 'Satoshi', 'DM Sans', sans-serif;
+
+      /* Structural */
+      --radius-card:   10px;
+      --radius-btn:    8px;
+      --radius-badge:  4px;
+      --border-weight: 0.5px;
+      --transition:    0.35s;
+    }
+
+    [data-theme="carbon"] {
+      --bg:             #1E1F22;
+      --surface:        #26282C;
+      --surface-raised: #2E3035;
+      --text-primary:   #E4E2DC;
+      --text-secondary: #8A8680;
+      --text-tertiary:  #5A5751;
+      --border:         #35373B;
+      --border-mid:     #4A4D52;
+      --inset-rule:     #C8A96E;
+      --c-green:        #3DCA7A;
+      --c-green-bg:     #0D2B1A;
+      --c-amber:        #E8A23A;
+      --c-amber-bg:     #2B1D08;
+      --c-red:          #E05050;
+      --c-red-bg:       #2B1010;
+      --warn:           #C8943A;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       RESET + BASE
+       ═══════════════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      font-family: var(--sans);
+      font-size: 15px;
+      background: var(--bg);
+      color: var(--text-primary);
+      transition: background var(--transition), color var(--transition);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       HORIZON BAND — always Carbon (#1A1A1A), hardcoded per tokens
+       ═══════════════════════════════════════════════════════════════ */
+    .horizon {
+      background: #1A1A1A;
+      padding: 0 1.5rem;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: var(--border-weight) solid #C8A96E;
+      flex-shrink: 0;
+    }
+
+    .horizon-wordmark {
+      font-family: var(--heading);
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #C8A96E;
+      letter-spacing: 0.04em;
+      text-decoration: none;
+    }
+
+    .horizon-right {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .horizon-rail-badge {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      padding: 0.2em 0.55em;
+      border-radius: var(--radius-badge);
+      border: var(--border-weight) solid #C8A96E;
+      color: #C8A96E;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.3rem;
+      color: #8A8680;
+      font-size: 1rem;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .theme-toggle:hover { color: #C8A96E; }
+
+    .signout-btn {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: #8A8680;
+      background: none;
+      border: var(--border-weight) solid #35373B;
+      border-radius: var(--radius-badge);
+      padding: 0.25em 0.6em;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .signout-btn:hover { color: #C8A96E; border-color: #C8A96E; }
+
+    /* ═══════════════════════════════════════════════════════════════
+       LOGIN GATE
+       ═══════════════════════════════════════════════════════════════ */
+    #login-screen {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .login-card {
+      background: var(--surface);
+      border: var(--border-weight) solid var(--border);
+      border-top: 2px solid var(--accent);
+      border-radius: var(--radius-card);
+      padding: 2.25rem 2rem;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .login-card h1 {
+      font-family: var(--heading);
+      font-weight: 700;
+      font-size: 1.35rem;
+      color: var(--text-primary);
+      margin-bottom: 0.35rem;
+    }
+
+    .login-card .sub {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      margin-bottom: 1.75rem;
+      line-height: 1.5;
+    }
+
+    .field-label {
+      display: block;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.45rem;
+    }
+
+    .key-input {
+      width: 100%;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      padding: 0.65rem 0.85rem;
+      background: var(--bg);
+      border: var(--border-weight) solid var(--border-mid);
+      border-radius: var(--radius-btn);
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.15s;
+      letter-spacing: 0.02em;
+    }
+    .key-input:focus { border-color: var(--accent); }
+    .key-input::placeholder { color: var(--text-tertiary); }
+
+    .login-error {
+      font-size: 0.78rem;
+      color: var(--c-red);
+      margin-top: 0.6rem;
+      min-height: 1.2em;
+      display: none;
+    }
+    .login-error.visible { display: block; }
+
+    .login-btn {
+      display: block;
+      width: 100%;
+      margin-top: 1.25rem;
+      padding: 0.7rem 1rem;
+      background: var(--text-primary);
+      color: var(--bg);
+      font-family: var(--sans);
+      font-size: 0.87rem;
+      font-weight: 500;
+      border: none;
+      border-radius: var(--radius-btn);
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .login-btn:hover { opacity: 0.85; }
+    .login-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .login-footer {
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: var(--border-weight) solid var(--border);
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      line-height: 1.55;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       MAIN DASHBOARD
+       ═══════════════════════════════════════════════════════════════ */
+    #dashboard-screen {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+    }
+    #dashboard-screen.visible { display: flex; }
+
+    .dash-body {
+      flex: 1;
+      padding: 1.75rem 1.5rem;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ── Page header ── */
+    .page-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .page-title {
+      font-family: var(--heading);
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--text-primary);
+    }
+
+    .page-meta {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--text-tertiary);
+      letter-spacing: 0.03em;
+    }
+
+    /* ── Summary cards row ── */
+    .summary-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .summary-card {
+      background: var(--surface);
+      border: var(--border-weight) solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 1rem 1.1rem;
+    }
+
+    .summary-card .label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    .summary-card .value {
+      font-family: var(--heading);
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+
+    .summary-card .value.green { color: var(--c-green); }
+    .summary-card .value.amber { color: var(--c-amber); }
+
+    /* ── Transfers table ── */
+    .table-card {
+      background: var(--surface);
+      border: var(--border-weight) solid var(--border);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+    }
+
+    .table-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 1.1rem;
+      border-bottom: var(--border-weight) solid var(--inset-rule);
+    }
+
+    .table-title {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .refresh-btn {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      background: none;
+      border: var(--border-weight) solid var(--border-mid);
+      border-radius: var(--radius-badge);
+      color: var(--text-secondary);
+      padding: 0.25em 0.6em;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .refresh-btn:hover { color: var(--accent); border-color: var(--accent); }
+    .refresh-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Scrollable table wrapper */
+    .table-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    thead tr {
+      border-bottom: var(--border-weight) solid var(--border);
+    }
+
+    th {
+      text-align: left;
+      padding: 0.6rem 1.1rem;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 0.7rem 1.1rem;
+      color: var(--text-primary);
+      border-bottom: var(--border-weight) solid var(--border);
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    tr:hover td { background: var(--surface-raised); }
+
+    .uuid-cell {
+      font-family: var(--mono);
+      font-size: 0.73rem;
+      color: var(--text-secondary);
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .uuid-cell .uuid-short { display: inline; }
+    .uuid-cell .uuid-full  { display: none; }
+
+    .ts-cell {
+      font-family: var(--mono);
+      font-size: 0.73rem;
+      color: var(--text-secondary);
+    }
+
+    .size-cell {
+      font-family: var(--mono);
+      font-size: 0.73rem;
+      text-align: right;
+      color: var(--text-primary);
+    }
+
+    /* Status pill */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4em;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      padding: 0.2em 0.55em;
+      border-radius: var(--radius-badge);
+      text-transform: uppercase;
+    }
+
+    .status-pill::before {
+      content: '';
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0.75;
+    }
+
+    .status-pill.active {
+      background: var(--c-green-bg);
+      color: var(--c-green);
+    }
+
+    .status-pill.discharged {
+      background: var(--surface-raised);
+      color: var(--text-tertiary);
+    }
+
+    .status-pill.expired {
+      background: var(--c-red-bg);
+      color: var(--c-red);
+    }
+
+    /* Receipt badges */
+    .receipt-cell {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+    }
+
+    .receipt-badge {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.04em;
+      padding: 0.18em 0.5em;
+      border-radius: var(--radius-badge);
+      border: var(--border-weight) solid transparent;
+    }
+
+    .receipt-badge.present {
+      background: var(--c-green-bg);
+      color: var(--c-green);
+      border-color: var(--c-green);
+    }
+
+    .receipt-badge.absent {
+      background: transparent;
+      color: var(--text-tertiary);
+      border-color: var(--border);
+    }
+
+    /* Ref cell */
+    .ref-cell {
+      font-family: var(--mono);
+      font-size: 0.73rem;
+      color: var(--text-tertiary);
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── Table states ── */
+    .table-state {
+      padding: 2.5rem 1.1rem;
+      text-align: center;
+    }
+
+    .table-state .state-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .table-state .state-msg {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+    }
+
+    .table-state .state-sub {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      margin-top: 0.25rem;
+    }
+
+    /* ── Pagination ── */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1.1rem;
+      border-top: var(--border-weight) solid var(--border);
+    }
+
+    .pagination-info {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--text-tertiary);
+    }
+
+    .pagination-btns {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .page-btn {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      background: none;
+      border: var(--border-weight) solid var(--border);
+      border-radius: var(--radius-badge);
+      color: var(--text-secondary);
+      padding: 0.3em 0.7em;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .page-btn:hover:not(:disabled) { color: var(--accent); border-color: var(--accent); }
+    .page-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .page-btn.current { color: var(--accent); border-color: var(--accent); }
+
+    /* ── Spinner ── */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Footer ── */
+    .dash-footer {
+      padding: 0.75rem 1.5rem;
+      border-top: var(--border-weight) solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.25rem;
+    }
+
+    .footer-links a {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--text-tertiary);
+      text-decoration: none;
+      letter-spacing: 0.03em;
+      transition: color 0.15s;
+    }
+    .footer-links a:hover { color: var(--accent); }
+
+    .raven-pill {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      color: var(--c-green);
+      background: var(--c-green-bg);
+      border: var(--border-weight) solid var(--c-green);
+      border-radius: var(--radius-badge);
+      padding: 0.18em 0.5em;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .dash-body { padding: 1.25rem 1rem; }
+      .horizon { padding: 0 1rem; }
+      th:nth-child(4), td:nth-child(4),   /* ref col */
+      th:nth-child(5), td:nth-child(5)    /* receipts col */
+      { display: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ── Horizon band (always Carbon) ── -->
+  <header class="horizon">
+    <a href="https://refueler.io/share/" class="horizon-wordmark">Refueler Share</a>
+    <div class="horizon-right">
+      <span class="horizon-rail-badge" id="rail-badge" style="display:none"></span>
+      <button class="theme-toggle" id="theme-toggle" title="Toggle theme" aria-label="Toggle theme">◐</button>
+      <button class="signout-btn" id="signout-btn" style="display:none">Sign out</button>
+    </div>
+  </header>
+
+  <!-- ════════════════════════════════════
+       LOGIN GATE
+       ════════════════════════════════════ -->
+  <div id="login-screen">
+    <div class="login-card">
+      <h1>Harbourmaster</h1>
+      <p class="sub">Enter your <code style="font-family:var(--mono);font-size:0.85em">rfs_live_</code> API key to access your dashboard.</p>
+
+      <label class="field-label" for="api-key-input">API KEY</label>
+      <input
+        type="password"
+        id="api-key-input"
+        class="key-input"
+        placeholder="rfs_live_…"
+        autocomplete="off"
+        spellcheck="false"
+      >
+      <div class="login-error" id="login-error"></div>
+
+      <button class="login-btn" id="login-btn">Access dashboard</button>
+
+      <div class="login-footer">
+        Your key is never stored — it lives in this session only and is used
+        to sign each request with HMAC-SHA256. Closing this tab removes it.
+        <br><br>
+        API-tier credentials only. Need access?
+        <a href="https://refueler.io/share/" style="color:var(--accent);text-decoration:none">refueler.io/share</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════
+       MAIN DASHBOARD
+       ════════════════════════════════════ -->
+  <div id="dashboard-screen">
+    <div class="dash-body">
+
+      <div class="page-header">
+        <div>
+          <div class="page-title">Transfers</div>
+          <div class="page-meta" id="page-meta">Loading…</div>
+        </div>
+        <div class="page-meta" id="key-display"></div>
+      </div>
+
+      <!-- Summary row -->
+      <div class="summary-row" id="summary-row">
+        <div class="summary-card">
+          <div class="label">Total transfers</div>
+          <div class="value" id="sum-total">—</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">Active</div>
+          <div class="value green" id="sum-active">—</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">Discharged</div>
+          <div class="value" id="sum-discharged">—</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">Expired</div>
+          <div class="value amber" id="sum-expired">—</div>
+        </div>
+      </div>
+
+      <!-- Transfers table -->
+      <div class="table-card">
+        <div class="table-header">
+          <span class="table-title">Transfer log</span>
+          <button class="refresh-btn" id="refresh-btn">↻ Refresh</button>
+        </div>
+
+        <!-- State: loading -->
+        <div class="table-state" id="state-loading" style="display:none">
+          <div class="state-icon"><span class="spinner"></span></div>
+          <div class="state-msg">Loading transfers…</div>
+        </div>
+
+        <!-- State: empty -->
+        <div class="table-state" id="state-empty" style="display:none">
+          <div class="state-icon">⬚</div>
+          <div class="state-msg">No transfers yet.</div>
+          <div class="state-sub">Transfers appear here once cargo is accepted.</div>
+        </div>
+
+        <!-- State: error -->
+        <div class="table-state" id="state-error" style="display:none">
+          <div class="state-icon">⚠</div>
+          <div class="state-msg" id="state-error-msg">Could not load transfers.</div>
+          <div class="state-sub">Check your network connection and try again.</div>
+        </div>
+
+        <!-- Table itself -->
+        <div class="table-scroll" id="table-wrap" style="display:none">
+          <table>
+            <thead>
+              <tr>
+                <th>UUID</th>
+                <th>Accepted</th>
+                <th style="text-align:right">Size</th>
+                <th>Ref</th>
+                <th>Status</th>
+                <th>Receipts</th>
+              </tr>
+            </thead>
+            <tbody id="transfers-tbody"></tbody>
+          </table>
+        </div>
+
+        <div class="pagination" id="pagination" style="display:none">
+          <span class="pagination-info" id="pagination-info"></span>
+          <div class="pagination-btns">
+            <button class="page-btn" id="prev-btn" disabled>← Prev</button>
+            <button class="page-btn" id="next-btn" disabled>Next →</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <footer class="dash-footer">
+      <div class="footer-links">
+        <a href="https://refueler.io/share/">Share</a>
+        <a href="https://refueler.io/share/status.html">Status</a>
+        <a href="mailto:hello@refueler.io">Support</a>
+      </div>
+      <span class="raven-pill" id="raven-pill">● Raven present</span>
+    </footer>
+  </div>
+
+  <script type="module">
+    /* ══════════════════════════════════════════════════════════════
+       CONFIGURATION
+       ══════════════════════════════════════════════════════════════ */
+    const API_BASE    = 'https://api.share.refueler.io';
+    const PAGE_SIZE   = 25;   // transfers per page
+    const AE_WINDOW   = 7200; // AE query window in seconds (2 h) — extend for wider view
+    // No rfs_live_ key prefix restriction: the Worker validates, not the UI
+
+    /* ══════════════════════════════════════════════════════════════
+       THEME (rs-theme cookie, same model as main site)
+       ══════════════════════════════════════════════════════════════ */
+    (function initTheme() {
+      const saved = document.cookie.split(';')
+        .map(c => c.trim())
+        .find(c => c.startsWith('rs-theme='));
+      const theme = saved ? saved.split('=')[1] : 'paper';
+      document.documentElement.dataset.theme = theme;
+    })();
+
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      const current = document.documentElement.dataset.theme;
+      const next    = current === 'carbon' ? 'paper' : 'carbon';
+      document.documentElement.dataset.theme = next;
+      document.cookie = `rs-theme=${next};path=/;max-age=${60 * 60 * 24 * 30};SameSite=Lax`;
+    });
+
+    /* ══════════════════════════════════════════════════════════════
+       SESSION STATE (memory only — never localStorage)
+       ══════════════════════════════════════════════════════════════ */
+    const SESSION = {
+      liveKey:  null,   // rfs_live_ string
+      signKey:  null,   // rfs_sign_ string (entered separately for signing)
+      rail:     null,
+      tier:     null,
+      page:     0,
+      transfers: [],
+      totalCount: 0,
+    };
+
+    /* ══════════════════════════════════════════════════════════════
+       HMAC-SHA256 SIGNING
+       Canonical string: method\npath\ntimestamp\nbody_hash
+       Matches api_auth.js on the Worker.
+       ══════════════════════════════════════════════════════════════ */
+    async function importSignKey(rawKeyStr) {
+      const enc = new TextEncoder();
+      return crypto.subtle.importKey(
+        'raw', enc.encode(rawKeyStr), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+      );
+    }
+
+    async function sha256Hex(data) {
+      const buf = await crypto.subtle.digest('SHA-256',
+        typeof data === 'string' ? new TextEncoder().encode(data) : data
+      );
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    /**
+     * Build HMAC-signed headers for a request.
+     * @param {string} method    — uppercase HTTP method
+     * @param {string} path      — e.g. '/api/v1/auth/ping'
+     * @param {string} body      — request body string ('' for GET)
+     * @param {CryptoKey} sigKey — imported sign key
+     * @param {string} liveKey   — rfs_live_ string (sent in Authorization)
+     */
+    async function signedHeaders(method, path, body, sigKey, liveKey) {
+      const timestamp  = Math.floor(Date.now() / 1000).toString();
+      const bodyHash   = await sha256Hex(body);
+      const canonical  = `${method}\n${path}\n${timestamp}\n${bodyHash}`;
+      const enc        = new TextEncoder();
+      const sigBuf     = await crypto.subtle.sign('HMAC', sigKey, enc.encode(canonical));
+      const sigHex     = Array.from(new Uint8Array(sigBuf))
+        .map(b => b.toString(16).padStart(2, '0')).join('');
+      return {
+        'Authorization':       `HMAC ${liveKey}`,
+        'X-Refueler-Timestamp': timestamp,
+        'X-Refueler-Signature': sigHex,
+        'Content-Type':        'application/json',
+      };
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       LOGIN FLOW
+       ══════════════════════════════════════════════════════════════ */
+    const loginScreen    = document.getElementById('login-screen');
+    const dashScreen     = document.getElementById('dashboard-screen');
+    const keyInput       = document.getElementById('api-key-input');
+    const loginBtn       = document.getElementById('login-btn');
+    const loginError     = document.getElementById('login-error');
+
+    function showLoginError(msg) {
+      loginError.textContent = msg;
+      loginError.classList.add('visible');
+    }
+    function clearLoginError() {
+      loginError.textContent = '';
+      loginError.classList.remove('visible');
+    }
+
+    loginBtn.addEventListener('click', attemptLogin);
+    keyInput.addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
+
+    async function attemptLogin() {
+      clearLoginError();
+      const rawKey = keyInput.value.trim();
+      if (!rawKey) { showLoginError('Enter your API key.'); return; }
+
+      // Derive sign key from the live key:
+      // The Worker's api_auth.js verifies HMAC signed with rfs_sign_.
+      // For the dashboard login ping specifically, we use the live key itself
+      // to sign (the ping is a read-only liveness check — the sign key is
+      // requested below on success for subsequent calls).
+      // NOTE: this means the login ping is signed with rfs_live_ as the HMAC
+      // key, matching the Option C approach in api_auth.js where the sign key
+      // is derived from the live key hash. The Worker's verifyApiRequest must
+      // accept this pattern for the ping endpoint.
+      //
+      // If your Worker's api_auth.js requires the separate rfs_sign_ key:
+      // prompt for it here and use it for signing. For the initial scaffold
+      // we sign with the live key, matching the simplest auth_ping verification.
+      //
+      // ── Prompt for sign key ──────────────────────────────────────────────
+      // Present a second input for rfs_sign_ to allow proper HMAC verification.
+      const signKeyRaw = document.getElementById('sign-key-input')?.value?.trim() || rawKey;
+
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Verifying…';
+
+      try {
+        const importedKey = await importSignKey(signKeyRaw);
+        const headers = await signedHeaders('GET', '/api/v1/auth/ping', '', importedKey, rawKey);
+        const resp = await fetch(`${API_BASE}/api/v1/auth/ping`, { method: 'GET', headers });
+        const data = await resp.json();
+
+        if (!resp.ok || !data.ok) {
+          const msg = data.message || 'Authentication failed.';
+          showLoginError(msg);
+          return;
+        }
+
+        // Stash in session memory
+        SESSION.liveKey = rawKey;
+        SESSION.signKey = signKeyRaw;
+        SESSION.signCryptoKey = importedKey;
+        SESSION.rail   = data.rail;
+        SESSION.tier   = data.tier;
+
+        activateDashboard();
+
+      } catch (err) {
+        showLoginError('Network error. Check your connection.');
+        console.error('[harbourmaster] login error:', err);
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Access dashboard';
+      }
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       DASHBOARD ACTIVATION
+       ══════════════════════════════════════════════════════════════ */
+    function activateDashboard() {
+      loginScreen.style.display = 'none';
+      dashScreen.classList.add('visible');
+
+      // Show rail badge and signout
+      const railBadge = document.getElementById('rail-badge');
+      railBadge.textContent = SESSION.rail;
+      railBadge.style.display = 'inline';
+
+      document.getElementById('signout-btn').style.display = 'inline';
+
+      // Truncated key display
+      const k = SESSION.liveKey;
+      document.getElementById('key-display').textContent =
+        k.length > 20 ? `${k.slice(0, 12)}…${k.slice(-6)}` : k;
+
+      checkRaven();
+      loadTransfers();
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       SIGN OUT
+       ══════════════════════════════════════════════════════════════ */
+    document.getElementById('signout-btn').addEventListener('click', () => {
+      SESSION.liveKey = null;
+      SESSION.signKey = null;
+      SESSION.signCryptoKey = null;
+      SESSION.rail = null;
+      SESSION.tier = null;
+      SESSION.transfers = [];
+      SESSION.page = 0;
+
+      dashScreen.classList.remove('visible');
+      loginScreen.style.display = 'flex';
+      keyInput.value = '';
+      document.getElementById('rail-badge').style.display = 'none';
+      document.getElementById('signout-btn').style.display = 'none';
+    });
+
+    /* ══════════════════════════════════════════════════════════════
+       RAVEN CANARY CHECK
+       Presence = no warrant. Absence = the signal.
+       GET /status → parse { raven: true/false }
+       ══════════════════════════════════════════════════════════════ */
+    async function checkRaven() {
+      const pill = document.getElementById('raven-pill');
+      try {
+        const resp = await fetch(`${API_BASE.replace('api.', 'refueler-share.rt-fc4.workers.dev')
+          .replace('api.share.refueler.io', 'refueler-share.rt-fc4.workers.dev')}/status`);
+        // Fall back to the known Worker URL if needed
+        if (!resp.ok) throw new Error('non-ok');
+        const data = await resp.json();
+        if (data.raven === false) {
+          pill.textContent = '▲ Raven absent';
+          pill.style.background = 'var(--c-red-bg)';
+          pill.style.color = 'var(--c-red)';
+          pill.style.borderColor = 'var(--c-red)';
+        }
+      } catch (_) {
+        pill.textContent = '— Raven unknown';
+        pill.style.color = 'var(--text-tertiary)';
+      }
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       TRANSFERS — load from AE via Worker proxy
+       GET /api/v1/transfers (to be built in SW5b as the full AE query proxy)
+
+       For SW5a scaffold: we call the AE proxy endpoint the Worker exposes.
+       The Worker queries AE for events of type 'upload_complete' filtered
+       by the api_key_hash matching the presenting key.
+
+       Expected response shape (paginated):
+       {
+         transfers: [
+           { uuid, accepted_at, size_bytes, status, transfer_ref }
+         ],
+         total: number,
+         page:  number,
+         pages: number
+       }
+       ══════════════════════════════════════════════════════════════ */
+    const tbody        = document.getElementById('transfers-tbody');
+    const tableWrap    = document.getElementById('table-wrap');
+    const stateLoading = document.getElementById('state-loading');
+    const stateEmpty   = document.getElementById('state-empty');
+    const stateError   = document.getElementById('state-error');
+    const stateErrorMsg = document.getElementById('state-error-msg');
+    const refreshBtn   = document.getElementById('refresh-btn');
+    const pagination   = document.getElementById('pagination');
+    const paginInfo    = document.getElementById('pagination-info');
+    const prevBtn      = document.getElementById('prev-btn');
+    const nextBtn      = document.getElementById('next-btn');
+
+    refreshBtn.addEventListener('click', () => loadTransfers());
+    prevBtn.addEventListener('click', () => { if (SESSION.page > 0) { SESSION.page--; loadTransfers(); } });
+    nextBtn.addEventListener('click', () => {
+      const pages = Math.ceil(SESSION.totalCount / PAGE_SIZE);
+      if (SESSION.page < pages - 1) { SESSION.page++; loadTransfers(); }
+    });
+
+    function showState(state) {
+      [stateLoading, stateEmpty, stateError, tableWrap, pagination].forEach(el => {
+        el.style.display = 'none';
+      });
+      if (state === 'loading') stateLoading.style.display = 'block';
+      else if (state === 'empty') stateEmpty.style.display = 'block';
+      else if (state === 'error') stateError.style.display = 'block';
+      else if (state === 'table') {
+        tableWrap.style.display = 'block';
+        pagination.style.display = 'flex';
+      }
+    }
+
+    async function loadTransfers() {
+      showState('loading');
+      refreshBtn.disabled = true;
+
+      try {
+        const path = `/api/v1/transfers?page=${SESSION.page}&limit=${PAGE_SIZE}`;
+        const headers = await signedHeaders(
+          'GET', path, '', SESSION.signCryptoKey, SESSION.liveKey
+        );
+        const resp = await fetch(`${API_BASE}${path}`, { method: 'GET', headers });
+
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({}));
+          stateErrorMsg.textContent = err.message || `Server error (${resp.status})`;
+          showState('error');
+          return;
+        }
+
+        const data = await resp.json();
+        SESSION.transfers  = data.transfers || [];
+        SESSION.totalCount = data.total     || 0;
+
+        if (SESSION.transfers.length === 0) {
+          showState('empty');
+          updateSummary([]);
+          return;
+        }
+
+        // Fetch receipt status for visible rows in parallel
+        const withReceipts = await Promise.all(
+          SESSION.transfers.map(t => fetchReceiptStatus(t))
+        );
+
+        renderTable(withReceipts);
+        updateSummary(withReceipts);
+        renderPagination(data);
+        showState('table');
+
+      } catch (err) {
+        stateErrorMsg.textContent = 'Network error. Try again.';
+        showState('error');
+        console.error('[harbourmaster] load transfers error:', err);
+      } finally {
+        refreshBtn.disabled = false;
+      }
+    }
+
+    /* ── Receipt status check ──────────────────────────────────────
+       GET /api/v1/receipt/:uuid/acceptance
+       GET /api/v1/receipt/:uuid/collection
+       Returns the receipt JSON if it exists, 404 if not.
+       We just need presence/absence for the badge.
+       ─────────────────────────────────────────────────────────── */
+    async function fetchReceiptStatus(transfer) {
+      const { uuid } = transfer;
+      const [acceptResp, collectResp] = await Promise.all([
+        fetchReceipt(uuid, 'acceptance'),
+        fetchReceipt(uuid, 'collection'),
+      ]);
+      return {
+        ...transfer,
+        receipt_acceptance: acceptResp,
+        receipt_collection: collectResp,
+      };
+    }
+
+    async function fetchReceipt(uuid, type) {
+      try {
+        const path = `/api/v1/receipt/${uuid}/${type}`;
+        const headers = await signedHeaders(
+          'GET', path, '', SESSION.signCryptoKey, SESSION.liveKey
+        );
+        const resp = await fetch(`${API_BASE}${path}`, { method: 'GET', headers });
+        if (resp.status === 404) return null;
+        if (!resp.ok) return null;
+        return await resp.json();
+      } catch (_) {
+        return null;
+      }
+    }
+
+    /* ── Table rendering ─────────────────────────────────────────── */
+    function renderTable(transfers) {
+      tbody.innerHTML = '';
+      transfers.forEach(t => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="uuid-cell" title="${escHtml(t.uuid)}">
+            <span class="uuid-short">${escHtml(t.uuid.slice(0, 8))}…</span>
+          </td>
+          <td class="ts-cell">${formatTs(t.accepted_at)}</td>
+          <td class="size-cell">${formatBytes(t.size_bytes)}</td>
+          <td class="ref-cell" title="${escHtml(t.transfer_ref || '')}">
+            ${t.transfer_ref ? escHtml(t.transfer_ref) : '<span style="color:var(--text-tertiary)">—</span>'}
+          </td>
+          <td>${statusPill(t.status)}</td>
+          <td class="receipt-cell">
+            ${receiptBadge(t.receipt_acceptance, 'AC')}
+            ${receiptBadge(t.receipt_collection, 'CO')}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function statusPill(status) {
+      const cls = status === 'active'      ? 'active'
+                : status === 'discharged'  ? 'discharged'
+                : 'expired';
+      return `<span class="status-pill ${cls}">${escHtml(status)}</span>`;
+    }
+
+    function receiptBadge(receipt, label) {
+      const present = receipt !== null && receipt !== undefined;
+      return `<span class="receipt-badge ${present ? 'present' : 'absent'}">${label}</span>`;
+    }
+
+    /* ── Summary cards ───────────────────────────────────────────── */
+    function updateSummary(transfers) {
+      const total      = SESSION.totalCount;
+      const active     = transfers.filter(t => t.status === 'active').length;
+      const discharged = transfers.filter(t => t.status === 'discharged').length;
+      const expired    = transfers.filter(t => t.status === 'expired').length;
+
+      document.getElementById('sum-total').textContent     = total;
+      document.getElementById('sum-active').textContent    = active;
+      document.getElementById('sum-discharged').textContent = discharged;
+      document.getElementById('sum-expired').textContent   = expired;
+
+      const ts = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('page-meta').textContent = `Last updated ${ts} · Page ${SESSION.page + 1}`;
+    }
+
+    /* ── Pagination ──────────────────────────────────────────────── */
+    function renderPagination(data) {
+      const pages = Math.ceil((data.total || 0) / PAGE_SIZE);
+      const from  = SESSION.page * PAGE_SIZE + 1;
+      const to    = Math.min((SESSION.page + 1) * PAGE_SIZE, data.total);
+      paginInfo.textContent  = `${from}–${to} of ${data.total}`;
+      prevBtn.disabled       = SESSION.page === 0;
+      nextBtn.disabled       = SESSION.page >= pages - 1;
+    }
+
+    /* ── Formatters ──────────────────────────────────────────────── */
+    function formatTs(unixSecs) {
+      if (!unixSecs) return '—';
+      return new Date(unixSecs * 1000).toLocaleString('en-GB', {
+        day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
+      });
+    }
+
+    function formatBytes(bytes) {
+      if (!bytes && bytes !== 0) return '—';
+      if (bytes < 1024)       return `${bytes} B`;
+      if (bytes < 1048576)    return `${(bytes / 1024).toFixed(1)} KB`;
+      if (bytes < 1073741824) return `${(bytes / 1048576).toFixed(1)} MB`;
+      return `${(bytes / 1073741824).toFixed(2)} GB`;
+    }
+
+    function escHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+  </script>
+
+  <!-- ── Sign key input (below the live key, same card) ── -->
+  <!-- Injected via JS so it only appears after DOM is ready -->
+  <script>
+    // Append sign-key field to login card (keeps HTML clean)
+    (function injectSignKeyField() {
+      const card = document.querySelector('.login-card');
+      if (!card) return;
+      const keyInput = document.getElementById('api-key-input');
+
+      const signLabel = document.createElement('label');
+      signLabel.className = 'field-label';
+      signLabel.htmlFor   = 'sign-key-input';
+      signLabel.textContent = 'SIGN KEY';
+      signLabel.style.marginTop = '1rem';
+      signLabel.style.display   = 'block';
+
+      const signInput = document.createElement('input');
+      signInput.type         = 'password';
+      signInput.id           = 'sign-key-input';
+      signInput.className    = 'key-input';
+      signInput.placeholder  = 'rfs_sign_…';
+      signInput.autocomplete = 'off';
+      signInput.spellcheck   = false;
+
+      // Insert after the live-key input
+      keyInput.insertAdjacentElement('afterend', signInput);
+      signInput.insertAdjacentElement('beforebegin', signLabel);
+
+      // Enter on sign key also submits
+      signInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') document.getElementById('login-btn').click();
+      });
+    })();
+  </script>
+</body>
+</html>
