@@ -843,10 +843,8 @@
        HMAC SIGNING — same as original SW5a implementation
        ══════════════════════════════════════════════════════════════ */
     async function importSignKey(raw) {
-      const clean = raw.startsWith('rfs_sign_') ? raw.slice('rfs_sign_'.length)
-                  : raw.startsWith('rfs_test_sign_') ? raw.slice('rfs_test_sign_'.length)
-                  : raw;
-      const bytes = base58Decode(clean);
+      // Worker uses TextEncoder(presentedSignKey) as HMAC key — full string, no stripping.
+      const bytes = new TextEncoder().encode(raw);
       return crypto.subtle.importKey(
         'raw', bytes,
         { name: 'HMAC', hash: 'SHA-256' },
