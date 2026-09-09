@@ -833,6 +833,7 @@
        ══════════════════════════════════════════════════════════════ */
     const SESSION = {
       liveKey:       null,
+      signKey:       null,
       signCryptoKey: null,
       page:          0,
       totalCount:    0,
@@ -852,7 +853,7 @@
       );
     }
 
-    async function signedHeaders(method, path, body, cryptoKey, liveKey) {
+    async function signedHeaders(method, path, body, cryptoKey, liveKey, signKey) {
       const ts       = Math.floor(Date.now() / 1000).toString();
       const bodyHash = body
         ? bufToHex(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(body)))
@@ -863,7 +864,7 @@
 
       return {
         'Authorization':   `HMAC-SHA256 key=${liveKey}, sig=${sig}, ts=${ts}`,
-        'X-Api-Sign-Key':  liveKey.startsWith('rfs_test_') ? liveKey : liveKey.replace('rfs_live_', 'rfs_sign_'),
+        'X-Api-Sign-Key':  signKey,
         'Content-Type':    'application/json',
       };
     }
@@ -937,7 +938,7 @@
       try {
         const cryptoKey = await importSignKey(signKey);
         const path      = '/api/v1/auth/ping';
-        const headers   = await signedHeaders('GET', path, '', cryptoKey, liveKey);
+        const headers   = await signedHeaders('GET', path, '', cryptoKey, liveKey, signKey);
 
         const resp = await fetch(`${API_BASE}${path}`, { method: 'GET', headers });
         if (!resp.ok) {
@@ -947,6 +948,7 @@
         }
 
         SESSION.liveKey       = liveKey;
+        SESSION.signKey       = signKey;
         SESSION.signCryptoKey = cryptoKey;
 
         // Transition to dashboard
@@ -971,6 +973,7 @@
 
     signoutBtn.addEventListener('click', () => {
       SESSION.liveKey       = null;
+      SESSION.signKey       = null;
       SESSION.signCryptoKey = null;
       SESSION.page          = 0;
       SESSION.totalCount    = 0;
@@ -992,7 +995,7 @@
 
       try {
         const path    = '/api/v1/capabilities';
-        const headers = await signedHeaders('GET', path, '', SESSION.signCryptoKey, SESSION.liveKey);
+        const headers = await signedHeaders('GET', path, '', SESSION.signCryptoKey, SESSION.liveKey, SESSION.signKey);
         const resp    = await fetch(`${API_BASE}${path}`, { method: 'GET', headers });
 
         if (!resp.ok) {
@@ -1081,7 +1084,7 @@
 
       try {
         const path    = '/api/v1/webhooks/status';
-        const headers = await signedHeaders('GET', path, '', SESSION.signCryptoKey, SESSION.liveKey);
+        const headers = await signedHeaders('GET', path, '', SESSION.signCryptoKey, SESSION.liveKey, SESSION.signKey);
         const resp    = await fetch(`${API_BASE}${path}`, { method: 'GET', headers });
 
         if (!resp.ok) {
@@ -1154,7 +1157,7 @@
 
       try {
         const path    = '/api/v1/hostname/health';
-        const headers = await signedHeaders('GET', path, '', SESSION.signCryptoKey, SESSION.liveKey);
+        const headers = await signedHeaders('GET', path, '', SESSION.signCryptoKey, SESSION.liveKey, SESSION.signKey);
         const resp    = await fetch(`${API_BASE}${path}`, { method: 'GET', headers });
 
         if (!resp.ok) {
@@ -1268,7 +1271,7 @@
 
       try {
         const path    = `/api/v1/transfers?page=${SESSION.page}&limit=${PAGE_SIZE}`;
-        const headers = await signedHeaders('GET', path, '', SESSION.signCryptoKey, SESSION.liveKey);
+        const headers = await signedHeaders('GET', path, '', SESSION.signCryptoKey, SESSION.liveKey, SESSION.signKey);
         const resp    = await fetch(`${API_BASE}${path}`, { method: 'GET', headers });
 
         if (!resp.ok) {
@@ -1319,7 +1322,7 @@
     async function fetchReceipt(uuid, type) {
       try {
         const path    = `/api/v1/receipt/${uuid}/${type}`;
-        const headers = await signedHeaders('GET', path, '', SESSION.signCryptoKey, SESSION.liveKey);
+        const headers = await signedHeaders('GET', path, '', SESSION.signCryptoKey, SESSION.liveKey, SESSION.signKey);
         const resp    = await fetch(`${API_BASE}${path}`, { method: 'GET', headers });
         if (resp.status === 404) return null;
         if (!resp.ok) return null;
