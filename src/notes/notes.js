@@ -22,7 +22,7 @@ function applyTheme(theme) {
     root.setAttribute('data-theme', 'carbon');
     if (pill) pill.textContent = 'Carbon / Paper';
   } else {
-    root.removeAttribute('data-theme');
+    root.setAttribute('data-theme', 'paper');
     if (pill) pill.textContent = 'Paper / Carbon';
   }
 }

@@ -63,7 +63,7 @@ function _startPinLockout(type) {
 // not the public web rs-theme cookie. The two systems are intentionally separate.
 // Font alias prefix divergence (--mono vs --font-mono) is a known doc; align later.
 function setTheme(t) {
-  document.documentElement.setAttribute('data-theme', t === 'carbon' ? 'carbon' : '');
+  document.documentElement.setAttribute('data-theme', t === 'carbon' ? 'carbon' : 'paper');
   localStorage.setItem('rfTheme', t);
   ['pill-paper', 'owner-pill-paper'].forEach(id => {
     const el = document.getElementById(id);
@@ -76,7 +76,7 @@ function setTheme(t) {
 }
 (function initTheme() {
   const t = localStorage.getItem('rfTheme') || 'paper';
-  document.documentElement.setAttribute('data-theme', t === 'carbon' ? 'carbon' : '');
+  document.documentElement.setAttribute('data-theme', t === 'carbon' ? 'carbon' : 'paper');
   ['pill-paper'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.toggle('active', t === 'paper'); });
   ['pill-carbon'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.toggle('active', t === 'carbon'); });
 })();
