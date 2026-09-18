@@ -1,24 +1,20 @@
-/* ─── dashboard.js — refueler-share admin dashboard ────────────────────────
- * Last updated: Share-Dash-1 (dashboard-only, refueler.io repo, index.js untouched)
+/* ─── navy-office.js — refueler-share · Navy Office admin ───────────────────
+ * Last updated: Share-Dash-3
  *
- * Share-Dash-1 SHIPPED (this file + dashboard.{html,css}):
- *   1. Sidebar stubs wired — live views scroll-to-card; Subscribers /
- *      Maintenance mode / Rate limits open a "coming in Share-Dash-2" micro-modal.
- *   3. Execution Dock panel + detail modal — subset fields only (uuid · tier ·
- *      status · created · expiry · days-remaining · collected). Reads existing
- *      GET /admin/execution-dock. Filenames not shown (D-1).
- *   6. Row-3 deferred-card opacity scoped to sm-value/sm-label (CSS).
- *   7. Sandbox result: 5-min auto-clear (pre-existing) + Copy JSON button.
- *   8. Download-success 0.00% false positive fixed — 0/0 chunks now reads n/a.
- *   +  Fixed refreshAll() Promise.all misalignment (hh was getting kv-stats).
- *
- * Share-Dash-2 DEFERRED (refueler-share Worker session — needs index.js):
- *   2. Client-errors 90-day KV log — Worker append on 4xx/5xx + read endpoint
- *      (today's errors are AE-only via /log/error, 24h).
- *   4. API & MCP card (replaces CPU-time stub) — needs /admin/api-stats.
- *   5. Growth-signal card — needs /admin/news-events GET+POST + admin:news_events KV.
- *   3b. Dock enrichment — size · rail · download-count · merkle-root into
- *       dock_index (finalise persists size+root; handler returns them).
+ * Share-Dash-3 changes (this file):
+ *   (1) Rename: dashboard → navy-office throughout. document.title set to
+ *       "refueler-share · Navy Office".
+ *   (2) Chambers rename: no JS in this file references harbourmaster.
+ *   (3a) Client-errors modal: AE/KV source toggle above existing AE table.
+ *        KV source: GET /admin/client-errors-log (X-Admin-Key).
+ *        Toggle state: in-memory only (no cookie, no localStorage).
+ *   (3b) API & MCP card (6th card row-3): replaces CPU-time stub.
+ *        Source: GET /admin/api-stats (X-Admin-Key). Degrades gracefully.
+ *        by_rail none → "Pro Bono" (carry-in from Share-Dash-2).
+ *   (3c) Growth signal card: inline SVG sparkline. Three series (paid/free/api).
+ *        Annotation ticks. Add-event form. Delete. Source: /admin/news-events.
+ *   (4)  Execution Dock detail: size_bytes human-readable, rail label map,
+ *        merkle_root "pending (available at Share-6-5)", download count pending.
  * ─────────────────────────────────────────────────────────────────────────── */
 
 const WORKER = 'https://api.share.refueler.io';
@@ -28,7 +24,11 @@ let countdown   = 60;
 let lastMetrics  = null;
 let lastAe       = null;
 let lastSnapshot = null;
-let clientErrorsDetail = []; // S73a — detail rows from AE client_errors_detail
+let clientErrorsDetail = []; // AE detail rows from /admin/ae-metrics
+let kvErrorsCache = null;    // KV log rows from /admin/client-errors-log
+
+// (3a) CE source toggle: 'ae' | 'kv' — in-memory only
+let ceSource = 'ae';
 
 // ── Theme ──────────────────────────────────────────────────────────────────
 function getTheme() {
@@ -40,7 +40,6 @@ function setTheme(t) {
   document.documentElement.setAttribute('data-theme', t);
   document.getElementById('theme-paper').classList.toggle('active', t === 'paper');
   document.getElementById('theme-carbon').classList.toggle('active', t === 'carbon');
-  // Write with dot-prefixed domain only; evict any legacy exact-host cookie.
   document.cookie = `rs-theme=${t};path=/;domain=.refueler.io;max-age=2592000;SameSite=Lax;Secure`;
   document.cookie = `rs-theme=;path=/;domain=refueler.io;max-age=0;SameSite=Lax`;
 }
@@ -61,6 +60,7 @@ function showDashboard() {
   document.getElementById('gate').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
   document.getElementById('sb-auth').textContent = 'admin · authenticated';
+  document.title = 'refueler-share · Navy Office';
   initLightningToggle();
 }
 
@@ -106,9 +106,6 @@ async function refreshAll() {
   clearInterval(refreshTimer);
   countdown = 60;
   updateCountdown();
-  // Array hole ( , ) skips the fetchKvStats slot — it renders itself and
-  // returns nothing. This keeps hh aligned to fetchHostnameHealth (was
-  // silently receiving the kv-stats result before Share-Dash-1).
   const [m, ae, snap, , hh, dock] = await Promise.all([
     fetchMetrics(),
     fetchAeMetrics(),
@@ -123,6 +120,10 @@ async function refreshAll() {
   if (hh)   { renderHostnameHealth(hh); }
   if (dock) { renderExecutionDock(dock); }
   if (m || ae) renderFarming(lastMetrics, lastAe);
+  // (3b) API & MCP card
+  fetchApiStats();
+  // (3c) Growth card
+  fetchGrowth();
   const ts = new Date();
   setText('refreshed-at', `Refreshed ${ts.toLocaleTimeString('en-GB')}`);
   document.getElementById('main').setAttribute('data-print-ts', ts.toUTCString());
@@ -161,7 +162,6 @@ async function fetchHostnameHealth() {
 }
 
 function renderHostnameHealth(data) {
-  // Summary badge
   const countEl   = document.getElementById('hh-count');
   const healthyEl = document.getElementById('hh-healthy');
   const tsEl      = document.getElementById('hh-checked-at');
@@ -184,7 +184,6 @@ function renderHostnameHealth(data) {
       : 'never';
   }
 
-  // Row-level table
   const tbody = document.getElementById('hh-tbody');
   if (!tbody) return;
 
@@ -303,7 +302,6 @@ function renderAeMetrics(d) {
   const ret      = d.r2_chunk_retrieval_success_rate;
   const retTotal = d.r2_chunk_total_chunks ?? 0;
   if (retTotal === 0) {
-    // No downloads in the window: 0/0 must read as no-data, never as 0.00% red.
     retEl.textContent = 'n/a'; retEl.className = 'sm-value';
   } else if (ret !== null && ret !== undefined) {
     retEl.textContent = `${(ret * 100).toFixed(2)}%`;
@@ -317,19 +315,60 @@ function renderAeMetrics(d) {
     ceEl.className = 'sm-value' + (ce > 10 ? ' red' : ce > 0 ? ' amber' : '');
   } else { ceEl.textContent = 'n/a'; ceEl.className = 'sm-value'; }
 
-  // S73a — store detail rows for client-errors modal
   clientErrorsDetail = Array.isArray(d.client_errors_detail) ? d.client_errors_detail : [];
-
-  // CPU time — deferred to B6; render stub so card is not blank
-  const cpuEl = document.getElementById('snap-cpu-time');
-  if (cpuEl) { cpuEl.textContent = '—'; cpuEl.className = 'sm-value'; }
 
   lastAe = d;
 }
 
+// ── (3b) API & MCP card ───────────────────────────────────────────────────
+// Source: GET /admin/api-stats (X-Admin-Key)
+// Response shape: {
+//   active_keys: { provisioned, active, by_plan: {...} },
+//   requests_30d: { total, by_rail: { identity, anonymous, none } },
+//   api_attach_rate: { api_transfers, total_transfers, rate },
+//   sandbox_to_live: { available: false, reason: "..." },
+//   ae_available: bool, kv_available: bool
+// }
+let _apiStatsCache = null;
+
+async function fetchApiStats() {
+  try {
+    const res = await fetch(`${WORKER}/admin/api-stats`, { headers: { 'X-Admin-Key': adminKey } });
+    if (!res.ok) { console.warn('[navy-office] /admin/api-stats', res.status); return; }
+    const data = await res.json();
+    _apiStatsCache = data;
+    renderApiStatsCard(data);
+  } catch (e) { console.warn('[navy-office] /admin/api-stats', e.message); }
+}
+
+function renderApiStatsCard(data) {
+  const activeKeys = data?.active_keys?.active ?? null;
+  const reqs30d    = data?.requests_30d?.total ?? null;
+
+  const keysEl = document.getElementById('snap-api-keys');
+  const reqsEl = document.getElementById('snap-api-reqs');
+
+  if (keysEl) {
+    keysEl.textContent = activeKeys !== null ? String(activeKeys) : 'n/a';
+    keysEl.className   = 'sm-value';
+  }
+  if (reqsEl) {
+    reqsEl.textContent = reqs30d !== null
+      ? `${reqs30d.toLocaleString('en-GB')} reqs (30d)`
+      : '';
+  }
+}
+
+// (3a) KV client errors log ──────────────────────────────────────────────
+async function fetchKvErrorsLog() {
+  try {
+    const res = await fetch(`${WORKER}/admin/client-errors-log`, { headers: { 'X-Admin-Key': adminKey } });
+    if (!res.ok) { return null; }
+    return res.json();
+  } catch { return null; }
+}
+
 // ── Render: farming signal ─────────────────────────────────────────────────
-// credentials_issued_24h = sum of credential_issuances_by_tier from AE.
-// uploads_completed_24h: proxy (ratio against itself = 1.00) until B6 lands real field.
 function renderFarming(m, ae) {
   const el = document.getElementById('snap-farming');
   if (!el) return;
@@ -388,11 +427,11 @@ const MODAL_DEFS = {
   retrieval:            { label: 'Download success rate',     plain: 'Chunk retrieval success in last 24h' },
   churn:                { label: 'Churn rate',                plain: 'Cancellations' },
   'free-users':         { label: 'Free users',                plain: 'Total accounts on free tier' },
-  'client-errors':      { label: 'Client errors (24h)',       plain: 'Browser-side failures reported' },
+  'client-errors':      { label: 'Client errors',             plain: 'Browser-side and Worker-observed failures' },
   farming:              { label: 'Farming signal',            plain: 'Credential-to-upload ratio (normal: 0.8–1.2 · alarm: >3.0)' },
   lightning:            { label: 'Lightning settlement',      plain: 'Sats vs fiat payment mix' },
   'kv-monitor':         { label: 'KV quota monitor',         plain: 'Cloudflare Workers KV free-plan usage' },
-  'cpu-time':           { label: 'Worker CPU time',          plain: 'Average CPU ms per request today' },
+  'api-mcp':            { label: 'API & MCP',                plain: 'API keys and request volumes' },
 };
 
 let _modalTrigger = null;
@@ -406,7 +445,6 @@ function openModal(key, triggerEl) {
   setText('modal-label', def.label);
   setText('modal-plain', def.plain);
 
-  // Deferred state
   const deferredNote = document.getElementById('modal-deferred-note');
   const isLightning  = key === 'lightning';
   deferredNote.style.display = isLightning ? '' : 'none';
@@ -414,10 +452,9 @@ function openModal(key, triggerEl) {
     deferredNote.innerHTML = '<strong>B7</strong><span class="deferred-badge">deferred</span><br><br>This metric is live at Block 7 when Lightning/Blink integration ships.';
   }
 
-  // Skeleton while no data
   const mv = document.getElementById('modal-value');
   const ms = document.getElementById('modal-sub');
-  if (lastMetrics === null && lastAe === null && key !== 'lightning') {
+  if (lastMetrics === null && lastAe === null && key !== 'lightning' && key !== 'api-mcp') {
     mv.textContent = '\u00A0';
     mv.className = 'modal-value skeleton';
     ms.textContent = '\u00A0';
@@ -550,16 +587,17 @@ function openModal(key, triggerEl) {
       sub = 'Supabase · subscribers where tier = free';
       break;
     }
+
+    // ── (3a) Client errors modal with AE/KV toggle ─────────────────────
     case 'client-errors': {
-      const ce = ae.client_errors_24h;
-      if (ce !== null && ce !== undefined) {
-        value = String(ce);
-        colorClass = ce > 10 ? ' red' : ce > 0 ? ' amber' : ' green';
+      // Build the value from the current ceSource
+      const ceAeVal = ae.client_errors_24h;
+      if (ceAeVal !== null && ceAeVal !== undefined) {
+        value = String(ceAeVal);
+        colorClass = ceAeVal > 10 ? ' red' : ceAeVal > 0 ? ' amber' : ' green';
       } else { value = 'n/a'; isNA = true; }
 
-      const count = clientErrorsDetail.length;
-
-      // Hide the static Trend / Export section titles — this modal owns its own layout
+      // Hide standard Trend / Export chrome — this modal owns its layout
       const sparkEl = document.getElementById('modal-sparkline');
       sparkEl.classList.remove('modal-sparkline-stub');
       sparkEl.closest('.modal-body').querySelectorAll('.modal-section-title').forEach(el => {
@@ -568,56 +606,14 @@ function openModal(key, triggerEl) {
       document.getElementById('modal-csv-btn').style.display  = 'none';
       document.getElementById('modal-csv-note').style.display = 'none';
 
-      if (count === 0) {
-        sub = 'No client errors logged in the last 24 hours.';
-        sparkEl.innerHTML = '<div class="ce-empty">No errors in the last 24 hours.</div>';
-      } else {
-        sub = count === 1
-          ? '1 browser-side failure reported via /log/error'
-          : `${count} browser-side failures reported via /log/error`;
-
-        const rows = clientErrorsDetail.map(r => {
-          const ts = r.ts
-            ? new Date(r.ts).toLocaleString('en-GB', {
-                day: '2-digit', month: 'short',
-                hour: '2-digit', minute: '2-digit', second: '2-digit',
-                hour12: false
-              })
-            : '—';
-          const context = escHtml(r.context || '—');
-          const msg     = r.message
-            ? escHtml(r.message.slice(0, 80)) + (r.message.length > 80 ? '&hellip;' : '')
-            : '—';
-          const browser = escHtml(parseUA(r.detail));
-          return `<tr>
-            <td class="ce-ts">${ts}</td>
-            <td class="ce-ctx">${context}</td>
-            <td class="ce-msg">${msg}</td>
-            <td class="ce-browser">${browser}</td>
-          </tr>`;
-        }).join('');
-
-        sparkEl.innerHTML = `
-          <div class="modal-section-title">Detail</div>
-          <div class="ce-table-wrap">
-            <table class="ce-table">
-              <thead><tr>
-                <th>Time</th>
-                <th>Context</th>
-                <th>Message</th>
-                <th>Browser</th>
-              </tr></thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>
-          <p class="ce-provenance-note">
-            Errors logged before the S73 deploy (5 Aug 2026) do not carry browser data —
-            the <code>blob4</code> UA field was added in that release.
-            Rows with no browser data show&nbsp;—.
-          </p>`;
-      }
+      // Render the toggle + content
+      _renderCeModalContent(sparkEl, ae);
+      sub = ceSource === 'ae'
+        ? `Reported by browser (24h) · /log/error`
+        : `Observed by Worker (90d) · /admin/client-errors-log`;
       break;
     }
+
     case 'farming': {
       const farmIss      = ae.credential_issuances_by_tier;
       const farmIssued   = farmIss ? (farmIss.free ?? 0) + (farmIss.creative ?? 0) + (farmIss.max ?? 0) : null;
@@ -635,16 +631,14 @@ function openModal(key, triggerEl) {
       break;
     }
     case 'kv-monitor': {
-      // Build the 3-bar quota view instead of the standard sparkline layout.
       const kv = window._kvCache ?? {};
       const writes   = kv.writes_today   ?? 0;
       const reads    = kv.reads_today    ?? 0;
       const storage  = kv.storage_bytes  ?? 0;
       const keys     = kv.key_count      ?? 0;
-      // Free-plan limits (daily reset for ops, fixed for storage)
       const W_LIMIT = 1_000;
       const R_LIMIT = 100_000;
-      const S_LIMIT = 1_073_741_824; // 1 GiB
+      const S_LIMIT = 1_073_741_824;
 
       const writePct   = Math.min((writes  / W_LIMIT)  * 100, 100);
       const readPct    = Math.min((reads   / R_LIMIT)   * 100, 100);
@@ -658,7 +652,6 @@ function openModal(key, triggerEl) {
         return b + ' B';
       }
 
-      // Hide the default sparkline/export section; this modal owns its layout.
       const sparkEl = document.getElementById('modal-sparkline');
       sparkEl.classList.remove('modal-sparkline-stub');
       sparkEl.closest('.modal-body').querySelectorAll('.modal-section-title').forEach(el => {
@@ -710,15 +703,31 @@ function openModal(key, triggerEl) {
         <div class="kv-plan-note">
           Plan: FREE · Ops limits reset DAILY at midnight UTC.<br>
           Upgrade to Workers Paid ($5/mo) to move to MONTHLY accrual with 10× higher allowances.<br>
-          Flip <code>PLAN='paid'</code> in dashboard.js after upgrade — no GraphQL auto-detect yet.
+          Flip <code>PLAN='paid'</code> in navy-office.js after upgrade — no GraphQL auto-detect yet.
         </div>`;
       break;
     }
-    case 'cpu-time': {
-      // Stub — AE CPU time metric not yet wired; deferred to B6 analytics pass.
-      value = '—'; sub = 'Deferred — CPU time per-request reporting lands in B6'; isNA = true;
+
+    // ── (3b) API & MCP modal ──────────────────────────────────────────────
+    case 'api-mcp': {
+      const d = _apiStatsCache;
+      const activeCount = d?.active_keys?.active ?? null;
+      value = activeCount !== null ? String(activeCount) : 'n/a';
+      isNA  = activeCount === null;
+      sub   = 'Active API keys · all plans';
+
+      const sparkEl = document.getElementById('modal-sparkline');
+      sparkEl.classList.remove('modal-sparkline-stub');
+      sparkEl.closest('.modal-body').querySelectorAll('.modal-section-title').forEach(el => {
+        el.style.display = 'none';
+      });
+      document.getElementById('modal-csv-btn').style.display  = 'none';
+      document.getElementById('modal-csv-note').style.display = 'none';
+
+      sparkEl.innerHTML = _buildApiMcpModalHtml(d);
       break;
     }
+
     default:
       value = 'n/a'; isNA = true; sub = 'Unknown metric key';
   }
@@ -728,6 +737,197 @@ function openModal(key, triggerEl) {
   ms.textContent = sub;
   ms.className   = 'modal-sub';
   _openModalShell();
+}
+
+// ── (3b) API & MCP modal HTML builder ─────────────────────────────────────
+// by_rail none → "Pro Bono" (carry-in Share-Dash-2)
+function _railLabel(rail) {
+  if (rail === 'identity')  return 'Registered';
+  if (rail === 'anonymous') return 'Bearer';
+  if (rail === 'none')      return 'Pro Bono';
+  return escHtml(String(rail ?? '—'));
+}
+
+function _apiRow(k, v, cls) {
+  return `<div class="api-row"><span class="api-row-k">${escHtml(k)}</span><span class="api-row-v${cls ? ' ' + cls : ''}">${v}</span></div>`;
+}
+
+function _buildApiMcpModalHtml(d) {
+  if (!d) {
+    return `<div class="api-modal-section"><p style="font-family:var(--mono);font-size:12px;color:var(--text-tertiary)">No data — /admin/api-stats not yet reached.</p></div>`;
+  }
+
+  const aeWarn  = d.ae_available  === false ? '<span class="api-row-v unavail">AE unavailable</span>' : null;
+  const kvWarn  = d.kv_available  === false ? '<span class="api-row-v unavail">KV unavailable</span>' : null;
+
+  // Section 1: Active keys
+  const ak = d.active_keys ?? {};
+  const byPlan = ak.by_plan ?? {};
+  const keyRows = [
+    _apiRow('Provisioned', ak.provisioned ?? '—'),
+    _apiRow('Active',      ak.active      ?? '—'),
+    ...Object.entries(byPlan).map(([plan, n]) => _apiRow(`  ${escHtml(plan)}`, String(n))),
+  ];
+
+  // Section 2: Requests 30d
+  const r30 = d.requests_30d ?? {};
+  const byRail = r30.by_rail ?? {};
+  const reqRows = [
+    _apiRow('Total (30d)', r30.total?.toLocaleString('en-GB') ?? (aeWarn ? aeWarn : '—')),
+    ...Object.entries(byRail).map(([rail, n]) =>
+      _apiRow(`  ${_railLabel(rail)}`, String(n))
+    ),
+  ];
+
+  // Section 3: Attach rate
+  const ar = d.api_attach_rate ?? {};
+  const ratePct = ar.rate != null ? `${(ar.rate * 100).toFixed(1)}%` : (kvWarn ? kvWarn : '—');
+  const attachRows = [
+    _apiRow('API transfers',   ar.api_transfers?.toLocaleString('en-GB') ?? '—'),
+    _apiRow('Total transfers', ar.total_transfers?.toLocaleString('en-GB') ?? '—'),
+    _apiRow('Attach rate',     ratePct),
+  ];
+
+  // Section 4: Sandbox → live
+  const s2l = d.sandbox_to_live ?? {};
+  const s2lVal = s2l.available === false
+    ? `<span class="api-row-v pending">pending — ${escHtml(s2l.reason ?? 'no reason given')}</span>`
+    : `<span class="api-row-v">available</span>`;
+
+  return `
+    <div class="api-modal-section">
+      <div class="api-modal-section-title">Active keys</div>
+      ${keyRows.join('')}
+    </div>
+    <div class="api-modal-section">
+      <div class="api-modal-section-title">Requests · 30d</div>
+      ${reqRows.join('')}
+    </div>
+    <div class="api-modal-section">
+      <div class="api-modal-section-title">API attach rate</div>
+      ${attachRows.join('')}
+    </div>
+    <div class="api-modal-section">
+      <div class="api-modal-section-title">Sandbox → live</div>
+      ${_apiRow('Status', s2lVal)}
+    </div>
+  `;
+}
+
+// ── (3a) CE modal content renderer ────────────────────────────────────────
+// Builds the toggle + whichever table is active, into the given sparkEl.
+function _renderCeModalContent(sparkEl, ae) {
+  const toggleHtml = `
+    <div class="ce-source-toggle">
+      <button class="ce-source-btn${ceSource === 'ae' ? ' active' : ''}" onclick="_setCeSource('ae')">
+        Reported by browser (24h)
+      </button>
+      <button class="ce-source-btn${ceSource === 'kv' ? ' active' : ''}" onclick="_setCeSource('kv')">
+        Observed by Worker (90d)
+      </button>
+    </div>`;
+
+  if (ceSource === 'ae') {
+    const count = clientErrorsDetail.length;
+    if (count === 0) {
+      sparkEl.innerHTML = toggleHtml + '<div class="ce-empty">No errors in the last 24 hours.</div>';
+      return;
+    }
+    const rows = clientErrorsDetail.map(r => {
+      const ts = r.ts
+        ? new Date(r.ts).toLocaleString('en-GB', {
+            day: '2-digit', month: 'short',
+            hour: '2-digit', minute: '2-digit', second: '2-digit',
+            hour12: false
+          })
+        : '—';
+      const context = escHtml(r.context || '—');
+      const msg     = r.message
+        ? escHtml(r.message.slice(0, 80)) + (r.message.length > 80 ? '&hellip;' : '')
+        : '—';
+      const browser = escHtml(parseUA(r.detail));
+      return `<tr>
+        <td class="ce-ts">${ts}</td>
+        <td class="ce-ctx">${context}</td>
+        <td class="ce-msg">${msg}</td>
+        <td class="ce-browser">${browser}</td>
+      </tr>`;
+    }).join('');
+    sparkEl.innerHTML = toggleHtml + `
+      <div class="modal-section-title">Detail</div>
+      <div class="ce-table-wrap">
+        <table class="ce-table">
+          <thead><tr>
+            <th>Time</th><th>Context</th><th>Message</th><th>Browser</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      <p class="ce-provenance-note">
+        Errors logged before the S73 deploy (5 Aug 2026) do not carry browser data —
+        the <code>blob4</code> UA field was added in that release.
+        Rows with no browser data show&nbsp;—.
+      </p>`;
+  } else {
+    // KV source — fetch if not cached, then render
+    sparkEl.innerHTML = toggleHtml + '<div class="ce-empty" style="color:var(--text-tertiary)">Loading Worker log…</div>';
+    fetchKvErrorsLog().then(data => {
+      kvErrorsCache = data;
+      if (!data) {
+        sparkEl.innerHTML = toggleHtml + '<div class="ce-empty" style="color:var(--c-amber)">Worker log unavailable — /admin/client-errors-log returned an error.</div>';
+        return;
+      }
+      const entries = Array.isArray(data.entries) ? data.entries : [];
+      if (entries.length === 0) {
+        sparkEl.innerHTML = toggleHtml + '<div class="ce-empty">No Worker-observed errors in the last 90 days.</div>';
+        return;
+      }
+      const summary = `${data.total ?? entries.length} total · ${data.count_4xx ?? 0}× 4xx · ${data.count_5xx ?? 0}× 5xx · ${data.window_days ?? 90}d window`;
+      const rows = entries.map(r => {
+        const ts = r.ts
+          ? new Date(r.ts).toLocaleString('en-GB', {
+              day: '2-digit', month: 'short',
+              hour: '2-digit', minute: '2-digit', second: '2-digit',
+              hour12: false
+            })
+          : '—';
+        const statusCls = r.status >= 500 ? 'ce-status" style="color:var(--c-red)' :
+                          r.status >= 400 ? 'ce-status" style="color:var(--c-amber)' :
+                          'ce-status';
+        return `<tr>
+          <td class="ce-ts">${ts}</td>
+          <td class="${statusCls}">${r.status ?? '—'}</td>
+          <td class="ce-ep">${escHtml(r.endpoint ?? '—')}</td>
+          <td class="ce-path">${escHtml(r.path ?? '—')}</td>
+          <td class="ce-msg">${escHtml((r.msg ?? '').slice(0, 80))}</td>
+        </tr>`;
+      }).join('');
+      sparkEl.innerHTML = toggleHtml + `
+        <div class="modal-section-title">Worker-observed errors</div>
+        <div class="ce-table-wrap">
+          <table class="ce-table">
+            <thead><tr>
+              <th>Time</th><th>Status</th><th>Endpoint</th><th>Path</th><th>Message</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+        <p class="ce-provenance-note">${escHtml(summary)}</p>`;
+    });
+  }
+}
+
+// Toggle handler — in-memory only
+function _setCeSource(src) {
+  ceSource = src;
+  // Re-render modal content in place without closing
+  const sparkEl = document.getElementById('modal-sparkline');
+  if (sparkEl) _renderCeModalContent(sparkEl, lastAe ?? {});
+  // Update sub text
+  const ms = document.getElementById('modal-sub');
+  if (ms) ms.textContent = src === 'ae'
+    ? `Reported by browser (24h) · /log/error`
+    : `Observed by Worker (90d) · /admin/client-errors-log`;
 }
 
 function _openModalShell() {
@@ -764,7 +964,7 @@ function closeModal() {
   document.body.style.overflow = '';
   document.getElementById('modal-csv-note').style.display = 'none';
 
-  // Restore elements hidden by client-errors and kv-monitor modals
+  // Restore elements hidden by client-errors / kv-monitor / api-mcp modals
   const sparkEl = document.getElementById('modal-sparkline');
   if (sparkEl) {
     sparkEl.classList.add('modal-sparkline-stub');
@@ -784,15 +984,14 @@ function closeModal() {
     requestAnimationFrame(() => { if (typeof t.focus === 'function') t.focus(); });
   }
   _modalTrigger = null;
+  // Reset CE source toggle to AE on close so next open is fresh
+  ceSource = 'ae';
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSoonModal(); closeDockModal(); } });
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-
-// S73a — parse a raw UA string into a human-readable "Browser / OS" label.
-// Order matters: Edge and Opera share Chrome tokens, so they must come first.
 function parseUA(ua) {
   if (!ua || ua.length < 4) return '—';
   let browser = 'Unknown', os = 'Unknown';
@@ -817,7 +1016,6 @@ function parseUA(ua) {
   return `${browser} / ${os}`;
 }
 
-// S73a — minimal HTML escaping for user-supplied strings in the detail table.
 function escHtml(s) {
   return String(s)
     .replace(/&/g, '&amp;')
@@ -840,8 +1038,14 @@ function formatBytes(bytes) {
   return { val, unit: units[i] };
 }
 
+// Human-readable bytes for dock detail — (4)
+function fmtSizeBytes(n) {
+  if (n == null) return '—';
+  const { val, unit } = formatBytes(n);
+  return `${val} ${unit}`;
+}
+
 function showError(msg) {
-  // querySelector rather than getElementById — guards against stale duplicate IDs.
   const el = document.querySelector('#error-banner');
   if (!el) return;
   el.style.display = 'block'; el.textContent = msg;
@@ -951,9 +1155,9 @@ window.smokeTest = async function() {
   return { pass, deferred, fail };
 };
 
-// ─── SW6: Sandbox card ────────────────────────────────────────────────────────
+// ─── Sandbox card ────────────────────────────────────────────────────────────
 
-const SANDBOX_TOKEN_COUNT = 10; // mirrors sandbox.js constant — update together
+const SANDBOX_TOKEN_COUNT = 10;
 
 function escapeHtml(str) {
   return String(str)
@@ -978,7 +1182,7 @@ function openSoonModal(feature) {
   document.getElementById('soon-modal-title').textContent = feature;
   document.getElementById('soon-modal-body').innerHTML =
     `${escHtml(SOON_COPY[feature] ?? 'A dedicated view for this section.')}` +
-    `<br><br><span style="opacity:.6">Coming in Share-Dash-2.</span>`;
+    `<br><br><span style="opacity:.6">Coming in a future session.</span>`;
   document.getElementById('soon-modal').classList.add('open');
 }
 function closeSoonModal() {
@@ -993,7 +1197,7 @@ function updateSandboxState(label) {
 }
 
 async function sandboxActivate() {
-  if (!adminKey) { alert('Not authenticated — unlock the dashboard first.'); return; }
+  if (!adminKey) { alert('Not authenticated — unlock the Navy Office first.'); return; }
 
   const rail = document.getElementById('sandbox-rail-select').value;
   const ref  = (document.getElementById('sandbox-ref-input').value || 'sandbox').trim();
@@ -1039,7 +1243,6 @@ async function sandboxActivate() {
     document.getElementById('sandbox-sub').textContent =
       `${data.rail} rail · ${data.credits !== null ? data.credits + ' credits' : SANDBOX_TOKEN_COUNT + ' test tokens'} · expires ${new Date(data.expires_at * 1000).toLocaleDateString()}`;
 
-    // Auto-clear after 5 minutes — keypair should be recorded by then
     setTimeout(() => {
       resultEl.innerHTML = '<span style="opacity:.4">Result cleared after 5 min — record credentials immediately next time.</span>';
     }, 5 * 60 * 1000);
@@ -1054,7 +1257,7 @@ async function sandboxActivate() {
 }
 
 async function sandboxReset() {
-  if (!adminKey) { alert('Not authenticated — unlock the dashboard first.'); return; }
+  if (!adminKey) { alert('Not authenticated — unlock the Navy Office first.'); return; }
 
   const liveKey = (document.getElementById('sandbox-reset-key-input').value ?? '').trim();
   if (!liveKey.startsWith('rfs_test_live_')) {
@@ -1119,13 +1322,7 @@ async function fetchKvStats() {
   } catch (e) { console.warn('[kv-stats]', e); }
 }
 
-// ── Execution Dock (Share-Dash-1) ─────────────────────────────────────────
-// Reads GET /admin/execution-dock (handlers/execution_dock.js).
-// Panel shows the 10 most recent; the endpoint returns up to 200.
-// Fields available now: uuid · tier · status · created · expiry · days_remaining
-// · collected/collected_at. Size · rail · download-count · merkle-root are NOT
-// in dock_index yet — deferred to Share-Dash-2 (Worker session extends the
-// handler + finalise persists size/root). Filenames deliberately not shown (D-1).
+// ── Execution Dock (Share-Dash-1/2/3) ─────────────────────────────────────
 let dockTransfers = [];
 
 async function fetchExecutionDock() {
@@ -1189,6 +1386,12 @@ function _dockDetailRow(k, v, deferred) {
   </div>`;
 }
 
+// (4) Rail label map — matches share-sessions spec
+const RAIL_LABEL = {
+  identity:  'Registered',
+  anonymous: 'Bearer',
+};
+
 function openDockModal(idx) {
   const t = dockTransfers[idx];
   if (!t) return;
@@ -1196,6 +1399,10 @@ function openDockModal(idx) {
   const days = t.collected
     ? 'collected'
     : (t.days_remaining != null ? `${t.days_remaining} day${t.days_remaining === 1 ? '' : 's'} left` : '—');
+
+  // (4) size_bytes — human-readable; rail — label map; merkle_root — pending note; download count — pending
+  const sizeVal  = t.size_bytes != null ? fmtSizeBytes(t.size_bytes) : '—';
+  const railVal  = t.rail ? (RAIL_LABEL[t.rail] ?? escHtml(t.rail)) : '—';
 
   document.getElementById('dock-modal-title').textContent = 'Transfer';
   document.getElementById('dock-modal-body').innerHTML = [
@@ -1206,10 +1413,10 @@ function openDockModal(idx) {
     _dockDetailRow('Expires',            fmtDockDate(t.expiry_timestamp)),
     _dockDetailRow('Remaining',          escHtml(days)),
     _dockDetailRow('Collected at',       t.collected_at ? fmtDockDate(t.collected_at) : '—'),
-    _dockDetailRow('Size',               'pending — Share-Dash-2', true),
-    _dockDetailRow('Rail',               'pending — Share-Dash-2', true),
-    _dockDetailRow('Download count',     'pending — Share-Dash-2', true),
-    _dockDetailRow('BLAKE3 merkle root', 'pending — Share-Dash-2', true),
+    _dockDetailRow('Size',               sizeVal),
+    _dockDetailRow('Rail',               railVal),
+    _dockDetailRow('Download count',     'pending', true),
+    _dockDetailRow('BLAKE3 merkle root', 'pending (available at Share-6-5)', true),
   ].join('');
   document.getElementById('dock-modal').classList.add('open');
 }
@@ -1228,4 +1435,228 @@ async function copySandboxResult(btn) {
       setTimeout(() => { btn.textContent = prev; btn.classList.remove('copied'); }, 1500);
     }
   } catch { showError('Clipboard write failed'); }
+}
+
+// ── (3c) Growth signal card ────────────────────────────────────────────────
+// Source: GET /admin/news-events (X-Admin-Key)
+// Response: { events: [{ id, date, label?, note?, free?, paid?, api? }] }
+// POST /admin/news-events  { date, label?, note?, free?, paid?, api? }
+// DELETE /admin/news-events/:id
+
+let _growthEvents = [];
+
+async function fetchGrowth() {
+  try {
+    const res = await fetch(`${WORKER}/admin/news-events`, { headers: { 'X-Admin-Key': adminKey } });
+    if (!res.ok) { console.warn('[navy-office] /admin/news-events', res.status); return; }
+    const data = await res.json();
+    _growthEvents = Array.isArray(data.events) ? data.events : [];
+    renderGrowth();
+  } catch (e) { console.warn('[navy-office] /admin/news-events', e.message); }
+}
+
+function renderGrowth() {
+  const svg  = document.getElementById('growth-svg');
+  const list = document.getElementById('growth-events-list');
+  const body = document.getElementById('growth-events-body');
+  if (!svg) return;
+
+  // Filter to entries that have at least one of free/paid/api
+  const dataPoints = _growthEvents.filter(e => e.free != null || e.paid != null || e.api != null);
+  // Annotations are entries with a label (may or may not have data)
+  const annotations = _growthEvents.filter(e => e.label);
+
+  if (dataPoints.length === 0) {
+    svg.innerHTML = `<text x="400" y="64" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="var(--text-tertiary)">No data yet — add the first event below.</text>`;
+    // Still render annotation list if any
+    if (annotations.length > 0 && list && body) {
+      list.style.display = '';
+      body.innerHTML = _buildEventListHtml(annotations);
+    }
+    return;
+  }
+
+  // Sort by date
+  const sorted = [...dataPoints].sort((a, b) => a.date < b.date ? -1 : 1);
+
+  // Find max for y scale
+  const maxVal = Math.max(1, ...sorted.flatMap(e => [e.free ?? 0, e.paid ?? 0, e.api ?? 0]));
+
+  const W = 800, H = 120, PAD_L = 0, PAD_R = 0, PAD_T = 12, PAD_B = 20;
+  const chartW = W - PAD_L - PAD_R;
+  const chartH = H - PAD_T - PAD_B;
+
+  // Map date → x, value → y
+  const n = sorted.length;
+  function xOf(i) { return PAD_L + (n === 1 ? chartW / 2 : (i / (n - 1)) * chartW); }
+  function yOf(v) { return PAD_T + chartH - ((v ?? 0) / maxVal) * chartH; }
+
+  function polyPoints(key) {
+    return sorted.map((e, i) => `${xOf(i).toFixed(1)},${yOf(e[key] ?? 0).toFixed(1)}`).join(' ');
+  }
+
+  // CSS variable colours — inline for SVG (SVG can't resolve CSS vars in polyline stroke)
+  // We use fixed values matching the design system. Theme-switch redraws on next refresh.
+  const isPaper = document.documentElement.getAttribute('data-theme') !== 'carbon';
+  const fgColor   = isPaper ? '#3D3A36' : '#E4E2DC';
+  const mutedColor = isPaper ? '#9A948D' : '#5A5751';
+
+  // Tick lines for annotations on the data x-axis
+  const sortedAll = [..._growthEvents].sort((a, b) => a.date < b.date ? -1 : 1);
+  // Map date to x within sorted dataPoints (approximate — find nearest index)
+  function xForDate(dateStr) {
+    const idx = sorted.findIndex(e => e.date >= dateStr);
+    if (idx === -1) return xOf(n - 1);
+    if (idx === 0)  return xOf(0);
+    // Interpolate if needed
+    const prev = sorted[idx - 1], curr = sorted[idx];
+    const frac = (dateStr - prev.date) / (curr.date - prev.date);
+    return xOf(idx - 1) + frac * (xOf(idx) - xOf(idx - 1));
+  }
+
+  const tickLines = annotations.map(ev => {
+    const x = xForDate(ev.date).toFixed(1);
+    const shortDate = ev.date ? ev.date.slice(5) : '';
+    return `<line x1="${x}" y1="${PAD_T}" x2="${x}" y2="${H - PAD_B}" stroke="var(--accent,#C8A96E)" stroke-width="1" stroke-dasharray="3,3" data-tick-date="${escHtml(ev.date)}" data-tick-label="${escHtml(ev.label ?? '')}" data-tick-note="${escHtml(ev.note ?? '')}" class="growth-tick-line" style="cursor:pointer;"/>
+      <text x="${x}" y="${H - 4}" text-anchor="middle" font-family="var(--mono)" font-size="8" fill="var(--accent,#C8A96E)">${escHtml(shortDate)}</text>`;
+  }).join('');
+
+  // Dot circles at each data point
+  function dots(key, fill) {
+    return sorted.map((e, i) => {
+      if (e[key] == null) return '';
+      return `<circle cx="${xOf(i).toFixed(1)}" cy="${yOf(e[key]).toFixed(1)}" r="3" fill="${fill}" stroke="var(--bg,#1E1F22)" stroke-width="1.5"/>`;
+    }).join('');
+  }
+
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = `
+    ${tickLines}
+    <polyline points="${polyPoints('free')}"  fill="none" stroke="${fgColor}"   stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <polyline points="${polyPoints('paid')}"  fill="none" stroke="#C8A96E"      stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <polyline points="${polyPoints('api')}"   fill="none" stroke="${mutedColor}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+    ${dots('free', fgColor)}
+    ${dots('paid', '#C8A96E')}
+    ${dots('api',  mutedColor)}
+  `;
+
+  // Tick hover / tap
+  svg.querySelectorAll('.growth-tick-line').forEach(line => {
+    line.addEventListener('mouseenter', e => _showGrowthTooltip(e, line));
+    line.addEventListener('mouseleave', _hideGrowthTooltip);
+    line.addEventListener('click',      e => _showGrowthTooltip(e, line));
+  });
+
+  // Events list
+  if (list && body) {
+    if (annotations.length > 0) {
+      list.style.display = '';
+      body.innerHTML = _buildEventListHtml(annotations);
+    } else {
+      list.style.display = 'none';
+    }
+  }
+}
+
+function _buildEventListHtml(events) {
+  return [...events].sort((a, b) => a.date < b.date ? 1 : -1).map(ev => `
+    <div class="growth-event-row">
+      <span class="growth-event-date">${escHtml(ev.date ?? '—')}</span>
+      ${ev.label ? `<span class="growth-event-label">${escHtml(ev.label)}</span>` : ''}
+      <span class="growth-event-note">${escHtml(ev.note ?? '')}</span>
+      <button class="growth-event-delete" onclick="growthDeleteEvent('${escHtml(ev.id)}', this)" title="Delete">✕</button>
+    </div>`
+  ).join('');
+}
+
+function _showGrowthTooltip(e, line) {
+  const tip   = document.getElementById('growth-tooltip');
+  if (!tip) return;
+  const label = line.dataset.tickLabel || '';
+  const note  = line.dataset.tickNote  || '';
+  const date  = line.dataset.tickDate  || '';
+  tip.textContent = [date, label, note].filter(Boolean).join('\n');
+  tip.style.display = 'block';
+  // Position relative to growth-chart-wrap
+  const wrap = line.closest('.growth-chart-wrap') ?? document.body;
+  const wRect = wrap.getBoundingClientRect();
+  const x = e.clientX - wRect.left + 10;
+  const y = e.clientY - wRect.top  - 8;
+  tip.style.left = `${x}px`;
+  tip.style.top  = `${y}px`;
+}
+function _hideGrowthTooltip() {
+  const tip = document.getElementById('growth-tooltip');
+  if (tip) tip.style.display = 'none';
+}
+
+async function growthAddEvent() {
+  if (!adminKey) { alert('Not authenticated.'); return; }
+  const date   = (document.getElementById('growth-date').value ?? '').trim();
+  const label  = (document.getElementById('growth-label').value ?? '').trim() || undefined;
+  const note   = (document.getElementById('growth-note').value ?? '').trim() || undefined;
+  const freeV  = document.getElementById('growth-free').value;
+  const paidV  = document.getElementById('growth-paid').value;
+  const apiV   = document.getElementById('growth-api').value;
+
+  if (!date) { alert('Date is required.'); return; }
+
+  const body = { date };
+  if (label)         body.label = label;
+  if (note)          body.note  = note;
+  if (freeV !== '')  body.free  = parseInt(freeV, 10);
+  if (paidV !== '')  body.paid  = parseInt(paidV, 10);
+  if (apiV  !== '')  body.api   = parseInt(apiV,  10);
+
+  const statusEl = document.getElementById('growth-form-status');
+  statusEl.style.display = '';
+  statusEl.textContent = 'Saving…';
+
+  try {
+    const res = await fetch(`${WORKER}/admin/news-events`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Key': adminKey },
+      body:    JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      statusEl.textContent = `Error ${res.status}: ${err.error ?? 'unknown'}`;
+      statusEl.style.color = 'var(--c-red)';
+      return;
+    }
+    statusEl.textContent = '✓ Saved.';
+    statusEl.style.color = 'var(--c-green)';
+    // Clear fields
+    ['growth-date','growth-label','growth-note','growth-free','growth-paid','growth-api']
+      .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    setTimeout(() => { statusEl.style.display = 'none'; statusEl.style.color = ''; }, 3000);
+    // Re-fetch
+    await fetchGrowth();
+  } catch (e) {
+    statusEl.textContent = `Network error: ${e.message}`;
+    statusEl.style.color = 'var(--c-red)';
+  }
+}
+
+async function growthDeleteEvent(id, btn) {
+  if (!adminKey) { alert('Not authenticated.'); return; }
+  if (!id) return;
+  const orig = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = '…'; }
+  try {
+    const res = await fetch(`${WORKER}/admin/news-events/${encodeURIComponent(id)}`, {
+      method:  'DELETE',
+      headers: { 'X-Admin-Key': adminKey },
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      showError(`Delete failed ${res.status}: ${err.error ?? 'unknown'}`);
+      if (btn) { btn.disabled = false; btn.textContent = orig; }
+      return;
+    }
+    await fetchGrowth();
+  } catch (e) {
+    showError(`Delete error: ${e.message}`);
+    if (btn) { btn.disabled = false; btn.textContent = orig; }
+  }
 }
