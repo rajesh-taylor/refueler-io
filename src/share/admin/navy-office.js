@@ -59,7 +59,6 @@ document.getElementById('key-input').addEventListener('keydown', e => {
 function showDashboard() {
   document.getElementById('gate').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
-  document.getElementById('sb-auth').textContent = 'admin · authenticated';
   document.title = 'refueler-share · Navy Office';
   initLightningToggle();
 }
