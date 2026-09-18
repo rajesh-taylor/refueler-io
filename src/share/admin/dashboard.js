@@ -1,5 +1,24 @@
 /* ─── dashboard.js — refueler-share admin dashboard ────────────────────────
- * Last updated: S46a
+ * Last updated: Share-Dash-1 (dashboard-only, refueler.io repo, index.js untouched)
+ *
+ * Share-Dash-1 SHIPPED (this file + dashboard.{html,css}):
+ *   1. Sidebar stubs wired — live views scroll-to-card; Subscribers /
+ *      Maintenance mode / Rate limits open a "coming in Share-Dash-2" micro-modal.
+ *   3. Execution Dock panel + detail modal — subset fields only (uuid · tier ·
+ *      status · created · expiry · days-remaining · collected). Reads existing
+ *      GET /admin/execution-dock. Filenames not shown (D-1).
+ *   6. Row-3 deferred-card opacity scoped to sm-value/sm-label (CSS).
+ *   7. Sandbox result: 5-min auto-clear (pre-existing) + Copy JSON button.
+ *   8. Download-success 0.00% false positive fixed — 0/0 chunks now reads n/a.
+ *   +  Fixed refreshAll() Promise.all misalignment (hh was getting kv-stats).
+ *
+ * Share-Dash-2 DEFERRED (refueler-share Worker session — needs index.js):
+ *   2. Client-errors 90-day KV log — Worker append on 4xx/5xx + read endpoint
+ *      (today's errors are AE-only via /log/error, 24h).
+ *   4. API & MCP card (replaces CPU-time stub) — needs /admin/api-stats.
+ *   5. Growth-signal card — needs /admin/news-events GET+POST + admin:news_events KV.
+ *   3b. Dock enrichment — size · rail · download-count · merkle-root into
+ *       dock_index (finalise persists size+root; handler returns them).
  * ─────────────────────────────────────────────────────────────────────────── */
 
 const WORKER = 'https://api.share.refueler.io';
@@ -87,17 +106,22 @@ async function refreshAll() {
   clearInterval(refreshTimer);
   countdown = 60;
   updateCountdown();
-  const [m, ae, snap, hh] = await Promise.all([
+  // Array hole ( , ) skips the fetchKvStats slot — it renders itself and
+  // returns nothing. This keeps hh aligned to fetchHostnameHealth (was
+  // silently receiving the kv-stats result before Share-Dash-1).
+  const [m, ae, snap, , hh, dock] = await Promise.all([
     fetchMetrics(),
     fetchAeMetrics(),
     fetchSnapshot(),
     fetchKvStats(),
     fetchHostnameHealth(),
+    fetchExecutionDock(),
   ]);
   if (m)    { lastMetrics  = m;    renderMetrics(m); }
   if (ae)   { lastAe       = ae;   renderAeMetrics(ae); }
   if (snap) { lastSnapshot = snap; renderSnapshot(snap); }
   if (hh)   { renderHostnameHealth(hh); }
+  if (dock) { renderExecutionDock(dock); }
   if (m || ae) renderFarming(lastMetrics, lastAe);
   const ts = new Date();
   setText('refreshed-at', `Refreshed ${ts.toLocaleTimeString('en-GB')}`);
@@ -275,9 +299,13 @@ function renderAeMetrics(d) {
     dlP99El.className = 'sm-value' + (dl.p99_ms > 1000 ? ' red' : dl.p99_ms > 500 ? ' amber' : '');
   } else { dlP99El.textContent = 'n/a'; dlP99El.className = 'sm-value'; }
 
-  const retEl = document.getElementById('snap-retrieval');
-  const ret   = d.r2_chunk_retrieval_success_rate;
-  if (ret !== null && ret !== undefined) {
+  const retEl    = document.getElementById('snap-retrieval');
+  const ret      = d.r2_chunk_retrieval_success_rate;
+  const retTotal = d.r2_chunk_total_chunks ?? 0;
+  if (retTotal === 0) {
+    // No downloads in the window: 0/0 must read as no-data, never as 0.00% red.
+    retEl.textContent = 'n/a'; retEl.className = 'sm-value';
+  } else if (ret !== null && ret !== undefined) {
     retEl.textContent = `${(ret * 100).toFixed(2)}%`;
     retEl.className = 'sm-value' + (ret < 0.99 ? ' red' : ret < 0.999 ? ' amber' : ' green');
   } else { retEl.textContent = 'n/a'; retEl.className = 'sm-value'; }
@@ -496,10 +524,14 @@ function openModal(key, triggerEl) {
       break;
     }
     case 'retrieval': {
-      const ret = ae.r2_chunk_retrieval_success_rate;
-      if (ret !== null && ret !== undefined) {
+      const ret   = ae.r2_chunk_retrieval_success_rate;
+      const total = ae.r2_chunk_total_chunks ?? 0;
+      if (total === 0) {
+        value = 'n/a'; isNA = true;
+        sub = 'No downloads in the last 24h — nothing to measure yet';
+      } else if (ret !== null && ret !== undefined) {
         value = `${(ret * 100).toFixed(2)}%`;
-        sub = `${ae.r2_chunk_successful_chunks ?? 0} / ${ae.r2_chunk_total_chunks ?? 0} chunks`;
+        sub = `${ae.r2_chunk_successful_chunks ?? 0} / ${total} chunks`;
         colorClass = ret < 0.99 ? ' red' : ret < 0.999 ? ' amber' : ' green';
       } else { value = 'n/a'; isNA = true; sub = 'No R2 retrieval data in AE'; }
       break;
@@ -755,6 +787,7 @@ function closeModal() {
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSoonModal(); closeDockModal(); } });
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -934,6 +967,24 @@ function scrollToCard(id) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+// ── Coming-soon micro-modal (Share-Dash-1) ────────────────────────────────
+const SOON_COPY = {
+  'Subscribers':      'A dedicated subscriber view — per-tier lists, lifecycle and Stripe status. Paying-customer counts are already live in System Summary.',
+  'Maintenance mode': 'A one-switch maintenance banner for the public Share pages, driven from here.',
+  'Rate limits':      'Live per-endpoint rate-limit thresholds and current usage, editable from the dashboard.',
+};
+
+function openSoonModal(feature) {
+  document.getElementById('soon-modal-title').textContent = feature;
+  document.getElementById('soon-modal-body').innerHTML =
+    `${escHtml(SOON_COPY[feature] ?? 'A dedicated view for this section.')}` +
+    `<br><br><span style="opacity:.6">Coming in Share-Dash-2.</span>`;
+  document.getElementById('soon-modal').classList.add('open');
+}
+function closeSoonModal() {
+  document.getElementById('soon-modal').classList.remove('open');
+}
+
 function updateSandboxState(label) {
   const el = document.getElementById('sandbox-state');
   if (!el) return;
@@ -979,7 +1030,10 @@ async function sandboxActivate() {
       `<span style="opacity:.5;font-size:10px">Full response (copy before timer clears):</span>`,
       `<span style="opacity:.7">${escapeHtml(JSON.stringify(data, null, 2))}</span>`,
     ];
-    resultEl.innerHTML = lines.join('<br>');
+    window._sandboxRaw = data;
+    resultEl.innerHTML =
+      `<div class="sandbox-result-head"><button class="ghost-btn" onclick="copySandboxResult(this)">Copy JSON</button></div>` +
+      lines.join('<br>');
 
     updateSandboxState('Active');
     document.getElementById('sandbox-sub').textContent =
@@ -1037,7 +1091,10 @@ async function sandboxReset() {
     if (data.test_tokens?.length) {
       lines.push(``, `<span style="opacity:.7">${escapeHtml(JSON.stringify(data.test_tokens, null, 2))}</span>`);
     }
-    resultEl.innerHTML = lines.join('<br>');
+    window._sandboxRaw = data;
+    resultEl.innerHTML =
+      `<div class="sandbox-result-head"><button class="ghost-btn" onclick="copySandboxResult(this)">Copy JSON</button></div>` +
+      lines.join('<br>');
 
   } catch (e) {
     const resultEl = document.getElementById('sandbox-result');
@@ -1060,4 +1117,115 @@ async function fetchKvStats() {
     el.style.color = count > 500_000 ? 'var(--c-red)' : count > 100_000 ? 'var(--c-amber)' : '';
     window._kvCache = data;
   } catch (e) { console.warn('[kv-stats]', e); }
+}
+
+// ── Execution Dock (Share-Dash-1) ─────────────────────────────────────────
+// Reads GET /admin/execution-dock (handlers/execution_dock.js).
+// Panel shows the 10 most recent; the endpoint returns up to 200.
+// Fields available now: uuid · tier · status · created · expiry · days_remaining
+// · collected/collected_at. Size · rail · download-count · merkle-root are NOT
+// in dock_index yet — deferred to Share-Dash-2 (Worker session extends the
+// handler + finalise persists size/root). Filenames deliberately not shown (D-1).
+let dockTransfers = [];
+
+async function fetchExecutionDock() {
+  try {
+    const res = await fetch(`${WORKER}/admin/execution-dock`, { headers: { 'X-Admin-Key': adminKey } });
+    if (!res.ok) { showError(`/admin/execution-dock ${res.status}`); return null; }
+    return res.json();
+  } catch (e) { showError(`/admin/execution-dock: ${e.message}`); return null; }
+}
+
+const DOCK_PILL = {
+  active:       { cls: 'active',    label: 'active'    },
+  active_nudge: { cls: 'nudge',     label: 'nudge'     },
+  collected:    { cls: 'collected', label: 'collected' },
+  expired:      { cls: 'expired',   label: 'expired'   },
+};
+
+function fmtDockDate(unixSeconds) {
+  if (!unixSeconds) return '—';
+  return new Date(unixSeconds * 1000).toLocaleString('en-GB', {
+    day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false,
+  });
+}
+
+function renderExecutionDock(data) {
+  dockTransfers = Array.isArray(data.transfers) ? data.transfers : [];
+  const tbody = document.getElementById('dock-tbody');
+  const badge = document.getElementById('dock-badge');
+  if (!tbody) return;
+
+  const badgeCount = data.badge_count ?? 0;
+  if (badge) {
+    if (badgeCount > 0) {
+      badge.style.display = '';
+      badge.textContent = `${badgeCount} need${badgeCount === 1 ? 's' : ''} a nudge`;
+    } else { badge.style.display = 'none'; }
+  }
+
+  if (dockTransfers.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="dock-empty">No transfers on the dock.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = dockTransfers.slice(0, 10).map((t, i) => {
+    const pill  = DOCK_PILL[t.status] ?? { cls: 'expired', label: t.status ?? '—' };
+    const short = t.uuid ? `${escHtml(t.uuid.slice(0, 8))}…${escHtml(t.uuid.slice(-4))}` : '—';
+    return `<tr onclick="openDockModal(${i})">
+      <td class="dock-uuid">${short}</td>
+      <td>${escHtml(t.tier ?? '—')}</td>
+      <td><span class="dock-pill ${pill.cls}">${escHtml(pill.label)}</span></td>
+      <td>${fmtDockDate(t.created_at)}</td>
+      <td>${fmtDockDate(t.expiry_timestamp)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function _dockDetailRow(k, v, deferred) {
+  return `<div class="dock-detail-row">
+    <span class="dock-detail-k">${escHtml(k)}</span>
+    <span class="dock-detail-v${deferred ? ' deferred-field' : ''}">${v}</span>
+  </div>`;
+}
+
+function openDockModal(idx) {
+  const t = dockTransfers[idx];
+  if (!t) return;
+  const pill = DOCK_PILL[t.status] ?? { cls: 'expired', label: t.status ?? '—' };
+  const days = t.collected
+    ? 'collected'
+    : (t.days_remaining != null ? `${t.days_remaining} day${t.days_remaining === 1 ? '' : 's'} left` : '—');
+
+  document.getElementById('dock-modal-title').textContent = 'Transfer';
+  document.getElementById('dock-modal-body').innerHTML = [
+    _dockDetailRow('UUID',               escHtml(t.uuid ?? '—')),
+    _dockDetailRow('Status',             `<span class="dock-pill ${pill.cls}">${escHtml(pill.label)}</span>`),
+    _dockDetailRow('Tier',               escHtml(t.tier ?? '—')),
+    _dockDetailRow('Created',            fmtDockDate(t.created_at)),
+    _dockDetailRow('Expires',            fmtDockDate(t.expiry_timestamp)),
+    _dockDetailRow('Remaining',          escHtml(days)),
+    _dockDetailRow('Collected at',       t.collected_at ? fmtDockDate(t.collected_at) : '—'),
+    _dockDetailRow('Size',               'pending — Share-Dash-2', true),
+    _dockDetailRow('Rail',               'pending — Share-Dash-2', true),
+    _dockDetailRow('Download count',     'pending — Share-Dash-2', true),
+    _dockDetailRow('BLAKE3 merkle root', 'pending — Share-Dash-2', true),
+  ].join('');
+  document.getElementById('dock-modal').classList.add('open');
+}
+function closeDockModal() {
+  document.getElementById('dock-modal').classList.remove('open');
+}
+
+// ── Sandbox result copy (Share-Dash-1) ────────────────────────────────────
+async function copySandboxResult(btn) {
+  try {
+    await navigator.clipboard.writeText(JSON.stringify(window._sandboxRaw ?? {}, null, 2));
+    if (btn) {
+      const prev = btn.textContent;
+      btn.textContent = 'Copied';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = prev; btn.classList.remove('copied'); }, 1500);
+    }
+  } catch { showError('Clipboard write failed'); }
 }

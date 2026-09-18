@@ -118,8 +118,22 @@ body {
   border-left: 2px solid var(--accent);
   background: var(--bg);
 }
-.sb-item.stub { color: var(--text-tertiary); pointer-events: none; }
+.sb-item.stub { color: var(--text-tertiary); cursor: pointer; }
+.sb-item.stub:hover { color: var(--text-primary); }
 [data-theme="carbon"] .sb-item.stub { color: var(--text-secondary); }
+.sb-soon {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-amber);
+  background: var(--c-amber-bg);
+  border-radius: 3px;
+  padding: 1px 5px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
 
 .sb-footer {
   padding: 1rem 1.25rem 0;
@@ -453,9 +467,10 @@ body {
 .sm-value.green { color: var(--c-green); }
 .sm-value.blue  { color: var(--c-blue); }
 
-/* ── Deferred card ───────────────────────────────────────────────────────── */
-.deferred       { opacity: 0.38; cursor: default; }
-.deferred:hover { background: transparent; }
+/* ── Deferred card (Share-Dash-1: dim value + label only; card stays live) ── */
+.deferred            { cursor: pointer; }
+.deferred .sm-value,
+.deferred .sm-label  { opacity: 0.38; }
 .b7-badge {
   display: inline-block;
   font-family: var(--mono); font-size: 0.6rem;
@@ -838,3 +853,102 @@ body {
   border-radius: 3px;
   border: 0.5px solid var(--border);
 }
+
+/* ── Micro-modal (coming-soon + transfer detail) — Share-Dash-1 ──────────── */
+.micro-modal-backdrop {
+  display: none; position: fixed; inset: 0; z-index: 120;
+  background: rgba(0, 0, 0, 0.45);
+  align-items: center; justify-content: center;
+  padding: 24px;
+}
+.micro-modal-backdrop.open { display: flex; }
+.micro-modal {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 28px 32px;
+  max-width: 380px; width: 100%;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+.micro-modal-label {
+  font-family: var(--mono); font-size: 0.6rem;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--c-amber); margin-bottom: 10px;
+}
+.micro-modal-title {
+  font-family: var(--heading); font-weight: 700;
+  font-size: 1.15rem; color: var(--text-primary); margin-bottom: 10px;
+}
+.micro-modal-body {
+  font-family: var(--sans); font-size: 0.85rem;
+  color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px;
+}
+.micro-modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+/* ── Execution Dock (Share-Dash-1) ──────────────────────────────────────── */
+.dock-panel { margin-top: 1.5rem; }
+.dock-header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 1rem; margin-bottom: 0.75rem;
+}
+.dock-title {
+  font-family: var(--heading); font-size: 0.65rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-tertiary);
+}
+.dock-badge {
+  font-family: var(--mono); font-size: 0.6rem;
+  color: var(--c-amber); background: var(--c-amber-bg);
+  border: 0.5px solid var(--c-amber); border-radius: 3px; padding: 2px 8px;
+  white-space: nowrap;
+}
+.dock-table-wrap {
+  overflow-x: auto;
+  border: 0.5px solid var(--border); border-radius: 10px;
+  background: var(--surface);
+}
+.dock-table {
+  width: 100%; border-collapse: collapse;
+  font-family: var(--mono); font-size: 11px; color: var(--text-primary);
+}
+.dock-table thead tr {
+  background: var(--surface-raised); border-bottom: 0.5px solid var(--border-mid);
+}
+.dock-table th {
+  padding: 8px 14px; text-align: left; font-weight: 500;
+  color: var(--text-secondary); letter-spacing: 0.04em; white-space: nowrap;
+}
+.dock-table td {
+  padding: 8px 14px; border-bottom: 0.5px solid var(--border);
+  vertical-align: middle; white-space: nowrap;
+}
+.dock-table tbody tr:last-child td { border-bottom: none; }
+.dock-table tbody tr { cursor: pointer; transition: background 0.12s; }
+.dock-table tbody tr:hover { background: var(--surface-raised); }
+.dock-uuid { color: var(--accent); }
+.dock-empty {
+  padding: 20px 14px; color: var(--text-tertiary);
+  font-family: var(--mono); font-size: 0.75rem;
+}
+.dock-pill {
+  display: inline-block; font-family: var(--mono); font-size: 10px;
+  padding: 2px 8px; border-radius: 3px; letter-spacing: 0.04em; text-transform: uppercase;
+}
+.dock-pill.active    { color: var(--c-green); background: var(--c-green-bg); }
+.dock-pill.nudge     { color: var(--c-amber); background: var(--c-amber-bg); }
+.dock-pill.collected { color: var(--c-blue);  background: var(--surface-raised); }
+.dock-pill.expired   { color: var(--text-tertiary); background: var(--surface-raised); }
+
+/* Dock detail modal reuses the micro-modal shell, a touch wider */
+.dock-modal { max-width: 460px; }
+.dock-detail-row {
+  display: flex; justify-content: space-between; gap: 16px;
+  padding: 7px 0; border-bottom: 0.5px solid var(--border);
+  font-family: var(--mono); font-size: 12px;
+}
+.dock-detail-row:last-child { border-bottom: none; }
+.dock-detail-k { color: var(--text-tertiary); }
+.dock-detail-v { color: var(--text-primary); text-align: right; word-break: break-all; }
+.dock-detail-v.deferred-field { color: var(--text-tertiary); font-style: italic; }
+
+/* ── Sandbox result copy button head (Share-Dash-1) ─────────────────────── */
+.sandbox-result-head { display: flex; justify-content: flex-end; margin-bottom: 8px; }

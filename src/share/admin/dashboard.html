@@ -23,16 +23,16 @@
     <div class="sb-section">Overview</div>
     <a class="sb-item active">System Summary</a>
     <div class="sb-section">Metrics</div>
-    <a class="sb-item stub">Upload latency</a>
-    <a class="sb-item stub">Download latency</a>
-    <a class="sb-item stub">Token security</a>
-    <a class="sb-item stub">Client errors</a>
+    <a class="sb-item stub" onclick="scrollToCard('metric-upload')">Upload latency</a>
+    <a class="sb-item stub" onclick="scrollToCard('metric-download')">Download latency</a>
+    <a class="sb-item stub" onclick="scrollToCard('metric-token-security')">Token security</a>
+    <a class="sb-item stub" onclick="scrollToCard('metric-client-errors')">Client errors</a>
     <div class="sb-section">Data</div>
-    <a class="sb-item stub">Transfers</a>
-    <a class="sb-item stub">Subscribers</a>
+    <a class="sb-item stub" onclick="scrollToCard('card-execution-dock')">Transfers</a>
+    <a class="sb-item stub" onclick="openSoonModal('Subscribers')">Subscribers<span class="sb-soon">soon</span></a>
     <div class="sb-section">Ops</div>
-    <a class="sb-item stub">Maintenance mode</a>
-    <a class="sb-item stub">Rate limits</a>
+    <a class="sb-item stub" onclick="openSoonModal('Maintenance mode')">Maintenance mode<span class="sb-soon">soon</span></a>
+    <a class="sb-item stub" onclick="openSoonModal('Rate limits')">Rate limits<span class="sb-soon">soon</span></a>
     <div class="sb-section">API</div>
     <a class="sb-item stub" onclick="scrollToCard('card-sandbox')">Sandbox</a>
   </nav>
@@ -162,7 +162,7 @@
           <div class="sm-plain">Right now</div>
           <div class="sm-value" id="snap-error-rate">—</div>
         </div>
-        <div class="snap-metric" tabindex="0" onclick="openModal('uniqueness', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('uniqueness', this)">
+        <div class="snap-metric" id="metric-token-security" tabindex="0" onclick="openModal('uniqueness', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('uniqueness', this)">
           <div class="sm-label">Token security</div>
           <div class="sm-plain">No double-spends</div>
           <div class="sm-value" id="snap-uniqueness">—</div>
@@ -171,12 +171,12 @@
 
       <!-- Row 2: latency + reliability -->
       <div class="row-6">
-        <div class="snap-metric" tabindex="0" onclick="openModal('upload-speed', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('upload-speed', this)">
+        <div class="snap-metric" id="metric-upload" tabindex="0" onclick="openModal('upload-speed', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('upload-speed', this)">
           <div class="sm-label">Upload speed · p95</div>
           <div class="sm-plain">Typical worst case</div>
           <div class="sm-value" id="snap-upload-speed">—</div>
         </div>
-        <div class="snap-metric" tabindex="0" onclick="openModal('download-speed', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('download-speed', this)">
+        <div class="snap-metric" id="metric-download" tabindex="0" onclick="openModal('download-speed', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('download-speed', this)">
           <div class="sm-label">Download speed · p95</div>
           <div class="sm-plain">Typical worst case</div>
           <div class="sm-value" id="snap-download-speed">—</div>
@@ -210,7 +210,7 @@
           <div class="sm-plain">Total on free tier</div>
           <div class="sm-value" id="snap-free-users">—</div>
         </div>
-        <div class="snap-metric" tabindex="0" onclick="openModal('client-errors', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('client-errors', this)">
+        <div class="snap-metric" id="metric-client-errors" tabindex="0" onclick="openModal('client-errors', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('client-errors', this)">
           <div class="sm-label">Client errors (24h)</div>
           <div class="sm-plain">Browser-side failures</div>
           <div class="sm-value" id="snap-client-errors">—</div>
@@ -238,6 +238,28 @@
           <div class="sm-plain">vs 10 ms free limit</div>
           <div class="sm-value" id="snap-cpu-time">—</div>
         </div>
+      </div>
+    </div>
+
+    <!-- ─── Execution Dock (Share-Dash-1) ─────────────────────────────────── -->
+    <div class="dock-panel" id="card-execution-dock">
+      <div class="dock-header">
+        <div class="dock-title">Execution Dock · last 10 transfers</div>
+        <span class="dock-badge" id="dock-badge" style="display:none;"></span>
+      </div>
+      <div class="dock-table-wrap">
+        <table class="dock-table">
+          <thead><tr>
+            <th>UUID</th>
+            <th>Tier</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Expires</th>
+          </tr></thead>
+          <tbody id="dock-tbody">
+            <tr><td colspan="5" class="dock-empty">Loading transfers…</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -275,6 +297,30 @@
     <div class="modal-section-title">Export</div>
     <button class="modal-csv-btn" id="modal-csv-btn" onclick="onCsvClick()">⬇ Download CSV</button>
     <div class="modal-csv-note" id="modal-csv-note" style="display:none">CSV export available from B6</div>
+  </div>
+</div>
+
+<!-- ─── Micro-modal: coming-soon (Share-Dash-1) ─── -->
+<div class="micro-modal-backdrop" id="soon-modal" onclick="if(event.target===this)closeSoonModal()">
+  <div class="micro-modal" role="dialog" aria-modal="true" aria-labelledby="soon-modal-title">
+    <div class="micro-modal-label">Planned</div>
+    <div class="micro-modal-title" id="soon-modal-title">—</div>
+    <div class="micro-modal-body" id="soon-modal-body"></div>
+    <div class="micro-modal-actions">
+      <button class="ghost-btn" onclick="closeSoonModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Execution Dock: transfer detail (Share-Dash-1) ─── -->
+<div class="micro-modal-backdrop" id="dock-modal" onclick="if(event.target===this)closeDockModal()">
+  <div class="micro-modal dock-modal" role="dialog" aria-modal="true" aria-labelledby="dock-modal-title">
+    <div class="micro-modal-label">Transfer detail</div>
+    <div class="micro-modal-title" id="dock-modal-title">—</div>
+    <div id="dock-modal-body"></div>
+    <div class="micro-modal-actions" style="margin-top:20px;">
+      <button class="ghost-btn" onclick="closeDockModal()">Close</button>
+    </div>
   </div>
 </div>
 
