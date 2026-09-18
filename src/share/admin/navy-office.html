@@ -3,21 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>refueler-share · dashboard</title>
+<title>refueler-share · Navy Office</title>
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.bunny.net">
 <link href="https://fonts.bunny.net/css?family=ibm-plex-mono:400,500|source-serif-4:300,400&display=swap" rel="stylesheet">
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
 <!-- Styles -->
-<link rel="stylesheet" href="dashboard.css">
+<link rel="stylesheet" href="navy-office.css">
 </head>
 <body>
 
 <!-- ─── Sidebar ─── -->
 <aside id="sidebar">
   <div class="sb-wordmark">
-    <span class="wm-brand">refueler-share</span><span class="wm-div">/</span><span class="wm-sub">dashboard</span>
+    <span class="wm-brand">refueler-share</span><span class="wm-div">/</span><span class="wm-sub">Navy Office</span>
   </div>
   <nav class="sb-nav">
     <div class="sb-section">Overview</div>
@@ -51,7 +51,7 @@
 
   <!-- Password gate -->
   <div id="gate">
-    <h1>refueler-share</h1>
+    <h1>Navy Office</h1>
     <input type="password" id="key-input" placeholder="Admin key" autocomplete="off">
     <button onclick="tryUnlock()">Unlock</button>
     <div id="gate-error"></div>
@@ -233,10 +233,11 @@
           <div class="sm-plain">Free plan · 1 GB cap</div>
           <div class="sm-value" id="snap-kv-keys">—</div>
         </div>
-        <div class="snap-metric" tabindex="0" onclick="openModal('cpu-time', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('cpu-time', this)">
-          <div class="sm-label">CPU time today</div>
-          <div class="sm-plain">vs 10 ms free limit</div>
-          <div class="sm-value" id="snap-cpu-time">—</div>
+        <div class="snap-metric" id="metric-api-mcp" tabindex="0" onclick="openModal('api-mcp', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('api-mcp', this)">
+          <div class="sm-label">API &amp; MCP</div>
+          <div class="sm-plain">Active keys</div>
+          <div class="sm-value" id="snap-api-keys">—</div>
+          <div class="sm-plain" id="snap-api-reqs"></div>
         </div>
       </div>
     </div>
@@ -260,6 +261,62 @@
             <tr><td colspan="5" class="dock-empty">Loading transfers…</td></tr>
           </tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- ─── Growth signal card (Share-Dash-3) ───────────────────────────────── -->
+    <div class="growth-panel" id="card-growth">
+      <div class="growth-header">
+        <div class="growth-title">Growth signal</div>
+        <div class="growth-legend">
+          <span class="growth-legend-item"><span class="growth-legend-swatch" style="background:var(--text-primary)"></span>Free</span>
+          <span class="growth-legend-item"><span class="growth-legend-swatch" style="background:var(--accent)"></span>Paid</span>
+          <span class="growth-legend-item"><span class="growth-legend-swatch" style="background:var(--text-tertiary)"></span>API</span>
+        </div>
+      </div>
+
+      <div class="growth-chart-wrap" style="position:relative;">
+        <svg class="growth-svg" id="growth-svg" viewBox="0 0 800 120" preserveAspectRatio="none"></svg>
+        <div class="growth-tick-tooltip" id="growth-tooltip"></div>
+      </div>
+
+      <div class="growth-events-list" id="growth-events-list" style="display:none;">
+        <div class="growth-events-title">Annotations</div>
+        <div id="growth-events-body"></div>
+      </div>
+
+      <div class="growth-form">
+        <div class="growth-form-title">Add data point / annotation</div>
+        <div class="growth-form-row">
+          <div class="growth-form-field">
+            <label class="growth-form-label" for="growth-date">Date</label>
+            <input type="date" id="growth-date">
+          </div>
+          <div class="growth-form-field">
+            <label class="growth-form-label" for="growth-free">Free</label>
+            <input type="number" id="growth-free" min="0" placeholder="—">
+          </div>
+          <div class="growth-form-field">
+            <label class="growth-form-label" for="growth-paid">Paid</label>
+            <input type="number" id="growth-paid" min="0" placeholder="—">
+          </div>
+          <div class="growth-form-field">
+            <label class="growth-form-label" for="growth-api">API</label>
+            <input type="number" id="growth-api" min="0" placeholder="—">
+          </div>
+        </div>
+        <div class="growth-form-row">
+          <div class="growth-form-field" style="flex:1;min-width:140px;">
+            <label class="growth-form-label" for="growth-label">Label</label>
+            <input type="text" id="growth-label" maxlength="60" placeholder="e.g. HN launch">
+          </div>
+          <div class="growth-form-field" style="flex:2;min-width:180px;">
+            <label class="growth-form-label" for="growth-note">Note</label>
+            <input type="text" id="growth-note" maxlength="200" placeholder="optional detail">
+          </div>
+          <button class="growth-submit-btn" onclick="growthAddEvent()">Add event</button>
+        </div>
+        <div id="growth-form-status" style="display:none;font-family:var(--mono);font-size:11px;"></div>
       </div>
     </div>
 
@@ -324,6 +381,6 @@
   </div>
 </div>
 
-<script src="dashboard.js"></script>
+<script src="navy-office.js"></script>
 </body>
 </html>
