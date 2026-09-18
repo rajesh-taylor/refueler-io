@@ -3,397 +3,1598 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>refueler-share · Navy Office</title>
-<!-- Fonts -->
+<title>Navy Office — refueler-share</title>
 <link rel="preconnect" href="https://fonts.bunny.net">
 <link href="https://fonts.bunny.net/css?family=ibm-plex-mono:400,500|source-serif-4:300,400&display=swap" rel="stylesheet">
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
-<!-- Styles -->
-<link rel="stylesheet" href="navy-office.css">
+<style>
+/* ── Design tokens ── */
+:root {
+  --bg:             #F5F0E8;
+  --surface:        #EAE5DC;
+  --surface-raised: #E0DDD5;
+  --text-primary:   #3D3A36;
+  --text-secondary: #5A5751;
+  --text-tertiary:  #9A948D;
+  --border:         #D6D1C8;
+  --border-mid:     #B8B2A8;
+  --inset-rule:     var(--border);
+  --accent:         #C8A96E;
+  --accent-hover:   #E0C48A;
+  --accent-action:  #D4690A;
+  --c-green:        #1C7C4A;
+  --c-green-bg:     #EBF7F0;
+  --c-amber:        #B85C00;
+  --c-amber-bg:     #FEF3E6;
+  --c-red:          #C0392B;
+  --c-red-bg:       #FDF0EE;
+  --warn:           #B87333;
+  --mono:  'IBM Plex Mono', monospace;
+  --sans:  'DM Sans', sans-serif;
+  --serif: 'Source Serif 4', Georgia, serif;
+  --heading: 'Satoshi', 'DM Sans', sans-serif;
+}
+[data-theme="carbon"] {
+  --bg:             #1A1A1A;
+  --surface:        #26282C;
+  --surface-raised: #2E3035;
+  --text-primary:   #E4E2DC;
+  --text-secondary: #8A8680;
+  --text-tertiary:  #5A5751;
+  --border:         #35373B;
+  --border-mid:     #4A4D52;
+  --inset-rule:     #C8A96E;
+  --accent-action:  #F5820A;
+  --c-green:        #3DCA7A;
+  --c-green-bg:     #0D2B1A;
+  --c-amber:        #E8A23A;
+  --c-amber-bg:     #2B1D08;
+  --c-red:          #E05050;
+  --c-red-bg:       #2B1010;
+  --warn:           #C8943A;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  font-weight: 300;
+  background: var(--bg);
+  color: var(--text-primary);
+  transition: background 0.35s, color 0.35s;
+  min-height: 100vh;
+}
+
+/* ── Auth gate ── */
+#auth-gate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+.auth-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-top: 2px solid var(--accent);
+  border-radius: 10px;
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+}
+.auth-card .wordmark {
+  font-family: var(--heading);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+  letter-spacing: -0.01em;
+}
+.auth-card .wordmark span {
+  color: var(--accent);
+}
+.auth-card .sub {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+  margin-bottom: 2rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.auth-card input[type="password"] {
+  width: 100%;
+  background: var(--bg);
+  border: 0.5px solid var(--border-mid);
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  outline: none;
+  margin-bottom: 0.85rem;
+}
+.auth-card input:focus { border-color: var(--accent); }
+.auth-card button {
+  width: 100%;
+  background: var(--accent);
+  color: #1A1A1A;
+  border: none;
+  border-radius: 8px;
+  padding: 0.65rem;
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.auth-card button:hover { background: var(--accent-hover); }
+#auth-error {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--c-red);
+  min-height: 1.1rem;
+}
+
+/* ── Main shell ── */
+#main-app { display: none; }
+
+/* ── Top bar ── */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #1A1A1A;
+  border-bottom: 0.5px solid #2A2A2A;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  height: 52px;
+}
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+.topbar-wordmark {
+  font-family: var(--heading);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #E4E2DC;
+  letter-spacing: -0.01em;
+}
+.topbar-wordmark span { color: var(--accent); }
+.topbar-surface {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 0.5px solid var(--accent);
+  border-radius: 3px;
+  padding: 0.15rem 0.45rem;
+}
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.topbar-time {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: #5A5751;
+}
+.theme-btn {
+  background: none;
+  border: 0.5px solid #35373B;
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  color: #8A8680;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.theme-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── Page content ── */
+.page { max-width: 1280px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+/* ── Page header ── */
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 0.5px solid var(--border);
+}
+.page-header h1 {
+  font-family: var(--heading);
+  font-weight: 700;
+  font-size: 1.55rem;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+}
+.page-header .sub {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-top: 0.3rem;
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.refresh-btn {
+  background: none;
+  border: 0.5px solid var(--border-mid);
+  border-radius: 8px;
+  padding: 0.4rem 0.85rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+.last-refresh {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--text-tertiary);
+}
+
+/* ── Section headers ── */
+.section-label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 0.5px solid var(--border);
+}
+
+/* ── Metric grid ── */
+.metric-grid {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.metric-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.metric-grid-4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 900px) {
+  .metric-grid-3, .metric-grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .metric-grid-3, .metric-grid-4 { grid-template-columns: 1fr; }
+}
+
+/* ── Metric card ── */
+.card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  padding: 1.25rem 1.25rem 1rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  position: relative;
+}
+.card:hover { border-color: var(--accent); }
+.card-label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 0.6rem;
+}
+.card-value {
+  font-family: var(--heading);
+  font-weight: 700;
+  font-size: 2rem;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+.card-value.loading { color: var(--text-tertiary); font-size: 1.4rem; }
+.card-sub {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+.card-sub.green { color: var(--c-green); }
+.card-sub.amber { color: var(--c-amber); }
+.card-sub.red { color: var(--c-red); }
+
+/* ── Status dot ── */
+.status-dot {
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  margin-right: 0.4rem;
+  vertical-align: middle;
+}
+.dot-green { background: var(--c-green); }
+.dot-amber { background: var(--c-amber); }
+.dot-red { background: var(--c-red); }
+
+/* ── Harbourmaster (Execution Dock) ── */
+.harbourmaster-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.harbourmaster-header h2 {
+  font-family: var(--heading);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+.harbourmaster-meta {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--text-tertiary);
+}
+.dock-table-wrap {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+.dock-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+.dock-table th {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  padding: 0.7rem 1rem;
+  text-align: left;
+  border-bottom: 0.5px solid var(--border);
+  background: var(--surface-raised);
+}
+.dock-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 0.5px solid var(--border);
+  vertical-align: middle;
+  font-family: var(--mono);
+  color: var(--text-secondary);
+}
+.dock-table tr:last-child td { border-bottom: none; }
+.dock-table tr:hover td { background: var(--surface-raised); cursor: pointer; }
+.dock-uuid {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+}
+.rail-badge {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 3px;
+  border: 0.5px solid;
+}
+.rail-registered { color: var(--c-green); border-color: var(--c-green); }
+.rail-bearer { color: var(--accent); border-color: var(--accent); }
+.rail-free {
+  color: var(--text-tertiary);
+  border-color: var(--border-mid);
+}
+.dock-pending {
+  font-size: 0.68rem;
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+/* ── Growth card (full-width) ── */
+.growth-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+.growth-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  gap: 1rem;
+}
+.growth-header-left h2 {
+  font-family: var(--heading);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+.growth-header-left .sub {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+.growth-add-btn {
+  background: none;
+  border: 0.5px solid var(--border-mid);
+  border-radius: 8px;
+  padding: 0.4rem 0.85rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, color 0.15s ease;
+  flex-shrink: 0;
+}
+.growth-add-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Sparkline */
+.sparkline-wrap {
+  position: relative;
+  height: 120px;
+  margin-bottom: 1rem;
+}
+.sparkline-wrap svg { width: 100%; height: 100%; overflow: visible; }
+.sparkline-legend {
+  display: flex;
+  gap: 1.25rem;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--text-tertiary);
+  margin-bottom: 0.75rem;
+}
+.sparkline-legend-item { display: flex; align-items: center; gap: 0.4rem; }
+.legend-swatch {
+  width: 20px; height: 2px;
+  display: inline-block;
+  border-radius: 1px;
+}
+.swatch-paid { background: var(--c-green); }
+.swatch-free { background: var(--accent); }
+.swatch-api  { background: var(--c-amber); }
+
+/* Event ticks */
+.tick-tooltip {
+  position: absolute;
+  background: var(--surface-raised);
+  border: 0.5px solid var(--border-mid);
+  border-radius: 6px;
+  padding: 0.4rem 0.65rem;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  pointer-events: none;
+  z-index: 50;
+  white-space: nowrap;
+  display: none;
+}
+
+/* Events list */
+.events-list {
+  margin-top: 0.5rem;
+  border-top: 0.5px solid var(--border);
+  padding-top: 0.75rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.event-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 0.45rem 0;
+  border-bottom: 0.5px solid var(--border);
+  gap: 1rem;
+}
+.event-row:last-child { border-bottom: none; }
+.event-meta {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+.event-label {
+  font-size: 0.78rem;
+  color: var(--text-primary);
+  flex: 1;
+}
+.event-note {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  margin-top: 0.1rem;
+}
+.event-flags { display: flex; gap: 0.35rem; align-items: center; flex-shrink: 0; }
+.event-flag {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  border: 0.5px solid var(--border-mid);
+  color: var(--text-tertiary);
+}
+.event-flag.active { color: var(--c-green); border-color: var(--c-green); }
+.event-del-btn {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 0.1rem 0.25rem;
+  border-radius: 3px;
+  transition: color 0.15s ease;
+  flex-shrink: 0;
+}
+.event-del-btn:hover { color: var(--c-red); }
+
+/* Add event form */
+.add-event-form {
+  display: none;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 0.5px solid var(--border);
+  display: grid;
+  grid-template-columns: 140px 1fr 1fr auto;
+  gap: 0.65rem;
+  align-items: end;
+}
+.add-event-form.hidden { display: none; }
+.form-group label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 0.35rem;
+}
+.form-group input, .form-group select {
+  width: 100%;
+  background: var(--bg);
+  border: 0.5px solid var(--border-mid);
+  border-radius: 6px;
+  padding: 0.5rem 0.65rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--text-primary);
+  outline: none;
+}
+.form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+.form-flags { display: flex; gap: 0.5rem; align-items: center; }
+.form-flags label { font-size: 0.7rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.3rem; font-family: var(--sans); text-transform: none; letter-spacing: 0; }
+.form-flags input[type=checkbox] { width: auto; }
+.form-submit-btn {
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: 0.8rem;
+  color: #1A1A1A;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+  height: fit-content;
+  align-self: flex-end;
+}
+.form-submit-btn:hover { background: var(--accent-hover); }
+
+/* ── Modals ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface);
+  border: 0.5px solid var(--border-mid);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 640px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 0.5px solid var(--border);
+  flex-shrink: 0;
+}
+.modal-header h3 {
+  font-family: var(--heading);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 1.2rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  transition: color 0.15s ease;
+}
+.modal-close:hover { color: var(--text-primary); }
+.modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 0.5px solid var(--border);
+  flex-shrink: 0;
+  display: flex;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+/* Source toggle (client errors) */
+.source-toggle {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+.source-btn {
+  background: none;
+  border: 0.5px solid var(--border-mid);
+  border-radius: 6px;
+  padding: 0.4rem 0.85rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.source-btn.active {
+  background: var(--surface-raised);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.source-window {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--text-tertiary);
+  margin-left: auto;
+}
+
+/* Error list */
+.error-list { list-style: none; }
+.error-item {
+  padding: 0.6rem 0;
+  border-bottom: 0.5px solid var(--border);
+  font-size: 0.78rem;
+}
+.error-item:last-child { border-bottom: none; }
+.error-item-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.2rem;
+}
+.error-code {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--c-red);
+}
+.error-path { font-family: var(--mono); font-size: 0.7rem; color: var(--text-secondary); }
+.error-ts { font-family: var(--mono); font-size: 0.65rem; color: var(--text-tertiary); }
+.error-msg { font-size: 0.74rem; color: var(--text-secondary); }
+
+/* Detail rows for modals */
+.detail-row {
+  display: flex;
+  align-items: baseline;
+  padding: 0.6rem 0;
+  border-bottom: 0.5px solid var(--border);
+  gap: 1rem;
+  font-size: 0.82rem;
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-label {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  min-width: 140px;
+  flex-shrink: 0;
+}
+.detail-value {
+  font-family: var(--mono);
+  color: var(--text-primary);
+  word-break: break-all;
+}
+.detail-pending {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+/* API card stat rows */
+.api-stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0;
+  border-bottom: 0.5px solid var(--border);
+  font-size: 0.8rem;
+}
+.api-stat-row:last-child { border-bottom: none; }
+.api-stat-label { color: var(--text-secondary); }
+.api-stat-val { font-family: var(--mono); font-weight: 500; color: var(--text-primary); }
+.api-stat-val.pending { color: var(--text-tertiary); font-style: italic; font-size: 0.72rem; }
+
+/* Sandbox→live badge */
+.sandbox-badge {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+  border: 0.5px solid var(--border-mid);
+  color: var(--text-tertiary);
+}
+.sandbox-badge.live { color: var(--c-green); border-color: var(--c-green); }
+
+/* Misc */
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-tertiary);
+  font-size: 0.82rem;
+  font-family: var(--mono);
+}
+.section-gap { margin-bottom: 2.5rem; }
+</style>
 </head>
 <body>
 
-<!-- ─── Sidebar ─── -->
-<aside id="sidebar">
-  <div class="sb-wordmark">
-    <span class="wm-brand">refueler-share</span><span class="wm-div">/</span><span class="wm-sub">Navy Office</span>
-  </div>
-  <nav class="sb-nav">
-    <div class="sb-section">Overview</div>
-    <a class="sb-item active">System Summary</a>
-    <div class="sb-section">Metrics</div>
-    <a class="sb-item stub" onclick="scrollToCard('metric-upload')">Upload latency</a>
-    <a class="sb-item stub" onclick="scrollToCard('metric-download')">Download latency</a>
-    <a class="sb-item stub" onclick="scrollToCard('metric-token-security')">Token security</a>
-    <a class="sb-item stub" onclick="scrollToCard('metric-client-errors')">Client errors</a>
-    <div class="sb-section">Data</div>
-    <a class="sb-item stub" onclick="scrollToCard('card-execution-dock')">Transfers</a>
-    <a class="sb-item stub" onclick="openSoonModal('Subscribers')">Subscribers<span class="sb-soon">soon</span></a>
-    <div class="sb-section">Ops</div>
-    <a class="sb-item stub" onclick="openSoonModal('Maintenance mode')">Maintenance mode<span class="sb-soon">soon</span></a>
-    <a class="sb-item stub" onclick="openSoonModal('Rate limits')">Rate limits<span class="sb-soon">soon</span></a>
-    <div class="sb-section">API</div>
-    <a class="sb-item stub" onclick="scrollToCard('card-sandbox')">Sandbox</a>
-  </nav>
-  <div class="sb-footer">
-    <div class="sb-auth" id="sb-auth">not signed in</div>
-    <div class="sb-theme">
-      <button id="theme-paper"  onclick="setTheme('paper')">Paper</button>
-      <button id="theme-carbon" onclick="setTheme('carbon')">Carbon</button>
-    </div>
-    <button class="sb-signout" onclick="signOut()">Sign out</button>
-  </div>
-</aside>
-
-<!-- ─── Main ─── -->
-<div id="main">
-
-  <!-- Password gate -->
-  <div id="gate">
-    <h1>refueler-share</h1>
-    <input type="password" id="key-input" placeholder="Admin key" autocomplete="off">
-    <button onclick="tryUnlock()">Unlock</button>
-    <div id="gate-error"></div>
-  </div>
-
-  <!-- Dashboard -->
-  <div id="dashboard">
-    <div class="content-header">
-      <div class="section-title">System Summary</div>
-      <div class="header-right">
-        <span id="refreshed-at"></span>
-        <span id="countdown"></span>
-        <button class="ghost-btn" id="refresh-btn" onclick="refreshAll()">↻ Refresh</button>
-        <button class="ghost-btn" onclick="window.print()">Print / Export PDF</button>
-      </div>
-    </div>
-
-<!-- ─── Ops cards ──────────────────────────────────────────────────────────── -->
-<div class="ops-section-heading">Lightning availability</div>
-<div class="card" id="card-lightning-toggle">
-  <div class="card-label">Lightning availability</div>
-  <div class="card-value" id="lightning-toggle-state">—</div>
-  <div class="card-sub" id="lightning-toggle-sub">checking…</div>
-  <div class="lightning-toggle-controls">
-    <button class="toggle-btn" id="btn-lightning-phoenixd" data-value="phoenixd">Phoenixd</button>
-    <button class="toggle-btn" id="btn-lightning-true"     data-value="true">On (any)</button>
-    <button class="toggle-btn" id="btn-lightning-false"    data-value="false">Off</button>
+<!-- ── Auth gate ── -->
+<div id="auth-gate">
+  <div class="auth-card">
+    <div class="wordmark">refueler<span>.</span>share</div>
+    <div class="sub">Navy Office</div>
+    <input type="password" id="admin-key" placeholder="Admin key" autocomplete="off">
+    <button onclick="authenticate()">Enter</button>
+    <div id="auth-error"></div>
   </div>
 </div>
 
-<div class="ops-section-divider"></div>
+<!-- ── Main app ── -->
+<div id="main-app">
 
-<div class="ops-section-heading">API Sandbox</div>
-<!-- ─── Sandbox card ──────────────────────────────────────────────────────── -->
-<div class="card" id="card-sandbox">
-  <div class="card-label">API Sandbox</div>
-  <div class="card-value" id="sandbox-state">—</div>
-  <div class="card-sub" id="sandbox-sub">Credential-limited test environment · both rails</div>
-
-  <div class="sandbox-controls" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
-
-    <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
-      <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:140px;">
-        <label class="card-sub" for="sandbox-rail-select" style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Rail</label>
-        <select id="sandbox-rail-select" class="sandbox-select">
-          <option value="identity">Identity</option>
-          <option value="anonymous">Anonymous</option>
-        </select>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:140px;">
-        <label class="card-sub" for="sandbox-ref-input" style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;">Transfer ref prefix</label>
-        <input id="sandbox-ref-input" type="text" value="sandbox" maxlength="32" class="sandbox-input" />
-      </div>
-      <button class="toggle-btn" id="btn-sandbox-activate" onclick="sandboxActivate()" style="white-space:nowrap;">
-        Issue keypair
-      </button>
+  <!-- Top bar (always Carbon) -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-wordmark">refueler<span>.</span>share</div>
+      <div class="topbar-surface">Navy Office</div>
     </div>
-
-    <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
-      <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:200px;">
-        <label class="card-sub" for="sandbox-reset-key-input" style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;">rfs_test_live_ key (to reset)</label>
-        <input id="sandbox-reset-key-input" type="text" placeholder="rfs_test_live_…" maxlength="64" class="sandbox-input" style="width:100%;" />
-      </div>
-      <button class="toggle-btn" id="btn-sandbox-reset" onclick="sandboxReset()" style="white-space:nowrap;">
-        Reset credits
-      </button>
+    <div class="topbar-right">
+      <div class="topbar-time" id="topbar-clock"></div>
+      <button class="theme-btn" onclick="toggleTheme()">◐</button>
     </div>
   </div>
 
-  <!-- Result area — shown after activate/reset. Auto-clears after 5 min. -->
-  <div id="sandbox-result" class="sandbox-result" style="display:none;"></div>
+  <div class="page">
 
-  <div class="ops-keypair-divider"></div>
-  <div class="card-sub ops-keypair-warn">
-    ⚠ Keypair shown once — record it immediately. Do not send real cargo to the sandbox.
-  </div>
-</div>
-
-<div class="ops-metric-divider"></div>
-
-    <div id="error-banner"></div>
-
-    <div class="card-group">
-      <!-- Row 1: primary metrics -->
-      <div class="row-6">
-        <div class="snap-metric" tabindex="0" onclick="openModal('mrr', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('mrr', this)">
-          <div class="sm-label">Monthly run rate</div>
-          <div class="sm-plain">Revenue</div>
-          <div class="sm-value blue" id="snap-mrr">—</div>
-        </div>
-        <div class="snap-metric" tabindex="0" onclick="openModal('paid', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('paid', this)">
-          <div class="sm-label">Paid subscribers</div>
-          <div class="sm-plain">Paying customers</div>
-          <div class="sm-value" id="snap-paid">—</div>
-        </div>
-        <div class="snap-metric" tabindex="0" onclick="openModal('issuances', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('issuances', this)">
-          <div class="sm-label">Issuances (30d)</div>
-          <div class="sm-plain">Uploads started</div>
-          <div class="sm-value" id="snap-issuances">—</div>
-        </div>
-        <div class="snap-metric" tabindex="0" onclick="openModal('storage', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('storage', this)">
-          <div class="sm-label">Data stored (90d)</div>
-          <div class="sm-plain">Total uploaded</div>
-          <div class="sm-value" id="snap-bytes">—</div>
-        </div>
-        <div class="snap-metric" tabindex="0" onclick="openModal('errors', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('errors', this)">
-          <div class="sm-label">Server errors</div>
-          <div class="sm-plain">Right now</div>
-          <div class="sm-value" id="snap-error-rate">—</div>
-        </div>
-        <div class="snap-metric" id="metric-token-security" tabindex="0" onclick="openModal('uniqueness', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('uniqueness', this)">
-          <div class="sm-label">Token security</div>
-          <div class="sm-plain">No double-spends</div>
-          <div class="sm-value" id="snap-uniqueness">—</div>
-        </div>
+    <!-- Page header -->
+    <div class="page-header">
+      <div>
+        <h1>Navy Office</h1>
+        <div class="sub">Operations &amp; monitoring · Seething Lane</div>
       </div>
-
-      <!-- Row 2: latency + reliability -->
-      <div class="row-6">
-        <div class="snap-metric" id="metric-upload" tabindex="0" onclick="openModal('upload-speed', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('upload-speed', this)">
-          <div class="sm-label">Upload speed · p95</div>
-          <div class="sm-plain">Typical worst case</div>
-          <div class="sm-value" id="snap-upload-speed">—</div>
-        </div>
-        <div class="snap-metric" id="metric-download" tabindex="0" onclick="openModal('download-speed', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('download-speed', this)">
-          <div class="sm-label">Download speed · p95</div>
-          <div class="sm-plain">Typical worst case</div>
-          <div class="sm-value" id="snap-download-speed">—</div>
-        </div>
-        <div class="snap-metric" tabindex="0" onclick="openModal('upload-speed-p99', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('upload-speed-p99', this)">
-          <div class="sm-label">Upload speed · p99</div>
-          <div class="sm-plain">Extreme tail</div>
-          <div class="sm-value" id="snap-upload-speed-p99">—</div>
-        </div>
-        <div class="snap-metric" tabindex="0" onclick="openModal('download-speed-p99', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('download-speed-p99', this)">
-          <div class="sm-label">Download speed · p99</div>
-          <div class="sm-plain">Extreme tail</div>
-          <div class="sm-value" id="snap-download-speed-p99">—</div>
-        </div>
-        <div class="snap-metric" tabindex="0" onclick="openModal('retrieval', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('retrieval', this)">
-          <div class="sm-label">Download success</div>
-          <div class="sm-plain">Last 24 hours</div>
-          <div class="sm-value" id="snap-retrieval">—</div>
-        </div>
-        <div class="snap-metric" tabindex="0" onclick="openModal('churn', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('churn', this)">
-          <div class="sm-label">Churn</div>
-          <div class="sm-plain">Month to date</div>
-          <div class="sm-value" id="snap-churn">—</div>
-        </div>
-      </div>
-
-      <!-- Row 3: growth + ops — 6-column. CPU-time replaced by API & MCP (3b) -->
-      <div class="row-6">
-        <div class="snap-metric" tabindex="0" onclick="openModal('free-users', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('free-users', this)">
-          <div class="sm-label">Free users</div>
-          <div class="sm-plain">Total on free tier</div>
-          <div class="sm-value" id="snap-free-users">—</div>
-        </div>
-        <div class="snap-metric" id="metric-client-errors" tabindex="0" onclick="openModal('client-errors', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('client-errors', this)">
-          <div class="sm-label">Client errors (24h)</div>
-          <div class="sm-plain">Browser-side failures</div>
-          <div class="sm-value" id="snap-client-errors">—</div>
-        </div>
-        <div class="snap-metric deferred" tabindex="0" title="Deferred — B7 Lightning/Blink"
-             onclick="openModal('lightning', this)"
-             onkeydown="if(event.key==='Enter'||event.key===' ')openModal('lightning', this)"
-             style="pointer-events:auto;cursor:pointer;">
-          <div class="sm-label">Lightning settlement<span class="b7-badge">B7</span></div>
-          <div class="sm-plain">Sats vs fiat mix</div>
-          <div class="sm-value amber">—</div>
-        </div>
-        <div class="snap-metric" tabindex="0" onclick="openModal('farming', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('farming', this)">
-          <div class="sm-label">Farming signal</div>
-          <div class="sm-plain">Credentials per upload</div>
-          <div class="sm-value" id="snap-farming">—</div>
-        </div>
-        <div class="snap-metric" tabindex="0" onclick="openModal('kv-monitor', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('kv-monitor', this)">
-          <div class="sm-label">KV keys stored</div>
-          <div class="sm-plain">Free plan · 1 GB cap</div>
-          <div class="sm-value" id="snap-kv-keys">—</div>
-        </div>
-        <!-- (3b) API & MCP card — replaces CPU-time stub -->
-        <div class="snap-metric" tabindex="0" onclick="openModal('api-mcp', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('api-mcp', this)">
-          <div class="sm-label">API &amp; MCP</div>
-          <div class="sm-plain">Active keys</div>
-          <div class="sm-value" id="snap-api-keys">—</div>
-          <div class="sm-plain" id="snap-api-reqs" style="margin-top:4px;font-size:11px;"></div>
-        </div>
+      <div class="header-actions">
+        <div class="last-refresh" id="last-refresh-label"></div>
+        <button class="refresh-btn" onclick="refreshAll()">↻ Refresh</button>
       </div>
     </div>
 
-    <!-- ─── Execution Dock (Share-Dash-1) ─────────────────────────────────── -->
-    <div class="dock-panel" id="card-execution-dock">
-      <div class="dock-header">
-        <div class="dock-title">Harbourmaster · last 10 transfers</div>
-        <span class="dock-badge" id="dock-badge" style="display:none;"></span>
+    <!-- ── Row 1: Revenue + Subscribers (3-up) ── -->
+    <div class="section-label">Revenue &amp; subscribers</div>
+    <div class="metric-grid metric-grid-3 section-gap">
+      <div class="card" onclick="openModal('modal-mrr')">
+        <div class="card-label">MRR (GBP)</div>
+        <div class="card-value loading" id="v-mrr">—</div>
+        <div class="card-sub" id="s-mrr"></div>
       </div>
-      <div class="dock-table-wrap">
-        <table class="dock-table">
-          <thead><tr>
+      <div class="card" onclick="openModal('modal-subs')">
+        <div class="card-label">Active subscribers</div>
+        <div class="card-value loading" id="v-subs">—</div>
+        <div class="card-sub" id="s-subs"></div>
+      </div>
+      <div class="card" onclick="openModal('modal-conv')">
+        <div class="card-label">Free → paid conversion</div>
+        <div class="card-value loading" id="v-conv">—</div>
+        <div class="card-sub" id="s-conv"></div>
+      </div>
+    </div>
+
+    <!-- ── Row 2: Ops snapshot (4-up) ── -->
+    <div class="section-label">System snapshot</div>
+    <div class="metric-grid metric-grid-4 section-gap">
+      <div class="card" onclick="openModal('modal-latency')">
+        <div class="card-label">p95 latency (ms)</div>
+        <div class="card-value loading" id="v-p95">—</div>
+        <div class="card-sub" id="s-p95"></div>
+      </div>
+      <div class="card" onclick="openModal('modal-errors')">
+        <div class="card-label">Error rate (24h)</div>
+        <div class="card-value loading" id="v-err">—</div>
+        <div class="card-sub" id="s-err"></div>
+      </div>
+      <div class="card" onclick="openModal('modal-transfers')">
+        <div class="card-label">Transfers (30d)</div>
+        <div class="card-value loading" id="v-xfers">—</div>
+        <div class="card-sub" id="s-xfers"></div>
+      </div>
+      <div class="card" onclick="openModal('modal-double')">
+        <div class="card-label">Double-spend attempts</div>
+        <div class="card-value loading" id="v-ds">—</div>
+        <div class="card-sub" id="s-ds"></div>
+      </div>
+    </div>
+
+    <!-- ── Row 3: Client errors + API & MCP (3-up) ── -->
+    <div class="section-label">Signals</div>
+    <div class="metric-grid metric-grid-3 section-gap">
+      <div class="card" onclick="openModal('modal-client-errors')">
+        <div class="card-label">Client errors (24h browser)</div>
+        <div class="card-value loading" id="v-cerr">—</div>
+        <div class="card-sub" id="s-cerr"></div>
+      </div>
+      <div class="card" onclick="openModal('modal-churn')">
+        <div class="card-label">Churn MTD</div>
+        <div class="card-value loading" id="v-churn">—</div>
+        <div class="card-sub" id="s-churn"></div>
+      </div>
+      <div class="card" onclick="openModal('modal-api')">
+        <div class="card-label">API &amp; MCP</div>
+        <div class="card-value loading" id="v-apikeys">—</div>
+        <div class="card-sub" id="s-apikeys">active keys</div>
+      </div>
+    </div>
+
+    <!-- ── Harbourmaster — Execution Dock ── -->
+    <div class="section-label section-gap" style="margin-top:0">Harbourmaster — Execution Dock</div>
+    <div class="harbourmaster-header">
+      <h2>Active transfers</h2>
+      <div class="harbourmaster-meta" id="dock-meta">Loading…</div>
+    </div>
+    <div class="dock-table-wrap">
+      <table class="dock-table">
+        <thead>
+          <tr>
             <th>UUID</th>
-            <th>Tier</th>
-            <th>Status</th>
-            <th>Created</th>
+            <th>Lodged</th>
             <th>Expires</th>
-          </tr></thead>
-          <tbody id="dock-tbody">
-            <tr><td colspan="5" class="dock-empty">Loading transfers…</td></tr>
-          </tbody>
-        </table>
-      </div>
+            <th>Size</th>
+            <th>Rail</th>
+            <th>Downloads</th>
+            <th>Merkle root</th>
+          </tr>
+        </thead>
+        <tbody id="dock-tbody">
+          <tr><td colspan="7"><div class="empty-state">Loading dock…</div></td></tr>
+        </tbody>
+      </table>
     </div>
 
-    <!-- ─── Growth signal card (3c) ────────────────────────────────────────── -->
-    <div class="growth-panel" id="card-growth">
+    <!-- ── Growth signal — full width ── -->
+    <div class="section-label">Growth signal</div>
+    <div class="growth-card">
       <div class="growth-header">
-        <div class="growth-title">Growth signal</div>
-      </div>
-      <div class="growth-chart-wrap" style="position:relative;">
-        <svg class="growth-svg" id="growth-svg" viewBox="0 0 800 120" preserveAspectRatio="none">
-          <text x="400" y="64" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="var(--text-tertiary)">Loading…</text>
-        </svg>
-        <div class="growth-tick-tooltip" id="growth-tooltip"></div>
-      </div>
-      <div class="growth-legend">
-        <div class="growth-legend-item">
-          <div class="growth-legend-swatch" style="background:#C8A96E;"></div>
-          <span>Paid</span>
+        <div class="growth-header-left">
+          <h2>Events &amp; signals</h2>
+          <div class="sub">Paid / free / API transfers plotted against annotated milestones</div>
         </div>
-        <div class="growth-legend-item">
-          <div class="growth-legend-swatch" style="background:var(--text-primary);"></div>
-          <span>Free</span>
-        </div>
-        <div class="growth-legend-item">
-          <div class="growth-legend-swatch" style="background:var(--text-tertiary);"></div>
-          <span>API</span>
-        </div>
+        <button class="growth-add-btn" onclick="toggleAddForm()">+ Add event</button>
       </div>
 
-      <!-- Add-event form -->
-      <div class="growth-form">
-        <div class="growth-form-title">Add event annotation</div>
-        <div class="growth-form-row">
-          <div class="growth-form-field">
-            <span class="growth-form-label">Date</span>
-            <input type="date" id="growth-date">
-          </div>
-          <div class="growth-form-field" style="flex:1;min-width:120px;">
-            <span class="growth-form-label">Label (optional)</span>
-            <input type="text" id="growth-label" placeholder="e.g. Launch">
-          </div>
-          <div class="growth-form-field" style="flex:1;min-width:120px;">
-            <span class="growth-form-label">Free users</span>
-            <input type="number" id="growth-free" min="0" placeholder="0">
-          </div>
-          <div class="growth-form-field" style="flex:1;min-width:120px;">
-            <span class="growth-form-label">Paid users</span>
-            <input type="number" id="growth-paid" min="0" placeholder="0">
-          </div>
-          <div class="growth-form-field" style="flex:1;min-width:120px;">
-            <span class="growth-form-label">API users</span>
-            <input type="number" id="growth-api" min="0" placeholder="0">
+      <div class="sparkline-legend">
+        <div class="sparkline-legend-item"><span class="legend-swatch swatch-paid"></span>Paid</div>
+        <div class="sparkline-legend-item"><span class="legend-swatch swatch-free"></span>Free (Pro Bono)</div>
+        <div class="sparkline-legend-item"><span class="legend-swatch swatch-api"></span>API / Chartered</div>
+      </div>
+
+      <div class="sparkline-wrap" id="sparkline-wrap">
+        <svg id="sparkline-svg" viewBox="0 0 800 120" preserveAspectRatio="none">
+          <!-- Rendered by JS -->
+        </svg>
+        <div class="tick-tooltip" id="tick-tooltip"></div>
+      </div>
+
+      <!-- Add event form -->
+      <div class="add-event-form hidden" id="add-event-form">
+        <div class="form-group">
+          <label>Date (YYYY-MM-DD)</label>
+          <input type="date" id="ev-date">
+        </div>
+        <div class="form-group">
+          <label>Label</label>
+          <input type="text" id="ev-label" placeholder="e.g. Beta launch">
+        </div>
+        <div class="form-group">
+          <label>Note (optional)</label>
+          <input type="text" id="ev-note" placeholder="Brief description">
+        </div>
+        <div class="form-group">
+          <label>Show on</label>
+          <div class="form-flags">
+            <label><input type="checkbox" id="ev-free" checked> Free</label>
+            <label><input type="checkbox" id="ev-paid" checked> Paid</label>
+            <label><input type="checkbox" id="ev-api"> API</label>
           </div>
         </div>
-        <div class="growth-form-row">
-          <div class="growth-form-field" style="flex:1;">
-            <span class="growth-form-label">Note (optional)</span>
-            <textarea id="growth-note" placeholder="Context for this data point…"></textarea>
-          </div>
-          <button class="growth-submit-btn" onclick="growthAddEvent()">Add event</button>
-        </div>
-        <div id="growth-form-status" style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary);display:none;"></div>
+        <button class="form-submit-btn" onclick="submitEvent()">Save</button>
       </div>
 
       <!-- Events list -->
-      <div class="growth-events-list" id="growth-events-list" style="display:none;">
-        <div class="growth-events-title">Annotations</div>
-        <div id="growth-events-body"></div>
+      <div class="events-list" id="events-list">
+        <div class="empty-state">Loading events…</div>
       </div>
     </div>
 
-    <p class="editorial-note">All figures update every 60 seconds. Data sourced from Cloudflare Analytics Engine and Supabase.</p>
+  </div><!-- /page -->
+</div><!-- /main-app -->
 
-    <div class="group-footer">
-      <button class="ghost-btn" id="snapshot-copy-btn" onclick="copySnapshot()">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-          <rect x="5" y="5" width="9" height="9" rx="1.5"/>
-          <path d="M3 11V3a1 1 0 0 1 1-1h8"/>
-        </svg>
-        Copy JSON
-      </button>
+
+<!-- ════ MODALS ════ -->
+
+<!-- MRR -->
+<div class="modal-overlay" id="modal-mrr">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Monthly Recurring Revenue</h3>
+      <button class="modal-close" onclick="closeModal('modal-mrr')">✕</button>
+    </div>
+    <div class="modal-body" id="body-mrr"><div class="empty-state">Loading…</div></div>
+  </div>
+</div>
+
+<!-- Subscribers -->
+<div class="modal-overlay" id="modal-subs">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Subscribers</h3>
+      <button class="modal-close" onclick="closeModal('modal-subs')">✕</button>
+    </div>
+    <div class="modal-body" id="body-subs"><div class="empty-state">Loading…</div></div>
+  </div>
+</div>
+
+<!-- Conversion -->
+<div class="modal-overlay" id="modal-conv">
+  <div class="modal">
+    <div class="modal-header"><h3>Free → Paid conversion</h3><button class="modal-close" onclick="closeModal('modal-conv')">✕</button></div>
+    <div class="modal-body" id="body-conv"><div class="empty-state">Loading…</div></div>
+  </div>
+</div>
+
+<!-- Latency -->
+<div class="modal-overlay" id="modal-latency">
+  <div class="modal">
+    <div class="modal-header"><h3>Latency distribution</h3><button class="modal-close" onclick="closeModal('modal-latency')">✕</button></div>
+    <div class="modal-body" id="body-latency"><div class="empty-state">Loading…</div></div>
+  </div>
+</div>
+
+<!-- Client errors — with source toggle -->
+<div class="modal-overlay" id="modal-errors">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Error rate</h3>
+      <button class="modal-close" onclick="closeModal('modal-errors')">✕</button>
+    </div>
+    <div class="modal-body" id="body-errors"><div class="empty-state">Loading…</div></div>
+  </div>
+</div>
+
+<!-- Transfers -->
+<div class="modal-overlay" id="modal-transfers">
+  <div class="modal">
+    <div class="modal-header"><h3>Transfers (30d)</h3><button class="modal-close" onclick="closeModal('modal-transfers')">✕</button></div>
+    <div class="modal-body" id="body-transfers"><div class="empty-state">Loading…</div></div>
+  </div>
+</div>
+
+<!-- Double-spend -->
+<div class="modal-overlay" id="modal-double">
+  <div class="modal">
+    <div class="modal-header"><h3>Double-spend attempts</h3><button class="modal-close" onclick="closeModal('modal-double')">✕</button></div>
+    <div class="modal-body" id="body-double"><div class="empty-state">Loading…</div></div>
+  </div>
+</div>
+
+<!-- Client errors modal (card 5 in row 3) — with AE/KV toggle -->
+<div class="modal-overlay" id="modal-client-errors">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Client errors</h3>
+      <button class="modal-close" onclick="closeModal('modal-client-errors')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1.25rem; flex-wrap:wrap;">
+        <div class="source-toggle">
+          <button class="source-btn active" id="src-btn-ae" onclick="setErrorSource('ae')">Reported by browser (24h)</button>
+          <button class="source-btn" id="src-btn-kv" onclick="setErrorSource('kv')">Observed by Worker (90d)</button>
+        </div>
+        <div class="source-window" id="source-window-label">Analytics Engine · last 24 h</div>
+      </div>
+      <ul class="error-list" id="client-errors-list"><li class="error-item"><div class="empty-state">Loading…</div></li></ul>
     </div>
   </div>
 </div>
 
-<!-- ─── Modal ─── -->
-<div id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-plain">
-  <div class="modal-header">
-    <div class="modal-titles">
-      <div class="modal-label" id="modal-label"></div>
-      <div class="modal-plain" id="modal-plain"></div>
-    </div>
-    <button id="modal-close" onclick="closeModal()" aria-label="Close">×</button>
-  </div>
-  <div class="modal-body">
-    <div class="modal-value" id="modal-value">—</div>
-    <div class="modal-sub"   id="modal-sub"></div>
-    <div id="modal-deferred-note" class="modal-deferred-note" style="display:none"></div>
-    <div class="modal-section-title">Trend</div>
-    <div class="modal-sparkline-stub" id="modal-sparkline">
-      Trend history — coming B5 polish pass
-    </div>
-    <div class="modal-section-title">Export</div>
-    <button class="modal-csv-btn" id="modal-csv-btn" onclick="onCsvClick()">⬇ Download CSV</button>
-    <div class="modal-csv-note" id="modal-csv-note" style="display:none">CSV export available from B6</div>
+<!-- Churn -->
+<div class="modal-overlay" id="modal-churn">
+  <div class="modal">
+    <div class="modal-header"><h3>Churn MTD</h3><button class="modal-close" onclick="closeModal('modal-churn')">✕</button></div>
+    <div class="modal-body" id="body-churn"><div class="empty-state">Loading…</div></div>
   </div>
 </div>
 
-<!-- ─── Micro-modal: coming-soon (Share-Dash-1) ─── -->
-<div class="micro-modal-backdrop" id="soon-modal" onclick="if(event.target===this)closeSoonModal()">
-  <div class="micro-modal" role="dialog" aria-modal="true" aria-labelledby="soon-modal-title">
-    <div class="micro-modal-label">Planned</div>
-    <div class="micro-modal-title" id="soon-modal-title">—</div>
-    <div class="micro-modal-body" id="soon-modal-body"></div>
-    <div class="micro-modal-actions">
-      <button class="ghost-btn" onclick="closeSoonModal()">Close</button>
+<!-- API & MCP -->
+<div class="modal-overlay" id="modal-api">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>API &amp; MCP — Chartered</h3>
+      <button class="modal-close" onclick="closeModal('modal-api')">✕</button>
+    </div>
+    <div class="modal-body" id="body-api">
+      <div class="empty-state">Loading…</div>
     </div>
   </div>
 </div>
 
-<!-- ─── Execution Dock: transfer detail (Share-Dash-1) ─── -->
-<div class="micro-modal-backdrop" id="dock-modal" onclick="if(event.target===this)closeDockModal()">
-  <div class="micro-modal dock-modal" role="dialog" aria-modal="true" aria-labelledby="dock-modal-title">
-    <div class="micro-modal-label">Transfer detail</div>
-    <div class="micro-modal-title" id="dock-modal-title">—</div>
-    <div id="dock-modal-body"></div>
-    <div class="micro-modal-actions" style="margin-top:20px;">
-      <button class="ghost-btn" onclick="closeDockModal()">Close</button>
+<!-- Dock detail -->
+<div class="modal-overlay" id="modal-dock-detail">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Transfer detail</h3>
+      <button class="modal-close" onclick="closeModal('modal-dock-detail')">✕</button>
+    </div>
+    <div class="modal-body" id="body-dock-detail">
+      <div class="empty-state">Select a transfer</div>
     </div>
   </div>
 </div>
 
-<script src="navy-office.js"></script>
+
+<!-- ════ SCRIPT ════ -->
+<script>
+const WORKER = 'https://refueler-share.rt-fc4.workers.dev';
+let ADMIN_KEY = '';
+let refreshTimer = null;
+let errorSource = 'ae'; // 'ae' | 'kv' — in-memory only, never persisted
+
+// ── Cache for modal data ──
+const cache = {};
+
+// ── Auth ──
+async function authenticate() {
+  const key = document.getElementById('admin-key').value.trim();
+  const err = document.getElementById('auth-error');
+  if (!key) { err.textContent = 'Key required.'; return; }
+  try {
+    const r = await fetch(`${WORKER}/admin/snapshot`, {
+      headers: { 'X-Admin-Key': key }
+    });
+    if (!r.ok) { err.textContent = 'Invalid key.'; return; }
+    ADMIN_KEY = key;
+    document.getElementById('auth-gate').style.display = 'none';
+    document.getElementById('main-app').style.display = 'block';
+    startClock();
+    refreshAll();
+    refreshTimer = setInterval(refreshAll, 60000);
+  } catch(e) {
+    err.textContent = 'Network error.';
+  }
+}
+document.getElementById('admin-key').addEventListener('keydown', e => {
+  if (e.key === 'Enter') authenticate();
+});
+
+// ── Theme ──
+function toggleTheme() {
+  const html = document.documentElement;
+  html.dataset.theme = html.dataset.theme === 'carbon' ? 'paper' : 'carbon';
+}
+
+// ── Clock ──
+function startClock() {
+  const el = document.getElementById('topbar-clock');
+  function tick() {
+    el.textContent = new Date().toLocaleTimeString('en-GB', { hour12: false });
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+// ── Admin fetch helper ──
+async function adminFetch(path) {
+  const r = await fetch(`${WORKER}${path}`, { headers: { 'X-Admin-Key': ADMIN_KEY } });
+  if (!r.ok) throw new Error(`${r.status} ${path}`);
+  return r.json();
+}
+
+// ── Refresh all ──
+async function refreshAll() {
+  document.getElementById('last-refresh-label').textContent =
+    'Last: ' + new Date().toLocaleTimeString('en-GB', { hour12: false });
+  await Promise.allSettled([
+    loadSnapshot(),
+    loadAEMetrics(),
+    loadDock(),
+    loadCerr(),
+    loadApiStats(),
+    loadGrowth(),
+  ]);
+}
+
+// ── Rail display helpers ──
+function railDisplay(rail) {
+  if (!rail || rail === 'none' || rail === 'free') return 'Pro Bono';
+  if (rail === 'registered' || rail === 'creative' || rail === 'max') return 'Registered';
+  if (rail === 'bearer') return 'Bearer';
+  return rail;
+}
+function railBadgeClass(rail) {
+  if (!rail || rail === 'none' || rail === 'free') return 'rail-free';
+  if (rail === 'registered' || rail === 'creative' || rail === 'max') return 'rail-registered';
+  if (rail === 'bearer') return 'rail-bearer';
+  return 'rail-free';
+}
+
+// ── Human-readable bytes ──
+function humanBytes(bytes) {
+  if (bytes == null || bytes === '' || isNaN(bytes)) return '—';
+  const n = Number(bytes);
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 ** 2) return `${(n / 1024).toFixed(1)} KB`;
+  if (n < 1024 ** 3) return `${(n / 1024 ** 2).toFixed(2)} MB`;
+  return `${(n / 1024 ** 3).toFixed(3)} GB`;
+}
+
+// ── Load snapshot ──
+async function loadSnapshot() {
+  try {
+    const d = await adminFetch('/admin/snapshot');
+    cache.snapshot = d;
+    set('v-mrr', d.mrr != null ? `£${(d.mrr / 100).toFixed(2)}` : '—');
+    set('s-mrr', d.mrr_change != null ? `${d.mrr_change > 0 ? '+' : ''}${d.mrr_change}% MoM` : '');
+    set('v-subs', d.subscribers_active ?? '—');
+    set('s-subs', buildSubsSub(d));
+    set('v-conv', d.conversion_rate != null ? `${d.conversion_rate}%` : '—');
+    set('s-conv', d.conversion_base ? `from ${d.conversion_base} free users` : '');
+    set('v-ds', d.double_spend_attempts_24h ?? '—');
+    set('s-ds', d.double_spend_total != null ? `${d.double_spend_total} total` : '');
+    set('v-churn', d.churn_mtd != null ? `${d.churn_mtd}` : '—');
+    set('s-churn', 'cancellations MTD');
+    set('v-xfers', d.transfers_30d ?? '—');
+    set('s-xfers', d.transfers_7d != null ? `${d.transfers_7d} last 7d` : '');
+  } catch(e) { console.warn('snapshot', e); }
+}
+
+function buildSubsSub(d) {
+  const parts = [];
+  if (d.subscribers_citizen != null) parts.push(`${d.subscribers_citizen} Citizen`);
+  if (d.subscribers_sovereign != null) parts.push(`${d.subscribers_sovereign} Sovereign`);
+  if (d.subscribers_api != null) parts.push(`${d.subscribers_api} Chartered`);
+  return parts.join(' · ');
+}
+
+// ── Load AE metrics ──
+async function loadAEMetrics() {
+  try {
+    const d = await adminFetch('/admin/ae-metrics');
+    cache.ae = d;
+    set('v-p95', d.p95_ms != null ? Math.round(d.p95_ms) : '—');
+    set('s-p95', d.p99_ms != null ? `p99: ${Math.round(d.p99_ms)} ms` : '');
+    const errRate = d.error_rate != null ? `${(d.error_rate * 100).toFixed(2)}%` : '—';
+    set('v-err', errRate);
+    const errClass = d.error_rate > 0.05 ? 'red' : d.error_rate > 0.01 ? 'amber' : 'green';
+    document.getElementById('s-err').className = `card-sub ${errClass}`;
+    set('s-err', d.error_rate != null ? `${errClass === 'green' ? '✓ nominal' : errClass === 'amber' ? '⚠ elevated' : '✗ high'}` : '');
+  } catch(e) { console.warn('ae-metrics', e); }
+}
+
+// ── Load client errors (card 5 label only) ──
+async function loadCerr() {
+  try {
+    // Card shows AE 24h count by default
+    const d = await adminFetch('/admin/ae-metrics');
+    const count = d.client_errors_24h ?? d.error_count_24h ?? '—';
+    set('v-cerr', count);
+    set('s-cerr', 'browser-reported · 24h');
+  } catch(e) {
+    set('v-cerr', '—');
+  }
+}
+
+// ── Load API stats ──
+async function loadApiStats() {
+  try {
+    const d = await adminFetch('/admin/api-stats');
+    cache.apiStats = d;
+    set('v-apikeys', d.active_keys ?? '—');
+    set('s-apikeys', 'active keys');
+  } catch(e) { console.warn('api-stats', e); }
+}
+
+// ── Load dock ──
+async function loadDock() {
+  try {
+    const d = await adminFetch('/admin/execution-dock');
+    cache.dock = d;
+    const entries = d.entries ?? [];
+    const meta = document.getElementById('dock-meta');
+    meta.textContent = `${entries.length} transfer${entries.length !== 1 ? 's' : ''} · updated ${new Date().toLocaleTimeString('en-GB', {hour12:false})}`;
+    const tbody = document.getElementById('dock-tbody');
+    if (!entries.length) {
+      tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state">No active transfers</div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = entries.map(row => `
+      <tr onclick="openDockDetail('${row.uuid}')">
+        <td class="dock-uuid">${row.uuid.slice(0,8)}…</td>
+        <td>${fmtTs(row.created_at)}</td>
+        <td>${fmtTs(row.expiry_timestamp)}</td>
+        <td>${humanBytes(row.size_bytes)}</td>
+        <td><span class="rail-badge ${railBadgeClass(row.rail)}">${railDisplay(row.rail)}</span></td>
+        <td class="dock-pending">pending</td>
+        <td class="dock-pending">pending (6-5)</td>
+      </tr>`).join('');
+  } catch(e) {
+    document.getElementById('dock-tbody').innerHTML =
+      '<tr><td colspan="7"><div class="empty-state">Failed to load dock</div></td></tr>';
+  }
+}
+
+function fmtTs(ts) {
+  if (!ts) return '—';
+  try {
+    return new Date(ts).toLocaleString('en-GB', {
+      day:'numeric', month:'short', hour:'2-digit', minute:'2-digit', hour12:false
+    });
+  } catch { return ts; }
+}
+
+// ── Dock detail modal ──
+function openDockDetail(uuid) {
+  if (!cache.dock) return;
+  const row = (cache.dock.entries ?? []).find(r => r.uuid === uuid);
+  if (!row) return;
+  const body = document.getElementById('body-dock-detail');
+  body.innerHTML = `
+    <div class="detail-row"><span class="detail-label">UUID</span><span class="detail-value">${row.uuid}</span></div>
+    <div class="detail-row"><span class="detail-label">Lodged</span><span class="detail-value">${fmtTs(row.created_at)}</span></div>
+    <div class="detail-row"><span class="detail-label">Expires</span><span class="detail-value">${fmtTs(row.expiry_timestamp)}</span></div>
+    <div class="detail-row"><span class="detail-label">Size</span><span class="detail-value">${humanBytes(row.size_bytes)}</span></div>
+    <div class="detail-row"><span class="detail-label">Chunks</span><span class="detail-value">${row.total_chunks ?? '—'}</span></div>
+    <div class="detail-row"><span class="detail-label">Rail</span><span class="detail-value"><span class="rail-badge ${railBadgeClass(row.rail)}">${railDisplay(row.rail)}</span></span></div>
+    <div class="detail-row"><span class="detail-label">Tier (issued)</span><span class="detail-value">${row.issued_tier ?? '—'}</span></div>
+    <div class="detail-row"><span class="detail-label">Merkle root</span><span class="detail-pending">pending — available at Share-6-5</span></div>
+    <div class="detail-row"><span class="detail-label">Downloads</span><span class="detail-pending">pending</span></div>
+    <div class="detail-row"><span class="detail-label">Permanent record</span><span class="detail-value">${row.permanent_record ? 'Yes' : 'No'}</span></div>
+  `;
+  openModal('modal-dock-detail');
+}
+
+// ── Growth / news-events ──
+let eventsData = [];
+
+async function loadGrowth() {
+  try {
+    const d = await adminFetch('/admin/news-events');
+    eventsData = d.events ?? [];
+    cache.events = eventsData;
+    renderEventsList();
+    renderSparkline();
+  } catch(e) { console.warn('news-events', e); }
+}
+
+function renderEventsList() {
+  const el = document.getElementById('events-list');
+  if (!eventsData.length) {
+    el.innerHTML = '<div class="empty-state">No events yet. Add one above.</div>';
+    return;
+  }
+  el.innerHTML = eventsData.slice().reverse().map(ev => `
+    <div class="event-row">
+      <div style="flex:0 0 auto">
+        <div class="event-meta">${ev.date ?? ''}</div>
+      </div>
+      <div style="flex:1; min-width:0">
+        <div class="event-label">${esc(ev.label ?? '')}</div>
+        ${ev.note ? `<div class="event-note">${esc(ev.note)}</div>` : ''}
+      </div>
+      <div class="event-flags">
+        ${ev.free  ? '<span class="event-flag active">Free</span>'  : '<span class="event-flag">Free</span>'}
+        ${ev.paid  ? '<span class="event-flag active">Paid</span>'  : '<span class="event-flag">Paid</span>'}
+        ${ev.api   ? '<span class="event-flag active">API</span>'   : '<span class="event-flag">API</span>'}
+        <button class="event-del-btn" onclick="deleteEvent('${esc(ev.id)}')">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderSparkline() {
+  const svg = document.getElementById('sparkline-svg');
+  if (!eventsData.length) { svg.innerHTML = ''; return; }
+
+  // Extract count-bearing rows only (rows that have numeric counts)
+  const countRows = eventsData.filter(ev =>
+    ev.free_count != null || ev.paid_count != null || ev.api_count != null
+  ).sort((a, b) => (a.date ?? '').localeCompare(b.date ?? ''));
+
+  // Tick-mark rows (label rows)
+  const tickRows = eventsData.filter(ev => ev.label);
+
+  const W = 800, H = 120, PX = 20, PY = 15;
+  const plotW = W - PX * 2, plotH = H - PY * 2;
+
+  const allDates = eventsData.map(e => e.date).filter(Boolean).sort();
+  if (!allDates.length) { svg.innerHTML = ''; return; }
+  const dMin = allDates[0], dMax = allDates[allDates.length - 1];
+  const tMin = new Date(dMin).getTime(), tMax = new Date(dMax).getTime();
+  const tRange = tMax - tMin || 1;
+
+  function dateX(d) {
+    const t = new Date(d).getTime();
+    return PX + ((t - tMin) / tRange) * plotW;
+  }
+
+  const freeVals = countRows.map(e => e.free_count ?? 0);
+  const paidVals = countRows.map(e => e.paid_count ?? 0);
+  const apiVals  = countRows.map(e => e.api_count  ?? 0);
+  const allVals  = [...freeVals, ...paidVals, ...apiVals];
+  const vMax = Math.max(1, ...allVals);
+
+  function valY(v) { return PY + plotH - (v / vMax) * plotH; }
+
+  function makePolyline(rows, vals, color, strokeW) {
+    if (!rows.length) return '';
+    const pts = rows.map((ev, i) => `${dateX(ev.date).toFixed(1)},${valY(vals[i]).toFixed(1)}`).join(' ');
+    return `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="${strokeW}" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>`;
+  }
+
+  // Tick marks for label events
+  const tickMarks = tickRows.map(ev => {
+    const x = dateX(ev.date).toFixed(1);
+    return `<line x1="${x}" y1="${PY}" x2="${x}" y2="${PY + plotH}" stroke="var(--border-mid)" stroke-width="0.5" stroke-dasharray="3,3"/>
+    <circle cx="${x}" cy="${PY}" r="3" fill="var(--accent)" opacity="0.8"
+      data-label="${esc(ev.label)}" data-date="${esc(ev.date)}" data-note="${esc(ev.note??'')}"
+      class="tick-mark" style="cursor:pointer"/>`;
+  }).join('');
+
+  svg.innerHTML = `
+    <!-- Grid line -->
+    <line x1="${PX}" y1="${PY+plotH}" x2="${PX+plotW}" y2="${PY+plotH}" stroke="var(--border)" stroke-width="0.5"/>
+    ${tickMarks}
+    ${makePolyline(countRows, paidVals, 'var(--c-green)', 2)}
+    ${makePolyline(countRows, freeVals, 'var(--accent)', 1.5)}
+    ${makePolyline(countRows, apiVals,  'var(--c-amber)', 1.5)}
+  `;
+
+  // Tooltip on tick marks
+  const tooltip = document.getElementById('tick-tooltip');
+  svg.querySelectorAll('.tick-mark').forEach(circle => {
+    circle.addEventListener('mouseenter', e => {
+      const label = circle.dataset.label;
+      const date  = circle.dataset.date;
+      const note  = circle.dataset.note;
+      tooltip.innerHTML = `<strong>${date}</strong> — ${label}${note ? `<br>${note}` : ''}`;
+      tooltip.style.display = 'block';
+    });
+    circle.addEventListener('mousemove', e => {
+      const wrap = document.getElementById('sparkline-wrap');
+      const rect = wrap.getBoundingClientRect();
+      tooltip.style.left = (e.clientX - rect.left + 10) + 'px';
+      tooltip.style.top  = (e.clientY - rect.top  - 10) + 'px';
+    });
+    circle.addEventListener('mouseleave', () => {
+      tooltip.style.display = 'none';
+    });
+  });
+}
+
+function toggleAddForm() {
+  const form = document.getElementById('add-event-form');
+  form.classList.toggle('hidden');
+}
+
+async function submitEvent() {
+  const date  = document.getElementById('ev-date').value.trim();
+  const label = document.getElementById('ev-label').value.trim();
+  const note  = document.getElementById('ev-note').value.trim();
+  const free  = document.getElementById('ev-free').checked;
+  const paid  = document.getElementById('ev-paid').checked;
+  const api   = document.getElementById('ev-api').checked;
+  if (!date || !label) { alert('Date and label required.'); return; }
+  try {
+    await fetch(`${WORKER}/admin/news-events`, {
+      method: 'POST',
+      headers: { 'X-Admin-Key': ADMIN_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ date, label, note: note || undefined, free, paid, api })
+    });
+    document.getElementById('ev-date').value = '';
+    document.getElementById('ev-label').value = '';
+    document.getElementById('ev-note').value = '';
+    document.getElementById('add-event-form').classList.add('hidden');
+    await loadGrowth();
+  } catch(e) { alert('Failed to save event.'); }
+}
+
+async function deleteEvent(id) {
+  if (!confirm('Delete this event?')) return;
+  try {
+    await fetch(`${WORKER}/admin/news-events`, {
+      method: 'DELETE',
+      headers: { 'X-Admin-Key': ADMIN_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    await loadGrowth();
+  } catch(e) { alert('Failed to delete event.'); }
+}
+
+// ── Client errors source toggle ──
+function setErrorSource(src) {
+  errorSource = src;
+  document.getElementById('src-btn-ae').classList.toggle('active', src === 'ae');
+  document.getElementById('src-btn-kv').classList.toggle('active', src === 'kv');
+  document.getElementById('source-window-label').textContent =
+    src === 'ae' ? 'Analytics Engine · last 24 h' : 'Worker KV log · last 90 d';
+  loadClientErrorsModal();
+}
+
+async function loadClientErrorsModal() {
+  const list = document.getElementById('client-errors-list');
+  list.innerHTML = '<li class="error-item"><div class="empty-state">Loading…</div></li>';
+  try {
+    let errors = [];
+    if (errorSource === 'ae') {
+      const d = await adminFetch('/admin/ae-metrics');
+      errors = d.client_errors ?? [];
+    } else {
+      const d = await adminFetch('/admin/client-errors-log');
+      errors = d.errors ?? [];
+    }
+    if (!errors.length) {
+      list.innerHTML = '<li class="error-item"><div class="empty-state">No errors in this window</div></li>';
+      return;
+    }
+    list.innerHTML = errors.map(e => `
+      <li class="error-item">
+        <div class="error-item-top">
+          <span class="error-code">${e.status ?? e.code ?? '?'}</span>
+          <span class="error-path">${esc(e.path ?? e.endpoint ?? '')}</span>
+          <span class="error-ts">${e.timestamp ? fmtTs(e.timestamp) : e.ts ?? ''}</span>
+        </div>
+        <div class="error-msg">${esc(e.message ?? e.msg ?? '')}</div>
+      </li>`).join('');
+  } catch(e) {
+    list.innerHTML = '<li class="error-item"><div class="empty-state" style="color:var(--c-red)">Failed to load</div></li>';
+  }
+}
+
+// ── API & MCP modal ──
+async function loadApiModal() {
+  const body = document.getElementById('body-api');
+  try {
+    const d = cache.apiStats ?? await adminFetch('/admin/api-stats');
+    cache.apiStats = d;
+
+    const rails = d.requests_by_rail ?? {};
+    const railRows = Object.entries(rails).map(([rail, count]) =>
+      `<div class="api-stat-row"><span class="api-stat-label">Requests · ${railDisplay(rail)}</span><span class="api-stat-val">${count.toLocaleString()}</span></div>`
+    ).join('') || '<div class="api-stat-row"><span class="api-stat-label">Requests by rail</span><span class="api-stat-val pending">no data</span></div>';
+
+    const attachRate = d.attach_rate != null ? `${(d.attach_rate * 100).toFixed(1)}%` : null;
+    const sandboxToLive = d.sandbox_to_live_count ?? null;
+
+    body.innerHTML = `
+      <div class="api-stat-row"><span class="api-stat-label">Active keys</span><span class="api-stat-val">${d.active_keys ?? '—'}</span></div>
+      <div class="api-stat-row"><span class="api-stat-label">Requests (30d)</span><span class="api-stat-val">${d.requests_30d != null ? d.requests_30d.toLocaleString() : '—'}</span></div>
+      ${railRows}
+      <div class="api-stat-row">
+        <span class="api-stat-label">MCP attach rate</span>
+        ${attachRate
+          ? `<span class="api-stat-val">${attachRate}</span>`
+          : `<span class="api-stat-val pending">no data yet</span>`}
+      </div>
+      <div class="api-stat-row">
+        <span class="api-stat-label">Sandbox → live</span>
+        ${sandboxToLive != null
+          ? `<span class="api-stat-val">${sandboxToLive} <span class="sandbox-badge live">live</span></span>`
+          : `<span class="api-stat-val pending">pending — wire at first Chartered client</span>`}
+      </div>
+    `;
+  } catch(e) {
+    body.innerHTML = '<div class="empty-state" style="color:var(--c-red)">Failed to load</div>';
+  }
+}
+
+// ── Generic modal open/close ──
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  // Lazy-load specific modals
+  if (id === 'modal-client-errors') loadClientErrorsModal();
+  if (id === 'modal-api') loadApiModal();
+  if (id === 'modal-subs') loadSubsModal();
+  if (id === 'modal-mrr') loadMrrModal();
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+// Close on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+// ── Subs modal ──
+async function loadSubsModal() {
+  const body = document.getElementById('body-subs');
+  const d = cache.snapshot ?? {};
+  const tiers = [
+    ['Pro Bono', d.subscribers_free ?? '—'],
+    ['Citizen (Registered)', d.subscribers_citizen ?? '—'],
+    ['Sovereign (Bearer)', d.subscribers_sovereign ?? '—'],
+    ['Chartered', d.subscribers_api ?? '—'],
+  ];
+  body.innerHTML = tiers.map(([label, val]) =>
+    `<div class="detail-row"><span class="detail-label">${label}</span><span class="detail-value">${val}</span></div>`
+  ).join('');
+}
+
+// ── MRR modal ──
+async function loadMrrModal() {
+  const body = document.getElementById('body-mrr');
+  const d = cache.snapshot ?? {};
+  body.innerHTML = `
+    <div class="detail-row"><span class="detail-label">MRR</span><span class="detail-value">${d.mrr != null ? '£' + (d.mrr/100).toFixed(2) : '—'}</span></div>
+    <div class="detail-row"><span class="detail-label">MoM change</span><span class="detail-value">${d.mrr_change != null ? d.mrr_change + '%' : '—'}</span></div>
+    <div class="detail-row"><span class="detail-label">ARR (est.)</span><span class="detail-value">${d.mrr != null ? '£' + (d.mrr * 12 / 100).toFixed(2) : '—'}</span></div>
+  `;
+}
+
+// ── Utility ──
+function set(id, val) {
+  const el = document.getElementById(id);
+  if (el) { el.textContent = val; el.classList.remove('loading'); }
+}
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
 </body>
 </html>
