@@ -431,7 +431,7 @@ async function _startDownloadStream(uuid, meta, fileHandle, fileName, willSelfDe
       try {
         plaintext = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: state.sessionIv, additionalData: aad }, state.sessionAesKey, ciphertextBuf);
       } catch (e) {
-        reportError('decrypt', e.message, `uuid:${uuid.slice(0,8)} chunk:${i}`).catch(() => {});
+        reportError('decrypt', e.message, `uuid:${uuid.slice(0,8)} chunk:${i}`);
         await writable.abort();
         _showDownloadError('Decryption failed — wrong key or corrupted data. No partial file was saved.', domRefs);
         return;
@@ -520,7 +520,7 @@ async function _startDownload(uuid, meta, fileName, willSelfDestruct, hasOts, se
       return;
     }
     if (!res.ok) {
-      reportError('download_chunk', `HTTP ${res.status} chunk ${i}`, `uuid:${uuid.slice(0,8)}`).catch(() => {});
+      reportError('download_chunk', `HTTP ${res.status} chunk ${i}`, `uuid:${uuid.slice(0,8)}`);
       _showDownloadError(`Download failed (${res.status}). Please try again.`, domRefs);
       return;
     }
@@ -553,7 +553,7 @@ async function _startDownload(uuid, meta, fileName, willSelfDestruct, hasOts, se
       const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: state.sessionIv, additionalData: aad }, state.sessionAesKey, chunks[i]);
       decrypted.push(plain);
     } catch (e) {
-      reportError('decrypt', e.message, `uuid:${uuid.slice(0,8)} chunk:${i}`).catch(() => {});
+      reportError('decrypt', e.message, `uuid:${uuid.slice(0,8)} chunk:${i}`);
       _showDownloadError('Decryption failed — wrong key or corrupted data.', domRefs);
       return;
     }
