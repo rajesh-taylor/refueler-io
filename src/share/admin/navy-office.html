@@ -275,12 +275,10 @@
         </div>
       </div>
 
-      <div class="growth-range-toggle" id="growth-range-toggle" role="group" aria-label="Time range">
-        <button class="growth-range-btn" data-range="D" onclick="growthSetRange('D')">D</button>
-        <button class="growth-range-btn" data-range="W" onclick="growthSetRange('W')">W</button>
-        <button class="growth-range-btn active" data-range="M" onclick="growthSetRange('M')">M</button>
-        <button class="growth-range-btn" data-range="Y" onclick="growthSetRange('Y')">Y</button>
+      <div class="growth-subhead">
+        <span class="growth-range-label">Last 90 days</span>
         <span class="growth-range-note" id="growth-range-note"></span>
+        <button class="growth-print-btn" onclick="printGrowthChart()" title="Print or save this chart as a PDF to archive it before the data ages out">Print chart</button>
       </div>
 
       <div class="growth-chart-wrap" style="position:relative;">

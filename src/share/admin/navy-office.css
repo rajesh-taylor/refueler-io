@@ -982,25 +982,26 @@ body {
   background: none !important;
 }
 
-/* B10-1: D/W/M/Y range toggle */
-.growth-range-toggle {
-  display: flex; align-items: center; gap: 4px; margin-top: 12px;
+/* B10-1: growth sub-head — fixed 90-day label + note + print button */
+.growth-subhead {
+  display: flex; align-items: center; gap: 10px; margin-top: 12px;
 }
-.growth-range-btn {
+.growth-range-label {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--text-secondary);
+}
+.growth-range-note {
+  font-family: var(--mono); font-size: 10px; color: var(--text-tertiary);
+}
+.growth-print-btn {
+  margin-left: auto;
   font-family: var(--mono); font-size: 11px;
-  padding: 3px 10px; min-width: 30px;
+  padding: 4px 12px;
   background: transparent; color: var(--text-secondary);
   border: 0.5px solid var(--border-mid); border-radius: 5px;
   cursor: pointer; transition: background .12s, color .12s, border-color .12s;
 }
-.growth-range-btn:hover { border-color: var(--accent); color: var(--text-primary); }
-.growth-range-btn.active {
-  background: var(--accent); color: #1A1A1A; border-color: var(--accent);
-}
-.growth-range-note {
-  font-family: var(--mono); font-size: 10px; color: var(--text-tertiary);
-  margin-left: 8px;
-}
+.growth-print-btn:hover { border-color: var(--accent); color: var(--text-primary); }
 
 /* B10-1: growth form hint (annotations-only) */
 .growth-form-hint {
@@ -1008,8 +1009,21 @@ body {
   color: var(--text-tertiary); margin: 0;
 }
 
-/* B10-1: client-errors Browser header info glyph */
-.ce-th-info { color: var(--text-tertiary); cursor: help; font-size: 10px; }
+/* B10-1: print just the growth chart — archive it as a one-card PDF.
+   body.printing-growth is toggled by printGrowthChart() around window.print(). */
+@media print {
+  body.printing-growth { background: #fff; }
+  body.printing-growth * { visibility: hidden !important; }
+  body.printing-growth #card-growth,
+  body.printing-growth #card-growth * { visibility: visible !important; }
+  body.printing-growth #card-growth {
+    position: absolute; left: 0; top: 0; width: 100%;
+    box-shadow: none; border: none;
+  }
+  /* Hide the annotation form and the print button itself in the printout. */
+  body.printing-growth #card-growth .growth-form,
+  body.printing-growth #card-growth .growth-print-btn { display: none !important; }
+}
 
 /* Growth annotation tick tooltip */
 .growth-tick-tooltip {

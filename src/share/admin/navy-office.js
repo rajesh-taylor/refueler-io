@@ -30,8 +30,9 @@ let kvErrorsCache = null;    // KV log rows from /admin/client-errors-log
 // (3a) CE source toggle: 'ae' | 'kv' — in-memory only
 let ceSource = 'ae';
 
-// (B10-1) Growth chart: in-memory range + caches. Default Month.
-let _growthRange    = 'M';   // 'D' | 'W' | 'M' | 'Y'
+// (B10-1) Growth chart caches. Fixed to the last 90 days — the maximum
+// Analytics Engine retains — so there is no range toggle; archive via print.
+let _growthRange    = 'Y';   // 'Y' = last ~90 days (AE retention ceiling)
 let _growthSnapshot = null;  // GET /admin/growth-snapshot (three lines)
 let _btcPrice       = null;  // GET /admin/btc-price (right-axis overlay)
 
@@ -871,12 +872,11 @@ function _renderCeModalContent(sparkEl, ae) {
       const msg     = r.message
         ? escHtml(r.message.slice(0, 80)) + (r.message.length > 80 ? '&hellip;' : '')
         : '—';
-      const browser = escHtml(parseUA(r.detail));
+      // B10-1: Browser (UA) column dropped — mostly Unknown and not worth a column.
       return `<tr>
         <td class="ce-ts">${ts}</td>
         <td class="ce-ctx">${context}</td>
         <td class="ce-msg">${msg}</td>
-        <td class="ce-browser">${browser}</td>
       </tr>`;
     }).join('');
     sparkEl.innerHTML = toggleHtml + `
@@ -884,15 +884,11 @@ function _renderCeModalContent(sparkEl, ae) {
       <div class="ce-table-wrap">
         <table class="ce-table">
           <thead><tr>
-            <th>Time</th><th>Context</th><th>Message</th><th title="User-agent data is only available from Aug 2026 (the blob4 UA field shipped in the S73 deploy, 5 Aug 2026). Earlier rows show —.">Browser&nbsp;<span class="ce-th-info" aria-hidden="true">ⓘ</span></th>
+            <th>Time</th><th>Context</th><th>Message</th>
           </tr></thead>
           <tbody>${rows}</tbody>
         </table>
-      </div>
-      <p class="ce-provenance-note">
-        Browser (UA) data is only available from Aug 2026 — the <code>blob4</code> UA
-        field shipped in the S73 deploy (5 Aug 2026). Rows from before then show&nbsp;—.
-      </p>`;
+      </div>`;
   } else {
     // KV source — fetch if not cached, then render
     sparkEl.innerHTML = toggleHtml + '<div class="ce-empty" style="color:var(--text-tertiary)">Loading Worker log…</div>';
@@ -1511,15 +1507,13 @@ async function fetchGrowthAll() {
   renderGrowth();
 }
 
-// Range toggle (in-memory only, no cookie/localStorage). Re-fetches the lines.
-function growthSetRange(r) {
-  if (!['D', 'W', 'M', 'Y'].includes(r)) return;
-  _growthRange = r;
-  document.querySelectorAll('#growth-range-toggle .growth-range-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.range === r);
-  });
-  fetchGrowthSnapshot().then(renderGrowth);
+// Print / archive just the growth chart as a one-card PDF. @media print in the
+// stylesheet isolates #card-growth while body carries .printing-growth.
+function printGrowthChart() {
+  document.body.classList.add('printing-growth');
+  window.print();
 }
+window.addEventListener('afterprint', () => document.body.classList.remove('printing-growth'));
 
 // Nominal window in seconds per range — fixes the x-axis to the selected window
 // so the axis and annotation ticks are stable even when AE has sparse buckets.
@@ -1538,13 +1532,7 @@ function renderGrowth() {
 
   // Range note — flags AE unavailability and the truncated Year view.
   if (noteEl) {
-    if (snap && snap.ae_available === false) {
-      noteEl.textContent = 'Analytics Engine unavailable';
-    } else if (snap && snap.truncated) {
-      noteEl.textContent = '· Year limited to ~90d (Analytics Engine retention)';
-    } else {
-      noteEl.textContent = '';
-    }
+    noteEl.textContent = (snap && snap.ae_available === false) ? '· Analytics Engine unavailable' : '';
   }
 
   const W = 800, H = 120, PAD_L = 0, PAD_R = 0, PAD_T = 12, PAD_B = 20;
@@ -1685,23 +1673,50 @@ async function _renderIssuanceTrend(sparkEl) {
   }
 
   const pts = series.map(p => ({ t: p.t, n: (p.free ?? 0) + (p.paid ?? 0) + (p.api ?? 0) }));
-  const W = 320, H = 72, PAD = 8;
+  const totalNew = pts.reduce((s, p) => s + p.n, 0);
   const t0 = pts[0].t, t1 = pts[pts.length - 1].t;
   const maxN = Math.max(1, ...pts.map(p => p.n));
-  const xOf = t => (t1 === t0) ? PAD + (W - 2 * PAD) / 2 : PAD + ((t - t0) / (t1 - t0)) * (W - 2 * PAD);
-  const yOf = n => PAD + (H - 2 * PAD) - (n / maxN) * (H - 2 * PAD);
-  const stroke = '#C8A96E';
+
+  // Chart box with gutters for a Y-axis (count/day) and an X-axis (date).
+  const W = 480, H = 180;
+  const PAD_L = 42, PAD_R = 16, PAD_T = 16, PAD_B = 34;
+  const plotW = W - PAD_L - PAD_R, plotH = H - PAD_T - PAD_B;
+  const xOf = t => (t1 === t0) ? PAD_L + plotW / 2 : PAD_L + ((t - t0) / (t1 - t0)) * plotW;
+  const yOf = n => PAD_T + plotH - (n / maxN) * plotH;
+
+  const stroke  = '#C8A96E';
   const isPaper = document.documentElement.getAttribute('data-theme') !== 'carbon';
-  const muted  = isPaper ? '#9A948D' : '#5A5751';
-  const poly = pts.map(p => `${xOf(p.t).toFixed(1)},${yOf(p.n).toFixed(1)}`).join(' ');
-  const totalNew = pts.reduce((s, p) => s + p.n, 0);
+  const muted   = isPaper ? '#9A948D' : '#5A5751';
+  const axis    = isPaper ? '#7A746D' : '#6A675F';
+
+  const poly  = pts.map(p => `${xOf(p.t).toFixed(1)},${yOf(p.n).toFixed(1)}`).join(' ');
+  const baseY = yOf(0);
+  const dfmt  = t => new Date(t * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+
+  // Y ticks: 0, mid, max (deduped) — gridline + left-aligned count label.
+  const yTicks = [...new Set([0, Math.round(maxN / 2), maxN])];
+  const yGrid = yTicks.map(v => {
+    const y = yOf(v).toFixed(1);
+    return `<line x1="${PAD_L}" y1="${y}" x2="${W - PAD_R}" y2="${y}" stroke="${muted}" stroke-width="0.5" stroke-opacity="0.25"/>` +
+           `<text x="${PAD_L - 6}" y="${(parseFloat(y) + 3).toFixed(1)}" text-anchor="end" font-family="var(--mono)" font-size="10" fill="${muted}">${v}</text>`;
+  }).join('');
 
   sparkEl.innerHTML = `
-    <svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="none" style="display:block">
-      <polyline points="${poly}" fill="none" stroke="${stroke}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
-      <text x="${PAD}" y="${PAD + 8}" font-family="var(--mono)" font-size="9" fill="${muted}">${maxN.toLocaleString('en-GB')}/day peak</text>
+    <svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;height:auto">
+      ${yGrid}
+      <!-- axes -->
+      <line x1="${PAD_L}" y1="${PAD_T}" x2="${PAD_L}" y2="${baseY.toFixed(1)}" stroke="${axis}" stroke-width="0.75"/>
+      <line x1="${PAD_L}" y1="${baseY.toFixed(1)}" x2="${W - PAD_R}" y2="${baseY.toFixed(1)}" stroke="${axis}" stroke-width="0.75"/>
+      <!-- data -->
+      <polyline points="${poly}" fill="none" stroke="${stroke}" stroke-width="1.75" stroke-linejoin="round" stroke-linecap="round"/>
+      <!-- axis titles -->
+      <text transform="rotate(-90)" x="${(-(PAD_T + plotH / 2)).toFixed(1)}" y="12" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="${muted}">issued / day</text>
+      <!-- x labels -->
+      <text x="${PAD_L}" y="${(baseY + 16).toFixed(1)}" text-anchor="start" font-family="var(--mono)" font-size="10" fill="${muted}">${dfmt(t0)}</text>
+      <text x="${((PAD_L + W - PAD_R) / 2).toFixed(1)}" y="${(baseY + 16).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="${muted}">date</text>
+      <text x="${W - PAD_R}" y="${(baseY + 16).toFixed(1)}" text-anchor="end" font-family="var(--mono)" font-size="10" fill="${muted}">${dfmt(t1)}</text>
     </svg>
-    <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-top:4px">Daily credentials issued · last 30d · ${totalNew.toLocaleString('en-GB')} total${snap.truncated ? ' · Year limited to ~90d' : ''}</div>`;
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-top:4px">Credentials issued per day · last 30 days · ${totalNew.toLocaleString('en-GB')} total · peak ${maxN.toLocaleString('en-GB')}/day</div>`;
 }
 
 function _buildEventListHtml(events) {
