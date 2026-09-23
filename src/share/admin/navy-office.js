@@ -30,6 +30,11 @@ let kvErrorsCache = null;    // KV log rows from /admin/client-errors-log
 // (3a) CE source toggle: 'ae' | 'kv' — in-memory only
 let ceSource = 'ae';
 
+// (B10-1) Growth chart: in-memory range + caches. Default Month.
+let _growthRange    = 'M';   // 'D' | 'W' | 'M' | 'Y'
+let _growthSnapshot = null;  // GET /admin/growth-snapshot (three lines)
+let _btcPrice       = null;  // GET /admin/btc-price (right-axis overlay)
+
 // ── Theme ──────────────────────────────────────────────────────────────────
 function getTheme() {
   const cookie = document.cookie.split(';').map(c => c.trim())
@@ -121,8 +126,8 @@ async function refreshAll() {
   if (m || ae) renderFarming(lastMetrics, lastAe);
   // (3b) API & MCP card
   fetchApiStats();
-  // (3c) Growth card
-  fetchGrowth();
+  // (3c/B10-1) Growth card — annotations + AE lines + BTC overlay
+  fetchGrowthAll();
   const ts = new Date();
   setText('refreshed-at', `Refreshed ${ts.toLocaleTimeString('en-GB')}`);
   document.getElementById('main').setAttribute('data-print-ts', ts.toUTCString());
@@ -342,7 +347,7 @@ async function fetchApiStats() {
 
 function renderApiStatsCard(data) {
   const activeKeys = data?.active_keys?.active ?? null;
-  const reqs30d    = data?.requests_30d?.total ?? null;
+  const r30        = data?.requests_30d ?? null;
 
   const keysEl = document.getElementById('snap-api-keys');
   const reqsEl = document.getElementById('snap-api-reqs');
@@ -352,9 +357,18 @@ function renderApiStatsCard(data) {
     keysEl.className   = 'sm-value';
   }
   if (reqsEl) {
-    reqsEl.textContent = reqs30d !== null
-      ? `${reqs30d.toLocaleString('en-GB')} reqs (30d)`
-      : '';
+    // B10-1: the headline request count is BILLABLE traffic only (Registered +
+    // Bearer). `total` is dominated by Pro Bono and reads as if the API tier is
+    // busy when it is not. Pro Bono is shown as a separate, muted sub-line.
+    if (r30 && r30.ae_available !== false) {
+      const billable = r30.billable ?? ((r30.by_rail?.identity ?? 0) + (r30.by_rail?.anonymous ?? 0));
+      const proBono  = r30.pro_bono ?? (r30.by_rail?.none ?? 0);
+      reqsEl.innerHTML =
+        `${billable.toLocaleString('en-GB')} billable reqs (30d)` +
+        `<br><span style="color:var(--text-tertiary)">+ ${proBono.toLocaleString('en-GB')} Pro Bono</span>`;
+    } else {
+      reqsEl.textContent = '';
+    }
   }
 }
 
@@ -500,6 +514,13 @@ function openModal(key, triggerEl) {
       if (total !== null) { value = String(total); }
       else { value = 'n/a'; isNA = true; }
       sub = iss ? `free ${iss.free ?? 0} · creative ${iss.creative ?? 0} · max ${iss.max ?? 0}` : 'No AE data';
+      // B10-1: replace the placeholder Trend stub with a real daily line graph.
+      const sparkEl = document.getElementById('modal-sparkline');
+      if (sparkEl) {
+        sparkEl.classList.remove('modal-sparkline-stub');
+        sparkEl.innerHTML = '<div style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary)">Loading daily trend…</div>';
+        _renderIssuanceTrend(sparkEl);
+      }
       break;
     }
     case 'storage': {
@@ -768,15 +789,21 @@ function _buildApiMcpModalHtml(d) {
     ...Object.entries(byPlan).map(([plan, n]) => _apiRow(`  ${escHtml(plan)}`, String(n))),
   ];
 
-  // Section 2: Requests 30d
+  // Section 2: Requests 30d — B10-1: lead with billable (Registered + Bearer),
+  // then the rail breakdown, then Pro Bono and the all-in total for reference.
   const r30 = d.requests_30d ?? {};
   const byRail = r30.by_rail ?? {};
-  const reqRows = [
-    _apiRow('Total (30d)', r30.total?.toLocaleString('en-GB') ?? (aeWarn ? aeWarn : '—')),
-    ...Object.entries(byRail).map(([rail, n]) =>
-      _apiRow(`  ${_railLabel(rail)}`, String(n))
-    ),
-  ];
+  const billable = r30.billable ?? ((byRail.identity ?? 0) + (byRail.anonymous ?? 0));
+  const proBono  = r30.pro_bono ?? (byRail.none ?? 0);
+  const reqRows = (r30.ae_available === false)
+    ? [ _apiRow('Requests (30d)', aeWarn || 'Analytics Engine unavailable') ]
+    : [
+        _apiRow('Billable (30d)', billable.toLocaleString('en-GB')),
+        _apiRow('  Registered',   String(byRail.identity ?? 0)),
+        _apiRow('  Bearer',       String(byRail.anonymous ?? 0)),
+        _apiRow('Pro Bono',       proBono.toLocaleString('en-GB')),
+        _apiRow('All requests',   (r30.total ?? 0).toLocaleString('en-GB')),
+      ];
 
   // Section 3: Attach rate
   const ar = d.api_attach_rate ?? {};
@@ -857,15 +884,14 @@ function _renderCeModalContent(sparkEl, ae) {
       <div class="ce-table-wrap">
         <table class="ce-table">
           <thead><tr>
-            <th>Time</th><th>Context</th><th>Message</th><th>Browser</th>
+            <th>Time</th><th>Context</th><th>Message</th><th title="User-agent data is only available from Aug 2026 (the blob4 UA field shipped in the S73 deploy, 5 Aug 2026). Earlier rows show —.">Browser&nbsp;<span class="ce-th-info" aria-hidden="true">ⓘ</span></th>
           </tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>
       <p class="ce-provenance-note">
-        Errors logged before the S73 deploy (5 Aug 2026) do not carry browser data —
-        the <code>blob4</code> UA field was added in that release.
-        Rows with no browser data show&nbsp;—.
+        Browser (UA) data is only available from Aug 2026 — the <code>blob4</code> UA
+        field shipped in the S73 deploy (5 Aug 2026). Rows from before then show&nbsp;—.
       </p>`;
   } else {
     // KV source — fetch if not cached, then render
@@ -893,12 +919,15 @@ function _renderCeModalContent(sparkEl, ae) {
         const statusCls = r.status >= 500 ? 'ce-status" style="color:var(--c-red)' :
                           r.status >= 400 ? 'ce-status" style="color:var(--c-amber)' :
                           'ce-status';
+        // B10-1: Message column removed — the Worker-observed KV log records
+        // status/endpoint/path but not a message body (appendClientError is
+        // called without errorMsg on the 4xx/5xx egress path), so the column
+        // was always empty. Endpoint + path + status carry the signal here.
         return `<tr>
           <td class="ce-ts">${ts}</td>
           <td class="${statusCls}">${r.status ?? '—'}</td>
           <td class="ce-ep">${escHtml(r.endpoint ?? '—')}</td>
           <td class="ce-path">${escHtml(r.path ?? '—')}</td>
-          <td class="ce-msg">${escHtml((r.msg ?? '').slice(0, 80))}</td>
         </tr>`;
       }).join('');
       sparkEl.innerHTML = toggleHtml + `
@@ -906,7 +935,7 @@ function _renderCeModalContent(sparkEl, ae) {
         <div class="ce-table-wrap">
           <table class="ce-table">
             <thead><tr>
-              <th>Time</th><th>Status</th><th>Endpoint</th><th>Path</th><th>Message</th>
+              <th>Time</th><th>Status</th><th>Endpoint</th><th>Path</th>
             </tr></thead>
             <tbody>${rows}</tbody>
           </table>
@@ -1444,117 +1473,235 @@ async function copySandboxResult(btn) {
 
 let _growthEvents = [];
 
-async function fetchGrowth() {
+// ── (B10-1) Growth data fetchers ───────────────────────────────────────────
+// Three sources, one render:
+//   · annotations   — GET /admin/news-events   (vertical tick marks)
+//   · the lines     — GET /admin/growth-snapshot?range= (AE, cumulative/tier)
+//   · BTC overlay   — GET /admin/btc-price      (single spot value)
+
+async function fetchGrowthEvents() {
   try {
     const res = await fetch(`${WORKER}/admin/news-events`, { headers: { 'X-Admin-Key': adminKey } });
     if (!res.ok) { console.warn('[navy-office] /admin/news-events', res.status); return; }
     const data = await res.json();
     _growthEvents = Array.isArray(data.events) ? data.events : [];
-    renderGrowth();
   } catch (e) { console.warn('[navy-office] /admin/news-events', e.message); }
 }
+
+async function fetchGrowthSnapshot() {
+  try {
+    const res = await fetch(`${WORKER}/admin/growth-snapshot?range=${encodeURIComponent(_growthRange)}`,
+      { headers: { 'X-Admin-Key': adminKey } });
+    if (!res.ok) { console.warn('[navy-office] /admin/growth-snapshot', res.status); _growthSnapshot = null; return; }
+    _growthSnapshot = await res.json();
+  } catch (e) { console.warn('[navy-office] /admin/growth-snapshot', e.message); _growthSnapshot = null; }
+}
+
+async function fetchBtcPrice() {
+  try {
+    const res = await fetch(`${WORKER}/admin/btc-price`, { headers: { 'X-Admin-Key': adminKey } });
+    if (!res.ok) { _btcPrice = null; return; }        // 503 = unavailable; overlay hidden
+    _btcPrice = await res.json();
+  } catch (e) { console.warn('[navy-office] /admin/btc-price', e.message); _btcPrice = null; }
+}
+
+// Orchestrator — load all three in parallel, then render once.
+async function fetchGrowthAll() {
+  await Promise.all([fetchGrowthEvents(), fetchGrowthSnapshot(), fetchBtcPrice()]);
+  renderGrowth();
+}
+
+// Range toggle (in-memory only, no cookie/localStorage). Re-fetches the lines.
+function growthSetRange(r) {
+  if (!['D', 'W', 'M', 'Y'].includes(r)) return;
+  _growthRange = r;
+  document.querySelectorAll('#growth-range-toggle .growth-range-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.range === r);
+  });
+  fetchGrowthSnapshot().then(renderGrowth);
+}
+
+// Nominal window in seconds per range — fixes the x-axis to the selected window
+// so the axis and annotation ticks are stable even when AE has sparse buckets.
+const _GROWTH_WINDOW_SEC = { D: 86400, W: 7 * 86400, M: 30 * 86400, Y: 90 * 86400 };
 
 function renderGrowth() {
   const svg  = document.getElementById('growth-svg');
   const list = document.getElementById('growth-events-list');
   const body = document.getElementById('growth-events-body');
+  const noteEl = document.getElementById('growth-range-note');
   if (!svg) return;
 
-  // Filter to entries that have at least one of free/paid/api
-  const dataPoints = _growthEvents.filter(e => e.free != null || e.paid != null || e.api != null);
-  // Annotations are entries with a label (may or may not have data)
   const annotations = _growthEvents.filter(e => e.label);
+  const snap   = _growthSnapshot;
+  const series = Array.isArray(snap?.series) ? snap.series : [];
 
-  if (dataPoints.length === 0) {
-    svg.innerHTML = `<text x="400" y="64" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="var(--text-tertiary)">No data yet — add the first event below.</text>`;
-    // Still render annotation list if any
-    if (annotations.length > 0 && list && body) {
-      list.style.display = '';
-      body.innerHTML = _buildEventListHtml(annotations);
+  // Range note — flags AE unavailability and the truncated Year view.
+  if (noteEl) {
+    if (snap && snap.ae_available === false) {
+      noteEl.textContent = 'Analytics Engine unavailable';
+    } else if (snap && snap.truncated) {
+      noteEl.textContent = '· Year limited to ~90d (Analytics Engine retention)';
+    } else {
+      noteEl.textContent = '';
     }
-    return;
   }
-
-  // Sort by date
-  const sorted = [...dataPoints].sort((a, b) => a.date < b.date ? -1 : 1);
-
-  // Find max for y scale
-  const maxVal = Math.max(1, ...sorted.flatMap(e => [e.free ?? 0, e.paid ?? 0, e.api ?? 0]));
 
   const W = 800, H = 120, PAD_L = 0, PAD_R = 0, PAD_T = 12, PAD_B = 20;
   const chartW = W - PAD_L - PAD_R;
   const chartH = H - PAD_T - PAD_B;
 
-  // Map date → x, value → y
-  const n = sorted.length;
-  function xOf(i) { return PAD_L + (n === 1 ? chartW / 2 : (i / (n - 1)) * chartW); }
+  // x domain: fixed to the selected window ending now.
+  const nowSec = Math.floor(Date.now() / 1000);
+  const t1 = nowSec;
+  const t0 = nowSec - (_GROWTH_WINDOW_SEC[_growthRange] ?? _GROWTH_WINDOW_SEC.M);
+  function xOfT(t) {
+    if (t1 === t0) return PAD_L + chartW / 2;
+    const frac = Math.max(0, Math.min(1, (t - t0) / (t1 - t0)));
+    return PAD_L + frac * chartW;
+  }
+
+  // Theme-aware colours (SVG strokes can't resolve CSS vars).
+  const isPaper    = document.documentElement.getAttribute('data-theme') !== 'carbon';
+  const goldColor  = '#C8A96E';                          // Free
+  const greenColor = isPaper ? '#1C7C4A' : '#3DCA7A';    // Paid
+  const amberColor = isPaper ? '#B85C00' : '#E8A23A';    // API
+  const mutedColor = isPaper ? '#9A948D' : '#5A5751';    // BTC overlay
+  const bgStroke   = isPaper ? '#E8E2D8' : '#1A1A1A';
+
+  // Empty / degraded state — no AE line data. Still draw annotation ticks.
+  if (series.length === 0) {
+    const emptyMsg = (snap && snap.ae_available === false)
+      ? 'Analytics Engine unavailable — lines cannot be drawn.'
+      : 'No credentials issued in this range yet.';
+    const ticks = _growthTickMarks(annotations, xOfT, t0, t1, PAD_T, H, PAD_B);
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.innerHTML = ticks +
+      `<text x="400" y="64" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="${mutedColor}">${escHtml(emptyMsg)}</text>`;
+    _wireGrowthTicks(svg);
+    _renderGrowthList(list, body, annotations);
+    return;
+  }
+
+  // y domain (left axis): cumulative credentials issued.
+  const maxVal = Math.max(1, ...series.flatMap(p => [p.free_cum ?? 0, p.paid_cum ?? 0, p.api_cum ?? 0]));
   function yOf(v) { return PAD_T + chartH - ((v ?? 0) / maxVal) * chartH; }
 
   function polyPoints(key) {
-    return sorted.map((e, i) => `${xOf(i).toFixed(1)},${yOf(e[key] ?? 0).toFixed(1)}`).join(' ');
+    return series.map(p => `${xOfT(p.t).toFixed(1)},${yOf(p[key] ?? 0).toFixed(1)}`).join(' ');
+  }
+  function lastDot(key, fill) {
+    const p = series[series.length - 1];
+    if (!p) return '';
+    return `<circle cx="${xOfT(p.t).toFixed(1)}" cy="${yOf(p[key] ?? 0).toFixed(1)}" r="3" fill="${fill}" stroke="${bgStroke}" stroke-width="1.5"/>`;
   }
 
-  // CSS variable colours — inline for SVG (SVG can't resolve CSS vars in polyline stroke)
-  // We use fixed values matching the design system. Theme-switch redraws on next refresh.
-  const isPaper = document.documentElement.getAttribute('data-theme') !== 'carbon';
-  const fgColor   = isPaper ? '#3D3A36' : '#E4E2DC';
-  const mutedColor = isPaper ? '#9A948D' : '#5A5751';
-
-  // Tick lines for annotations on the data x-axis
-  const sortedAll = [..._growthEvents].sort((a, b) => a.date < b.date ? -1 : 1);
-  // Map date to x within sorted dataPoints (approximate — find nearest index)
-  function xForDate(dateStr) {
-    const idx = sorted.findIndex(e => e.date >= dateStr);
-    if (idx === -1) return xOf(n - 1);
-    if (idx === 0)  return xOf(0);
-    // Interpolate if needed
-    const prev = sorted[idx - 1], curr = sorted[idx];
-    const frac = (dateStr - prev.date) / (curr.date - prev.date);
-    return xOf(idx - 1) + frac * (xOf(idx) - xOf(idx - 1));
+  // BTC/GBP overlay — a single spot value (no historical series exists), drawn as
+  // a horizontal reference line near the top of the right axis with a label. It is
+  // deliberately NOT a curve: we do not fabricate price history we do not store.
+  let btcOverlay = '';
+  if (_btcPrice && typeof _btcPrice.price_gbp === 'number') {
+    const yBtc = (PAD_T + chartH * 0.10).toFixed(1);
+    const priceStr = '£' + Math.round(_btcPrice.price_gbp).toLocaleString('en-GB');
+    const staleTag = _btcPrice.stale ? ' (cached)' : '';
+    btcOverlay = `
+      <line x1="0" y1="${yBtc}" x2="${W}" y2="${yBtc}" stroke="${mutedColor}" stroke-width="1" stroke-dasharray="2,3" opacity="0.8"/>
+      <text x="${W - 4}" y="${(PAD_T + chartH * 0.10 - 4).toFixed(1)}" text-anchor="end" font-family="var(--mono)" font-size="9" fill="${mutedColor}">BTC ${escHtml(priceStr)}${escHtml(staleTag)}</text>`;
   }
 
-  const tickLines = annotations.map(ev => {
-    const x = xForDate(ev.date).toFixed(1);
-    const shortDate = ev.date ? ev.date.slice(5) : '';
-    return `<line x1="${x}" y1="${PAD_T}" x2="${x}" y2="${H - PAD_B}" stroke="var(--accent,#C8A96E)" stroke-width="1" stroke-dasharray="3,3" data-tick-date="${escHtml(ev.date)}" data-tick-label="${escHtml(ev.label ?? '')}" data-tick-note="${escHtml(ev.note ?? '')}" class="growth-tick-line" style="cursor:pointer;"/>
-      <text x="${x}" y="${H - 4}" text-anchor="middle" font-family="var(--mono)" font-size="8" fill="var(--accent,#C8A96E)">${escHtml(shortDate)}</text>`;
-  }).join('');
+  // y-max label (left) for the cumulative axis.
+  const yMaxLabel = `<text x="2" y="${(PAD_T + 8).toFixed(1)}" text-anchor="start" font-family="var(--mono)" font-size="9" fill="${mutedColor}">${maxVal.toLocaleString('en-GB')}</text>`;
 
-  // Dot circles at each data point
-  function dots(key, fill) {
-    return sorted.map((e, i) => {
-      if (e[key] == null) return '';
-      return `<circle cx="${xOf(i).toFixed(1)}" cy="${yOf(e[key]).toFixed(1)}" r="3" fill="${fill}" stroke="var(--bg,#1E1F22)" stroke-width="1.5"/>`;
-    }).join('');
-  }
+  const ticks = _growthTickMarks(annotations, xOfT, t0, t1, PAD_T, H, PAD_B);
 
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   svg.innerHTML = `
-    ${tickLines}
-    <polyline points="${polyPoints('free')}"  fill="none" stroke="${fgColor}"   stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
-    <polyline points="${polyPoints('paid')}"  fill="none" stroke="#C8A96E"      stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
-    <polyline points="${polyPoints('api')}"   fill="none" stroke="${mutedColor}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
-    ${dots('free', fgColor)}
-    ${dots('paid', '#C8A96E')}
-    ${dots('api',  mutedColor)}
+    ${btcOverlay}
+    ${ticks}
+    <polyline points="${polyPoints('free_cum')}" fill="none" stroke="${goldColor}"  stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <polyline points="${polyPoints('paid_cum')}" fill="none" stroke="${greenColor}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <polyline points="${polyPoints('api_cum')}"  fill="none" stroke="${amberColor}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+    ${lastDot('free_cum', goldColor)}
+    ${lastDot('paid_cum', greenColor)}
+    ${lastDot('api_cum',  amberColor)}
+    ${yMaxLabel}
   `;
 
-  // Tick hover / tap
+  _wireGrowthTicks(svg);
+  _renderGrowthList(list, body, annotations);
+}
+
+// Vertical annotation tick marks, mapped by date onto the fixed time x-axis.
+// Annotations outside the current window are skipped.
+function _growthTickMarks(annotations, xOfT, t0, t1, PAD_T, H, PAD_B) {
+  return annotations.map(ev => {
+    if (!ev.date) return '';
+    const t = Math.floor(Date.parse(`${ev.date}T00:00:00Z`) / 1000);
+    if (!Number.isFinite(t) || t < t0 || t > t1) return '';
+    const x = xOfT(t).toFixed(1);
+    const shortDate = ev.date.slice(5);
+    return `<line x1="${x}" y1="${PAD_T}" x2="${x}" y2="${H - PAD_B}" stroke="#C8A96E" stroke-width="1" stroke-dasharray="3,3" data-tick-date="${escHtml(ev.date)}" data-tick-label="${escHtml(ev.label ?? '')}" data-tick-note="${escHtml(ev.note ?? '')}" class="growth-tick-line" style="cursor:pointer;"/>
+      <text x="${x}" y="${H - 4}" text-anchor="middle" font-family="var(--mono)" font-size="8" fill="#C8A96E">${escHtml(shortDate)}</text>`;
+  }).join('');
+}
+
+function _wireGrowthTicks(svg) {
   svg.querySelectorAll('.growth-tick-line').forEach(line => {
     line.addEventListener('mouseenter', e => _showGrowthTooltip(e, line));
     line.addEventListener('mouseleave', _hideGrowthTooltip);
     line.addEventListener('click',      e => _showGrowthTooltip(e, line));
   });
+}
 
-  // Events list
-  if (list && body) {
-    if (annotations.length > 0) {
-      list.style.display = '';
-      body.innerHTML = _buildEventListHtml(annotations);
-    } else {
-      list.style.display = 'none';
-    }
+function _renderGrowthList(list, body, annotations) {
+  if (!list || !body) return;
+  if (annotations.length > 0) {
+    list.style.display = '';
+    body.innerHTML = _buildEventListHtml(annotations);
+  } else {
+    list.style.display = 'none';
   }
+}
+
+// (B10-1) Credential Issuances card modal — daily line graph. Sources the same
+// AE data as the growth chart (range=M, daily buckets) and plots NEW issuances
+// per day (free + paid + api), replacing the old "coming B5" placeholder stub.
+async function _renderIssuanceTrend(sparkEl) {
+  let snap;
+  try {
+    const res = await fetch(`${WORKER}/admin/growth-snapshot?range=M`, { headers: { 'X-Admin-Key': adminKey } });
+    if (!res.ok) { sparkEl.innerHTML = `<div class="ce-empty">Daily trend unavailable (${res.status}).</div>`; return; }
+    snap = await res.json();
+  } catch { sparkEl.innerHTML = '<div class="ce-empty">Daily trend unavailable.</div>'; return; }
+
+  if (snap && snap.ae_available === false) {
+    sparkEl.innerHTML = '<div class="ce-empty">Analytics Engine unavailable — trend cannot be drawn.</div>';
+    return;
+  }
+  const series = Array.isArray(snap?.series) ? snap.series : [];
+  if (series.length === 0) {
+    sparkEl.innerHTML = '<div class="ce-empty">No credential issuances in the last 30 days.</div>';
+    return;
+  }
+
+  const pts = series.map(p => ({ t: p.t, n: (p.free ?? 0) + (p.paid ?? 0) + (p.api ?? 0) }));
+  const W = 320, H = 72, PAD = 8;
+  const t0 = pts[0].t, t1 = pts[pts.length - 1].t;
+  const maxN = Math.max(1, ...pts.map(p => p.n));
+  const xOf = t => (t1 === t0) ? PAD + (W - 2 * PAD) / 2 : PAD + ((t - t0) / (t1 - t0)) * (W - 2 * PAD);
+  const yOf = n => PAD + (H - 2 * PAD) - (n / maxN) * (H - 2 * PAD);
+  const stroke = '#C8A96E';
+  const isPaper = document.documentElement.getAttribute('data-theme') !== 'carbon';
+  const muted  = isPaper ? '#9A948D' : '#5A5751';
+  const poly = pts.map(p => `${xOf(p.t).toFixed(1)},${yOf(p.n).toFixed(1)}`).join(' ');
+  const totalNew = pts.reduce((s, p) => s + p.n, 0);
+
+  sparkEl.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="none" style="display:block">
+      <polyline points="${poly}" fill="none" stroke="${stroke}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+      <text x="${PAD}" y="${PAD + 8}" font-family="var(--mono)" font-size="9" fill="${muted}">${maxN.toLocaleString('en-GB')}/day peak</text>
+    </svg>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-top:4px">Daily credentials issued · last 30d · ${totalNew.toLocaleString('en-GB')} total${snap.truncated ? ' · Year limited to ~90d' : ''}</div>`;
 }
 
 function _buildEventListHtml(events) {
@@ -1594,18 +1741,16 @@ async function growthAddEvent() {
   const date   = (document.getElementById('growth-date').value ?? '').trim();
   const label  = (document.getElementById('growth-label').value ?? '').trim() || undefined;
   const note   = (document.getElementById('growth-note').value ?? '').trim() || undefined;
-  const freeV  = document.getElementById('growth-free').value;
-  const paidV  = document.getElementById('growth-paid').value;
-  const apiV   = document.getElementById('growth-api').value;
 
   if (!date) { alert('Date is required.'); return; }
+  if (!label && !note) { alert('Add a label or a note for the annotation.'); return; }
 
+  // B10-1: annotations only. The three lines come from Analytics Engine, so the
+  // manual free/paid/api count fields were removed. (The endpoint still accepts
+  // them for backward compatibility, but this form no longer sends them.)
   const body = { date };
-  if (label)         body.label = label;
-  if (note)          body.note  = note;
-  if (freeV !== '')  body.free  = parseInt(freeV, 10);
-  if (paidV !== '')  body.paid  = parseInt(paidV, 10);
-  if (apiV  !== '')  body.api   = parseInt(apiV,  10);
+  if (label) body.label = label;
+  if (note)  body.note  = note;
 
   const statusEl = document.getElementById('growth-form-status');
   statusEl.style.display = '';
@@ -1626,11 +1771,11 @@ async function growthAddEvent() {
     statusEl.textContent = '✓ Saved.';
     statusEl.style.color = 'var(--c-green)';
     // Clear fields
-    ['growth-date','growth-label','growth-note','growth-free','growth-paid','growth-api']
+    ['growth-date','growth-label','growth-note']
       .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     setTimeout(() => { statusEl.style.display = 'none'; statusEl.style.color = ''; }, 3000);
-    // Re-fetch
-    await fetchGrowth();
+    // Re-fetch (annotations + lines + overlay)
+    await fetchGrowthAll();
   } catch (e) {
     statusEl.textContent = `Network error: ${e.message}`;
     statusEl.style.color = 'var(--c-red)';
@@ -1653,7 +1798,7 @@ async function growthDeleteEvent(id, btn) {
       if (btn) { btn.disabled = false; btn.textContent = orig; }
       return;
     }
-    await fetchGrowth();
+    await fetchGrowthAll();
   } catch (e) {
     showError(`Delete error: ${e.message}`);
     if (btn) { btn.disabled = false; btn.textContent = orig; }

@@ -268,10 +268,19 @@
       <div class="growth-header">
         <div class="growth-title">Growth signal</div>
         <div class="growth-legend">
-          <span class="growth-legend-item"><span class="growth-legend-swatch" style="background:var(--text-primary)"></span>Free</span>
-          <span class="growth-legend-item"><span class="growth-legend-swatch" style="background:var(--accent)"></span>Paid</span>
-          <span class="growth-legend-item"><span class="growth-legend-swatch" style="background:var(--text-tertiary)"></span>API</span>
+          <span class="growth-legend-item"><span class="growth-legend-swatch" style="background:#C8A96E"></span>Free</span>
+          <span class="growth-legend-item"><span class="growth-legend-swatch" style="background:var(--c-green)"></span>Paid</span>
+          <span class="growth-legend-item"><span class="growth-legend-swatch" style="background:var(--c-amber)"></span>API</span>
+          <span class="growth-legend-item"><span class="growth-legend-swatch growth-legend-swatch-dash" style="background:var(--text-tertiary)"></span>BTC/GBP</span>
         </div>
+      </div>
+
+      <div class="growth-range-toggle" id="growth-range-toggle" role="group" aria-label="Time range">
+        <button class="growth-range-btn" data-range="D" onclick="growthSetRange('D')">D</button>
+        <button class="growth-range-btn" data-range="W" onclick="growthSetRange('W')">W</button>
+        <button class="growth-range-btn active" data-range="M" onclick="growthSetRange('M')">M</button>
+        <button class="growth-range-btn" data-range="Y" onclick="growthSetRange('Y')">Y</button>
+        <span class="growth-range-note" id="growth-range-note"></span>
       </div>
 
       <div class="growth-chart-wrap" style="position:relative;">
@@ -285,26 +294,13 @@
       </div>
 
       <div class="growth-form">
-        <div class="growth-form-title">Add data point / annotation</div>
+        <div class="growth-form-title">Add annotation</div>
+        <p class="growth-form-hint">The three lines auto-populate from Analytics Engine (credentials issued per tier). Annotations mark events on the timeline — date + label + optional note.</p>
         <div class="growth-form-row">
           <div class="growth-form-field">
             <label class="growth-form-label" for="growth-date">Date</label>
             <input type="date" id="growth-date">
           </div>
-          <div class="growth-form-field">
-            <label class="growth-form-label" for="growth-free">Free</label>
-            <input type="number" id="growth-free" min="0" placeholder="—">
-          </div>
-          <div class="growth-form-field">
-            <label class="growth-form-label" for="growth-paid">Paid</label>
-            <input type="number" id="growth-paid" min="0" placeholder="—">
-          </div>
-          <div class="growth-form-field">
-            <label class="growth-form-label" for="growth-api">API</label>
-            <input type="number" id="growth-api" min="0" placeholder="—">
-          </div>
-        </div>
-        <div class="growth-form-row">
           <div class="growth-form-field" style="flex:1;min-width:140px;">
             <label class="growth-form-label" for="growth-label">Label</label>
             <input type="text" id="growth-label" maxlength="60" placeholder="e.g. HN launch">
