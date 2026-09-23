@@ -1562,7 +1562,7 @@ function renderGrowth() {
     const emptyMsg = (snap && snap.ae_available === false)
       ? 'Analytics Engine unavailable — lines cannot be drawn.'
       : 'No credentials issued in this range yet.';
-    const ticks = _growthTickMarks(annotations, xOfT, t0, t1, PAD_T, H, PAD_B);
+    const ticks = _growthTickMarks(annotations, xOfT, t0, t1, PAD_T, H, PAD_B, [], null);
     svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
     svg.innerHTML = ticks +
       `<text x="400" y="64" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="${mutedColor}">${escHtml(emptyMsg)}</text>`;
@@ -1600,7 +1600,7 @@ function renderGrowth() {
   // y-max label (left) for the cumulative axis.
   const yMaxLabel = `<text x="2" y="${(PAD_T + 8).toFixed(1)}" text-anchor="start" font-family="var(--mono)" font-size="9" fill="${mutedColor}">${maxVal.toLocaleString('en-GB')}</text>`;
 
-  const ticks = _growthTickMarks(annotations, xOfT, t0, t1, PAD_T, H, PAD_B);
+  const ticks = _growthTickMarks(annotations, xOfT, t0, t1, PAD_T, H, PAD_B, series, yOf);
 
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   svg.innerHTML = `
@@ -1619,26 +1619,70 @@ function renderGrowth() {
   _renderGrowthList(list, body, annotations);
 }
 
-// Vertical annotation tick marks, mapped by date onto the fixed time x-axis.
-// Annotations outside the current window are skipped.
-function _growthTickMarks(annotations, xOfT, t0, t1, PAD_T, H, PAD_B) {
+// Annotation FLAG markers, mapped by date onto the fixed time x-axis and seated
+// on the Free line (interpolated). A faint guide drops to the x-axis. Hovering a
+// flag shows its tooltip and highlights the matching row in the list below (and
+// vice-versa). Annotations outside the current window are skipped.
+function _growthTickMarks(annotations, xOfT, t0, t1, PAD_T, H, PAD_B, series, yOf) {
+  const baseY = H - PAD_B;
+  const hasLine = Array.isArray(series) && series.length > 0 && typeof yOf === 'function';
+
+  // Interpolate the Free cumulative line's y at time t (so the flag sits on it).
+  function lineY(t) {
+    if (!hasLine) return PAD_T + 18;
+    const s = series;
+    if (t <= s[0].t) return yOf(s[0].free_cum ?? 0);
+    if (t >= s[s.length - 1].t) return yOf(s[s.length - 1].free_cum ?? 0);
+    for (let i = 1; i < s.length; i++) {
+      if (t <= s[i].t) {
+        const a = s[i - 1], b = s[i];
+        const f = (t - a.t) / ((b.t - a.t) || 1);
+        const va = a.free_cum ?? 0, vb = b.free_cum ?? 0;
+        return yOf(va + (vb - va) * f);
+      }
+    }
+    return yOf(s[s.length - 1].free_cum ?? 0);
+  }
+
   return annotations.map(ev => {
     if (!ev.date) return '';
     const t = Math.floor(Date.parse(`${ev.date}T00:00:00Z`) / 1000);
     if (!Number.isFinite(t) || t < t0 || t > t1) return '';
-    const x = xOfT(t).toFixed(1);
-    const shortDate = ev.date.slice(5);
-    return `<line x1="${x}" y1="${PAD_T}" x2="${x}" y2="${H - PAD_B}" stroke="#C8A96E" stroke-width="1" stroke-dasharray="3,3" data-tick-date="${escHtml(ev.date)}" data-tick-label="${escHtml(ev.label ?? '')}" data-tick-note="${escHtml(ev.note ?? '')}" class="growth-tick-line" style="cursor:pointer;"/>
-      <text x="${x}" y="${H - 4}" text-anchor="middle" font-family="var(--mono)" font-size="8" fill="#C8A96E">${escHtml(shortDate)}</text>`;
+    const x  = xOfT(t);
+    const y  = lineY(t);
+    const xs = x.toFixed(1), ys = y.toFixed(1);
+    const poleTop = (y - 17).toFixed(1);
+    // Pennant points LEFT (toward earlier dates) so right-edge flags don't clip.
+    const pennant = `M ${xs} ${poleTop} L ${(x - 12).toFixed(1)} ${(y - 14).toFixed(1)} L ${xs} ${(y - 10).toFixed(1)} Z`;
+    const data = `data-annot-id="${escHtml(ev.id ?? '')}" data-tick-date="${escHtml(ev.date)}" data-tick-label="${escHtml(ev.label ?? '')}" data-tick-note="${escHtml(ev.note ?? '')}"`;
+    return `<g class="growth-flag" ${data} style="cursor:pointer;">
+      <line x1="${xs}" y1="${ys}" x2="${xs}" y2="${baseY}" stroke="#C8A96E" stroke-width="0.75" stroke-dasharray="2,3" opacity="0.45"/>
+      <line class="growth-flag-pole" x1="${xs}" y1="${ys}" x2="${xs}" y2="${poleTop}" stroke="#C8A96E" stroke-width="1.25"/>
+      <path class="growth-flag-pennant" d="${pennant}" fill="#C8A96E"/>
+      <circle cx="${xs}" cy="${ys}" r="3" fill="#C8A96E"/>
+      <circle cx="${xs}" cy="${ys}" r="9" fill="transparent"/>
+    </g>`;
   }).join('');
 }
 
 function _wireGrowthTicks(svg) {
-  svg.querySelectorAll('.growth-tick-line').forEach(line => {
-    line.addEventListener('mouseenter', e => _showGrowthTooltip(e, line));
-    line.addEventListener('mouseleave', _hideGrowthTooltip);
-    line.addEventListener('click',      e => _showGrowthTooltip(e, line));
+  svg.querySelectorAll('.growth-flag').forEach(flag => {
+    const id = flag.getAttribute('data-annot-id');
+    flag.addEventListener('mouseenter', e => { _showGrowthTooltip(e, flag); _setAnnotHi(id, true); });
+    flag.addEventListener('mouseleave', ()  => { _hideGrowthTooltip();      _setAnnotHi(id, false); });
+    flag.addEventListener('click',      e => _showGrowthTooltip(e, flag));
   });
+}
+
+// Two-way highlight between a flag marker and its list row.
+function _setAnnotHi(id, on) {
+  if (!id) return;
+  let sel;
+  try { sel = CSS.escape(id); } catch { sel = id.replace(/"/g, '\\"'); }
+  const row = document.querySelector(`.growth-event-row[data-annot-id="${sel}"]`);
+  if (row) row.classList.toggle('growth-annot-hi', on);
+  document.querySelectorAll(`.growth-flag[data-annot-id="${sel}"]`)
+    .forEach(f => f.classList.toggle('growth-flag-hi', on));
 }
 
 function _renderGrowthList(list, body, annotations) {
@@ -1646,6 +1690,12 @@ function _renderGrowthList(list, body, annotations) {
   if (annotations.length > 0) {
     list.style.display = '';
     body.innerHTML = _buildEventListHtml(annotations);
+    // Row hover → highlight the flag on the chart.
+    body.querySelectorAll('.growth-event-row').forEach(row => {
+      const id = row.getAttribute('data-annot-id');
+      row.addEventListener('mouseenter', () => _setAnnotHi(id, true));
+      row.addEventListener('mouseleave', () => _setAnnotHi(id, false));
+    });
   } else {
     list.style.display = 'none';
   }
@@ -1721,7 +1771,7 @@ async function _renderIssuanceTrend(sparkEl) {
 
 function _buildEventListHtml(events) {
   return [...events].sort((a, b) => a.date < b.date ? 1 : -1).map(ev => `
-    <div class="growth-event-row">
+    <div class="growth-event-row" data-annot-id="${escHtml(ev.id ?? '')}">
       <span class="growth-event-date">${escHtml(ev.date ?? '—')}</span>
       ${ev.label ? `<span class="growth-event-label">${escHtml(ev.label)}</span>` : ''}
       <span class="growth-event-note">${escHtml(ev.note ?? '')}</span>
