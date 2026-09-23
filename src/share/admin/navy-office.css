@@ -1009,9 +1009,10 @@ body {
   color: var(--text-tertiary); margin: 0;
 }
 
-/* B10-1: print just the growth chart — archive it as a one-card PDF.
+/* B10-1: print just the growth chart — archive it as a one landscape page.
    body.printing-growth is toggled by printGrowthChart() around window.print(). */
 @media print {
+  @page { size: A4 landscape; margin: 12mm; }
   body.printing-growth { background: #fff; }
   body.printing-growth * { visibility: hidden !important; }
   body.printing-growth #card-growth,
@@ -1019,10 +1020,28 @@ body {
   body.printing-growth #card-growth {
     position: absolute; left: 0; top: 0; width: 100%;
     box-shadow: none; border: none;
+    page-break-inside: avoid; break-inside: avoid;
   }
+  /* Force dark text so the chart reads on white paper (backgrounds are off). */
+  body.printing-growth #card-growth,
+  body.printing-growth #card-growth * { color: #1A1A1A !important; }
   /* Hide the annotation form and the print button itself in the printout. */
   body.printing-growth #card-growth .growth-form,
   body.printing-growth #card-growth .growth-print-btn { display: none !important; }
+}
+
+/* B10-1: annotation flag markers on the growth line + two-way row highlight. */
+.growth-flag-pole,
+.growth-flag-pennant { transition: stroke-width .1s ease, fill .1s ease; }
+.growth-flag:hover .growth-flag-pole,
+.growth-flag.growth-flag-hi .growth-flag-pole { stroke-width: 2.25; stroke: var(--accent-hover); }
+.growth-flag:hover .growth-flag-pennant,
+.growth-flag.growth-flag-hi .growth-flag-pennant { fill: var(--accent-hover); }
+.growth-event-row { transition: background .12s ease; }
+.growth-event-row.growth-annot-hi {
+  background: rgba(200, 169, 110, 0.14);
+  border-radius: 4px;
+  box-shadow: inset 2px 0 0 var(--accent);
 }
 
 /* Growth annotation tick tooltip */
