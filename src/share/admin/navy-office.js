@@ -445,7 +445,7 @@ const MODAL_DEFS = {
   farming:              { label: 'Farming signal',            plain: 'Credential-to-upload ratio (normal: 0.8–1.2 · alarm: >3.0)' },
   lightning:            { label: 'Lightning settlement',      plain: 'Sats vs fiat payment mix' },
   'kv-monitor':         { label: 'KV quota monitor',         plain: 'Cloudflare Workers KV free-plan usage' },
-  'api-mcp':            { label: 'API & MCP',                plain: 'API keys and request volumes' },
+  'api-mcp':            { label: 'Requests (all tiers)',                plain: 'API keys and request volumes' },
 };
 
 let _modalTrigger = null;
