@@ -1,5 +1,14 @@
 /* ─── navy-office.js — refueler-share · Navy Office admin ───────────────────
- * Last updated: Share-Dash-3
+ * Last updated: Share-B10-2
+ *
+ * Share-B10-2 changes (this file):
+ *   (a) Growth Signal — Pro Bono colour: gold #C8A96E → blue #4A90D9 (carbon) / #2E6DA8 (paper).
+ *   (b) Growth Signal — x-axis: 3 date labels (start, mid, end) in PAD_B band; faint baseline.
+ *   (c) Growth Signal — y-axis: 3 gridlines (0, 50%, max) with count labels; no more lone floating value.
+ *   (d) Growth Signal — annotation flags: colour follows Pro Bono blue (was hardcoded gold).
+ *   (e) Growth Signal — tooltip: date removed from hover body (redundant with x-axis); right-edge clamp.
+ *   (f) Credential Issuances modal subtitle: display names (Pro Bono · Citizen · Sovereign · API/MCP).
+ *   (g) Issuances total now includes api tier throughout (renderAeMetrics, renderFarming, modal farming, smoke test).
  *
  * Share-Dash-3 changes (this file):
  *   (1) Rename: dashboard → navy-office throughout. document.title set to
@@ -247,7 +256,7 @@ function renderMetrics(d) {
 // ── Render: /admin/ae-metrics ──────────────────────────────────────────────
 function renderAeMetrics(d) {
   const iss      = d.credential_issuances_by_tier;
-  const issTotal = iss ? (iss.free ?? 0) + (iss.creative ?? 0) + (iss.max ?? 0) : null;
+  const issTotal = iss ? (iss.free ?? 0) + (iss.creative ?? 0) + (iss.max ?? 0) + (iss.api ?? 0) : null;
   const issEl    = document.getElementById('snap-issuances');
   issEl.textContent = issTotal !== null ? issTotal : 'n/a';
   issEl.className = 'sm-value';
@@ -388,7 +397,7 @@ function renderFarming(m, ae) {
   if (!el) return;
 
   const iss    = ae?.credential_issuances_by_tier;
-  const issued = iss ? (iss.free ?? 0) + (iss.creative ?? 0) + (iss.max ?? 0) : null;
+  const issued = iss ? (iss.free ?? 0) + (iss.creative ?? 0) + (iss.max ?? 0) + (iss.api ?? 0) : null;
 
   if (issued === null || issued === 0) {
     el.textContent = 'n/a'; el.className = 'sm-value'; return;
@@ -511,10 +520,12 @@ function openModal(key, triggerEl) {
     }
     case 'issuances': {
       const iss   = ae.credential_issuances_by_tier;
-      const total = iss ? (iss.free ?? 0) + (iss.creative ?? 0) + (iss.max ?? 0) : null;
+      const total = iss ? (iss.free ?? 0) + (iss.creative ?? 0) + (iss.max ?? 0) + (iss.api ?? 0) : null;
       if (total !== null) { value = String(total); }
       else { value = 'n/a'; isNA = true; }
-      sub = iss ? `free ${iss.free ?? 0} · creative ${iss.creative ?? 0} · max ${iss.max ?? 0}` : 'No AE data';
+      sub = iss
+        ? `Pro Bono ${iss.free ?? 0} · Citizen ${iss.creative ?? 0} · Sovereign ${iss.max ?? 0} · API/MCP ${iss.api ?? 0}`
+        : 'No AE data';
       // B10-1: replace the placeholder Trend stub with a real daily line graph.
       const sparkEl = document.getElementById('modal-sparkline');
       if (sparkEl) {
@@ -637,7 +648,7 @@ function openModal(key, triggerEl) {
 
     case 'farming': {
       const farmIss      = ae.credential_issuances_by_tier;
-      const farmIssued   = farmIss ? (farmIss.free ?? 0) + (farmIss.creative ?? 0) + (farmIss.max ?? 0) : null;
+      const farmIssued   = farmIss ? (farmIss.free ?? 0) + (farmIss.creative ?? 0) + (farmIss.max ?? 0) + (farmIss.api ?? 0) : null;
       const farmCompleted = ae.uploads_completed_24h ?? farmIssued;
       const ratio        = farmIssued !== null && farmCompleted > 0 ? farmIssued / farmCompleted : null;
       if (ratio !== null) {
@@ -1152,7 +1163,7 @@ window.smokeTest = async function() {
     fetch(`${WORKER}/admin/ae-metrics`, { headers: { 'X-Admin-Key': adminKey } }).then(r => r.json()),
   ]);
   const iss          = ae.credential_issuances_by_tier;
-  const farmIssued   = iss ? (iss.free ?? 0) + (iss.creative ?? 0) + (iss.max ?? 0) : null;
+  const farmIssued   = iss ? (iss.free ?? 0) + (iss.creative ?? 0) + (iss.max ?? 0) + (iss.api ?? 0) : null;
   const farmCompleted = ae.uploads_completed_24h ?? farmIssued;
   const farmRatio    = farmIssued !== null && farmCompleted > 0 ? farmIssued / farmCompleted : null;
   const checks = [
@@ -1551,21 +1562,29 @@ function renderGrowth() {
 
   // Theme-aware colours (SVG strokes can't resolve CSS vars).
   const isPaper    = document.documentElement.getAttribute('data-theme') !== 'carbon';
-  const goldColor  = '#C8A96E';                          // Free
+  const blueColor  = isPaper ? '#2E6DA8' : '#4A90D9';    // Pro Bono (free tier)
   const greenColor = isPaper ? '#1C7C4A' : '#3DCA7A';    // Paid
   const amberColor = isPaper ? '#B85C00' : '#E8A23A';    // API
-  const mutedColor = isPaper ? '#9A948D' : '#5A5751';    // BTC overlay
+  const mutedColor = isPaper ? '#9A948D' : '#5A5751';    // BTC overlay / axes
   const bgStroke   = isPaper ? '#E8E2D8' : '#1A1A1A';
+  const axisColor  = isPaper ? '#7A746D' : '#6A675F';
 
-  // Empty / degraded state — no AE line data. Still draw annotation ticks.
+  // Empty / degraded state — no AE line data. Still draw annotation ticks + axes.
   if (series.length === 0) {
     const emptyMsg = (snap && snap.ae_available === false)
       ? 'Analytics Engine unavailable — lines cannot be drawn.'
       : 'No credentials issued in this range yet.';
     const ticks = _growthTickMarks(annotations, xOfT, t0, t1, PAD_T, H, PAD_B, [], null);
+    const tMidE = (t0 + t1) / 2;
+    const dfmtE = t => new Date(t * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    const xAxisYE = (H - 6).toFixed(1);
     svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
     svg.innerHTML = ticks +
-      `<text x="400" y="64" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="${mutedColor}">${escHtml(emptyMsg)}</text>`;
+      `<line x1="0" y1="${H - PAD_B}" x2="${W}" y2="${H - PAD_B}" stroke="${mutedColor}" stroke-width="0.5" opacity="0.3"/>` +
+      `<text x="2" y="${xAxisYE}" text-anchor="start" font-family="var(--mono)" font-size="8" fill="${mutedColor}" opacity="0.7">${dfmtE(t0)}</text>` +
+      `<text x="${(W / 2).toFixed(1)}" y="${xAxisYE}" text-anchor="middle" font-family="var(--mono)" font-size="8" fill="${mutedColor}" opacity="0.7">${dfmtE(tMidE)}</text>` +
+      `<text x="${(W - 2).toFixed(1)}" y="${xAxisYE}" text-anchor="end" font-family="var(--mono)" font-size="8" fill="${mutedColor}" opacity="0.7">${dfmtE(t1)}</text>` +
+      `<text x="400" y="56" text-anchor="middle" font-family="var(--mono)" font-size="11" fill="${mutedColor}">${escHtml(emptyMsg)}</text>`;
     _wireGrowthTicks(svg);
     _renderGrowthList(list, body, annotations);
     return;
@@ -1597,22 +1616,43 @@ function renderGrowth() {
       <text x="${W - 4}" y="${(PAD_T + chartH * 0.10 - 4).toFixed(1)}" text-anchor="end" font-family="var(--mono)" font-size="9" fill="${mutedColor}">BTC ${escHtml(priceStr)}${escHtml(staleTag)}</text>`;
   }
 
-  // y-max label (left) for the cumulative axis.
-  const yMaxLabel = `<text x="2" y="${(PAD_T + 8).toFixed(1)}" text-anchor="start" font-family="var(--mono)" font-size="9" fill="${mutedColor}">${maxVal.toLocaleString('en-GB')}</text>`;
+  // Y-axis: 3 gridlines at 0, 50%, max with labels (inside left edge).
+  // PAD_B = 20 so the x-axis label row sits in the bottom 20px.
+  const yGridVals = [...new Set([0, Math.round(maxVal / 2), maxVal])];
+  const yGrid = yGridVals.map(v => {
+    const gy = yOf(v).toFixed(1);
+    const labelStr = v === 0 ? '0' : v >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(v);
+    return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${mutedColor}" stroke-width="0.5" stroke-opacity="0.18"/>` +
+           `<text x="2" y="${(parseFloat(gy) - 2).toFixed(1)}" text-anchor="start" font-family="var(--mono)" font-size="8" fill="${mutedColor}" opacity="0.7">${labelStr}</text>`;
+  }).join('');
+
+  // X-axis: 3 date labels (start, mid, end) seated in the PAD_B band.
+  const tMid = (t0 + t1) / 2;
+  const dfmt = t => new Date(t * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  const xAxisY = (H - 6).toFixed(1);  // bottom of viewBox
+  const xLabels =
+    `<text x="2" y="${xAxisY}" text-anchor="start" font-family="var(--mono)" font-size="8" fill="${mutedColor}" opacity="0.7">${dfmt(t0)}</text>` +
+    `<text x="${(W / 2).toFixed(1)}" y="${xAxisY}" text-anchor="middle" font-family="var(--mono)" font-size="8" fill="${mutedColor}" opacity="0.7">${dfmt(tMid)}</text>` +
+    `<text x="${(W - 2).toFixed(1)}" y="${xAxisY}" text-anchor="end" font-family="var(--mono)" font-size="8" fill="${mutedColor}" opacity="0.7">${dfmt(t1)}</text>`;
+
+  // Faint x-axis baseline at y = H - PAD_B.
+  const xBaseline = `<line x1="0" y1="${H - PAD_B}" x2="${W}" y2="${H - PAD_B}" stroke="${axisColor}" stroke-width="0.5" opacity="0.3"/>`;
 
   const ticks = _growthTickMarks(annotations, xOfT, t0, t1, PAD_T, H, PAD_B, series, yOf);
 
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   svg.innerHTML = `
+    ${yGrid}
+    ${xBaseline}
+    ${xLabels}
     ${btcOverlay}
     ${ticks}
-    <polyline points="${polyPoints('free_cum')}" fill="none" stroke="${goldColor}"  stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <polyline points="${polyPoints('free_cum')}" fill="none" stroke="${blueColor}"  stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
     <polyline points="${polyPoints('paid_cum')}" fill="none" stroke="${greenColor}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
     <polyline points="${polyPoints('api_cum')}"  fill="none" stroke="${amberColor}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
-    ${lastDot('free_cum', goldColor)}
+    ${lastDot('free_cum', blueColor)}
     ${lastDot('paid_cum', greenColor)}
     ${lastDot('api_cum',  amberColor)}
-    ${yMaxLabel}
   `;
 
   _wireGrowthTicks(svg);
@@ -1655,11 +1695,13 @@ function _growthTickMarks(annotations, xOfT, t0, t1, PAD_T, H, PAD_B, series, yO
     // Pennant points LEFT (toward earlier dates) so right-edge flags don't clip.
     const pennant = `M ${xs} ${poleTop} L ${(x - 12).toFixed(1)} ${(y - 14).toFixed(1)} L ${xs} ${(y - 10).toFixed(1)} Z`;
     const data = `data-annot-id="${escHtml(ev.id ?? '')}" data-tick-date="${escHtml(ev.date)}" data-tick-label="${escHtml(ev.label ?? '')}" data-tick-note="${escHtml(ev.note ?? '')}"`;
+    // Flag colour matches the Pro Bono (free) line — blue.
+    const flagColor = document.documentElement.getAttribute('data-theme') !== 'carbon' ? '#2E6DA8' : '#4A90D9';
     return `<g class="growth-flag" ${data} style="cursor:pointer;">
-      <line x1="${xs}" y1="${ys}" x2="${xs}" y2="${baseY}" stroke="#C8A96E" stroke-width="0.75" stroke-dasharray="2,3" opacity="0.45"/>
-      <line class="growth-flag-pole" x1="${xs}" y1="${ys}" x2="${xs}" y2="${poleTop}" stroke="#C8A96E" stroke-width="1.25"/>
-      <path class="growth-flag-pennant" d="${pennant}" fill="#C8A96E"/>
-      <circle cx="${xs}" cy="${ys}" r="3" fill="#C8A96E"/>
+      <line x1="${xs}" y1="${ys}" x2="${xs}" y2="${baseY}" stroke="${flagColor}" stroke-width="0.75" stroke-dasharray="2,3" opacity="0.45"/>
+      <line class="growth-flag-pole" x1="${xs}" y1="${ys}" x2="${xs}" y2="${poleTop}" stroke="${flagColor}" stroke-width="1.25"/>
+      <path class="growth-flag-pennant" d="${pennant}" fill="${flagColor}"/>
+      <circle cx="${xs}" cy="${ys}" r="3" fill="${flagColor}"/>
       <circle cx="${xs}" cy="${ys}" r="9" fill="transparent"/>
     </g>`;
   }).join('');
@@ -1785,14 +1827,16 @@ function _showGrowthTooltip(e, line) {
   if (!tip) return;
   const label = line.dataset.tickLabel || '';
   const note  = line.dataset.tickNote  || '';
-  const date  = line.dataset.tickDate  || '';
-  tip.textContent = [date, label, note].filter(Boolean).join('\n');
+  // Date is shown as x-axis annotation — tooltip shows label + note only.
+  tip.textContent = [label, note].filter(Boolean).join('\n') || line.dataset.tickDate || '';
   tip.style.display = 'block';
-  // Position relative to growth-chart-wrap
+  // Position relative to growth-chart-wrap, clamped so right edge doesn't clip.
   const wrap = line.closest('.growth-chart-wrap') ?? document.body;
   const wRect = wrap.getBoundingClientRect();
-  const x = e.clientX - wRect.left + 10;
-  const y = e.clientY - wRect.top  - 8;
+  const tipW  = tip.offsetWidth || 180;
+  let x = e.clientX - wRect.left + 12;
+  if (x + tipW > wRect.width - 4) x = e.clientX - wRect.left - tipW - 8;
+  const y = Math.max(2, e.clientY - wRect.top - 28);
   tip.style.left = `${x}px`;
   tip.style.top  = `${y}px`;
 }
