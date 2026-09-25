@@ -152,7 +152,7 @@ export async function enterDownloadMode(detected, domRefs, state, helpers) {
   const isPassphraseProtected = !!meta.passphrase_protected;
   if (isPassphraseProtected) rcPassphraseRow.classList.remove('hidden');
 
-  const willSelfDestruct     = !!meta.pending_destruction;
+  const willSelfDestruct     = meta.pending_destruction !== null && meta.pending_destruction !== undefined;
   const availableFromUnixRx  = meta.available_from_timestamp  || null;
   const availableUntilUnixRx = meta.available_until_timestamp || null;
 
@@ -287,9 +287,9 @@ async function _parse409Body(res) {
 function _showIntegrityFailure(domRefs, reportError, uuid, chunkIdx) {
   const { downloadCard, dlStageTag, dlPct, dlBar } = domRefs;
 
-  // Stop the progress bar where it is — don't snap to 100%
-  dlPct.textContent  = '—';
-  dlBar.style.width  = '0%';
+  // Hide progress entirely — no stray percentage/bar alongside a failure state.
+  dlPct.classList.add('hidden');
+  dlBar.parentElement.classList.add('hidden');
   dlStageTag.textContent = 'Transfer failed';
   downloadCard.classList.remove('hidden');
 
@@ -348,6 +348,8 @@ async function _startDownloadStream(uuid, meta, fileHandle, fileName, willSelfDe
   if (!totalChunks || totalChunks < 1) { _showDownloadError('Transfer metadata is incomplete. Please try again.', domRefs); return; }
 
   downloadCard.classList.remove('hidden');
+  dlPct.classList.remove('hidden');
+  dlBar.parentElement.classList.remove('hidden');
   dlStageTag.textContent = 'Downloading';
   dlPct.textContent = '0%';
   dlBar.style.width = '0%';
@@ -488,6 +490,8 @@ async function _startDownload(uuid, meta, fileName, willSelfDestruct, hasOts, se
   if (!totalChunks || totalChunks < 1) { _showDownloadError('Transfer metadata is incomplete. Please try again.', domRefs); return; }
 
   downloadCard.classList.remove('hidden');
+  dlPct.classList.remove('hidden');
+  dlBar.parentElement.classList.remove('hidden');
   dlStageTag.textContent = 'Downloading';
   dlPct.textContent = '0%';
   dlBar.style.width = '0%';
@@ -694,8 +698,15 @@ async function _showConfirmGate(uuid, isPassphrase, domRefs, state) {
 }
 
 function _showDownloadError(msg, domRefs) {
-  domRefs.downloadCard.classList.remove('hidden');
-  domRefs.dlStageTag.textContent = `Error — ${msg}`;
+  const { downloadCard, dlStageTag, dlPct, dlBar } = domRefs;
+  downloadCard.classList.remove('hidden');
+  dlStageTag.textContent = `Error — ${msg}`;
+  // Hide progress entirely on error (DAD-ERROR-TEXT, Share-B10-3) — no stray "0%".
+  // #dl-pct is a sibling span in the same flex-row as #dl-stage-tag; #dl-bar's
+  // parent (.progress-bar-wrap) is the separate row underneath. Hiding both
+  // matches the pattern _showIntegrityFailure now also uses.
+  dlPct.classList.add('hidden');
+  dlBar.parentElement.classList.add('hidden');
 }
 
 function _logReceiverEvent(event, variant) {
