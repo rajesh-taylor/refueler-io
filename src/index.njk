@@ -1,6 +1,6 @@
 ---
-title: "Refueler — Your transaction is nobody else's business."
-description: "Privacy infrastructure. Encrypted transfers, private Bitcoin explorer, and Lightning payments."
+title: "Refueler — Privacy infrastructure, London"
+description: "Privacy infrastructure from London. Share is live; Legend is in build; Pass and Merchants are coming."
 canonical: "https://refueler.io/"
 permalink: /index.html
 ---
@@ -10,7 +10,7 @@ permalink: /index.html
   {% include "head.njk" %}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/home.css">
 </head>
 
@@ -21,29 +21,53 @@ permalink: /index.html
   <main>
     <div class="home-hero">
 
-      <p class="home-overline"><span class="home-overline-rule"></span>Privacy Infrastructure · London</p>
+      <div class="home-top">
 
-      <h1 class="home-headline">Your transaction<br>is nobody else's<br>business.</h1>
+        <div>
+          <p class="home-overline"><span class="home-overline-rule"></span>London</p>
+          <h1 class="home-headline">Privacy<br>infrastructure.</h1>
+        </div>
 
-      <div class="home-subhead-band">
-        <p class="home-subhead">Privacy isn't a feature. It's the architecture.</p>
+        <div class="home-code">
+          <div class="home-code-head">
+            <span>refueler_send_file</span>
+            <span class="home-status home-status-build">MCP · In build</span>
+          </div>
+<pre><span class="c">// encrypted on your machine; only sealed data leaves</span>
+{
+  <span class="k">"file_path"</span>: "./board-pack.pdf",
+  <span class="k">"destroy_after_download"</span>: true
+}
+<span class="c">// → share_url · expires_at · cost_credits</span></pre>
+          <div class="home-code-cap">Share, called by an AI agent. Not yet released.</div>
+        </div>
+
       </div>
 
       <div class="home-caps">
 
         <div class="home-cap">
-          <span class="home-cap-label">Encrypted transfers</span>
-          <p class="home-cap-desc">The server is blind, so is the till.</p>
+          <span class="home-cap-label">Share</span>
+          <p class="home-cap-desc">Encrypted file transfer.</p>
+          <div class="home-cap-status"><span class="home-status home-status-live">Web · Live</span><span class="home-status home-status-build">MCP · In build</span></div>
         </div>
 
         <div class="home-cap">
-          <span class="home-cap-label">Bitcoin explorer</span>
-          <p class="home-cap-desc">Your search history is showing.</p>
+          <span class="home-cap-label">Legend</span>
+          <p class="home-cap-desc">Private Bitcoin lookups.</p>
+          <div class="home-cap-status"><span class="home-status home-status-build">In build</span></div>
         </div>
 
         <div class="home-cap">
-          <span class="home-cap-label">Lightning payments</span>
-          <p class="home-cap-desc">Tap and go. Sats or card, your call.</p>
+          <span class="home-cap-label">Pass</span>
+          <p class="home-cap-desc">Tickets that don't map who you know.</p>
+          <div class="home-cap-status"><span class="home-status home-status-soon">Coming</span></div>
+        </div>
+
+        <div class="home-cap">
+          <span class="home-cap-label">Merchants</span>
+          <p class="home-cap-desc">Rewards and venue hire for independents.</p>
+          <div class="home-cap-status"><span class="home-status home-status-soon">Coming</span></div>
         </div>
 
       </div>

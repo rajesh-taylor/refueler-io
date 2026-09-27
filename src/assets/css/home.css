@@ -1,13 +1,21 @@
 /* home.css — Refueler homepage layout
    All classes prefixed home- to avoid any collision with global.css.
    No :root block. All tokens from global.css via head.njk.
-   Headline: Cormorant Garamond 600 (loaded in index.njk)
+   Headline: Source Serif 4 300 (loaded in index.njk)
    ----------------------------------------------------------------- */
 
 .home-hero {
   max-width: 1200px;
   margin: 0 auto;
   padding: clamp(56px, 7vh, 96px) clamp(1.5rem, 4vw, 3.5rem) 0;
+}
+
+/* ── Top: headline left, code box right ────────────────────────────── */
+.home-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 500px);
+  gap: clamp(2rem, 5vw, 4.5rem);
+  align-items: center;
 }
 
 /* ── Overline ──────────────────────────────────────────────────────── */
@@ -34,50 +42,92 @@
 
 /* ── Headline ──────────────────────────────────────────────────────── */
 .home-headline {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: clamp(3.5rem, 7vw, 6.5rem);
-  font-weight: 600;
-  line-height: 0.98;
-  letter-spacing: -0.01em;
+  font-family: var(--font-serif);
+  font-size: clamp(2.5rem, 5.2vw, 5rem);
+  font-weight: 300;
+  line-height: 1.04;
+  letter-spacing: -0.015em;
   color: var(--fg);
-  margin-bottom: clamp(40px, 5vh, 64px);
 }
 
-/* ── Subhead band — div wrapper avoids p tag reset issues ──────────── */
-.home-subhead-band {
-  padding-bottom: clamp(48px, 6vh, 80px);
-  border-bottom: 0.5px solid var(--border);
+/* ── Code box — Carbon in both themes ──────────────────────────────── */
+.home-code {
+  background: #211F1C;
+  color: #F5F0E8;
+  border: 0.5px solid rgba(245,240,232,0.09);
+  border-radius: var(--radius-card);
+  overflow: hidden;
 }
 
-.home-subhead {
-  font-family: 'DM Sans', sans-serif !important;
-  font-size: clamp(1.125rem, 1.75vw, 1.5rem) !important;
-  font-weight: 300 !important;
-  line-height: 1.5 !important;
-  letter-spacing: -0.01em !important;
-  color: var(--fg) !important;
-  max-width: 640px;
+.home-code-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+  border-bottom: 0.5px solid rgba(245,240,232,0.09);
+  font-family: var(--font-mono);
+  font-size: 12px;
 }
 
-/* ── Capability block ──────────────────────────────────────────────── */
+.home-code pre {
+  padding: 16px;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.75;
+  color: #F5F0E8;
+}
+
+.home-code .c { color: #8C877F; }
+.home-code .k { color: #C8A96E; }
+
+.home-code-cap {
+  padding: 11px 16px;
+  border-top: 0.5px solid rgba(245,240,232,0.09);
+  font-size: 13px;
+  font-weight: 400;
+  color: #8C877F;
+}
+
+/* ── Status tags ───────────────────────────────────────────────────── */
+.home-status {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.home-status-live  { color: color-mix(in srgb, var(--success) 75%, var(--fg)); background: color-mix(in srgb, var(--success) 12%, transparent); }
+.home-status-build { color: var(--warn); background: color-mix(in srgb, var(--warn) 13%, transparent); }
+.home-code .home-status-build { color: #C8943A; background: rgba(200,148,58,0.13); }
+.home-status-soon  { color: var(--fg-muted); border: 0.5px solid var(--border); }
+
+/* ── Product block ─────────────────────────────────────────────────── */
 .home-caps {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: clamp(40px, 5vh, 64px);
+  border-top: 0.5px solid var(--border);
 }
 
 .home-cap {
-  padding: 40px 0;
-  padding-right: clamp(1.5rem, 3vw, 3rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 40px clamp(1.25rem, 2.5vw, 2.5rem);
   border-right: 0.5px solid var(--border);
 }
+
+.home-cap:first-child { padding-left: 0; }
 
 .home-cap:last-child {
   border-right: none;
   padding-right: 0;
-}
-
-.home-cap + .home-cap {
-  padding-left: clamp(1.5rem, 3vw, 3rem);
 }
 
 .home-cap-label {
@@ -87,7 +137,6 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--fg-muted);
-  margin-bottom: 1rem;
   display: block;
 }
 
@@ -99,18 +148,36 @@
   color: var(--fg) !important;
 }
 
+.home-cap-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 0.25rem;
+}
+
 /* ── Responsive ────────────────────────────────────────────────────── */
-@media (max-width: 900px) {
-  .home-subhead {
-    max-width: 100%;
+@media (max-width: 1100px) {
+  .home-top {
+    grid-template-columns: 1fr;
+    gap: 48px;
   }
 
-  .home-caps {
-    grid-template-columns: 1fr;
-  }
+  .home-code { max-width: 560px; }
+}
+
+@media (max-width: 1000px) {
+  .home-caps { grid-template-columns: repeat(2, 1fr); }
+  .home-cap:nth-child(2) { border-right: none; padding-right: 0; }
+  .home-cap:nth-child(3) { padding-left: 0; }
+  .home-cap:nth-child(-n+2) { border-bottom: 0.5px solid var(--border); }
+}
+
+@media (max-width: 560px) {
+  .home-caps { grid-template-columns: 1fr; }
 
   .home-cap,
-  .home-cap + .home-cap {
+  .home-cap:nth-child(n) {
     padding: 28px 0;
     border-right: none;
     border-bottom: 0.5px solid var(--border);
@@ -119,5 +186,10 @@
   .home-cap:last-child {
     border-bottom: none;
     padding-bottom: 0;
+  }
+
+  .home-code pre {
+    font-size: 12px;
+    white-space: pre-wrap;
   }
 }
