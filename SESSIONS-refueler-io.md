@@ -73,6 +73,24 @@ Buffer is untouchable until a block overruns.
 
 ---
 
+### Notes-List-1 (commit 10bc0b6) — date: 2026-09-27
+**Scope:** One source list for Notes articles; `/notes/latest.json` for the Share receiver card (refueler-share build list N-1, R-10/R-11).
+
+**Shipped:**
+- Each article's front matter now carries `cardTitle`, `summary`, `topics`, `date`, `readTime`. `eleventy.config.js` builds `collections.notes` from `src/notes/*/index.njk`, newest first (+ `monthYear`, `isoDate` filters).
+- `src/notes/index.njk` renders cards from the collection. Same markup; card summary is now the approved line (A1): "If a legal order reached your file transfer service tomorrow, what would it hand over? Eight services compared."
+- `src/notes/latest.json.njk` → `/notes/latest.json` (`notes-latest.v1`: title, summary, url, date). `src/_headers`: `Cache-Control: public, max-age=300`. Pages serves it as `application/json` by default.
+- Subpoena article dated 2026-07-28 (first commit of the article).
+- Verified live: latest.json parses with the right title, `content-type: application/json`, `max-age=300`, no cookies; /notes/ card correct.
+
+**To publish a new article:** add `src/notes/<slug>/index.njk` with the five fields above. A newer `date` puts it first on /notes/ and in latest.json. No other step.
+
+**Carry-forward:**
+- The article's own header (topics, "July 2026 · 6 min read") is still hand-written in each article. Update it alongside `readTime`/`date` when rewriting, or render it from front matter in a later small session.
+- Share receiver card that reads latest.json: Share-Receiver-2 (refueler-share, N-2 item 9).
+
+---
+
 ## Complete session plan — all remaining work
 
 Session counts are estimates. Planning sessions uncounted.
