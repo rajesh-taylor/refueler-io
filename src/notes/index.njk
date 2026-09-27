@@ -27,23 +27,26 @@ permalink: /notes/index.html
   <div class="notes-grid-wrap">
     <div class="notes-grid">
 
-      <!-- Note 1 — What a subpoena gets -->
-      <a class="note-card" href="/notes/what-a-subpoena-gets/">
+      {#- Cards come from each article's front matter (collections.notes, newest first) #}
+      {%- for note in collections.notes %}
+      <a class="note-card" href="{{ note.url }}">
         <div class="card-tags">
-          <span class="card-tag">Privacy</span>
+          {%- for topic in note.data.topics %}
+          {%- if not loop.first %}
           <span class="card-dot"></span>
-          <span class="card-tag">Legal</span>
-          <span class="card-dot"></span>
-          <span class="card-tag">File transfer</span>
+          {%- endif %}
+          <span class="card-tag">{{ topic }}</span>
+          {%- endfor %}
         </div>
-        <h2 class="card-title">What a subpoena gets from eight file transfer services</h2>
-        <p class="card-description">If someone served a valid legal order to your provider tomorrow, what would they actually hand over?</p>
+        <h2 class="card-title">{{ note.data.cardTitle }}</h2>
+        <p class="card-description">{{ note.data.summary }}</p>
         <div class="card-meta">
-          <span>July 2026</span>
+          <span>{{ note.date | monthYear }}</span>
           <span class="card-dot"></span>
-          <span>6 min</span>
+          <span>{{ note.data.readTime }}</span>
         </div>
       </a>
+      {%- endfor %}
 
     </div>
   </div>

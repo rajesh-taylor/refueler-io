@@ -1,0 +1,12 @@
+---
+permalink: /notes/latest.json
+eleventyExcludeFromCollections: true
+---
+{%- set note = collections.notes | first -%}
+{
+  "schema": "notes-latest.v1",
+  "title": {{ note.data.cardTitle | dump | safe }},
+  "summary": {{ note.data.summary | dump | safe }},
+  "url": {{ ("https://refueler.io" + note.url) | dump | safe }},
+  "date": {{ note.date | isoDate | dump | safe }}
+}

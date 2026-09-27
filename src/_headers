@@ -1,3 +1,9 @@
 /share/assets/blake3/*
   Access-Control-Allow-Origin: *
   X-Content-Type-Options: nosniff
+
+# Newest Notes article, read by the Share receiver card. Short cache so a
+# new article shows within minutes. Pages serves .json as application/json.
+/notes/latest.json
+  Cache-Control: public, max-age=300
+  X-Content-Type-Options: nosniff

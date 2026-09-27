@@ -31,6 +31,16 @@ module.exports = function (eleventyConfig) {
 
   eleventyConfig.addWatchTarget("src/_includes/");
 
+  // Notes — every src/notes/<slug>/index.njk is an article, newest first.
+  // Feeds the /notes/ cards and /notes/latest.json (Share receiver card).
+  eleventyConfig.addCollection("notes", (api) =>
+    api.getFilteredByGlob("src/notes/*/index.njk").sort((a, b) => b.date - a.date)
+  );
+  eleventyConfig.addFilter("monthYear", (d) =>
+    d.toLocaleDateString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" })
+  );
+  eleventyConfig.addFilter("isoDate", (d) => d.toISOString().slice(0, 10));
+
   return {
     dir: {
       input:    "src",
