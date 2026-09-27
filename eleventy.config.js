@@ -1,4 +1,16 @@
+const crypto = require("crypto");
+const fs = require("fs");
+const path = require("path");
+
 module.exports = function (eleventyConfig) {
+  // Cache-busting: "/assets/css/home.css" -> "/assets/css/home.css?v=3f9a1c2e"
+  // The hash changes whenever the file's contents change, so browsers fetch the new CSS.
+  eleventyConfig.addFilter("cssv", (url) => {
+    const file = path.join(__dirname, "src", url);
+    const hash = crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex").slice(0, 8);
+    return `${url}?v=${hash}`;
+  });
+
   // Static assets — copied verbatim to _site/
   eleventyConfig.addPassthroughCopy("src/assets");
   eleventyConfig.addPassthroughCopy("src/analytics.js");

@@ -9,8 +9,8 @@ stripeThemeRemount: true
 <html lang="en">
 <head>
 {% set extraHead %}
-<link rel="stylesheet" href="/share/assets/share-tokens.css">
-<link rel="stylesheet" href="/share/assets/plans.css">
+<link rel="stylesheet" href="{{ '/share/assets/share-tokens.css' | cssv }}">
+<link rel="stylesheet" href="{{ '/share/assets/plans.css' | cssv }}">
 <script src="https://js.stripe.com/v3/"></script>
 {% endset %}
 {% include "head.njk" %}

@@ -8,8 +8,8 @@ activePage: ""
 <html lang="en">
 <head>
 {% set extraHead %}
-<link rel="stylesheet" href="/share/assets/share-tokens.css">
-<link rel="stylesheet" href="/share/assets/status.css">
+<link rel="stylesheet" href="{{ '/share/assets/share-tokens.css' | cssv }}">
+<link rel="stylesheet" href="{{ '/share/assets/status.css' | cssv }}">
 {% endset %}
 {% include "head.njk" %}
 </head>
