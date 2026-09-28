@@ -456,4 +456,6 @@ input[type="email"]:focus { border-color: var(--fg-muted); }
   .site-header { padding: 0 24px; }
   .site-nav a:not(.active) { display: none; }
   .site-nav { gap: 0.75rem; }
+  /* The wordmark already names the section ("Refueler / Legend"): don't repeat it (F-15) */
+  .site-header.has-wordmark-section .site-nav a.active { display: none; }
 }
