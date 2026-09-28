@@ -5,8 +5,8 @@
    Blueprint: CSS-3-BLUEPRINT.md (CSS-4 implementation)
    Theme detection: document.documentElement.dataset.theme === 'carbon'
    Theme persistence: cookie rs-theme scoped to .refueler.io (30-day rolling, SameSite=Lax)
-   Web default: Paper (getCookie('rs-theme') || 'paper')
-   Legend template only: Carbon default (getCookie('rs-theme') || 'carbon')
+   Web default: Carbon, whole site (getCookie('rs-theme') || 'carbon'; R-13, Share-Cleanup-1)
+   :root below holds the Paper values; [data-theme="carbon"] overrides them
    Abolished: rfTheme · html.carbon-mode · setTheme() · localStorage for theme
    ─────────────────────────────────────────────────────────────────────────── */
 

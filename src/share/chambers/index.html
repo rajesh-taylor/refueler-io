@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="paper">
+<html lang="en" data-theme="carbon">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -257,7 +257,7 @@
     const PAGE_SIZE = 20;
 
     function getCookie(name) {
-      const m = document.cookie.match('(?:^|;)\s*' + name + '=([^;]*)');
+      const m = document.cookie.match('(?:^|;)\\s*' + name + '=([^;]*)');
       return m ? decodeURIComponent(m[1]) : null;
     }
     function setThemeCookie(theme) {
@@ -265,7 +265,7 @@
       document.cookie = `rs-theme=${theme};expires=${exp};path=/;domain=.refueler.io;SameSite=Lax`;
     }
     (function initTheme() {
-      const saved = getCookie('rs-theme') || 'paper';
+      const saved = getCookie('rs-theme') || 'carbon';
       document.documentElement.dataset.theme = saved;
       const btn = document.getElementById('theme-toggle-btn');
       if (btn) btn.textContent = saved === 'carbon' ? '\u25CB' : '\u263D';

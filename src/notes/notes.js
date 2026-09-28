@@ -1,43 +1,9 @@
 /* ─────────────────────────────────────────────────────────────────────────────
    notes.js — Refueler /notes/ shared scripts
-   Theme: rs-theme cookie scoped to .refueler.io — same as head.njk and global
+   Theme: none here. head.njk applies it and owns toggleTheme() (Share-Cleanup-1:
+   the copy that lived here replaced the site toggle and never updated the pill).
    Modal: focus-trapped, Escape-dismissible, click-outside-dismissible
    ───────────────────────────────────────────────────────────────────────────── */
-
-/* ── Theme ── */
-function getCookie(name) {
-  var m = document.cookie.match('(?:^|; )' + name + '=([^;]*)');
-  return m ? decodeURIComponent(m[1]) : null;
-}
-
-function setCookie(name, value) {
-  var expires = new Date(Date.now() + 30 * 864e5).toUTCString();
-  document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/; domain=.refueler.io; SameSite=Lax';
-}
-
-function applyTheme(theme) {
-  var root = document.documentElement;
-  var pill = document.getElementById('theme-btn');
-  if (theme === 'carbon') {
-    root.setAttribute('data-theme', 'carbon');
-    if (pill) pill.textContent = 'Carbon / Paper';
-  } else {
-    root.setAttribute('data-theme', 'paper');
-    if (pill) pill.textContent = 'Paper / Carbon';
-  }
-}
-
-function toggleTheme() {
-  var current = getCookie('rs-theme') || 'paper';
-  var next = current === 'paper' ? 'carbon' : 'paper';
-  setCookie('rs-theme', next);
-  applyTheme(next);
-}
-
-/* head.njk already applied the theme before first paint.
-   notes.js re-reads the same cookie and re-applies — no conflict,
-   no localStorage read, no overwrite of head.njk's work. */
-(function () { applyTheme(getCookie('rs-theme') || 'paper'); }());
 
 /* ── Modal ── */
 (function () {

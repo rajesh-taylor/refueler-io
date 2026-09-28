@@ -17,11 +17,12 @@
 <meta name="twitter:title" content="{{ title }}" />
 {% if description %}<meta name="twitter:description" content="{{ description }}" />{% endif %}
 
-<!-- Fonts: Satoshi · DM Sans · IBM Plex Mono -->
+<!-- Fonts: Satoshi · DM Sans · IBM Plex Mono · Source Serif 4 -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap" rel="stylesheet" />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" />
 
 <!-- Global styles: tokens, reset, nav, footer -->
@@ -38,7 +39,9 @@
 <!-- Theme: applied before first paint.
      Detection: document.documentElement.dataset.theme === 'carbon'
      Persistence: cookie rs-theme scoped to .refueler.io (30-day rolling)
-     Paper is default on public site. Carbon is user toggle only. -->
+     Carbon is default on the whole site (R-13). A visitor's saved choice wins.
+     The pill label is set again once the page has loaded: the pill doesn't exist yet
+     when this runs (F-7). -->
 <script>
   (function () {
     function getCookie(name) {
@@ -61,13 +64,16 @@
       }
     }
     window.toggleTheme = function () {
-      var current = getCookie('rs-theme') || 'paper';
+      var current = getCookie('rs-theme') || 'carbon';
       var next = current === 'paper' ? 'carbon' : 'paper';
       setCookie('rs-theme', next);
       applyTheme(next);
       {% if stripeThemeRemount %}if (typeof remountStripeForTheme === 'function') remountStripeForTheme();{% endif %}
     };
-    applyTheme(getCookie('rs-theme') || 'paper');
+    applyTheme(getCookie('rs-theme') || 'carbon');
+    document.addEventListener('DOMContentLoaded', function () {
+      applyTheme(getCookie('rs-theme') || 'carbon');
+    });
     window.toggleNavDrawer = function () {
       var h = document.getElementById('site-header');
       if (h) h.classList.toggle('nav-open');
