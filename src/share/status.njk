@@ -96,11 +96,11 @@ activePage: ""
       </div>
 
       <div class="integrity-card">
-        <div class="integrity-card-label">Technical: SHA-256 passphrase hash · NUT-11 Mode 1</div>
-        <div class="integrity-card-value">✓ Optional passphrase lock</div>
+        <div class="integrity-card-label">Technical: SHA-256 password hash · NUT-11 Mode 1</div>
+        <div class="integrity-card-value">✓ Optional password lock</div>
         <div class="integrity-card-note">
-          You can protect a share link with a passphrase. The passphrase never travels
-          the wire — only its hash is stored, and the server checks it before issuing a download token.
+          You can protect a share link with a password. Only a hash of the password is stored.
+          When the recipient unlocks, the password is sent over an encrypted connection, checked, and not kept.
         </div>
       </div>
 
