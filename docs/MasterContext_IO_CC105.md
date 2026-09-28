@@ -139,7 +139,7 @@ Two-column split below stats row. Left: Lightning address (ellipsis, gold lock �
 
 ---
 
-## Design system — warm carbon (CC-103, 2-week trial)
+## Design system — warm carbon (CC-103 trial → kept; Carbon is the site-wide default since Share-Cleanup-1, 28 Sep 2026)
 
 **Paper:** `--bg: #E8E2D8` · `--fg: #1A1A1A` · `--surface: #DAD4CA`
 **Carbon:** `--bg: #1A1917` · `--fg: #E8E2D8` · `--surface: #242424`
@@ -178,13 +178,13 @@ Pending: S-numo-v31 (numo_navy refs), app display name ("Relay"), Icon-B.
 ## Ongoing action items (Rajesh)
 
 - Open Revolut Business account (before first real merchant)
-- Open Blink ops wallet "Refueler Ops" (second BTC wallet in Blink)
+- ~~Open Blink ops wallet "Refueler Ops"~~ — obsolete: Blink UK closed 31 Aug; ops wallet moves to phoenixd + LNbits on Hetzner (NB-2…NB-5)
 - Create Refueler Crypto Ops Ledger
-- Push BRIDGE v4.9 to all repos
-- Push `refueler-app` dev branch (CA-1 prerequisite)
-- Disconnect `share.refueler.io` from Cloudflare Pages
+- ~~Push BRIDGE v4.9 to all repos~~ — superseded (BRIDGE is at v6.9+)
+- ~~Push `refueler-app` dev branch~~ — done (`origin/dev` exists, checked 28 Sep)
+- ~~Disconnect `share.refueler.io` from Cloudflare Pages~~ — done 8 Aug (dormant; Share lives at `refueler.io/share/`)
 - Upgrade Supabase to Pro at first real merchant
-- Upgrade Cloudflare Workers to Paid ($5/month) before production volume
+- ~~Upgrade Cloudflare Workers to Paid~~ — done (Workers Paid live for the Share Worker)
 - Commission rate planning conversation before first real merchant
 
 ---
@@ -193,7 +193,7 @@ Pending: S-numo-v31 (numo_navy refs), app display name ("Relay"), Icon-B.
 
 | # | Session | Type | Status |
 |---|---|---|---|
-| 1 | **Web-Touch-1** — S-33, S-28, S-29, S-32 | Sonnet | **Next** |
+| 1 | ~~**Web-Touch-1** — S-33, S-28, S-29, S-32~~ | Sonnet | ✓ closed CC-105 (`25a11cd`) |
 | 2 | **Darwin-A** — arrivals feed FST/SRY/SOC, 4-tile strip redesign | Sonnet | After Web-Touch-1 |
 | 3 | **Darwin-B** — mid-line ETA architecture | Opus | After Darwin-A |
 | 4 | **Darwin-C** — mid-line ETA architecture (cont.) | Opus | After Darwin-B |
@@ -204,3 +204,24 @@ Pending: S-numo-v31 (numo_navy refs), app display name ("Relay"), Icon-B.
 | — | CA-1 · Block 8 · Pass-A · Events intelligence · Staff Management v1 | Mixed | Queued |
 | — | Commission planning · Privacy page · Share API · AD-2 | Mixed | Gap |
 | — | Session A (CDK mint) · Status page · September User Guide | Mixed | Later |
+
+---
+
+## Chat import (28 Sep 2026)
+
+The claude.ai refueler.io project memory was exported (127 items, chats 15 Jul – 7 Sep; export kept off-repo) and swept against this repo, `refueler-app`, `refueler-share` and the live site in a refueler-share Claude Code session (Share-Cleanup-1). Most items were already in this file. Since CC-105 (22 Aug) the product work paused while Share ran; nothing below is built.
+
+**Happened after CC-105 (not yet logged here):**
+- **Blink UK closed 31 Aug.** Plan: phoenixd + LNbits on Hetzner. Sessions S73b (node architecture, Opus, Share project) → NB-2 Hetzner + phoenixd → NB-3 LNbits + ops wallet + test payment → NB-4 Tor + hardening → **NB-5 `refueler-io` handshake**. The refueler-share block sequence places NB-2…NB-4 after B8 (post-Berlin).
+- **Blink fallout, fix at NB-5 (Rajesh, 28 Sep: not urgent, do with the Hetzner work):** `blink-balance` Edge Function (dev-console balance tile) and the vestigial `blink-webhook`; set the test venue's `lightning_address` to a Minibits wallet; Block 8 float mechanics (ADR-MS series) assumed Blink and need revisiting.
+- Merchant onboarding docs: one line naming Dana (Silent Payments wallet) as a privacy-preserving on-chain option. Documentation only.
+- Subpoena article and Notes index rewritten (30 Aug); the article no longer mentions Blink (checked live 28 Sep).
+- Whitepaper texture from the Tower / City of London history chat went into BRIDGE v6.9 (never product UI).
+
+**Stale docs to refresh (a post-Berlin refueler.io docs session, with Rajesh's input):** `docs/claude.md` v4.9 (CC-70) still says Blink only for beta, commission "flat 6–10%" (chats since: 4–8% of order value, and the rate is explicitly unresolved), Carbon `#1A1A1A` / Paper `#F5F0E8`, `blink-webhook` v6 with Svix (Blink doesn't use Svix; v9–v15 rewrote it), `refueler-multi-core` (now `refueler-legend`), `share.refueler.io` and "Paper default".
+
+**Resolved on import:** btc++ Berlin is 30 Sep – 3 Oct (hackathon 1–3 Oct). Warm Carbon `#1A1917` kept and now the default. `share.refueler.io` dormant. Test PINs in the table above should be changed and masked here (they sit in a public repo; sign-in also needs a magic link to the owner's email).
+
+**Privacy page session (queued) — add to its scope:** the cookie section says one strictly necessary cookie and no third-party cookies, but the site also sets the `rs-theme` preference cookie on a theme switch, Stripe.js sets `__stripe_mid` / `__stripe_sid` on Share Plans, and `analytics.js` posts events to `analytics.refueler.io`. Make the page match what runs.
+
+**Homepage session note:** the corridor eyebrow stays "Limehouse → Fenchurch Street" until the homepage session decides it (Rajesh holds the reason).
