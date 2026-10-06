@@ -84,12 +84,11 @@ stripeThemeRemount: true
 <body>
 
 {% set activePage = "plans" %}
-{% include "share-nav.njk" %}
+{% include "nav.njk" %}
+{% include "section-nav.njk" %}
 
 <!-- ── Main page ─────────────────────────────────────────────────── -->
 <div class="page" id="mainPage">
-
-  <a href="/share/" class="upgrade-back-link">← Back to Refueler Share</a>
 
   <div class="page-header">
     <h1>Choose your plan</h1>
@@ -146,7 +145,7 @@ stripeThemeRemount: true
       <ul class="tier-features">
         <li>4 GB per transfer</li>
         <li>1 / 7 day expiry</li>
-        <li>End-to-end encrypted</li>
+        <li>Encrypted in your browser</li>
         <li>No account needed</li>
       </ul>
     </div>
@@ -164,7 +163,7 @@ stripeThemeRemount: true
       <ul class="tier-features">
         <li>100 GB per transfer</li>
         <li>1 / 7 / 30 day expiry</li>
-        <li>End-to-end encrypted</li>
+        <li>Encrypted in your browser</li>
         <li>Password-protected downloads</li>
         <li>Lightning payments</li>
       </ul>
@@ -183,7 +182,7 @@ stripeThemeRemount: true
       <ul class="tier-features">
         <li>250 GB per transfer</li>
         <li>1 / 7 / 30 / 90 day expiry</li>
-        <li>End-to-end encrypted</li>
+        <li>Encrypted in your browser</li>
         <li>Password-protected downloads</li>
         <li>Lightning payments</li>
         <li>Priority transfers</li>
@@ -247,7 +246,7 @@ stripeThemeRemount: true
   </div>
 </div>
 
-{% include "share-footer.njk" %}
+{% include "footer.njk" %}
 
 <script>
 const WORKER_URL = 'https://api.share.refueler.io';

@@ -211,6 +211,42 @@ html, body {
   color: var(--fg);
 }
 
+/* ─── Section sub-menu (Share-Upload-2, U-3) ─────────────────────────────────
+   One centred segmented pill under the header, rendered by section-nav.njk from
+   _data/sections.js. Lines and fill are mixed from --fg, so they match in both
+   themes and a section token file (share-tokens.css) can't change them. */
+.section-nav {
+  display: flex;
+  justify-content: center;
+  padding: 22px clamp(1rem, 4vw, 2.5rem) 0;
+}
+.section-nav-pill {
+  display: inline-flex;
+  border: 1px solid color-mix(in srgb, var(--fg) 22%, transparent);
+  border-radius: 100px;
+  overflow: hidden;
+}
+.section-nav-pill a {
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--fg-muted);
+  text-decoration: none;
+  padding: 9px 20px;
+  transition: color 0.2s, background 0.2s;
+}
+.section-nav-pill a + a { border-left: 1px solid color-mix(in srgb, var(--fg) 10%, transparent); }
+.section-nav-pill a:hover { color: var(--fg); }
+.section-nav-pill a:focus-visible { outline: 2px solid var(--fg); outline-offset: -2px; }
+.section-nav-pill a[aria-current="page"] {
+  color: var(--fg);
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
+}
+@media (max-width: 640px) {
+  .section-nav { padding-top: 18px; }
+}
+
 /* ─── Footer ─────────────────────────────────────────────────────────────── */
 .site-footer {
   border-top: var(--border-weight) solid var(--border);
