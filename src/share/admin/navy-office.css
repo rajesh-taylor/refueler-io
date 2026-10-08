@@ -1207,3 +1207,27 @@ body {
 
 /* ── Sandbox result copy button head (Share-Dash-1) ─────────────────────── */
 .sandbox-result-head { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+
+/* ── B12-2: Storage & Billing, quiet cards, header sign out ─────────────── */
+.storage-panel { margin-top: 1.5rem; }
+.storage-asof {
+  font-family: var(--mono); font-size: 0.65rem; color: var(--text-tertiary);
+}
+/* Quiet = informational, never alarming: muted value, no status colour. */
+.snap-metric.quiet .sm-value { color: var(--text-secondary); }
+.sm-value.na { font-family: var(--sans); font-weight: 400; font-size: 0.95rem; color: var(--text-tertiary); }
+.signout-btn { color: var(--text-tertiary); }
+
+/* Client-errors modal: code explanations */
+.ce-groups { display: flex; flex-direction: column; gap: 0.5rem; margin: 0.75rem 0 1rem; }
+.ce-code {
+  border: 0.5px solid var(--border); border-radius: 8px;
+  padding: 0.6rem 0.75rem; background: var(--surface);
+}
+.ce-code-head { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; }
+.ce-code-label { font-family: var(--sans); font-size: 0.85rem; color: var(--text-primary); }
+.ce-code-n { font-family: var(--mono); font-size: 0.8rem; color: var(--text-secondary); }
+.ce-code-id { font-family: var(--mono); font-size: 0.65rem; color: var(--text-tertiary); margin-top: 2px; }
+.ce-code-means, .ce-code-worry { font-family: var(--sans); font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; line-height: 1.45; }
+.ce-code-worry::before { content: 'When to worry: '; color: var(--text-tertiary); }
+.ce-count-line { font-family: var(--sans); font-size: 0.75rem; color: var(--text-tertiary); margin: 0.25rem 0 0.5rem; }

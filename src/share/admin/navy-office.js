@@ -1,5 +1,7 @@
 /* ─── navy-office.js — refueler-share · Navy Office admin ───────────────────
- * Last updated: Share-Dash-3
+ * Last updated: B12-2 (Client errors split into real / Expected events with
+ *   plain explanations; Storage & Billing row from /admin/storage; nudge badge
+ *   retired; Sign out moved to the header).
  *
  * Share-Dash-3 changes (this file):
  *   (1) Rename: dashboard → navy-office throughout. document.title set to
@@ -111,16 +113,21 @@ async function refreshAll() {
   clearInterval(refreshTimer);
   countdown = 60;
   updateCountdown();
-  const [m, ae, snap, , hh, dock] = await Promise.all([
+  const [m, ae, snap, , hh, dock, kvLog] = await Promise.all([
     fetchMetrics(),
     fetchAeMetrics(),
     fetchSnapshot(),
     fetchKvStats(),
     fetchHostnameHealth(),
     fetchExecutionDock(),
+    fetchKvErrorsLog(),
   ]);
   if (m)    { lastMetrics  = m;    renderMetrics(m); }
   if (ae)   { lastAe       = ae;   renderAeMetrics(ae); }
+  if (kvLog) kvErrorsCache = kvLog;
+  renderErrorCards(lastAe, kvErrorsCache);
+  // B12-2: storage lists the whole R2 bucket — every 15 min, not every 60 s.
+  if (!_storageAt || Date.now() - _storageAt > 15 * 60 * 1000) fetchStorage();
   if (snap) { lastSnapshot = snap; renderSnapshot(snap); }
   if (hh)   { renderHostnameHealth(hh); }
   if (dock) { renderExecutionDock(dock); }
@@ -252,15 +259,6 @@ function renderAeMetrics(d) {
   issEl.textContent = issTotal !== null ? issTotal : 'n/a';
   issEl.className = 'sm-value';
 
-  const bytesEl = document.getElementById('snap-bytes');
-  if (d.r2_bytes_uploaded !== null && d.r2_bytes_uploaded !== undefined) {
-    const { val, unit } = formatBytes(d.r2_bytes_uploaded);
-    bytesEl.textContent = `${val} ${unit}`;
-  } else {
-    bytesEl.textContent = 'n/a';
-  }
-  bytesEl.className = 'sm-value';
-
   const errs   = d.error_rate_by_endpoint;
   const errEl  = document.getElementById('snap-error-rate');
   if (errs && !d.error_rate_note) {
@@ -313,16 +311,102 @@ function renderAeMetrics(d) {
     retEl.className = 'sm-value' + (ret < 0.99 ? ' red' : ret < 0.999 ? ' amber' : ' green');
   } else { retEl.textContent = 'n/a'; retEl.className = 'sm-value'; }
 
-  const ceEl = document.getElementById('snap-client-errors');
-  const ce   = d.client_errors_24h;
-  if (ce !== null && ce !== undefined) {
-    ceEl.textContent = ce;
-    ceEl.className = 'sm-value' + (ce > 10 ? ' red' : ce > 0 ? ' amber' : '');
-  } else { ceEl.textContent = 'n/a'; ceEl.className = 'sm-value'; }
-
   clientErrorsDetail = Array.isArray(d.client_errors_detail) ? d.client_errors_detail : [];
 
   lastAe = d;
+}
+
+// ── B12-2: Client errors (real only) + Expected events cards ──────────────
+function renderErrorCards(ae, kv) {
+  const ceEl = document.getElementById('snap-client-errors');
+  const exEl = document.getElementById('snap-expected-events');
+  if (!ceEl || !exEl) return;
+  if (!ae?.client_errors_by_context_24h && !kv) {
+    ceEl.textContent = 'n/a'; ceEl.className = 'sm-value';
+    exEl.textContent = 'n/a'; exEl.className = 'sm-value';
+    return;
+  }
+  const c = ceCounts(ae, kv);
+  ceEl.textContent = c.real;
+  ceEl.className = 'sm-value' + (c.real > 10 ? ' red' : c.real > 0 ? ' amber' : ' green');
+  exEl.textContent = c.expected;
+  exEl.className = 'sm-value';
+}
+
+// ── B12-2: Storage & Billing ──────────────────────────────────────────────
+// Source: GET /admin/storage — aggregates of what R2 holds now. No UUIDs.
+// R2 Standard: first 10 GB-month free, then $0.015 per GB-month (Oct 2026).
+const R2_FREE_GB = 10, R2_USD_PER_GB_MONTH = 0.015;
+const TIER_LABEL = { free: 'Pro Bono', creative: 'Citizen', max: 'Sovereign', api: 'Chartered' };
+let _storage = null, _storageAt = 0;
+
+async function fetchStorage() {
+  try {
+    const res = await fetch(`${WORKER}/admin/storage`, { headers: { 'X-Admin-Key': adminKey } });
+    if (!res.ok) { console.warn('[navy-office] /admin/storage', res.status); return; }
+    _storage = await res.json(); _storageAt = Date.now();
+    renderStorage(_storage);
+  } catch (e) { console.warn('[navy-office] /admin/storage', e.message); }
+}
+
+function _gib(bytes) { return (bytes / 1024 ** 3); }
+function _fmtGib(bytes) {
+  const g = _gib(bytes);
+  return g >= 10 ? `${Math.round(g)} GiB` : `${g.toFixed(1)} GiB`;
+}
+function _storageCostUsd(bytes) { return Math.max(0, bytes / 1e9 - R2_FREE_GB) * R2_USD_PER_GB_MONTH; }
+function _fmtDay(isoDay) {
+  return new Date(isoDay + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+}
+
+function renderStorage(s) {
+  const el = document.getElementById('snap-bytes');
+  if (!el) return;
+  const band = s.budget_band_pct ?? 0;
+  el.textContent = _fmtGib(s.total_bytes);
+  el.className = 'sm-value' + (band >= 100 ? ' red' : band >= 90 ? ' amber' : '');
+  setText('snap-fleet-plain', `${band} % of ${s.budget_gib} GiB budget`);
+  setText('snap-fleet-cost', `≈ $${_storageCostUsd(s.total_bytes).toFixed(2)} a month`);
+  setText('storage-asof', `as of ${_fmtDay(s.as_of_day)}`);
+  const tierLine = (t) => {
+    const v = s.live?.[t];
+    return v ? `${v.transfers} · ${_fmtGib(v.bytes)}` : '0';
+  };
+  setText('snap-sovereign', tierLine('max'));
+  setText('snap-probono',   tierLine('free'));
+}
+
+function _storageModalHtml(s) {
+  const row = (k, v) => _apiRow(k, escHtml(v));
+  const live = Object.entries(s.live ?? {}).sort((a, b) => b[1].bytes - a[1].bytes);
+  const liveRows = live.length
+    ? live.map(([t, v]) => row(TIER_LABEL[t] ?? t, `${v.transfers} · ${_fmtGib(v.bytes)}`)).join('')
+    : row('Live transfers', 'none');
+  const other = [
+    ['Uploading or abandoned', s.uploading],
+    ['Expired, not yet swept', s.expired],
+    ['Deleted, objects left over', s.deleted],
+    ['No manifest (orphan sweep)', s.unattached],
+    ['Manifest unreadable', s.unreadable],
+  ].filter(([, v]) => v && v.transfers > 0)
+   .map(([k, v]) => row(k, `${v.transfers} · ${_fmtGib(v.bytes)}`)).join('');
+  return `
+    <div class="api-modal-section">
+      <div class="api-modal-section-title">Live transfers by tier</div>
+      ${liveRows}
+    </div>
+    <div class="api-modal-section">
+      <div class="api-modal-section-title">Other objects in R2</div>
+      ${other || row('Nothing else', '—')}
+    </div>
+    <div class="api-modal-section">
+      <div class="api-modal-section-title">Budget and cost</div>
+      ${row('Budget', `${s.budget_gib} GiB · amber at 90 %`)}
+      ${row('Held', `${s.budget_band_pct} % (5 % steps)`)}
+      ${row('Storage cost', `≈ $${_storageCostUsd(s.total_bytes).toFixed(2)} a month`)}
+      ${row('How', `first ${R2_FREE_GB} GB free, then $${R2_USD_PER_GB_MONTH}/GB-month`)}
+    </div>
+    <p class="ce-provenance-note">Ciphertext as stored, listed from R2 on ${escHtml(_fmtDay(s.as_of_day))}. Totals only — no transfer IDs or sizes.</p>`;
 }
 
 // ── (3b) API & MCP card ───────────────────────────────────────────────────
@@ -382,6 +466,133 @@ async function fetchKvErrorsLog() {
   } catch { return null; }
 }
 
+// ── B12-2: what each client-error code means ──────────────────────────────
+// kind: 'real'     — something failed for a person. Counted on Client errors.
+//       'detail'   — the step that failed behind an "Upload stopped" line; the
+//                    stop is the count, so these are listed but not counted.
+//       'expected' — retries, closed links and the page refusing a changed
+//                    file. Counted on the quiet Expected events card.
+const _RETRY = 'One try at sending a part failed; the page waits and tries again by itself.';
+const _RETRY_WORRY = 'Only if “Upload stopped” lines appear alongside.';
+const _REFUSED_RESUME = 'Working as designed: the page refused to continue an upload with a different file.';
+const CE_CODES = {
+  'upload_stopped:network':    { kind: 'real', label: 'Upload stopped · couldn’t reach Refueler', means: 'Several tries failed in a row and the upload stopped. Usually the person’s connection.', worry: 'Several in a day, or from different people — check Status and R2.' },
+  'upload_stopped:check':      { kind: 'real', label: 'Upload stopped · security check failed', means: 'The Cloudflare check (Turnstile) didn’t go through.', worry: 'A run of them — Turnstile keys or a Cloudflare outage.' },
+  'upload_stopped:refused':    { kind: 'real', label: 'Upload stopped · Refueler refused it', means: 'The Worker or R2 said no (bad link, limit, server error).', worry: 'Any. Look at the detail lines just before it.' },
+  'upload_stopped:missing':    { kind: 'real', label: 'Upload stopped · parts didn’t arrive', means: 'Finishing found parts missing in R2.', worry: 'Any — parts were acknowledged but not stored.' },
+  'upload_stopped:unfinished': { kind: 'real', label: 'Upload stopped · finishing failed', means: 'Everything was sent but the finish step failed; Try again finishes it.', worry: 'More than one a day.' },
+  'upload_stopped:browser':    { kind: 'real', label: 'Upload stopped · error in the browser', means: 'Something broke in the page itself (out of memory, a code fault).', worry: 'Any — read the message; it may be a bug.' },
+  'upload_stopped':            { kind: 'real', label: 'Upload stopped · error in the browser', means: 'Older form of the line above.', worry: 'Any — read the message.' },
+  'upload_stopped:changed':    { kind: 'expected', label: 'Upload stopped · a different file was picked', means: _REFUSED_RESUME, worry: 'Never by itself.' },
+  'upload_stopped:gone':       { kind: 'expected', label: 'Upload stopped · nothing left to continue', means: 'The saved upload had expired or already finished.', worry: 'Never by itself.' },
+  direct_put_err:      { kind: 'expected', label: 'Part retry · connection dropped', means: _RETRY + ' Safari says “Load failed”.', worry: _RETRY_WORRY },
+  direct_put_timeout:  { kind: 'expected', label: 'Part retry · timed out', means: _RETRY, worry: _RETRY_WORRY },
+  direct_put_5xx:      { kind: 'expected', label: 'Part retry · R2 server error', means: _RETRY, worry: 'Many in an hour — R2 trouble; check Cloudflare status.' },
+  direct_put_429:      { kind: 'expected', label: 'Part retry · R2 asked us to slow down', means: _RETRY, worry: _RETRY_WORRY },
+  resume_folder_changed: { kind: 'expected', label: 'Continue refused · folder had changed', means: _REFUSED_RESUME, worry: 'Never by itself.' },
+  resume_folder_tz:      { kind: 'expected', label: 'Continue refused · time zone changed', means: 'The device’s time zone changed, so the zip’s dates would differ. Refused as designed.', worry: 'Never by itself.' },
+  resume_part_mismatch:  { kind: 'expected', label: 'Continue refused · file differs from what was sent', means: _REFUSED_RESUME, worry: 'Never by itself.' },
+  resume_chunk_count:    { kind: 'expected', label: 'Continue refused · file is a different size', means: _REFUSED_RESUME, worry: 'Never by itself.' },
+  resume_folder_size:    { kind: 'expected', label: 'Continue refused · folder zips to a different size', means: _REFUSED_RESUME, worry: 'Never by itself.' },
+  direct_put_403:   { kind: 'detail', label: 'Upload link refused (403)', means: 'R2 rejected a signed upload link. Followed by “Upload stopped · refused”.', worry: 'Any — signing or clock problem in the Worker.' },
+  direct_put_4xx:   { kind: 'detail', label: 'Upload part refused (4xx)', means: 'R2 refused a part. Followed by “Upload stopped · refused”.', worry: 'Any.' },
+  url_batch_fetch:  { kind: 'detail', label: 'Couldn’t fetch upload links', means: 'Connection dropped asking for the next links.', worry: 'Only with a stop line.' },
+  url_batch_status: { kind: 'detail', label: 'Upload links refused', means: 'The Worker refused to hand out the next links.', worry: 'Any.' },
+  credential_issue: { kind: 'detail', label: 'Upload pass refused', means: 'The Worker refused the upload pass. Followed by a check or refused stop.', worry: 'A run of them.' },
+  initiate:         { kind: 'detail', label: 'Upload start refused', means: 'The Worker refused to start the transfer. Followed by a refused stop.', worry: 'Any.' },
+  credential_dleq:  { kind: 'real', label: 'Upload pass proof didn’t check out', means: 'The browser rejected the mint’s signature proof (DLEQ).', worry: 'Any — mint key config or tampering. Urgent.' },
+  turnstile_load:   { kind: 'real', label: 'Security check didn’t load', means: 'Turnstile’s script didn’t arrive in 15 s; often a content blocker.', worry: 'A run of them from different browsers.' },
+  load_deps:        { kind: 'real', label: 'Page code failed to load', means: 'BLAKE3 or curve code couldn’t load, so nothing was sent.', worry: 'Any — check the last ship.' },
+  folder_zip:       { kind: 'real', label: 'Couldn’t zip the folder', means: 'Zipping a picked folder failed in the browser.', worry: 'Repeats — memory or a file-name edge case.' },
+  folder_read:      { kind: 'real', label: 'Couldn’t read a dropped folder', means: 'The browser wouldn’t list a dragged folder.', worry: 'Repeats.' },
+  resume_folder_print: { kind: 'real', label: 'Couldn’t check the re-picked folder', means: 'Reading the folder to compare it failed.', worry: 'Repeats.' },
+  resume_folder_zip:   { kind: 'real', label: 'Couldn’t re-zip the folder', means: 'Re-zipping to continue failed.', worry: 'Repeats.' },
+  idb_write:        { kind: 'real', label: 'Couldn’t save the resume record', means: 'Browser storage refused a write (private mode, full disk).', worry: 'Repeats — continue won’t work for those people.' },
+  idb_clear:        { kind: 'real', label: 'Couldn’t clear the resume record', means: 'Harmless leftover in browser storage.', worry: 'Rarely.' },
+  permanent_record: { kind: 'real', label: 'Permanent record step failed', means: 'The date-seal step didn’t complete for a transfer.', worry: 'Any — that transfer has no seal.' },
+  decrypt:          { kind: 'real', label: 'Download couldn’t decrypt', means: 'A part failed to decrypt, or the size didn’t match.', worry: 'Any — a broken link or a crypto bug.' },
+  integrity_check_failed: { kind: 'real', label: 'Stored file failed its integrity check', means: 'The ciphertext didn’t match its recorded root.', worry: 'Any. Urgent.' },
+  download_chunk_retry_exhausted: { kind: 'real', label: 'Download stopped after retries', means: 'A part wouldn’t download after every retry.', worry: 'Several in a day.' },
+  download_unhandled: { kind: 'real', label: 'Download hit an unexpected error', means: 'Something in the download page threw.', worry: 'Any — read the message.' },
+  part_count:       { kind: 'real', label: 'Link and stored file disagree', means: 'The link’s size doesn’t match the stored part count.', worry: 'Any — a mangled link or a bug.' },
+  fsaa_picker_error:{ kind: 'real', label: 'Save picker failed', means: 'Chrome’s save dialog failed; the download fell back to memory.', worry: 'Repeats.' },
+  receiver_setup:   { kind: 'real', label: 'Receiver page failed to set up', means: 'The download page couldn’t start.', worry: 'Any.' },
+};
+function ceCode(ctx) {
+  const c = String(ctx || '');
+  if (CE_CODES[c]) return CE_CODES[c];
+  if (c.endsWith('_fetch')) return { kind: 'detail', label: 'Couldn’t reach Refueler', means: 'A request dropped; followed by “Upload stopped · couldn’t reach Refueler”.', worry: 'Only with a stop line.' };
+  return { kind: 'real', label: c || 'Unlabelled', means: 'No explanation recorded for this code yet.', worry: 'Look at the message.' };
+}
+
+// Worker-observed (KV log) entries: status + endpoint.
+function workerCode(e) {
+  const s = e.status, ep = e.endpoint;
+  if (s === 410) return { kind: 'expected', key: `410 ${ep}`, label: 'Closed link reopened', means: 'Someone opened a link that was deleted after download or had run out of time.', worry: 'Never by itself.' };
+  if (s === 404 && ep === 'meta') return { kind: 'expected', key: '404 meta', label: 'Unknown link opened', means: 'A link to a transfer that no longer exists (swept or mistyped).', worry: 'Hundreds an hour — someone guessing links.' };
+  if (s === 404 && ep === 'unknown') return { kind: 'expected', key: '404 unknown', label: 'Bot probing for files', means: 'Scanners asking for /.env, /.git/config and so on. No longer logged here.', worry: 'Never.' };
+  if (ep === 'admin_btc_price') return { kind: 'expected', key: `${s} admin_btc_price`, label: 'BTC price feed down', means: 'CoinGecko didn’t answer; only the chart overlay is missing. No longer logged here.', worry: 'Never.' };
+  if (s === 401 && String(ep).startsWith('admin')) return { kind: 'real', key: `401 ${ep}`, label: 'Admin key refused', means: 'A request to an admin route with a wrong or missing key.', worry: 'If it wasn’t you — someone is trying admin routes.' };
+  if (s >= 500) return { kind: 'real', key: `${s} ${ep}`, label: `Server error on ${ep}`, means: 'The Worker failed while answering.', worry: 'Any.' };
+  return { kind: 'real', key: `${s} ${ep}`, label: `${s} on ${ep}`, means: 'The Worker refused a request.', worry: 'Repeats, or a sudden run.' };
+}
+
+// Counts for the two cards: browser (AE, 24h) + Worker (KV log, last 24h).
+function ceCounts(ae, kv) {
+  const out = { real: 0, expected: 0, detail: 0 };
+  for (const [ctx, n] of Object.entries(ae?.client_errors_by_context_24h ?? {})) out[ceCode(ctx).kind] += n;
+  const since = Date.now() / 1000 - 86400;
+  for (const e of kv?.entries ?? []) if (e.ts >= since) out[workerCode(e).kind] += 1;
+  return out;
+}
+
+function _ceGroupHtml(groups) {
+  return '<div class="ce-groups">' + groups.map(g => `
+    <div class="ce-code">
+      <div class="ce-code-head"><span class="ce-code-label">${escHtml(g.label)}</span><span class="ce-code-n">${g.n}</span></div>
+      <div class="ce-code-id">${escHtml(g.key)}</div>
+      <div class="ce-code-means">${escHtml(g.means)}</div>
+      <div class="ce-code-worry">${escHtml(g.worry)}</div>
+    </div>`).join('') + '</div>';
+}
+function _groupsFromAe(ae, kinds) {
+  return Object.entries(ae?.client_errors_by_context_24h ?? {})
+    .map(([key, n]) => ({ key, n, ...ceCode(key) }))
+    .filter(g => g.n > 0 && kinds.includes(g.kind))
+    .sort((a, b) => b.n - a.n);
+}
+function _groupsFromKv(kv, kinds, sinceTs = 0) {
+  const m = new Map();
+  for (const e of kv?.entries ?? []) {
+    if (e.ts < sinceTs) continue;
+    const c = workerCode(e);
+    if (!kinds.includes(c.kind)) continue;
+    const g = m.get(c.key) ?? { ...c, n: 0 };
+    g.n++; m.set(c.key, g);
+  }
+  return [...m.values()].sort((a, b) => b.n - a.n);
+}
+function _kvCoverage(kv) {
+  if (!kv?.oldest_ts) return 'Worker log is empty.';
+  const d = new Date(kv.oldest_ts * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  return kv.total >= (kv.max_entries ?? 500)
+    ? `Worker log keeps the last ${kv.max_entries ?? 500} entries — back to ${d}.`
+    : `Worker log covers ${kv.total} entries back to ${d}.`;
+}
+
+// Expected-events modal body: browser (24h) and Worker (24h), quiet.
+function _renderExpectedModal(sparkEl, ae, kv) {
+  const since = Date.now() / 1000 - 86400;
+  const b = _groupsFromAe(ae, ['expected']);
+  const w = _groupsFromKv(kv, ['expected'], since);
+  sparkEl.innerHTML =
+    `<p class="ce-count-line">Normal running. These are counted so the red card stays for real failures.</p>` +
+    `<div class="modal-section-title">Reported by browser · 24h</div>` +
+    (b.length ? _ceGroupHtml(b) : '<div class="ce-empty">None.</div>') +
+    `<div class="modal-section-title">Observed by Worker · 24h</div>` +
+    (w.length ? _ceGroupHtml(w) : '<div class="ce-empty">None.</div>');
+}
+
 // ── Render: farming signal ─────────────────────────────────────────────────
 function renderFarming(m, ae) {
   const el = document.getElementById('snap-farming');
@@ -432,7 +643,7 @@ const MODAL_DEFS = {
   paid:                 { label: 'Paid subscribers',          plain: 'Paying customers' },
   uniqueness:           { label: 'Credential uniqueness rate',plain: 'Upload tokens used only once' },
   issuances:            { label: 'Credential issuances (30d)',plain: 'Uploads started in 30 days' },
-  storage:              { label: 'Data stored (90d)',         plain: 'Total encrypted data uploaded' },
+  storage:              { label: 'Fleet occupancy',           plain: 'What R2 holds right now' },
   errors:               { label: 'Server errors',             plain: 'Worker error rate across all endpoints' },
   'upload-speed':       { label: 'Upload speed · p95',        plain: 'p95 latency on uploads' },
   'upload-speed-p99':   { label: 'Upload speed · p99',        plain: 'Worst-case upload tail latency' },
@@ -441,7 +652,8 @@ const MODAL_DEFS = {
   retrieval:            { label: 'Download success rate',     plain: 'Chunk retrieval success in last 24h' },
   churn:                { label: 'Churn rate',                plain: 'Cancellations' },
   'free-users':         { label: 'Free users',                plain: 'Total accounts on free tier' },
-  'client-errors':      { label: 'Client errors',             plain: 'Browser-side and Worker-observed failures' },
+  'client-errors':      { label: 'Client errors',             plain: 'Real failures — browser-reported and Worker-observed' },
+  'expected-events':    { label: 'Expected events',           plain: 'Retries, closed links and refusals — working as designed' },
   farming:              { label: 'Farming signal',            plain: 'Credential-to-upload ratio (normal: 0.8–1.2 · alarm: >3.0)' },
   lightning:            { label: 'Lightning settlement',      plain: 'Sats vs fiat payment mix' },
   'kv-monitor':         { label: 'KV quota monitor',         plain: 'Cloudflare Workers KV free-plan usage' },
@@ -525,12 +737,21 @@ function openModal(key, triggerEl) {
       break;
     }
     case 'storage': {
-      const bytes = ae.r2_bytes_uploaded;
-      if (bytes !== null && bytes !== undefined) {
-        const { val, unit } = formatBytes(bytes);
-        value = `${val} ${unit}`;
-      } else { value = 'n/a'; isNA = true; }
-      sub = 'Rolling 90 days — encrypted ciphertext bytes';
+      const s = _storage;
+      const sparkEl = document.getElementById('modal-sparkline');
+      sparkEl.classList.remove('modal-sparkline-stub');
+      sparkEl.closest('.modal-body').querySelectorAll('.modal-section-title').forEach(el => { el.style.display = 'none'; });
+      document.getElementById('modal-csv-btn').style.display  = 'none';
+      document.getElementById('modal-csv-note').style.display = 'none';
+      if (s) {
+        value = _fmtGib(s.total_bytes);
+        sub = `${s.budget_band_pct} % of ${s.budget_gib} GiB budget · as of ${_fmtDay(s.as_of_day)}`;
+        colorClass = s.budget_band_pct >= 100 ? ' red' : s.budget_band_pct >= 90 ? ' amber' : '';
+        sparkEl.innerHTML = _storageModalHtml(s);
+      } else {
+        value = 'n/a'; isNA = true; sub = '/admin/storage not reached yet';
+        sparkEl.innerHTML = '';
+      }
       break;
     }
     case 'errors': {
@@ -611,12 +832,8 @@ function openModal(key, triggerEl) {
 
     // ── (3a) Client errors modal with AE/KV toggle ─────────────────────
     case 'client-errors': {
-      // Build the value from the current ceSource
-      const ceAeVal = ae.client_errors_24h;
-      if (ceAeVal !== null && ceAeVal !== undefined) {
-        value = String(ceAeVal);
-        colorClass = ceAeVal > 10 ? ' red' : ceAeVal > 0 ? ' amber' : ' green';
-      } else { value = 'n/a'; isNA = true; }
+      // B12-2: the headline follows the tab (it used to show the browser count on both).
+      ({ value, colorClass } = _ceHeadline(ae, kvErrorsCache));
 
       // Hide standard Trend / Export chrome — this modal owns its layout
       const sparkEl = document.getElementById('modal-sparkline');
@@ -629,9 +846,20 @@ function openModal(key, triggerEl) {
 
       // Render the toggle + content
       _renderCeModalContent(sparkEl, ae);
-      sub = ceSource === 'ae'
-        ? `Reported by browser (24h) · /log/error`
-        : `Observed by Worker (90d) · /admin/client-errors-log`;
+      sub = _ceSub();
+      break;
+    }
+
+    case 'expected-events': {
+      const c = ceCounts(ae, kvErrorsCache);
+      value = String(c.expected);
+      sub = 'Last 24 hours · browser and Worker';
+      const sparkEl = document.getElementById('modal-sparkline');
+      sparkEl.classList.remove('modal-sparkline-stub');
+      sparkEl.closest('.modal-body').querySelectorAll('.modal-section-title').forEach(el => { el.style.display = 'none'; });
+      document.getElementById('modal-csv-btn').style.display  = 'none';
+      document.getElementById('modal-csv-note').style.display = 'none';
+      _renderExpectedModal(sparkEl, ae, kvErrorsCache);
       break;
     }
 
@@ -842,7 +1070,38 @@ function _buildApiMcpModalHtml(d) {
 }
 
 // ── (3a) CE modal content renderer ────────────────────────────────────────
-// Builds the toggle + whichever table is active, into the given sparkEl.
+// B12-2: each tab lists REAL failures, grouped by code with a plain label and
+// "when to worry"; raw rows follow. Expected events live on their own card.
+function _ceHeadline(ae, kv) {
+  let n;
+  if (ceSource === 'ae') {
+    if (!ae?.client_errors_by_context_24h) return { value: 'n/a', colorClass: '' };
+    n = _groupsFromAe(ae, ['real']).reduce((t, g) => t + g.n, 0);
+  } else {
+    if (!kv) return { value: 'n/a', colorClass: '' };
+    n = _groupsFromKv(kv, ['real']).reduce((t, g) => t + g.n, 0);
+  }
+  return { value: String(n), colorClass: n > 10 ? ' red' : n > 0 ? ' amber' : ' green' };
+}
+function _ceSub() {
+  return ceSource === 'ae'
+    ? 'Real failures reported by browsers · last 24 hours'
+    : 'Real failures the Worker answered with 4xx/5xx · whole log';
+}
+
+function _ceRowsHtml(rows) {
+  if (!rows.length) return '';
+  return `
+    <div class="modal-section-title" style="display:block">Lines</div>
+    <div class="ce-table-wrap">
+      <table class="ce-table">
+        <thead><tr><th>Time</th><th>Code</th><th>Message</th></tr></thead>
+        <tbody>${rows.join('')}</tbody>
+      </table>
+    </div>`;
+}
+const _ceTime = (d) => d.toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+
 function _renderCeModalContent(sparkEl, ae) {
   const toggleHtml = `
     <div class="ce-source-toggle">
@@ -850,108 +1109,61 @@ function _renderCeModalContent(sparkEl, ae) {
         Reported by browser (24h)
       </button>
       <button class="ce-source-btn${ceSource === 'kv' ? ' active' : ''}" onclick="_setCeSource('kv')">
-        Observed by Worker (90d)
+        Observed by Worker
       </button>
     </div>`;
 
   if (ceSource === 'ae') {
-    const count = clientErrorsDetail.length;
-    if (count === 0) {
-      sparkEl.innerHTML = toggleHtml + '<div class="ce-empty">No errors in the last 24 hours.</div>';
+    const line = '<p class="ce-count-line">Counts a person’s upload or download failing. Per-try retries and refusals are on Expected events; “detail” lines explain a stop and aren’t counted twice.</p>';
+    const real   = _groupsFromAe(ae, ['real']);
+    const detail = _groupsFromAe(ae, ['detail']);
+    const rows = clientErrorsDetail
+      .filter(r => ceCode(r.context).kind !== 'expected')
+      .map(r => {
+        const ts  = r.ts ? _ceTime(new Date(r.ts)) : '—';
+        const msg = r.message ? escHtml(r.message.slice(0, 80)) + (r.message.length > 80 ? '&hellip;' : '') : '—';
+        return `<tr><td class="ce-ts">${ts}</td><td class="ce-ctx">${escHtml(r.context || '—')}</td><td class="ce-msg">${msg}</td></tr>`;
+      });
+    sparkEl.innerHTML = toggleHtml + line +
+      (real.length ? _ceGroupHtml(real) : '<div class="ce-empty">No real failures in the last 24 hours.</div>') +
+      (detail.length ? '<div class="modal-section-title" style="display:block">Detail behind a stop · not counted</div>' + _ceGroupHtml(detail) : '') +
+      _ceRowsHtml(rows);
+    return;
+  }
+
+  // Worker tab — KV log (refreshed every minute with the page).
+  const render = (data) => {
+    if (!data) {
+      sparkEl.innerHTML = toggleHtml + '<div class="ce-empty" style="color:var(--c-amber)">Worker log unavailable — /admin/client-errors-log returned an error.</div>';
       return;
     }
-    const rows = clientErrorsDetail.map(r => {
-      const ts = r.ts
-        ? new Date(r.ts).toLocaleString('en-GB', {
-            day: '2-digit', month: 'short',
-            hour: '2-digit', minute: '2-digit', second: '2-digit',
-            hour12: false
-          })
-        : '—';
-      const context = escHtml(r.context || '—');
-      const msg     = r.message
-        ? escHtml(r.message.slice(0, 80)) + (r.message.length > 80 ? '&hellip;' : '')
-        : '—';
-      // B10-1: Browser (UA) column dropped — mostly Unknown and not worth a column.
-      return `<tr>
-        <td class="ce-ts">${ts}</td>
-        <td class="ce-ctx">${context}</td>
-        <td class="ce-msg">${msg}</td>
-      </tr>`;
-    }).join('');
-    sparkEl.innerHTML = toggleHtml + `
-      <div class="modal-section-title">Detail</div>
-      <div class="ce-table-wrap">
-        <table class="ce-table">
-          <thead><tr>
-            <th>Time</th><th>Context</th><th>Message</th>
-          </tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>`;
-  } else {
-    // KV source — fetch if not cached, then render
-    sparkEl.innerHTML = toggleHtml + '<div class="ce-empty" style="color:var(--text-tertiary)">Loading Worker log…</div>';
-    fetchKvErrorsLog().then(data => {
-      kvErrorsCache = data;
-      if (!data) {
-        sparkEl.innerHTML = toggleHtml + '<div class="ce-empty" style="color:var(--c-amber)">Worker log unavailable — /admin/client-errors-log returned an error.</div>';
-        return;
-      }
-      const entries = Array.isArray(data.entries) ? data.entries : [];
-      if (entries.length === 0) {
-        sparkEl.innerHTML = toggleHtml + '<div class="ce-empty">No Worker-observed errors in the last 90 days.</div>';
-        return;
-      }
-      const summary = `${data.total ?? entries.length} total · ${data.count_4xx ?? 0}× 4xx · ${data.count_5xx ?? 0}× 5xx · ${data.window_days ?? 90}d window`;
-      const rows = entries.map(r => {
-        const ts = r.ts
-          ? new Date(r.ts * 1000).toLocaleString('en-GB', {
-              day: '2-digit', month: 'short',
-              hour: '2-digit', minute: '2-digit', second: '2-digit',
-              hour12: false
-            })
-          : '—';
-        const statusCls = r.status >= 500 ? 'ce-status" style="color:var(--c-red)' :
-                          r.status >= 400 ? 'ce-status" style="color:var(--c-amber)' :
-                          'ce-status';
-        // B10-1: Message column removed — the Worker-observed KV log records
-        // status/endpoint/path but not a message body (appendClientError is
-        // called without errorMsg on the 4xx/5xx egress path), so the column
-        // was always empty. Endpoint + path + status carry the signal here.
-        return `<tr>
-          <td class="ce-ts">${ts}</td>
-          <td class="${statusCls}">${r.status ?? '—'}</td>
-          <td class="ce-ep">${escHtml(r.endpoint ?? '—')}</td>
-          <td class="ce-path">${escHtml(r.path ?? '—')}</td>
-        </tr>`;
-      }).join('');
-      sparkEl.innerHTML = toggleHtml + `
-        <div class="modal-section-title">Worker-observed errors</div>
-        <div class="ce-table-wrap">
-          <table class="ce-table">
-            <thead><tr>
-              <th>Time</th><th>Status</th><th>Endpoint</th><th>Path</th>
-            </tr></thead>
-            <tbody>${rows}</tbody>
-          </table>
-        </div>
-        <p class="ce-provenance-note">${escHtml(summary)}</p>`;
-    });
-  }
+    const line = `<p class="ce-count-line">Counts requests the Worker refused or failed, except closed links, bot probes and the price feed (see Expected events). ${escHtml(_kvCoverage(data))}</p>`;
+    const real = _groupsFromKv(data, ['real']);
+    const rows = (data.entries ?? [])
+      .filter(e => workerCode(e).kind === 'real')
+      .slice(0, 100)
+      .map(r => {
+        const ts = r.ts ? _ceTime(new Date(r.ts * 1000)) : '—';
+        return `<tr><td class="ce-ts">${ts}</td><td class="ce-ctx">${escHtml(`${r.status} ${r.endpoint ?? ''}`)}</td><td class="ce-msg">${escHtml(r.path ?? '—')}</td></tr>`;
+      });
+    sparkEl.innerHTML = toggleHtml + line +
+      (real.length ? _ceGroupHtml(real) : '<div class="ce-empty">No real failures in the log.</div>') +
+      _ceRowsHtml(rows);
+  };
+  if (kvErrorsCache) { render(kvErrorsCache); return; }
+  sparkEl.innerHTML = toggleHtml + '<div class="ce-empty" style="color:var(--text-tertiary)">Loading Worker log…</div>';
+  fetchKvErrorsLog().then(data => { kvErrorsCache = data; render(data); });
 }
 
-// Toggle handler — in-memory only
+// Toggle handler — in-memory only. Headline + sub follow the tab (B12-2).
 function _setCeSource(src) {
   ceSource = src;
-  // Re-render modal content in place without closing
   const sparkEl = document.getElementById('modal-sparkline');
   if (sparkEl) _renderCeModalContent(sparkEl, lastAe ?? {});
-  // Update sub text
-  const ms = document.getElementById('modal-sub');
-  if (ms) ms.textContent = src === 'ae'
-    ? `Reported by browser (24h) · /log/error`
-    : `Observed by Worker (90d) · /admin/client-errors-log`;
+  const { value, colorClass } = _ceHeadline(lastAe, kvErrorsCache);
+  const mv = document.getElementById('modal-value');
+  if (mv) { mv.textContent = value; mv.className = 'modal-value' + (value === 'n/a' ? ' na' : colorClass); }
+  setText('modal-sub', _ceSub());
 }
 
 function _openModalShell() {
@@ -1158,7 +1370,7 @@ window.smokeTest = async function() {
   const checks = [
     { id: 1,  label: 'Credential uniqueness rate',    val: m.credential_uniqueness_rate },
     { id: 2,  label: 'Credential issuances (30d)',    val: farmIssued },
-    { id: 3,  label: 'R2 bytes uploaded (90d)',       val: ae.r2_bytes_uploaded },
+    { id: 3,  label: 'R2 held now (GiB)',             val: _storage ? +_gib(_storage.total_bytes).toFixed(1) : null },
     { id: 4,  label: 'Chunk retrieval success (24h)', val: ae.r2_chunk_retrieval_success_rate },
     { id: 5,  label: 'p95 upload latency',            val: ae.latency_by_endpoint?.upload?.p95_ms },
     { id: 6,  label: 'p99 download latency',          val: ae.latency_by_endpoint?.download?.p99_ms },
@@ -1359,7 +1571,7 @@ async function fetchExecutionDock() {
 
 const DOCK_PILL = {
   active:       { cls: 'active',    label: 'active'    },
-  active_nudge: { cls: 'nudge',     label: 'nudge'     },
+  active_nudge: { cls: 'active',    label: 'active'    },   // B12-2: nudge retired (spec §2.3 — not outreach)
   collected:    { cls: 'collected', label: 'collected' },
   expired:      { cls: 'expired',   label: 'expired'   },
 };
@@ -1374,16 +1586,7 @@ function fmtDockDate(unixSeconds) {
 function renderExecutionDock(data) {
   dockTransfers = Array.isArray(data.transfers) ? data.transfers : [];
   const tbody = document.getElementById('dock-tbody');
-  const badge = document.getElementById('dock-badge');
   if (!tbody) return;
-
-  const badgeCount = data.badge_count ?? 0;
-  if (badge) {
-    if (badgeCount > 0) {
-      badge.style.display = '';
-      badge.textContent = `${badgeCount} need${badgeCount === 1 ? 's' : ''} a nudge`;
-    } else { badge.style.display = 'none'; }
-  }
 
   if (dockTransfers.length === 0) {
     tbody.innerHTML = '<tr><td colspan="5" class="dock-empty">No transfers on the dock.</td></tr>';

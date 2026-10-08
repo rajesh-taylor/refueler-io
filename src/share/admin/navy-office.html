@@ -27,6 +27,7 @@
     <a class="sb-item stub" onclick="scrollToCard('metric-download')">Download latency</a>
     <a class="sb-item stub" onclick="scrollToCard('metric-token-security')">Token security</a>
     <a class="sb-item stub" onclick="scrollToCard('metric-client-errors')">Client errors</a>
+    <a class="sb-item stub" onclick="scrollToCard('card-storage')">Storage &amp; Billing</a>
     <div class="sb-section">Data</div>
     <a class="sb-item stub" onclick="scrollToCard('card-execution-dock')">Transfers</a>
     <a class="sb-item stub" onclick="openSoonModal('Subscribers')">Subscribers<span class="sb-soon">soon</span></a>
@@ -41,7 +42,6 @@
       <button id="theme-paper"  onclick="setTheme('paper')">Paper</button>
       <button id="theme-carbon" onclick="setTheme('carbon')">Carbon</button>
     </div>
-    <button class="sb-signout" onclick="signOut()">Sign out</button>
   </div>
 </aside>
 
@@ -65,6 +65,7 @@
         <span id="countdown"></span>
         <button class="ghost-btn" id="refresh-btn" onclick="refreshAll()">↻ Refresh</button>
         <button class="ghost-btn" onclick="window.print()">Print / Export PDF</button>
+        <button class="ghost-btn signout-btn" onclick="signOut()">Sign out</button>
       </div>
     </div>
 
@@ -151,20 +152,20 @@
           <div class="sm-plain">Uploads started</div>
           <div class="sm-value" id="snap-issuances">—</div>
         </div>
-        <div class="snap-metric" tabindex="0" onclick="openModal('storage', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('storage', this)">
-          <div class="sm-label">Data stored (90d)</div>
-          <div class="sm-plain">Total uploaded</div>
-          <div class="sm-value" id="snap-bytes">—</div>
-        </div>
         <div class="snap-metric" tabindex="0" onclick="openModal('errors', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('errors', this)">
           <div class="sm-label">Server errors</div>
           <div class="sm-plain">Right now</div>
           <div class="sm-value" id="snap-error-rate">—</div>
         </div>
-        <div class="snap-metric" id="metric-token-security" tabindex="0" onclick="openModal('uniqueness', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('uniqueness', this)">
-          <div class="sm-label">Token security</div>
-          <div class="sm-plain">No double-spends</div>
-          <div class="sm-value" id="snap-uniqueness">—</div>
+        <div class="snap-metric" id="metric-client-errors" tabindex="0" onclick="openModal('client-errors', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('client-errors', this)">
+          <div class="sm-label">Client errors (24h)</div>
+          <div class="sm-plain">Real failures only</div>
+          <div class="sm-value" id="snap-client-errors">—</div>
+        </div>
+        <div class="snap-metric quiet" id="metric-expected-events" tabindex="0" onclick="openModal('expected-events', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('expected-events', this)">
+          <div class="sm-label">Expected events (24h)</div>
+          <div class="sm-plain">Retries, closed links, refusals</div>
+          <div class="sm-value" id="snap-expected-events">—</div>
         </div>
       </div>
 
@@ -209,10 +210,10 @@
           <div class="sm-plain">Total on free tier</div>
           <div class="sm-value" id="snap-free-users">—</div>
         </div>
-        <div class="snap-metric" id="metric-client-errors" tabindex="0" onclick="openModal('client-errors', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('client-errors', this)">
-          <div class="sm-label">Client errors (24h)</div>
-          <div class="sm-plain">Browser-side failures</div>
-          <div class="sm-value" id="snap-client-errors">—</div>
+        <div class="snap-metric" id="metric-token-security" tabindex="0" onclick="openModal('uniqueness', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('uniqueness', this)">
+          <div class="sm-label">Token security</div>
+          <div class="sm-plain">No double-spends</div>
+          <div class="sm-value" id="snap-uniqueness">—</div>
         </div>
         <div class="snap-metric deferred" tabindex="0" title="Deferred — B7 Lightning/Blink"
              onclick="openModal('lightning', this)"
@@ -241,11 +242,53 @@
       </div>
     </div>
 
+    <!-- ─── Storage & Billing (B12-2) ─────────────────────────────────────── -->
+    <div class="storage-panel" id="card-storage">
+      <div class="dock-header">
+        <div class="dock-title">Storage &amp; Billing</div>
+        <span class="storage-asof" id="storage-asof"></span>
+      </div>
+      <div class="card-group">
+      <div class="row-6">
+        <div class="snap-metric" tabindex="0" onclick="openModal('storage', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('storage', this)">
+          <div class="sm-label">Fleet occupancy</div>
+          <div class="sm-plain" id="snap-fleet-plain">Held in R2 now</div>
+          <div class="sm-value" id="snap-bytes">—</div>
+          <div class="sm-plain" id="snap-fleet-cost"></div>
+        </div>
+        <div class="snap-metric" tabindex="0" onclick="openModal('storage', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('storage', this)">
+          <div class="sm-label">Sovereign</div>
+          <div class="sm-plain">Live transfers · held</div>
+          <div class="sm-value" id="snap-sovereign">—</div>
+        </div>
+        <div class="snap-metric" tabindex="0" onclick="openModal('storage', this)" onkeydown="if(event.key==='Enter'||event.key===' ')openModal('storage', this)">
+          <div class="sm-label">Pro Bono</div>
+          <div class="sm-plain">Live transfers · held</div>
+          <div class="sm-value" id="snap-probono">—</div>
+        </div>
+        <div class="snap-metric quiet">
+          <div class="sm-label">Capacity pressure</div>
+          <div class="sm-plain">Accounts near their quota</div>
+          <div class="sm-value na">No accounts yet</div>
+        </div>
+        <div class="snap-metric quiet">
+          <div class="sm-label">Chartered orgs</div>
+          <div class="sm-plain">Quota · held · renewal</div>
+          <div class="sm-value na">No accounts yet</div>
+        </div>
+        <div class="snap-metric quiet">
+          <div class="sm-label">Citizen distribution</div>
+          <div class="sm-plain">How full accounts are</div>
+          <div class="sm-value na">No accounts yet</div>
+        </div>
+      </div>
+      </div>
+    </div>
+
     <!-- ─── Execution Dock (Share-Dash-1) ─────────────────────────────────── -->
     <div class="dock-panel" id="card-execution-dock">
       <div class="dock-header">
         <div class="dock-title">Execution Dock · last 10 transfers</div>
-        <span class="dock-badge" id="dock-badge" style="display:none;"></span>
       </div>
       <div class="dock-table-wrap">
         <table class="dock-table">
