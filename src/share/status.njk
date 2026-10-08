@@ -196,27 +196,33 @@ activePage: "status"
   }
 
   // ── Incidents ─────────────────────────────────────────────────────────
+  // KV-Fix-1a: status data comes from KV — untrusted text. Severity is a
+  // lookup, never interpolated; times must be integers; updates an array.
+  const SEVERITIES = { minor: 'minor', major: 'major', critical: 'critical' };
+  const isTime = v => Number.isInteger(v) && v > 0;
+
   function renderIncidents(incidents) {
-    if (!incidents || incidents.length === 0) {
+    if (!Array.isArray(incidents) || incidents.length === 0) {
       incidentList.innerHTML = '<p class="no-incidents">No incidents in the current period.</p>';
       return;
     }
 
     // Most recent first
-    const sorted = [...incidents].sort((a, b) => (b.started_at ?? 0) - (a.started_at ?? 0));
+    const valid  = incidents.filter(inc => inc && typeof inc === 'object');
+    const sorted = valid.sort((a, b) => (isTime(b.started_at) ? b.started_at : 0) - (isTime(a.started_at) ? a.started_at : 0));
 
     incidentList.innerHTML = sorted.map(inc => {
-      const severityClass = `severity-${inc.severity ?? 'minor'}`;
-      const resolvedBadge = inc.resolved_at
+      const severity = Object.hasOwn(SEVERITIES, inc.severity) ? SEVERITIES[inc.severity] : 'minor';
+      const resolvedBadge = isTime(inc.resolved_at)
         ? `<span class="incident-resolved-badge">Resolved</span>`
         : '';
 
       const times = [];
-      if (inc.started_at)  times.push(`Started: ${fmtDatetime(inc.started_at)} (${fmtRelative(inc.started_at)})`);
-      if (inc.resolved_at) times.push(`Resolved: ${fmtDatetime(inc.resolved_at)}`);
+      if (isTime(inc.started_at))  times.push(`Started: ${fmtDatetime(inc.started_at)} (${fmtRelative(inc.started_at)})`);
+      if (isTime(inc.resolved_at)) times.push(`Resolved: ${fmtDatetime(inc.resolved_at)}`);
 
-      const updates = inc.updates && inc.updates.length
-        ? inc.updates.map(u => `
+      const updates = Array.isArray(inc.updates)
+        ? inc.updates.filter(u => u && isTime(u.at) && typeof u.body === 'string').map(u => `
             <div class="incident-update">
               <span class="incident-update-time">${fmtDatetime(u.at)}</span>
               <span class="incident-update-body">${escHtml(u.body)}</span>
@@ -226,7 +232,7 @@ activePage: "status"
       return `
         <div class="incident-card">
           <div class="incident-card-head">
-            <span class="incident-severity ${severityClass}">${escHtml(inc.severity ?? 'minor')}</span>
+            <span class="incident-severity severity-${severity}">${severity}</span>
             <span class="incident-title">${escHtml(inc.title ?? 'Incident')}</span>
             ${resolvedBadge}
           </div>
