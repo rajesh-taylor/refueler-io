@@ -1,15 +1,15 @@
 ---
-title: "What a subpoena gets from eight file transfer services · Refueler Notes"
-description: "If someone served a valid legal order to your file transfer provider tomorrow, what would they actually hand over? Eight services, two tables, no marketing copy."
+title: "What a court order gets from your file transfer service · Refueler Notes"
+description: "What ten file transfer services could hand over to a valid legal order, checked against their own policies, security pages and transparency reports in October 2026."
 canonical: "https://refueler.io/notes/what-a-subpoena-gets/"
 activePage: notes
 permalink: /notes/what-a-subpoena-gets/index.html
 # Notes list: drives the /notes/ card and /notes/latest.json
-cardTitle: "What a subpoena gets from eight file transfer services"
-summary: "If a legal order reached your file transfer service tomorrow, what would it hand over? Eight services compared."
+cardTitle: "What a court order gets from your file transfer service"
+summary: "What ten file transfer services could hand over to a valid legal order, checked against their own published policies."
 topics: ["Privacy", "Legal", "File transfer"]
 date: 2026-07-28
-readTime: "6 min"
+readTime: "7 min"
 ---
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -22,63 +22,82 @@ readTime: "6 min"
 <link rel="stylesheet" href="{{ '/notes/notes.css' | cssv }}">
 <style>
   /* ── Article-specific additions ── */
-  .table-label {
-    font-family: var(--font-heading);
+
+  /* Status chips: muted, low-saturation — the word carries the signal, the colour only supports it */
+  :root {
+    --chip-good:     #2F6B45;
+    --chip-good-bg:  rgba(47, 107, 69, 0.12);
+    --chip-bad:      #9A3B2E;
+    --chip-bad-bg:   rgba(154, 59, 46, 0.09);
+    --chip-plan:     var(--warn);
+    --chip-plan-bg:  rgba(184, 115, 51, 0.12);
+  }
+  [data-theme="carbon"] {
+    --chip-good:     #8CC79A;
+    --chip-good-bg:  rgba(140, 199, 154, 0.13);
+    --chip-bad:      #E39A8C;
+    --chip-bad-bg:   rgba(227, 154, 140, 0.10);
+    --chip-plan-bg:  rgba(200, 148, 58, 0.14);
+  }
+
+  .table-group { margin: 2rem 0 2.5rem; }
+  .table-group .table-wrap { margin: 0; }
+
+  .compare-table th { white-space: normal; line-height: 1.35; vertical-align: bottom; padding: 0.75rem 0.5rem; }
+  .compare-table th:not(:first-child) { text-align: center; }
+  .compare-table td { padding: 0.6rem 0.5rem; vertical-align: middle; text-align: center; }
+  .compare-table td:first-child { text-align: left; white-space: nowrap; padding-left: 1rem; }
+  .compare-table th:first-child { padding-left: 1rem; }
+  .compare-table td:first-child small {
+    display: block;
+    font-family: var(--font-sans);
+    font-weight: 400;
     font-size: 0.6875rem;
-    font-weight: 500;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
     color: var(--text-tertiary);
-    margin-bottom: 0.75rem;
-    margin-top: 0;
+    margin-top: 2px;
   }
-
-  .table-group {
-    margin-bottom: 2.5rem;
-  }
-
-  .cell-yes   { color: var(--text-primary); font-weight: 500; }
-  .cell-no    { color: var(--text-tertiary); }
-  .cell-maybe { color: var(--text-secondary); }
-
-  .modal-table-wrap { overflow-x: auto; margin-top: 1.5rem; }
-  .modal-data-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-family: var(--font-mono);
-    font-size: 0.8125rem;
-    line-height: 1.55;
-  }
-  .modal-data-table th {
+  .compare-table tr.grp td {
+    text-align: left;
     font-family: var(--font-heading);
-    font-size: 0.6125rem;
+    font-size: 0.625rem;
     font-weight: 500;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--text-tertiary);
-    padding: 0.625rem 0.875rem;
-    text-align: left;
-    border-bottom: 0.5px solid var(--border);
+    padding-top: 1rem;
+    background: transparent;
+  }
+  .compare-table tr.grp:hover td { background: transparent; }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.6em;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1;
+    padding: 0.3em 0.5em;
+    border-radius: 999px;
     white-space: nowrap;
   }
-  .modal-data-table td {
-    padding: 0.7rem 0.875rem;
-    border-bottom: 0.5px solid var(--border);
-    color: var(--text-primary);
-    vertical-align: top;
-  }
-  .modal-data-table tr:last-child td { border-bottom: none; }
-  .modal-data-table td:first-child {
-    font-family: var(--font-heading);
-    font-weight: 500;
-    white-space: nowrap;
-  }
-  .modal-data-table td.notes {
+  .chip-good { color: var(--chip-good); background: var(--chip-good-bg); }
+  .chip-bad  { color: var(--chip-bad);  background: var(--chip-bad-bg); }
+  .chip-plan { color: var(--chip-plan); background: var(--chip-plan-bg); }
+  .chip-note { color: var(--text-secondary); background: var(--surface); }
+
+  .table-legend {
     font-family: var(--font-sans);
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     color: var(--text-secondary);
+    margin-top: 0.6rem;
+    line-height: 1.6;
   }
 
+  .holds-list { padding-left: 1.1em; }
+  .holds-list li { margin-bottom: 0.9em; }
+
+  .modal-box .compare-table { margin-top: 1rem; }
   .modal-note {
     font-family: var(--font-serif);
     font-size: 0.875rem;
@@ -91,6 +110,56 @@ readTime: "6 min"
 <body>
 
 {% include "nav.njk" %}
+
+{#- Comparison data: one row per service. Cell codes: y = ✓, n = ✕, anything else = a short label.
+    Label chips: "2027"/"Planned" amber, all other labels grey. Checked 10 Oct 2026 against each service's own policy. -#}
+{% set groups = [
+  { label: "The service holds the key", rows: [
+    { name: "WeTransfer",     sub: "Netherlands · AWS",        c: ["n","n","n","n","n","n"] },
+    { name: "Smash",          sub: "France · AWS",             c: ["n","y","n","n","n","n"] },
+    { name: "SwissTransfer",  sub: "Switzerland · Infomaniak", c: ["n","y","n","n","n","n"] }
+  ]},
+  { label: "The key stays with you", rows: [
+    { name: "wormhole.app",   sub: "US",                       c: ["y","y","Part","n","n","Not stated"] },
+    { name: "Magic Wormhole", sub: "Software",                 c: ["y","y","y","y","n","Not stated"] },
+    { name: "OnionShare",     sub: "Software · Tor",           c: ["y","y","y","y","n","y"] },
+    { name: "Proton Drive",   sub: "Switzerland",              c: ["y","n","y","n","Planned","Short-term"] },
+    { name: "Tresorit Send",  sub: "Switzerland",              c: ["y","y","n","n","n","n"] },
+    { name: "crypt.fyi",      sub: "Base not stated",          c: ["y","y","y","y","y","Short-term"] },
+    { name: "Refueler Share", sub: "UK · Cloudflare",          c: ["y","y","y","2027","2027","~1 min"] }
+  ]}
+] %}
+{% macro compareTable(label, groups) %}
+<div class="table-wrap">
+  <table class="data-table compare-table" aria-label="{{ label }}">
+    <thead>
+      <tr>
+        <th>Service</th>
+        <th>Key stays<br>with you</th>
+        <th>No account<br>to send</th>
+        <th>Open<br>source</th>
+        <th>Run it<br>yourself</th>
+        <th>Post-<br>quantum</th>
+        <th>IP not<br>logged</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for g in groups %}
+      <tr class="grp"><td colspan="7">{{ g.label }}</td></tr>
+      {% for r in g.rows %}
+      <tr>
+        <td>{{ r.name }}<small>{{ r.sub }}</small></td>
+        {% for v in r.c %}
+        <td>{% if v == "y" %}<span class="chip chip-good" aria-label="Yes">✓</span>{% elif v == "n" %}<span class="chip chip-bad" aria-label="No">✕</span>{% elif v == "2027" or v == "Planned" %}<span class="chip chip-plan">{{ v }}</span>{% else %}<span class="chip chip-note">{{ v }}</span>{% endif %}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="table-legend">✓ yes · ✕ no · Short-term: kept briefly to stop abuse · Not stated: the service's own policy doesn't say · Base · storage under each name</p>
+{% endmacro %}
 
 <div class="article-wrap">
 
@@ -106,178 +175,108 @@ readTime: "6 min"
       <span class="eyebrow-dot"></span>
       <span>File transfer</span>
     </div>
-    <h1 class="article-title">What a subpoena gets from eight file transfer services</h1>
-    <p class="article-standfirst">Most privacy policies are written by lawyers to protect the company, not you.</p>
+    <h1 class="article-title">What a court order gets from your file transfer service</h1>
+    <p class="article-standfirst">Ten services, checked against their own policies, security pages and transparency reports.</p>
     <div class="article-meta">
-      <span>July 2026</span>
+      <span>July 2026 · updated 10 October 2026</span>
       <span class="meta-dot"></span>
-      <span>6 min read</span>
+      <span>7 min read</span>
     </div>
   </header>
 
   <article class="article-body">
 
-    <p>This piece skips the policy and goes straight to the question that matters: if someone served a valid legal order to your file transfer provider tomorrow, what would they actually hand over? A production order in England and Wales, a subpoena in US proceedings — the mechanism varies by jurisdiction; the question is the same.</p>
+    <p>This piece looks at what a file transfer service could hand over if a court ordered it to. A production order in England and Wales and a subpoena in the United States work differently, but both can only reach what the service holds.</p>
 
-    <h2>The identity question</h2>
+    <p>Everything below comes from the services' own published documents, checked on 10 October 2026. Where we couldn't confirm something, we say so.</p>
 
-    <p>Two things can be handed to a court: what you sent, and who sent it. Most privacy discussions focus on the first. The second is just as consequential.</p>
+    <h2>Whose key</h2>
 
-    <p>An account is a persistent identity anchor — every file, every access event, every IP address hangs off it and can be correlated. A court order that cannot read your files can still prove you sent them. WeTransfer logs your email address. Smash logs your email or your IP. SwissTransfer logs your IP. Even Proton, whose encryption is genuinely strong, ties your files to an account identity. Content protection and identity protection are not the same property.</p>
+    <p>Every service here says your files are encrypted, and they all are. The difference is who holds the key.</p>
 
-    <p>For services without accounts, the legal order has no identity to request — because none was collected. OnionShare achieves this via Tor, which also masks IP addresses at the network layer. For users who want equivalent network-layer anonymity without requiring recipients to run Tor Browser, a VPN closes most of the gap.</p>
+    <p>Some services encrypt your file on their own servers, with a key they keep. They can open the file when they need to: to scan it, to show a preview, or because a court tells them to.</p>
 
-    <p>Mullvad requires no account email at signup, accepts Bitcoin and Monero, and covers five devices.</p>
+    <p>Others encrypt the file on your own device, before it leaves. The key stays with you and the person you send it to. The service stores something it can't read. This is what security people call end-to-end encryption.</p>
 
-    <p>Refueler Share requires no account either. That is a design choice, not an accident. It has costs: no account means no recovery, no persistent history. Paid tiers add transfer controls — expiry, revocation, storage — without attaching an identity to them.</p>
+    <p>WeTransfer's privacy policy is clear about which kind it is. It says it may share "your information, including User Content" with law enforcement in response to a subpoena, warrant or government request. WeTransfer and Smash also record your IP address and email address, by their own policies.</p>
 
-    <div class="table-group">
-      <p class="table-label">Services where the operator can read your files</p>
-      <div class="table-wrap">
-        <table class="data-table" aria-label="File transfer services where the operator holds encryption keys">
-          <thead>
-            <tr>
-              <th>Service</th>
-              <th>Your content</th>
-              <th>Your identity</th>
-              <th>Metadata</th>
-              <th class="notes-col">Notes</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>WeTransfer</td>
-              <td class="cell-yes">Yes</td>
-              <td class="cell-yes">Yes</td>
-              <td class="cell-yes">Yes</td>
-              <td class="notes-col">Operator holds the keys. TLS in transit, at rest on their servers.</td>
-            </tr>
-            <tr>
-              <td>Smash</td>
-              <td class="cell-yes">Yes</td>
-              <td class="cell-yes">IPs; email if provided</td>
-              <td class="cell-yes">Yes</td>
-              <td class="notes-col">Same model. Content is readable by design.</td>
-            </tr>
-            <tr>
-              <td>SwissTransfer</td>
-              <td class="cell-yes">Yes</td>
-              <td class="cell-yes">IPs</td>
-              <td class="cell-yes">Yes</td>
-              <td class="notes-col">Infomaniak holds the keys. The flag is not the architecture.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <p>None of this is hidden. A service that can open your files can preview them, scan them for malware and recover them if something goes wrong. It can also produce them.</p>
 
-    <p>The three services above are the simple case — the operator holds the encryption keys, so a valid legal order produces your files in plaintext. The picture below is more varied: content is protected, but the trade-offs on identity and metadata differ considerably.</p>
+    <h2>What the record shows</h2>
+
+    <p>The clearest public examples come from Proton, which builds end-to-end encrypted email and storage in Switzerland.</p>
+
+    <p>In 2021, French police wanted to identify a climate activist who used Proton Mail. Their request went through Europol to Swiss authorities, who issued a binding order. Proton began logging the IP address used to sign in to the account (the number that identifies an internet connection) and handed it over. The emails stayed unreadable, because Proton doesn't hold the keys.</p>
+
+    <p>In 2024 it happened another way. Spanish police asked for the recovery email on a Proton account: the backup address used to reset a password. Proton gave it. It was an Apple address, and Apple's records led police to the person.</p>
+
+    <p>In both cases the encryption held. What reached the police was the information around the messages: when an account was used, from where, and what other accounts it was linked to. Security people call this metadata.</p>
+
+    <p>Proton publishes the numbers, which most services don't. In 2025 it received 9,301 orders for Proton Mail, contesting 988 of them. Whatever it hands over, it says it has no means to decrypt the emails or files.</p>
+
+    <p>Proton VPN shows the same rule from the other side. In 2025 it received 59 orders and handed over nothing, because it keeps no connection logs. A service can only produce what it keeps.</p>
+
+    <h2>Ten services side by side</h2>
 
     <div class="table-group">
-      <p class="table-label">Services where content is protected from the operator</p>
-      <div class="table-wrap">
-        <table class="data-table" aria-label="File transfer services where content is encrypted client-side">
-          <thead>
-            <tr>
-              <th>Service</th>
-              <th>Your content</th>
-              <th>Your identity</th>
-              <th>Metadata</th>
-              <th class="notes-col">Notes</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Wormhole</td>
-              <td class="cell-maybe">Probably not</td>
-              <td class="cell-maybe">No account; IPs yes</td>
-              <td class="cell-yes">Yes</td>
-              <td class="notes-col">PAKE-based. Closed source — claim unverifiable. US jurisdiction.</td>
-            </tr>
-            <tr>
-              <td>OnionShare</td>
-              <td class="cell-no">No</td>
-              <td class="cell-no">No — Tor hidden service</td>
-              <td class="cell-maybe">Sizes, timing via Tor</td>
-              <td class="notes-col">Self-hosted software. Tor provides network-layer anonymity the server never sees. Recipient requires Tor Browser.</td>
-            </tr>
-            <tr>
-              <td>Tresorit</td>
-              <td class="cell-no">No</td>
-              <td class="cell-yes">Yes — name, email, org</td>
-              <td class="cell-yes">Yes, extensive</td>
-              <td class="notes-col">Client-side E2EE, genuine. Identity is a feature for their buyers.</td>
-            </tr>
-            <tr>
-              <td>Proton Drive</td>
-              <td class="cell-no">No</td>
-              <td class="cell-yes">Yes — account + payment</td>
-              <td class="cell-yes">Yes, incl. IPs on order</td>
-              <td class="notes-col">Proven: Swiss court order, 2021. Content stayed protected; metadata did not.</td>
-            </tr>
-            <tr>
-              <td>Refueler Share</td>
-              <td class="cell-no">No — encrypted noise</td>
-              <td class="cell-no">None exists</td>
-              <td class="cell-maybe">Sizes, timestamps, edge IPs</td>
-              <td class="notes-col">UK jurisdiction. No account, no identity to produce.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      {{ compareTable("Ten file transfer services compared", groups) }}
+      <button class="table-expand-trigger" onclick="openModal('modal-full-analysis')" aria-haspopup="dialog">
+        Full screen ↗
+      </button>
     </div>
 
-    <button class="table-expand-trigger" onclick="openModal('modal-full-analysis')" aria-haspopup="dialog">
-      See full analysis ↗
-    </button>
+    <p>Two of these share a name. Magic Wormhole is an open-source tool, first released in 2016, that moves a file directly between two computers using a short spoken code. Nothing is stored, and both people need to be online at once. wormhole.app is a separate website, run by WebTorrent, LLC in California. It works much like Refueler Share: the key travels in the link, files are kept for 24 hours, and the recipient can start downloading before the upload has finished.</p>
 
-    <h2>What "encrypted" actually means</h2>
+    <p>OnionShare runs on your own computer over Tor, which hides both people's IP addresses; the recipient needs Tor Browser. Proton Drive needs an account to send. Tresorit Send needs none and suggests sending the password separately from the link. crypt.fyi is built for passwords, notes and small files rather than large transfers.</p>
 
-    <p>All of them are, technically speaking, correct. The question is: encrypted with whose key?</p>
+    <p>Our own row has gaps. You can't yet run Refueler Share on your own server, though the code is public under the Apache 2.0 licence. Its encryption isn't post-quantum yet. Both are planned for 2027. It also hasn't had an independent security audit of its code; that will follow once the payment and timestamp work is finished.</p>
 
-    <p>WeTransfer, Smash, and SwissTransfer encrypt your file in transit (TLS) and at rest on their servers. They hold the keys. A valid court order, a motivated employee, or a sufficiently thorough breach can produce your file in plaintext. This is not a flaw in their implementation — it is their architecture. They built a system where they can read your files, and they did so deliberately, because useful features like link previews, virus scanning, and thumbnail generation require it.</p>
+    <h2>Ownership can change the terms and conditions</h2>
 
-    <p>Tresorit and Proton Drive are different. Both encrypt client-side — your device does the encryption before anything leaves it, and the key never reaches their servers. A court order against Proton's infrastructure yields account metadata and IP addresses (as Swiss courts demonstrated in 2021) but not file content. The architecture earns the claim.</p>
+    <p>A privacy policy describes a company as it is today. Companies change hands.</p>
 
-    <p>Wormhole states a similar property via PAKE — Password Authenticated Key Exchange, where the decryption key derives from a code shared out-of-band and never transmitted to the server. The claim is architecturally sound. The problem is that Wormhole is closed source and unaudited, so you cannot verify it. The gap between "they say so" and "we can check" is where legal risk lives.</p>
+    <p>Bending Spoons bought WeTransfer in July 2024. A year later, WeTransfer's terms gained a licence to use uploaded files for "improving performance of machine learning models that enhance our content moderation process". After public concern, WeTransfer rewrote the clause within days and said it doesn't use customer content that way. Its current list of sub-processors, dated April 2026, includes Bending Spoons and its affiliates, AWS and two AI companies.</p>
 
-    <h2>The metadata problem</h2>
+    <p>All of this is in WeTransfer's own documents. It is a reminder that the terms you agreed to can be rewritten by whoever owns the service next. That matters less when the service never held the key.</p>
 
-    <p>Client-side encryption solves one problem and leaves another standing.</p>
+    <h2>What jurisdiction does</h2>
 
-    <p>Even when a provider cannot read your files, they know you have files. They know how large they are, when you uploaded them, when they were downloaded, and — increasingly, under legal pressure — who was at the keyboard when both events happened. IP address logs are metadata. Account identity is metadata. The graph of who sent what to whom, without a single readable byte of content, can be legally and journalistically significant.</p>
+    <p>Switzerland, the Netherlands, France and the UK each set their own bar for when data must be handed over, but those rules decide how an order is made, not what the service holds. WeTransfer and Smash both store files with AWS, a US company, and the US CLOUD Act lets American authorities require US companies to hand over data they control, wherever it is stored. The same law applies to Cloudflare, which Refueler Share runs on. The host isn't what separates these services. The key is.</p>
 
-    <p>Proton published a transparency report after their 2021 case. It confirmed what their architecture already implied: the content of a ProtonMail user's emails was never produced. The user's IP address was. Content protection and identity protection are not the same property, and privacy-focused providers vary considerably in which one they offer.</p>
-
-    <p>The honest position is to be specific about each: <em>this</em> is protected by mathematics, <em>that</em> is visible to the operator and therefore reachable by legal process.</p>
-
-    <h2>What jurisdiction actually buys you</h2>
-
-    <p>SwissTransfer's homepage prominently features Switzerland. The implication is that Swiss privacy law protects your files. This is partially true and mostly irrelevant.</p>
-
-    <p>Swiss law does require a valid Swiss court order to compel disclosure — a higher bar than a production order under the Police and Criminal Evidence Act in England and Wales, or a federal subpoena in US proceedings. But if the company holds your encryption keys, jurisdiction determines the <em>process</em> for getting your files, not whether they're gettable. A sufficiently motivated court in any jurisdiction that can reach the company will eventually produce a valid order. The flag on the website describes the legal process surface, not the cryptographic one.</p>
-
-    <p>Architecture protects your content. Jurisdiction shapes the paperwork required to ask for it.</p>
+    <p>Architecture is what protects you; jurisdiction just determines how long the paperwork takes.</p>
 
     <h2>What a court order gets from Refueler Share</h2>
 
-    <p>Encrypted ciphertext the operator cannot decrypt. File sizes and chunk counts. Upload and download timestamps. Cloudflare edge IP addresses — the IP addresses of connections to Cloudflare's network, logged at the infrastructure level. No account. No identity. No payment record for the free tier; a Lightning payment hash (pseudonymous) or a Stripe record (identified) for paid tiers.</p>
+    <p>This is the full list of what we, or the companies we run on, could be made to produce.</p>
 
-    <p>We publish this list voluntarily because the alternative — making you guess — is the pattern that produces the surprises in other providers' terms updates.</p>
+    <ul class="holds-list">
+      <li><strong>The encrypted file.</strong> Without the key it is unreadable, to us as well.</li>
+      <li><strong>The file's exact size.</strong> We stopped keeping it in our own records in October 2026; it now travels in the link. But the stored, encrypted parts are only slightly larger than the original (16 bytes per 32 MiB part), so their size gives the exact figure away.</li>
+      <li><strong>Timing and settings.</strong> When the file was uploaded and when it expires, how many parts it has, which plan it used, and whether delete-after-download or a download window was set.</li>
+      <li><strong>A fingerprint of the password, if you set one.</strong> Today this is a plain SHA-256 hash, and the password reaches our server as typed when the recipient unlocks the file. A weak password could be guessed from the hash. The password only gates the download: it is not part of the key, so the file stays encrypted either way. A fix is designed and on our roadmap. The password will be strengthened on your device and become part of the key, and our server will never see it. We'll update this page when it ships.</li>
+      <li><strong>A record that each upload pass was used,</strong> so none can be used twice. It doesn't name you.</li>
+      <li><strong>IP addresses, briefly.</strong> Our own systems keep a visitor's IP address for about a minute, to slow down abuse.</li>
+    </ul>
 
-    <p>The encryption key for every file lives in the URL fragment. Fragments are not transmitted in HTTP requests and are not logged by servers. Whoever has the link has the key. Whoever doesn't, doesn't.</p>
+    <p>Cloudflare runs the servers your browser connects to, between you and our code. Those servers see your IP address and the web address you asked for, including the transfer's ID. They never see the key: that sits after the #, and browsers don't send that part. If you'd rather Cloudflare didn't see your IP, use a VPN, ideally one with multi-hop.</p>
 
-    <p>If you sent a file yesterday and deleted the link, the encrypted file is still in our storage: the link works until its expiry date, and the stored data is cleared no later than 92 days after upload. Practically speaking, it's unreadable by anyone without the fragment. Including us.</p>
+    <p>There are no payment records, because paid plans haven't opened yet. When they do, there will be two ways to pay. Paying by card means the card company and our payment processor hold your name and email, linked to your plan. Paying with bitcoin over Lightning goes through our own node, which sees an amount, a payment ID and a time, but not who paid. Once that route is live, upload passes will be bought separately from transfers, so a payment can't be matched to a file.</p>
 
-    <h2>What no service can do</h2>
+    <p>What no order can get from us: the key, the real file name, or the contents. All three live after the # in the link, and that part never reaches us.</p>
 
-    <p>None of these services protect against endpoint compromise. If the device you're using is already compromised, the file was readable before encryption touched it. Client-side encryption protects against server-side failure — a breach, a court order, a motivated employee. It is not a substitute for device security, and no provider in this space claims otherwise.</p>
+    <p>If you sent a file yesterday and deleted the link, the encrypted file is still in our storage: the link works until its expiry date, and the stored data is cleared no later than 92 days after upload. It stays unreadable to anyone without the link, including us.</p>
 
-    <p>Understanding the boundary is part of understanding the tool.</p>
+    <h2>What we can't protect yet</h2>
+
+    <p>Each time you open Refueler Share, your browser downloads our code from Cloudflare. If Cloudflare were forced or hacked into sending altered code, that code could copy the keys of people who send files afterwards. Files already sent would stay safe. Every service that encrypts in the browser shares this weakness, including Proton's web apps, wormhole.app and crypt.fyi. We plan to publish a fingerprint of every version of our code, lock the page to it, and offer ways to send that don't load fresh code on each visit.</p>
+
+    <p>No service on this page can protect a device that is already compromised. If someone controls your computer or phone, they can read the file before it is encrypted. End-to-end encryption protects you from the server. It doesn't replace looking after your own device.</p>
+
+    <p>We'll update this page when any of this changes. From January 2027 we'll also publish a transparency report twice a year, including when there is nothing to report.</p>
 
     <div class="article-cta">
       <p class="cta-label">Refueler Share</p>
-      <p class="cta-text">Anonymous encrypted file transfer. No account required. Free for transfers up to 4 GB.</p>
+      <p class="cta-text">Encrypted file transfer. No account required. Free for transfers up to 4 GB.</p>
       <a class="cta-link" href="/share/">Try it →</a>
     </div>
 
@@ -285,7 +284,7 @@ readTime: "6 min"
 
 </div><!-- /article-wrap -->
 
-<!-- ── Modal: Full analysis ── -->
+<!-- ── Modal: the comparison table, full screen ── -->
 <div
   class="modal-overlay"
   id="modal-full-analysis"
@@ -296,89 +295,9 @@ readTime: "6 min"
 >
   <div class="modal-box">
     <button class="modal-close" onclick="closeModal('modal-full-analysis')" aria-label="Close">Close</button>
-    <h2 class="modal-title" id="modal-full-analysis-title">Full analysis — what each service actually exposes</h2>
-    <p style="font-family:var(--font-serif);font-size:0.9375rem;line-height:1.7;color:var(--text-secondary);margin-bottom:1.5rem;">The summary tables show what a court order <em>gets</em>. This table shows why, and what the operator can see independently of any legal process.</p>
-    <div class="modal-table-wrap">
-      <table class="modal-data-table" aria-label="Extended analysis of file transfer service disclosure risks">
-        <thead>
-          <tr>
-            <th>Service</th>
-            <th>Encryption model</th>
-            <th>Key holder</th>
-            <th>Account required</th>
-            <th>Jurisdiction</th>
-            <th class="notes">Operator can see</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>WeTransfer</td>
-            <td>TLS + server-side at rest</td>
-            <td>Operator</td>
-            <td>No (free); email logged</td>
-            <td>Netherlands / US</td>
-            <td class="notes">File content, sender email, recipient email, download IPs, timestamps.</td>
-          </tr>
-          <tr>
-            <td>Smash</td>
-            <td>TLS + server-side at rest</td>
-            <td>Operator</td>
-            <td>No; email or IP logged</td>
-            <td>France</td>
-            <td class="notes">File content, sender identity (email or IP), download events.</td>
-          </tr>
-          <tr>
-            <td>SwissTransfer</td>
-            <td>TLS + server-side at rest</td>
-            <td>Operator (Infomaniak)</td>
-            <td>No; IP logged</td>
-            <td>Switzerland</td>
-            <td class="notes">File content. Swiss process required to compel — but keys exist.</td>
-          </tr>
-          <tr>
-            <td>Wormhole</td>
-            <td>PAKE client-side (claimed)</td>
-            <td>Neither (if claim holds)</td>
-            <td>No; IPs logged</td>
-            <td>US</td>
-            <td class="notes">File sizes, timing, IPs. Content: unverifiable without audit.</td>
-          </tr>
-          <tr>
-            <td>OnionShare</td>
-            <td>AES-GCM client-side; Tor transport</td>
-            <td>Sender</td>
-            <td>No — self-hosted software</td>
-            <td>n/a (software)</td>
-            <td class="notes">Nothing — Tor hidden service. File exists only while sender's machine is running. Recipient requires Tor Browser.</td>
-          </tr>
-          <tr>
-            <td>Tresorit</td>
-            <td>Client-side E2EE (audited)</td>
-            <td>User</td>
-            <td>Yes — name, email, org, payment</td>
-            <td>Switzerland / Hungary</td>
-            <td class="notes">File sizes, sharing graph, account metadata. Content: not accessible.</td>
-          </tr>
-          <tr>
-            <td>Proton Drive</td>
-            <td>Client-side E2EE (audited)</td>
-            <td>User</td>
-            <td>Yes — account + payment + IPs</td>
-            <td>Switzerland</td>
-            <td class="notes">Account identity, IP logs (court-compelled 2021), file metadata. Content: not accessible.</td>
-          </tr>
-          <tr>
-            <td>Refueler Share</td>
-            <td>AES-GCM client-side; key in URL fragment</td>
-            <td>Sender (fragment never leaves device)</td>
-            <td>No — no account exists</td>
-            <td>UK</td>
-            <td class="notes">Encrypted ciphertext, file sizes, chunk counts, timestamps, Cloudflare edge IPs. Content and identity: not accessible.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="modal-note">Operator visibility is independent of legal process. A court order can only compel disclosure of data the operator holds. Where content is encrypted client-side and the operator has no key, a valid order produces noise.</p>
+    <h2 class="modal-title" id="modal-full-analysis-title">Ten services side by side</h2>
+    {{ compareTable("Ten file transfer services compared, full screen", groups) }}
+    <p class="modal-note">A court order can only reach what a service holds. Where the file is encrypted on your device and the service has no key, an order produces data that can't be read. Checked 10 October 2026.</p>
   </div>
 </div>
 
