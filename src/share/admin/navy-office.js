@@ -382,6 +382,9 @@ function _storageModalHtml(s) {
   const liveRows = live.length
     ? live.map(([t, v]) => row(TIER_LABEL[t] ?? t, `${v.transfers} · ${_fmtGib(v.bytes)}`)).join('')
     : row('Live transfers', 'none');
+  // B12-SR S2.5: soak tests on their own line, always shown — never hidden in a total.
+  const soak = s.soak ?? { transfers: 0, bytes: 0 };
+  const soakRow = row('Soak (test credentials)', `${soak.transfers} live · ${_fmtGib(soak.bytes)}`);
   const other = [
     ['Uploading or abandoned', s.uploading],
     ['Expired, not yet swept', s.expired],
@@ -394,6 +397,7 @@ function _storageModalHtml(s) {
     <div class="api-modal-section">
       <div class="api-modal-section-title">Live transfers by tier</div>
       ${liveRows}
+      ${soakRow}
     </div>
     <div class="api-modal-section">
       <div class="api-modal-section-title">Other objects in R2</div>
