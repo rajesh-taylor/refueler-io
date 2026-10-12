@@ -107,29 +107,6 @@ stripeThemeRemount: true
 
   </div>
 
-  <!-- Manage existing subscription (post-checkout or portal return) -->
-  <div class="manage-section" id="manageSection">
-    <div class="manage-row">
-      <div>
-        <div class="manage-meta-label">Current plan</div>
-        <div class="manage-meta-value" id="managePlanName">—</div>
-      </div>
-      <button class="btn btn-ghost" id="portalBtn" onclick="openPortal()">Manage subscription →</button>
-    </div>
-    <hr class="manage-divider">
-    <p class="manage-note">Update payment method, switch plan, or cancel — all in your secure billing portal.</p>
-  </div>
-
-  <!-- Lookup section: existing subscribers -->
-  <div class="lookup-section" id="manageLookup">
-    <p class="lookup-label">Already a subscriber? Enter your email to manage your plan.</p>
-    <div class="lookup-row">
-      <input type="email" id="lookupEmail" placeholder="you@example.com" autocomplete="email" />
-      <button class="btn btn-ghost" id="lookupBtn" onclick="lookupAndOpenPortal()">Go →</button>
-    </div>
-    <div class="status-msg" id="lookupStatus" style="margin-top:10px;"></div>
-  </div>
-
   <!-- Tier cards -->
   <div class="tiers">
 
@@ -201,9 +178,7 @@ stripeThemeRemount: true
       <button class="btn-subscribe" id="submitBtn" onclick="handleSubmit()">Subscribe now</button>
 
       <p class="payment-note">
-        Secured by <a href="https://stripe.com" target="_blank" rel="noopener">Stripe</a> ·
-        Cancel anytime in your billing portal ·
-        <a href="#" onclick="openPortal();return false;">Manage subscription</a>
+        Secured by <a href="https://stripe.com" target="_blank" rel="noopener">Stripe</a>
       </p>
     </div>
 
@@ -255,7 +230,6 @@ let billingYearly  = false;
 let stripe         = null;
 let elements       = null;
 let paymentElement = null;
-let portalEmail    = null;
 
 // ── URL param handling ──────────────────────────────────────────
 const params = new URLSearchParams(location.search);
@@ -398,11 +372,6 @@ async function handleSubmit() {
     document.getElementById('mainPage').style.display = 'none';
     const successPanel = document.getElementById('successPanel');
     successPanel.classList.add('visible');
-    portalEmail = email;
-    const manageLink = document.createElement('p');
-    manageLink.style.cssText = 'margin-top:16px;font-size:13px;';
-    manageLink.innerHTML = `<a href="#" onclick="openPortal();return false;" style="color:var(--gold);">Manage subscription →</a>`;
-    successPanel.appendChild(manageLink);
   }
 }
 
@@ -425,66 +394,7 @@ function showStatus(msg, type = '') {
   el.textContent = msg;
   el.className = `status-msg${type ? ' ' + type : ''}`;
 }
-function showLookupStatus(msg, type = '') {
-  const el = document.getElementById('lookupStatus');
-  el.textContent = msg;
-  el.className = `status-msg${type ? ' ' + type : ''}`;
-}
 
-// ── Portal ──────────────────────────────────────────────────────
-async function openPortal() {
-  if (!portalEmail) return;
-  const btn = document.getElementById('portalBtn');
-  btn.disabled = true;
-  btn.textContent = 'Opening…';
-  try {
-    const res = await fetch(`${WORKER_URL}/subscription/portal`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: portalEmail }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Portal unavailable');
-    window.location.href = data.url;
-  } catch (e) {
-    btn.disabled = false;
-    btn.textContent = 'Manage subscription →';
-    showLookupStatus(e.message, 'error');
-  }
-}
-
-async function lookupAndOpenPortal() {
-  const email = document.getElementById('lookupEmail').value.trim();
-  if (!email || !email.includes('@')) {
-    showLookupStatus('Please enter a valid email address.', 'error');
-    return;
-  }
-  const btn = document.getElementById('lookupBtn');
-  btn.disabled = true;
-  btn.textContent = '…';
-  showLookupStatus('');
-  try {
-    const res = await fetch(`${WORKER_URL}/subscription/portal`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'No active subscription found for this email.');
-    window.location.href = data.url;
-  } catch (e) {
-    btn.disabled = false;
-    btn.textContent = 'Go →';
-    showLookupStatus(e.message, 'error');
-  }
-}
-
-function showManageSection(email, tierName) {
-  portalEmail = email;
-  document.getElementById('managePlanName').textContent = tierName;
-  document.getElementById('manageSection').classList.add('visible');
-  document.getElementById('manageLookup').style.display = 'none';
-}
 
 // ── Stripe appearance — theme-aware ────────────────────────────
 function stripeAppearance() {
