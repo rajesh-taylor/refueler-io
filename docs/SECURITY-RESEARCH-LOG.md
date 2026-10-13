@@ -309,3 +309,15 @@ One-tap reorder of last/habitual order, timed to the train. A commuter on the 07
 ---
 
 *"Nothing stops this train."*
+
+---
+
+## 2026-10-13 — Share: email-only Stripe portal lookup (SEV-2 vulnerability, not exploited)
+
+**Found:** B12-4a planning, reading the Worker before building sign-in. Informed by INCIDENT-PROTOCOL.md (post-incident procedure).
+**What:** `POST /subscription/portal { email }` looked up `subscribers` by email and returned a Stripe Customer Portal session for that customer — no proof the caller owned the address. The Share plans and upgrade pages offered it as "Already a subscriber? Enter your email". Anyone knowing a subscriber's email could cancel their plan, read invoices, change the card (and the email, if portal email editing is on). `GET /subscription/status?email=` separately confirmed whether an address was a subscriber (and put the email in a URL).
+**Timeline:** found and closed 13 Oct 2026: both routes return 410 (Worker `9a692e00`), lookup UI removed (refueler-io `6f0decb`).
+**Scope:** `subscribers` held only test rows (operator's own). Stripe API logs show no `/v1/billing_portal/sessions` request ever — not exploited within Stripe's log window.
+**Root cause:** the email was treated as a credential. Pre-B12 shortcut that outlived its context.
+**What changes:** the portal returns at B12-6 as `POST /billing/portal` behind a signed-in session (cookie + CSRF + exact Origin), return URL fixed server-side, portal email editing off (B12-SR S6.9). Rule recorded in Share-Master-Context §Known broken: never an email-only lookup.
+**Also found the same session:** the Stripe webhook pointed at the disabled workers.dev host (events failing; endpoint auto-disabled) — moved to `api.share.refueler.io` and re-enabled. INCIDENT-PROTOCOL v1.0 is stale for Share (Citizen emails now held; Supabase contents) → Incident-Protocol-2.
