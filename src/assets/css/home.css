@@ -102,13 +102,11 @@
   white-space: nowrap;
 }
 
-.home-status-live  { color: color-mix(in srgb, var(--success) 75%, var(--fg)); background: color-mix(in srgb, var(--success) 12%, transparent); }
-.home-status-build { color: var(--warn); background: color-mix(in srgb, var(--warn) 13%, transparent); }
-.home-code .home-status-build { color: #C8943A; background: rgba(200,148,58,0.13); }
-.home-status-soon  { color: var(--fg-muted); border: 0.5px solid var(--border); }
-/* Research (Legend): suite gold, tinted like the others. NOTE: the status colours here break the
-   suite rule "two colours, no status colours" — revisit at the next design session; drop unless kept on purpose. */
-.home-status-research { color: color-mix(in srgb, var(--accent) 70%, var(--fg)); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+/* Status chips: ink and a hairline, like every other label (suite rule: two colours, no status colours). */
+.home-status-live,
+.home-status-build,
+.home-status-research,
+.home-status-soon { color: var(--fg-muted); border: 0.5px solid var(--border); }
 
 /* ── Product block ─────────────────────────────────────────────────── */
 .home-caps {
