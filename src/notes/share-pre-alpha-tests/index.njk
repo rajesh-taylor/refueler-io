@@ -1,0 +1,432 @@
+---
+title: "Moving 100 GB through Safari · Refueler Notes"
+description: "A pre-alpha test log for Refueler Share, 16 September to 14 October 2026: a 100 GB file sent and received in Safari without the browser's memory growing. 250 GB is still to come."
+canonical: "https://refueler.io/notes/share-pre-alpha-tests/"
+activePage: notes
+permalink: /notes/share-pre-alpha-tests/index.html
+# Notes list: drives the /notes/ card and /notes/latest.json
+cardTitle: "Moving 100 GB through Safari"
+summary: "A pre-alpha test log: a 100 GB file sent and received in Safari, with its memory staying flat. 250 GB is still to come."
+topics: ["Share", "Testing"]
+date: 2026-10-14
+readTime: "3 min"
+---
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+{% include "head.njk" %}
+<meta property="og:type" content="article" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="preload" href="{{ '/notes/notes.css' | cssv }}" as="style">
+<link rel="preload" href="/notes/notes.js" as="script">
+<link rel="stylesheet" href="{{ '/notes/notes.css' | cssv }}">
+<style>
+  /* ── Article-specific additions ── */
+
+  /* One mark colour: ink on Paper, gold on Carbon. Both ≥ 3 : 1 against the page. */
+  :root                 { --bar: var(--fg-muted); }
+  [data-theme="carbon"] { --bar: var(--accent); }
+
+  .equipment { padding-left: 1.1em; }
+  .equipment li { margin-bottom: 0.5em; }
+
+  /* ── Results tables (grouped rows, as in the subpoena article) ── */
+  .table-group { margin: 2rem 0 2.5rem; }
+  .table-group .table-wrap { margin: 0; }
+  .results-table td { white-space: nowrap; }
+  .results-table td.num, .results-table th.num { text-align: right; }
+  .results-table td.result { white-space: normal; font-family: var(--font-sans); color: var(--fg-muted); }
+  .results-table tr.stopped td:not(.result) { color: var(--fg-muted); }
+  .results-table tr.grp td {
+    font-family: var(--font-heading);
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    padding-top: 1rem;
+    background: transparent;
+  }
+  .results-table tr.grp:hover td { background: transparent; }
+  .modal-box .results-table { min-width: 46rem; }
+  .modal-box .results-table td.result { min-width: 16rem; }
+  /* In-page table: fits a 375 px phone without sideways scrolling */
+  .results-table.compact { font-family: var(--font-sans); }
+  .results-table.compact th, .results-table.compact td { padding: 0.6rem 0.55rem; }
+  .results-table.compact th:first-child, .results-table.compact td:first-child { padding-left: 0.9rem; }
+  .results-table.compact td { white-space: normal; }
+  .results-table.compact td:first-child, .results-table.compact td:nth-child(3), .results-table.compact td.result { white-space: nowrap; }
+  .table-legend {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 0.6rem;
+    line-height: 1.6;
+  }
+  .modal-box h3 {
+    font-family: var(--font-heading);
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin: 2rem 0 0.5rem;
+  }
+  .modal-note {
+    font-family: var(--font-serif);
+    font-size: 0.875rem;
+    color: var(--text-tertiary);
+    line-height: 1.65;
+    margin-top: 1.5rem;
+  }
+
+  /* ── Memory chart ── */
+  .chart { margin: 2.25em 0; }
+  .chart-title {
+    font-family: var(--font-heading);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin: 0 0 0.75rem;
+  }
+  .chart figcaption, .shot figcaption {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 0.9rem;
+    line-height: 1.6;
+  }
+  .plot { display: block; width: 100%; height: auto; }
+  .plot .grid { stroke: var(--border); stroke-width: 1; }
+  .plot .axis { stroke: var(--fg-subtle); stroke-width: 1; }
+  .plot .file { fill: none; stroke: var(--fg-subtle); stroke-width: 2; stroke-dasharray: 6 5; }
+  .plot .mem  { fill: none; stroke: var(--bar); stroke-width: 2; stroke-linejoin: round; }
+  .plot text  { font-family: var(--font-sans); font-size: 15px; fill: var(--text-secondary); }
+  .plot text.tick { fill: var(--text-tertiary); font-size: 13px; }
+  .plot text.mem-label { fill: var(--text-primary); }
+
+  /* ── Full-screen memory chart: pointer readout ── */
+  .modal-box .plot { margin-top: 1rem; }
+  .plot-wrap { position: relative; }
+  .plot-live { cursor: crosshair; touch-action: none; }
+  .plot-live:focus-visible { outline: 2px solid var(--fg-subtle); outline-offset: 4px; border-radius: 4px; }
+  .plot .hit { fill: transparent; }
+  .plot .cross { stroke: var(--fg-subtle); stroke-width: 1; }
+  .plot .dot-file { fill: var(--bg); stroke: var(--fg-subtle); stroke-width: 2; }
+  .plot .dot-mem { fill: var(--bar); stroke: var(--bg); stroke-width: 2; }
+  .plot-tip {
+    position: absolute;
+    z-index: 2;
+    pointer-events: none;
+    transform: translate(12px, -50%);
+    background: var(--surface-raised);
+    color: var(--text-primary);
+    border: var(--border-weight) solid var(--border-mid);
+    border-radius: 6px;
+    padding: 0.45rem 0.65rem;
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+  .plot-tip.flip { transform: translate(calc(-100% - 12px), -50%); }
+  .plot-tip strong { font-family: var(--font-mono); font-weight: 500; }
+
+  /* ── iPhone screenshot ── */
+  .shot { margin: 2em 0; }
+  .shot img {
+    display: block;
+    width: 100%;
+    max-width: 30rem;
+    height: auto;
+    border: var(--border-weight) solid var(--border);
+    border-radius: var(--radius-card);
+  }
+</style>
+</head>
+<body>
+
+{% include "nav.njk" %}
+
+{#- Figures from the test logs and session records (Test-Log-1, 14 Oct 2026).
+    Speeds: average over the whole run, MiB/s × 8.39 = Mbps, rounded. Sizes are GiB, written "GB".
+    Memory chart: ~/.refueler-soak/dl-spike-mem.log, all Safari processes, 30 s samples;
+    x = 48 + GB × 4.16, y = 256 − GB × 2.32. -#}
+{% set uploads = [
+  { date: "16–21 Sep", who: "Browser", size: "Under 1 GB", short: "Failed", time: "—", mbps: "—", retries: "—", long: "Failed; the upload was redesigned", stopped: true },
+  { date: "23 Sep",    who: "Brave, Mac",  size: "5 GB",   short: "Complete", time: "—",        mbps: "—",  retries: "—", long: "Complete" },
+  { date: "24–25 Sep", who: "Safari, Mac", size: "100 GB", short: "Complete", time: "5 h 35 m", mbps: "43", retries: "3", long: "Complete" },
+  { date: "24–25 Sep", who: "Brave, Mac",  size: "250 GB", short: "Stopped",  time: "—",        mbps: "—",  retries: "—", long: "Stopped by hand before it finished; progress not noted", stopped: true },
+  { date: "26 Sep",    who: "Safari, Mac", size: "100 GB", short: "Complete", time: "6 h 30 m", mbps: "37", retries: "—", long: "Complete" }
+] %}
+{% set downloads = [
+  { date: "10 Oct", who: "Safari, Mac",               size: "100 GB", short: "Byte-exact", time: "1 h 38 m",  mbps: "146", retries: "0", long: "Byte-exact (SHA-256 matched)" },
+  { date: "10 Oct", who: "Chrome, Mac",               size: "5 GB",   short: "Byte-exact", time: "5 m 06 s",  mbps: "140", retries: "0", long: "Byte-exact (SHA-256 matched)" },
+  { date: "10 Oct", who: "Firefox, Mac",              size: "5 GB",   short: "Byte-exact", time: "5 m 58 s",  mbps: "120", retries: "0", long: "Byte-exact (SHA-256 matched)" },
+  { date: "10 Oct", who: "Firefox, Mac, 3-min pause", size: "5 GB",   short: "Byte-exact", time: "7 m 41 s",  mbps: "—",   retries: "0", long: "Byte-exact (SHA-256 matched); carried on after the pause" },
+  { date: "10 Oct", who: "Safari, iPhone 13 mini",    size: "5 GB",   short: "Byte-exact", time: "28 m 43 s", mbps: "25",  retries: "3", long: "Byte-exact (SHA-256 matched); limited by the Mac's upload" }
+] %}
+{% macro resultsTable(label, full) %}
+<div class="table-wrap">
+  <table class="data-table results-table{% if not full %} compact{% endif %}" aria-label="{{ label }}">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Browser</th>
+        <th>Size</th>
+        {% if full %}<th class="num">Time</th><th class="num">Speed</th><th class="num">Retries</th>{% endif %}
+        <th>Result</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for g in [{ label: "Uploads", rows: uploads }, { label: "Downloads · test page", rows: downloads }] %}
+      <tr class="grp"><td colspan="{{ 7 if full else 4 }}">{{ g.label }}</td></tr>
+      {% for r in g.rows %}
+      <tr{% if r.stopped %} class="stopped"{% endif %}>
+        <td>{{ r.date }}</td>
+        <td>{{ r.who }}</td>
+        <td>{{ r.size }}</td>
+        {% if full %}<td class="num">{{ r.time }}</td><td class="num">{% if r.mbps != "—" %}{{ r.mbps }} Mbps{% else %}—{% endif %}</td><td class="num">{{ r.retries }}</td>{% endif %}
+        <td class="result">{{ r.long if full else r.short }}</td>
+      </tr>
+      {% endfor %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endmacro %}
+
+{% macro memoryPlot(interactive) %}
+<svg class="plot{% if interactive %} plot-live{% endif %}" viewBox="0 0 480 296"{% if interactive %} tabindex="0" role="img" aria-label="Safari's memory while 100 GB downloaded. Move the pointer, or use the left and right arrow keys, to read the memory at each point."{% else %} aria-hidden="true" focusable="false"{% endif %}>
+  <line class="grid" x1="48" y1="140" x2="464" y2="140"/>
+  <line class="grid" x1="48" y1="24" x2="464" y2="24"/>
+  <line class="axis" x1="48" y1="256" x2="464" y2="256"/>
+  <text class="tick" x="40" y="260" text-anchor="end">0</text>
+  <text class="tick" x="40" y="144" text-anchor="end">50</text>
+  <text class="tick" x="40" y="28" text-anchor="end">100</text>
+  <text class="tick" x="48" y="278" text-anchor="start">0</text>
+  <text class="tick" x="256" y="278" text-anchor="middle">50</text>
+  <text class="tick" x="464" y="278" text-anchor="end">100 GB downloaded</text>
+  <line class="file" x1="48" y1="256" x2="464" y2="24"/>
+  <text x="300" y="80" text-anchor="end">Downloaded so far</text>
+  <polyline class="mem" points="48.0,250.8 55.0,249.4 57.1,249.9 59.1,250.9 61.3,251.7 63.6,251.3 65.1,251.2 67.6,251.2 69.8,252.0 71.9,251.2 73.9,252.2 76.1,251.5 78.0,252.2 80.1,251.5 81.9,252.2 83.7,251.5 85.7,252.3 87.4,251.5 89.4,251.5 91.6,251.5 93.4,252.3 95.0,252.6 96.9,252.3 98.7,252.9 101.0,252.0 103.4,252.8 105.7,251.8 107.8,252.6 109.6,251.8 111.3,252.5 113.4,251.8 115.2,251.7 117.0,251.7 118.8,251.0 120.7,251.1 122.8,251.3 124.8,252.1 126.9,251.3 129.2,252.1 131.1,251.4 133.2,252.1 135.2,251.4 137.7,252.1 139.8,251.4 141.8,252.1 144.2,251.4 146.4,252.1 148.8,251.3 151.1,252.1 152.8,251.4 154.9,252.1 157.2,251.4 159.3,251.4 161.6,252.1 164.2,251.4 166.3,252.1 167.2,250.6 169.3,250.3 171.6,249.5 174.0,249.5 176.3,249.5 178.5,249.7 179.0,250.1 181.2,251.1 183.4,250.0 185.7,251.2 187.9,249.5 190.2,249.9 192.3,249.8 194.1,250.6 196.2,250.6 198.6,251.3 200.0,250.6 201.3,251.3 203.6,250.6 206.0,251.3 208.5,250.6 211.2,251.2 213.5,250.6 215.3,251.3 217.6,250.1 220.0,249.3 222.5,247.5 224.6,249.3 226.9,247.8 229.2,249.1 231.0,248.5 233.1,249.0 235.3,248.3 238.1,250.5 240.0,250.5 242.1,250.5 244.2,251.1 246.5,249.9 248.6,248.3 250.7,249.0 252.8,248.8 254.6,247.0 256.7,246.8 258.9,247.4 261.0,247.8 263.3,247.4 266.0,248.0 268.1,247.3 270.4,247.1 272.6,248.0 274.6,248.7 276.6,247.8 278.4,248.7 280.5,247.9 282.5,247.3 284.6,247.1 287.1,247.4 289.4,249.8 291.5,250.3 293.8,249.5 296.0,250.3 298.4,249.2 301.1,248.4 303.6,248.3 305.9,248.2 308.2,248.4 310.5,248.6 312.8,248.3 315.0,248.3 317.2,248.8 319.7,248.8 321.9,248.9 324.4,248.9 326.8,249.0 329.3,249.0 331.9,248.3 334.5,248.4 336.9,248.7 337.9,248.6 338.4,248.6 341.0,249.0 343.1,247.8 344.9,247.4 347.0,247.7 349.2,247.4 351.4,247.7 353.9,247.4 356.1,247.8 358.2,248.0 360.5,248.5 362.9,248.5 365.1,248.2 367.5,248.2 369.5,248.5 371.2,247.9 372.9,248.4 375.4,248.0 376.6,247.9 378.8,248.1 381.2,248.8 383.7,248.5 386.2,249.1 388.6,248.9 391.0,248.2 392.9,249.0 395.0,248.4 397.4,249.1 399.5,248.3 401.7,249.1 403.8,248.3 405.6,249.1 408.0,248.4 410.4,249.2 412.5,248.3 414.7,249.6 417.3,248.8 419.7,249.5 422.0,251.1 423.8,251.9 426.2,251.1 428.5,251.8 430.5,251.1 432.7,251.2 435.0,251.9 437.3,250.7 439.5,252.0 441.5,251.2 443.7,251.9 446.1,251.2 448.6,251.9 451.1,251.2 453.7,251.9 456.1,251.2 457.5,253.0 458.0,252.2 460.1,253.0 462.4,252.2 464.0,253.0"/>
+  <text class="mem-label" x="464" y="232" text-anchor="end">Safari's memory: never above 4 GB</text>
+  {% if interactive %}
+  <g class="readout" visibility="hidden">
+    <line class="cross" x1="0" y1="24" x2="0" y2="256"/>
+    <circle class="dot-file" r="5" cx="0" cy="0"/>
+    <circle class="dot-mem" r="5" cx="0" cy="0"/>
+  </g>
+  <rect class="hit" x="48" y="16" width="416" height="248"/>
+  {% endif %}
+</svg>
+{% endmacro %}
+
+<div class="article-wrap">
+
+  <p class="breadcrumb">
+    <a href="/notes/">Notes</a><span class="breadcrumb-sep">/</span>Share · Testing
+  </p>
+
+  <header class="article-header">
+    <div class="article-eyebrow">
+      <span>Share</span>
+      <span class="eyebrow-dot"></span>
+      <span>Testing</span>
+    </div>
+    <h1 class="article-title">Moving 100 GB through Safari</h1>
+    <p class="article-standfirst">A pre-alpha test log, 16 September to 14 October 2026. 250 GB is still to come.</p>
+    <div class="article-meta">
+      <span>14 October 2026</span>
+      <span class="meta-dot"></span>
+      <span>3 min read</span>
+    </div>
+  </header>
+
+  <article class="article-body">
+
+    <h2>What I wanted to know</h2>
+
+    <p>Share encrypts files in the browser, and Safari is the hardest browser for very large files. I wanted to know whether Safari could send and receive a 100 GB file without its memory falling over.</p>
+
+    <p>100 GB is the most a paid personal plan will hold. The API and MCP tier, for businesses and AI agents, is set at 250 GB. Share is still in pre-alpha, and nobody outside the project uses it yet.</p>
+
+    <h2>Equipment</h2>
+
+    <ul class="equipment">
+      <li>A MacBook on macOS 26.6.2, with Safari, Brave, Firefox and Chrome. Downloads were written over USB-C to an external SSD.</li>
+      <li>An iPhone 13 mini (Safari) and a Pixel 9a (Vanadium, on GrapheneOS).</li>
+      <li>A home cable line: about 547 Mbps down and 53 Mbps up without a VPN.</li>
+      <li>Mullvad VPN on throughout: single-hop on the Mac, multi-hop with DAITA on the phones. A VPN slows every connection, so these runs are slower than the line allows.</li>
+    </ul>
+
+    <h2>What happened</h2>
+
+    <p>In mid-September, uploads failed before they reached 1 GB. I redesigned how Share uploads, and on 24–25 September Safari sent its first 100 GB file, in 5 hours 35 minutes.</p>
+
+    <p>On 24 September I also started a 250 GB upload in Brave. I stopped it by hand the next day, having run out of time before flying to btc++ in Berlin, and didn't note how far it had got.</p>
+
+    <p>Downloads were the harder half. The live page built the whole file in the browser's memory before saving it, which can't work at 100 GB. On 10 October a new download method, run from a test page rather than the live site, saved the 100 GB file in Safari in 1 hour 38 minutes, byte-exact.</p>
+
+    <h2>Results</h2>
+
+    <div class="table-group">
+      {{ resultsTable("Upload and download results", false) }}
+      <button class="table-expand-trigger" onclick="openModal('modal-full-results')" aria-haspopup="dialog">
+        Full results ↗
+      </button>
+    </div>
+
+    <p class="table-legend">Byte-exact: a SHA-256 hash of the saved file matched one taken of the original before upload. Sizes are binary: 100 GB here is 100 GiB, or 107.4 billion bytes. Times and speeds are in the full results.</p>
+
+    <figure class="chart" role="img" aria-label="Line chart. As the 100 GB file downloaded in Safari, the amount saved rose steadily to 100 GB, while Safari's memory stayed between 1.3 and 4.0 GB the whole way.">
+      <p class="chart-title">Safari's memory while 100 GB downloaded (GB)</p>
+      {{ memoryPlot(false) }}
+      <figcaption>10 October, Safari on the Mac. Memory is all of Safari's processes together, sampled every 30 seconds. It stayed between 1.3 and 4.0 GB and didn't grow with the file. The old method held the whole file in memory, roughly twice over.</figcaption>
+      <button class="table-expand-trigger" onclick="openModal('modal-memory')" aria-haspopup="dialog">Full screen ↗</button>
+    </figure>
+
+    <figure class="shot">
+      <img src="/assets/notes/iphone-5gb-summary.png" width="584" height="78" alt="iPhone screen reading: 160/160 parts · 5.00 / 5.00 GiB · 3.0 MiB/s · 00:28:43 · retries 3">
+      <figcaption>The iPhone's screen when its 5 GB download finished, 10 October at 19:38. 3.0 MiB/s is about 25 Mbps.</figcaption>
+    </figure>
+
+    <h2>Before release</h2>
+
+    <p>On 14 October, before a release, ordinary transfers passed on the live site in Safari, Firefox and Chrome on the Mac, Safari on the iPhone and Vanadium on the Pixel, with the VPN on and off. The server's 842 automated tests passed the same day.</p>
+
+    <h2>Not done yet</h2>
+
+    <ul class="equipment">
+      <li>No 250 GB transfer has finished. That tier hasn't been fully scoped yet. When it runs, I'll publish the result, whichever way it goes.</li>
+      <li>The new download method isn't on the live site yet. Until it is, very large downloads in Safari and Firefox aren't something to rely on.</li>
+      <li>Still to run: a download on the Pixel, an iPhone download with the screen locked, and 100 GB downloads in Firefox and Chrome.</li>
+      <li>One person on one home line is not a lab. These runs say nothing about other networks or many people sending at once.</li>
+    </ul>
+
+    <div class="article-cta">
+      <p class="cta-label">Refueler Share</p>
+      <p class="cta-text">Encrypted file transfer. No account required. Free for transfers up to 4 GB.</p>
+      <a class="cta-link" href="/share/">Try it →</a>
+    </div>
+
+  </article>
+
+</div><!-- /article-wrap -->
+
+<!-- ── Modal: full results ── -->
+<div
+  class="modal-overlay"
+  id="modal-full-results"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-full-results-title"
+  aria-hidden="true"
+>
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('modal-full-results')" aria-label="Close">Close</button>
+    <h2 class="modal-title" id="modal-full-results-title">Full results</h2>
+    {{ resultsTable("Upload and download results, full", true) }}
+    <p class="table-legend">Speed is the average over the whole run. A dash means the run didn't record it. Retries are parts that were sent again after a temporary network or server error.</p>
+
+    <h3>Release checks, 14 October</h3>
+    <div class="table-wrap">
+      <table class="data-table" aria-label="Release checks, 14 October 2026">
+        <thead><tr><th>Browser</th><th>VPN</th><th>What was sent and received</th></tr></thead>
+        <tbody>
+          <tr><td>Safari, Mac</td><td>Off</td><td class="notes-col">A 400 MB folder with a password and delete-after-download; the link stopped working after one download</td></tr>
+          <tr><td>Safari, Mac</td><td>On</td><td class="notes-col">A single file; a password, right and wrong; a signed-in upload</td></tr>
+          <tr><td>Firefox, Mac</td><td>On</td><td class="notes-col">Upload, receive, link stopped working after</td></tr>
+          <tr><td>Chrome, Mac</td><td>On</td><td class="notes-col">Upload, receive, link stopped working after</td></tr>
+          <tr><td>Safari, iPhone 13 mini</td><td>On</td><td class="notes-col">A folder; the screen locked mid-upload and the upload picked up when it was unlocked; folder received</td></tr>
+          <tr><td>Vanadium, Pixel 9a</td><td>On</td><td class="notes-col">The same flows as above</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="modal-note">One person, one home line, Mullvad VPN on unless shown. Downloads on 10 October used a test page, not the live site.</p>
+  </div>
+</div>
+
+<!-- ── Modal: memory chart, full screen, with a pointer readout ── -->
+<div
+  class="modal-overlay"
+  id="modal-memory"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-memory-title"
+  aria-hidden="true"
+>
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('modal-memory')" aria-label="Close">Close</button>
+    <h2 class="modal-title" id="modal-memory-title">Safari's memory while 100 GB downloaded</h2>
+    <div class="plot-wrap">
+      {{ memoryPlot(true) }}
+      <div class="plot-tip" hidden aria-live="polite"></div>
+    </div>
+    <p class="modal-note">Move along the chart with a pointer or a finger, or use the arrow keys, to read Safari's memory at each point. 10 October, Safari on the Mac; all of Safari's processes together, sampled every 30 seconds. Sizes in GB (binary).</p>
+  </div>
+</div>
+
+<script type="application/json" id="memory-samples">[[0.0,2.26],[1.69,2.85],[2.19,2.62],[2.66,2.2],[3.19,1.83],[3.75,2.04],[4.12,2.07],[4.72,2.08],[5.25,1.74],[5.75,2.07],[6.22,1.62],[6.75,1.96],[7.22,1.62],[7.72,1.95],[8.16,1.63],[8.59,1.95],[9.06,1.61],[9.47,1.93],[9.94,1.94],[10.47,1.94],[10.91,1.62],[11.31,1.47],[11.75,1.6],[12.19,1.32],[12.75,1.71],[13.31,1.39],[13.88,1.81],[14.38,1.48],[14.81,1.81],[15.22,1.49],[15.72,1.83],[16.16,1.84],[16.59,1.85],[17.03,2.17],[17.47,2.09],[17.97,2.02],[18.47,1.69],[18.97,2.01],[19.53,1.67],[19.97,1.99],[20.47,1.67],[20.97,1.99],[21.56,1.67],[22.06,2.0],[22.56,1.67],[23.12,1.99],[23.66,1.67],[24.22,2.02],[24.78,1.67],[25.19,1.99],[25.69,1.67],[26.25,2.0],[26.75,2.0],[27.31,1.67],[27.94,2.0],[28.44,1.68],[28.66,2.35],[29.16,2.47],[29.72,2.81],[30.28,2.79],[30.84,2.82],[31.38,2.73],[31.5,2.56],[32.03,2.11],[32.56,2.58],[33.09,2.07],[33.62,2.8],[34.19,2.64],[34.69,2.67],[35.12,2.33],[35.62,2.33],[36.19,2.01],[36.53,2.34],[36.84,2.02],[37.41,2.35],[37.97,2.02],[38.59,2.35],[39.22,2.05],[39.78,2.35],[40.22,2.02],[40.78,2.53],[41.34,2.88],[41.94,3.68],[42.44,2.87],[43.0,3.52],[43.56,2.98],[44.0,3.25],[44.5,3.0],[45.03,3.3],[45.69,2.36],[46.16,2.39],[46.66,2.38],[47.16,2.12],[47.72,2.63],[48.22,3.3],[48.72,3.02],[49.22,3.11],[49.66,3.88],[50.16,3.96],[50.69,3.71],[51.19,3.55],[51.75,3.73],[52.41,3.44],[52.91,3.76],[53.47,3.84],[54.0,3.47],[54.47,3.15],[54.94,3.55],[55.38,3.15],[55.88,3.5],[56.38,3.74],[56.88,3.85],[57.47,3.7],[58.03,2.67],[58.53,2.45],[59.09,2.79],[59.62,2.47],[60.19,2.94],[60.84,3.26],[61.44,3.3],[62.0,3.37],[62.56,3.29],[63.09,3.21],[63.66,3.33],[64.19,3.32],[64.72,3.09],[65.31,3.11],[65.84,3.06],[66.44,3.04],[67.03,3.03],[67.62,3.02],[68.25,3.3],[68.88,3.26],[69.44,3.15],[69.69,3.17],[69.81,3.19],[70.44,3.0],[70.94,3.55],[71.38,3.69],[71.88,3.57],[72.41,3.7],[72.94,3.56],[73.53,3.69],[74.06,3.53],[74.56,3.45],[75.12,3.23],[75.69,3.22],[76.22,3.34],[76.81,3.35],[77.28,3.24],[77.69,3.5],[78.09,3.26],[78.69,3.43],[79.0,3.48],[79.53,3.39],[80.09,3.08],[80.69,3.24],[81.31,2.98],[81.88,3.05],[82.44,3.35],[82.91,3.02],[83.41,3.3],[84.0,2.98],[84.5,3.3],[85.03,2.97],[85.53,3.3],[85.97,2.97],[86.53,3.25],[87.12,2.93],[87.62,3.32],[88.16,2.76],[88.78,3.09],[89.34,2.79],[89.91,2.12],[90.34,1.79],[90.91,2.12],[91.47,1.79],[91.94,2.12],[92.47,2.05],[93.03,1.76],[93.59,2.27],[94.12,1.74],[94.59,2.08],[95.12,1.76],[95.69,2.09],[96.31,1.76],[96.91,2.08],[97.53,1.78],[98.09,2.08],[98.44,1.28],[98.56,1.65],[99.06,1.3],[99.62,1.63],[100.0,1.3]]</script>
+<script>
+/* Memory readout for the full-screen chart. Reads the samples above; no network, no storage. */
+(function () {
+  var svg = document.querySelector('.plot-live');
+  if (!svg) return;
+  var samples = JSON.parse(document.getElementById('memory-samples').textContent); // [GB downloaded, GB memory]
+  var wrap = svg.parentNode, tip = wrap.querySelector('.plot-tip');
+  var g = svg.querySelector('.readout'), cross = g.querySelector('.cross');
+  var dotFile = g.querySelector('.dot-file'), dotMem = g.querySelector('.dot-mem');
+  var X = function (gb) { return 48 + gb * 4.16; }, Y = function (gb) { return 256 - gb * 2.32; };
+  var current = -1;
+
+  function nearest(gb) {
+    var best = 0;
+    for (var i = 1; i < samples.length; i++) {
+      if (Math.abs(samples[i][0] - gb) < Math.abs(samples[best][0] - gb)) best = i;
+    }
+    return best;
+  }
+
+  function show(i) {
+    current = Math.max(0, Math.min(samples.length - 1, i));
+    var s = samples[current], x = X(s[0]);
+    cross.setAttribute('x1', x); cross.setAttribute('x2', x);
+    dotFile.setAttribute('cx', x); dotFile.setAttribute('cy', Y(s[0]));
+    dotMem.setAttribute('cx', x);  dotMem.setAttribute('cy', Y(s[1]));
+    g.setAttribute('visibility', 'visible');
+    tip.innerHTML = '<strong>' + s[0].toFixed(1) + ' GB</strong> downloaded<br>Safari\u2019s memory: <strong>' + s[1].toFixed(1) + ' GB</strong>';
+    tip.hidden = false;
+    // Place the window beside the point on the diagonal, flipped near the right edge.
+    var m = svg.getScreenCTM(), r = wrap.getBoundingClientRect();
+    var pt = svg.createSVGPoint(); pt.x = x; pt.y = Y(s[0]);
+    var p = pt.matrixTransform(m);
+    var left = p.x - r.left, top = p.y - r.top;
+    tip.classList.toggle('flip', s[0] > 60);
+    tip.style.left = left + 'px';
+    tip.style.top = top + 'px';
+  }
+
+  function hide() { g.setAttribute('visibility', 'hidden'); tip.hidden = true; }
+
+  svg.addEventListener('pointermove', function (e) {
+    var pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+    var p = pt.matrixTransform(svg.getScreenCTM().inverse());
+    show(nearest((p.x - 48) / 4.16));
+  });
+  svg.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') hide(); });
+  svg.addEventListener('blur', hide);
+  svg.addEventListener('keydown', function (e) {
+    var step = e.shiftKey ? 10 : 1;
+    if (e.key === 'ArrowRight') { e.preventDefault(); show(current < 0 ? 0 : current + step); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); show(current < 0 ? samples.length - 1 : current - step); }
+    else if (e.key === 'Home') { e.preventDefault(); show(0); }
+    else if (e.key === 'End') { e.preventDefault(); show(samples.length - 1); }
+  });
+}());
+</script>
+
+{% include "footer.njk" %}
+
+<script src="/notes/notes.js"></script>
+</body>
+</html>
