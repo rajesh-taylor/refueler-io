@@ -4,6 +4,8 @@ description: "Encrypted file transfer. Files are encrypted in the browser before
 permalink: /share/index.html
 activePage: "share"
 wordmarkSection: "Share"
+sendHref: "/share/"
+ioBase: ""
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -33,7 +35,7 @@ wordmarkSection: "Share"
 <div class="status-banner hidden" id="status-banner" role="alert" aria-live="polite">
   <span class="status-banner-icon" id="status-banner-icon"></span>
   <span class="status-banner-text" id="status-banner-text"></span>
-  <a class="status-banner-link" href="/share/status/" id="status-banner-link">View status →</a>
+  <a class="status-banner-link" href="{{ ioBase }}/share/status/" id="status-banner-link">View status →</a>
   <button class="status-banner-dismiss" id="status-banner-dismiss" aria-label="Dismiss">✕</button>
 </div>
 
@@ -150,11 +152,18 @@ function showMaintenanceModal(status) {
 <!-- ── Main shell ────────────────────────────────────────────────────── -->
 <div class="shell">
   <main id="app">
+{#- share-body.njk — the Share sheets (upload + receiver), X5-1 · 14 Oct 2026.
+    Included by BOTH src/index.njk (refueler.io/share/, rendered inline by
+    bin/lib/share-mirror.sh sm_render_njk) and src/app/index.njk (share.refueler.io).
+    One copy of the markup while both surfaces run. Page variables:
+      sendHref — the "Send a file" page: /share/ (old) · / (app)
+      ioBase   — refueler.io-owned pages (status, plans): "" (old) · https://refueler.io (app)
+    No inline script, no on*= and no style= here: the app's CSP forbids them. -#}
 
     <!-- File inputs: outside the slip so they never catch drag events or clicks (S56).
          Opened by JS from "Choose a file" / "or a folder". -->
-    <input type="file" id="file-input" aria-label="Select file" style="display:none" />
-    <input type="file" id="folder-input" webkitdirectory multiple aria-label="Select folder" style="display:none" />
+    <input type="file" id="file-input" aria-label="Select file" hidden />
+    <input type="file" id="folder-input" webkitdirectory multiple aria-label="Select folder" hidden />
 
     <!-- ── Sender (Share-Upload-2) ──────────────────────────────────────────
          Design: docs/drafts/share-upload-mock-v3.html, decisions U-1…U-11.
@@ -216,7 +225,7 @@ function showMaintenanceModal(status) {
             <dt>Size</dt>
             <dd><span id="file-size-tag" class="up-dim">—</span>
               <!-- R-12: "4 GB" is FREE_CAP in frontend/config.js -->
-              <small class="hidden" id="cap-warning">Free transfers go up to 4 GB. Paid plans for larger files aren’t open yet. <a class="up-link" href="/share/plans/">See plans</a></small></dd>
+              <small class="hidden" id="cap-warning">Free transfers go up to 4 GB. Paid plans for larger files aren’t open yet. <a class="up-link" href="{{ ioBase }}/share/plans/">See plans</a></small></dd>
           </div>
           <div class="rx-row up-not-over">
             <dt>Available until</dt>
@@ -366,7 +375,7 @@ function showMaintenanceModal(status) {
       <!-- R-12: "free up to 4 GB" is FREE_CAP in frontend/config.js. If the free
            limit ever drops below 4 GB, change both send lines (here and on the
            dead-link notice, below) and the upload page's "Free up to 4 GB" (drop zone). -->
-      <p class="rx-send-wrap" id="dl-signoff"><a class="rx-send" href="/share/"><span>Send your own file, free up to 4 GB →</span></a></p>
+      <p class="rx-send-wrap" id="dl-signoff"><a class="rx-send" href="{{ sendHref }}"><span>Send your own file, free up to 4 GB →</span></a></p>
     </section>
 
     <!-- Closed window, dead link, stopped download. Send line: dead link only (item 11). -->
@@ -374,7 +383,7 @@ function showMaintenanceModal(status) {
       <div class="rx-eyebrow-row"><p class="rx-eyebrow" id="rx-notice-eyebrow"></p><span class="stage-chip"></span></div>
       <h1 class="rx-head" id="rx-notice-head"></h1>
       <p class="rx-lede" id="rx-notice-lede"></p>
-      <p class="rx-send-wrap" id="rx-notice-send" hidden><a class="rx-send" href="/share/"><span>Send your own file, free up to 4 GB →</span></a></p>
+      <p class="rx-send-wrap" id="rx-notice-send" hidden><a class="rx-send" href="{{ sendHref }}"><span>Send your own file, free up to 4 GB →</span></a></p>
     </section>
 
   </main>

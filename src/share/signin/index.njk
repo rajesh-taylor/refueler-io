@@ -4,6 +4,7 @@ description: "Sign in to Refueler Share with a one-time email link."
 permalink: /share/signin/index.html
 activePage: "share"
 wordmarkSection: "Share"
+sendHref: "/share/"
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -27,6 +28,10 @@ wordmarkSection: "Share"
      Cloudflare's check loads only for the email form (signin.js). -->
 <div class="shell">
   <main id="app">
+{#- signin-body.njk — the sign-in sheet, X5-1 · 14 Oct 2026. Included by BOTH
+    src/signin.njk (refueler.io/share/signin/, pasted in by sm_render_njk) and
+    src/app/signin.njk (share.refueler.io/signin/). States set by signin.js on
+    data-state: ask · sent · link · expired · in · out. sendHref as share-body.njk. -#}
     <section class="rx-sheet si-sheet" id="signin-sheet" data-state="">
 
       <div class="si-for-ask">
@@ -77,7 +82,7 @@ wordmarkSection: "Share"
         </dl>
         <p class="rx-fine up-left">An hour without use signs you out sooner.</p>
         <div class="rx-actions si-actions">
-          <a class="rx-btn" href="/share/">Send a file</a>
+          <a class="rx-btn" href="{{ sendHref }}">Send a file</a>
           <button class="rx-btn up-ghost" id="si-signout" type="button">Sign out</button>
           <button class="up-link" id="si-everywhere" type="button">Sign out everywhere</button>
         </div>
