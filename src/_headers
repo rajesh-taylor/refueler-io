@@ -4,16 +4,19 @@
 # theme script and the two header buttons, each allowed by exact hash. If src/_includes/head.njk's
 # inline <script> or a nav onclick changes, its hash changes: recompute it here, or the theme pill
 # and phone menu stop working on these two pages (nothing else breaks). Remove forward.js and
-# these rules' comment about it on 12 Jan 2027.
+# these rules' comment about it on 12 Jan 2027. no-transform: stops Cloudflare injecting its bot-check
+# inline script here (our CSP would block it anyway; seen live 15 Oct), as on share.refueler.io.
 /share/
   Content-Security-Policy: script-src 'self' 'unsafe-hashes' 'sha256-aUAZY1RgJiWE+QlVwXbMrMb0SLv1wQJ48x6hlFytCZw=' 'sha256-usgF/RFyZjqAHP7w4+MbLw+uPbxCw0NBsWR4qQh9FHY=' 'sha256-5J8QIN0uHa3X4+TaUpRKBKn3pljcpBNl9MhDpDECP+U='; object-src 'none'; base-uri 'none'; frame-ancestors 'none'
   Referrer-Policy: no-referrer
   X-Content-Type-Options: nosniff
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
 
 /share/signin/
   Content-Security-Policy: script-src 'self' 'unsafe-hashes' 'sha256-aUAZY1RgJiWE+QlVwXbMrMb0SLv1wQJ48x6hlFytCZw=' 'sha256-usgF/RFyZjqAHP7w4+MbLw+uPbxCw0NBsWR4qQh9FHY=' 'sha256-5J8QIN0uHa3X4+TaUpRKBKn3pljcpBNl9MhDpDECP+U='; object-src 'none'; base-uri 'none'; frame-ancestors 'none'
   Referrer-Policy: no-referrer
   X-Content-Type-Options: nosniff
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
 
 # Newest Notes article, read by the Share receiver card (cross-origin from share.refueler.io since X5-2). Short cache so a
 # new article shows within minutes. Pages serves .json as application/json.
