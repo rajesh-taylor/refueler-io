@@ -17,9 +17,11 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy("src/notes/notes.css");
   eleventyConfig.addPassthroughCopy("src/notes/notes.js");
 
-  // Share — JS, CSS, and BLAKE3 WASM copied verbatim
+  // Share — since X5-2 only refueler.io's own Share pages live here (landing, Plans, Status,
+  // Navy Office); the app itself is at https://share.refueler.io
   eleventyConfig.addPassthroughCopy("src/share/assets");
   eleventyConfig.addPassthroughCopy("src/share/admin");
+  eleventyConfig.addPassthroughCopy("src/share/forward.js");   // X5-2: old links → share.refueler.io (remove 12 Jan 2027)
 
   // Merchant tablet — companion CSS and JS copied verbatim
   eleventyConfig.addPassthroughCopy("src/merchant/merchant-tablet-styles.css");

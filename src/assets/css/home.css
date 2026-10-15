@@ -211,3 +211,8 @@
   white-space: nowrap;
 }
 [data-theme="carbon"] .home-cap-label .stage-chip { border-color: rgba(245,240,232,0.22); }
+a.stage-chip { text-decoration: none; }
+a.stage-chip:hover { color: var(--fg); }
+/* X5-2: the Share entry links to Share's own address. */
+.home-cap-link { color: inherit; text-decoration: none; }
+.home-cap-link:hover { text-decoration: underline; text-underline-offset: 3px; }

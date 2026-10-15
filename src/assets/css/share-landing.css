@@ -1,0 +1,64 @@
+/* share-landing.css — refueler.io/share/ landing page and the moved sign-in note (X5-2 · 15 Oct 2026).
+   Share itself lives at https://share.refueler.io; this page says what it is and links there.
+   Same measure as the app's sheet (480 px), suite tokens from global.css. */
+.shl {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 72px 24px 96px;
+}
+.shl-eyebrow {
+  font: 500 11px/1 var(--font-mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  margin: 0 0 20px;
+}
+.shl-title {
+  font: 300 36px/1.15 var(--font-serif);
+  color: var(--fg);
+  margin: 0 0 16px;
+}
+.shl-lede {
+  font: 400 16px/1.6 var(--font-sans);
+  color: var(--fg-muted);
+  margin: 0 0 28px;
+}
+.shl-actions { margin: 0 0 56px; }
+.shl-alpha {
+  border-top: 1px solid rgba(26,26,26,0.26);
+  padding-top: 24px;
+  font: 400 15px/1.6 var(--font-sans);
+  color: var(--fg-muted);
+  scroll-margin-top: 96px;
+}
+[data-theme="carbon"] .shl-alpha { border-top-color: rgba(245,240,232,0.22); }
+.shl-h2 {
+  font: 500 13px/1 var(--font-mono);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--fg);
+  margin: 0 0 14px;
+}
+.shl-alpha p { margin: 0 0 10px; }
+.shl-alpha ul { margin: 0; padding-left: 18px; }
+.shl-alpha li { margin: 0 0 6px; }
+
+/* Stage chip — same rule as Share's .stage-chip (design theory §10): ink and a hairline. */
+.shl .stage-chip {
+  display: inline-block;
+  margin-left: 10px;
+  font: 500 10px/1 var(--font-mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  border: 1px solid rgba(26,26,26,0.26);
+  border-radius: 4px;
+  padding: 4px 6px;
+  vertical-align: middle;
+}
+[data-theme="carbon"] .shl .stage-chip { border-color: rgba(245,240,232,0.22); }
+
+@media (max-width: 640px) {
+  .shl { padding: 48px 16px 72px; }
+  .shl-title { font-size: 30px; }
+}
