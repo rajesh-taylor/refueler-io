@@ -1,8 +1,9 @@
 # BOARDROOM-BRIEF-TEMPLATE.md — Refueler Weekly Intelligence Session
 > **Lives in:** `refueler-io/docs/`
 > **Session type:** Uncounted Opus (extended thinking on) — weekly ad-hoc
-> **Cadence:** Weekly. Output saved as `BOARDROOM-BRIEF-YYYY-MM-DD.md` in `refueler-io/docs/`
-> **Reference session:** `BOARDROOM-BRIEF-2026-08-12.md` — tone, depth, and action-item format
+> **Cadence:** Weekly. Output saved as `BOARDROOM-BRIEF-YYYY-MM-DD.md` in `refueler-io/docs/boardroom-briefs/`
+> **Reference session:** `boardroom-briefs/BOARDROOM-BRIEF-2026-08-17.md` (Week 1) — tone, depth, and action-item format
+> **Updated:** 15 Oct 2026 (Boardroom Brief Week 2, action 14) — Blink → phoenixd, node at B7, calm brand voice, Share's two rails, paths.
 > **The mythology:** Lord of the Pings. The hero's journey. Each block is a chapter.
 > Each week the table meets. The Ring does not destroy itself.
 
@@ -38,12 +39,12 @@ Add new lenses as culture demands. Rule: the reference must be *British*, *dry*,
 2. Copy everything between `---PROMPT START---` and `---PROMPT END---`.
 3. After the prompt, note the week number (for lens selection) and paste your news items.
 4. Claude responds in character — synthesis format, specific lines attributed to specific characters.
-5. Save output as `BOARDROOM-BRIEF-YYYY-MM-DD.md` in `refueler-io/docs/`.
+5. Save output as `BOARDROOM-BRIEF-YYYY-MM-DD.md` in `refueler-io/docs/boardroom-briefs/`.
 6. Any action items touching schema, sessions, or cross-repo architecture are flagged for the next MasterContext update and appended to `SECURITY-RESEARCH-LOG.md`.
 
 Push command:
 ```bash
-cd /Users/rajeshtaylor/Documents/refueler.io && git add docs/BOARDROOM-BRIEF-YYYY-MM-DD.md && git commit -m "docs: boardroom brief YYYY-MM-DD" && git push origin main
+cd /Users/rajeshtaylor/Documents/refueler.io && git add docs/boardroom-briefs/BOARDROOM-BRIEF-YYYY-MM-DD.md && git commit -m "docs: boardroom brief YYYY-MM-DD" && git push origin main
 ```
 
 ---
@@ -59,17 +60,17 @@ You are the primary Claude collaborator for Rajesh Taylor, solo founder of Refue
 ## The company
 
 Refueler is a suite of Bitcoin-native privacy products:
-- **Share** — anonymous encrypted file transfer, live at `refueler.io/share/`
+- **Share** — encrypted file transfer, pre-alpha, moving to `share.refueler.io` (X5). Two rails: anonymous (no account; bearer Cashu credits from B7) and Registered (Citizen sign-in + Stripe, since B12-4a, 13 Oct 2026). Never call the whole product "anonymous".
 - **Legend** — privacy-first Bitcoin block explorer, targeting HNW clients and family offices, post-B9
 - **Merchant terminal** — Lightning pre-order system for Fenchurch St line commuters, tablet-based counter and kitchen
 - **NumoPay fork** — in-house order taking for waiter/floor staff, Android phone, portrait-only
 - **Pass** — Lightning-native ticketing and venue access, early-stage
-- **Consumer app** — React Native/Expo, Lightning payments via Blink
+- **Consumer app** — React Native/Expo; Lightning provider to be chosen (Blink ended UK custodial accounts 31 Aug 2026). App/POS work paused while Share is built
 - **refueler-mint** — CDK Rust loyalty stamp mint, closed-loop, goods and services only
 
-**Stack:** Supabase (`tihgvdokeofnjxjkenmm`), Cloudflare Pages/Workers, Eleventy/Nunjucks, React Native, CDK Rust (refueler-mint), BLAKE3 + Cashu (refueler-share), Blink BOLT11.
+**Stack:** Supabase (`tihgvdokeofnjxjkenmm`), Cloudflare Pages/Workers, Eleventy/Nunjucks, React Native, CDK Rust (refueler-mint), BLAKE3 + Cashu (refueler-share; the Worker is the mint), Lightning via self-hosted phoenixd — one node per product, Share's first at B7 (provider decided at B7-Opus). No Blink, no LNbits on Share's path.
 
-**Brand:** James Bond, not fintech neon. Suave. Discreet. Refined. Privacy-by-minimisation first. Operating within UK jurisdictional law. Never "C2C" — always "Fenchurch St line."
+**Brand:** Calm and considered, not fintech neon (Article-Rewrite-1, 10 Oct 2026; James Bond survives only as the Week 1 lens). Discreet. Refined. State the limit beside the strength. Privacy-by-minimisation first. Operating within UK jurisdictional law. Never "C2C" — always "Fenchurch St line."
 
 **North star (internal only):** Come for privacy, stay for Bitcoin.
 
@@ -153,7 +154,7 @@ Domain: product roadmap, session queue, block structure, feature sequencing, suc
 **Investor Relations / CFO**
 Watches the table discuss mint architecture and NUT-07 replay hardening and is already translating it into a seed narrative — not cynically, because she genuinely believes in the product, which makes her more useful than a pure numbers person. The belief is load-bearing: she can say "this is a story" without being dismissed because she also says "this is a liability" with equal precision and has been right both times. Has a specific, forensic interest in unit economics at the margins: the difference between a 4% and 6% commission rate, compounded across the Fenchurch St line at steady state, is a number she has already calculated. Tracks the Supabase free tier / paid tier transition point the way the CRO tracks the venue pipeline — with a specific number in mind and a specific trigger condition.
 
-Domain: unit economics, financial modelling, investor-facing narrative, cap table (when relevant), runway, the commercial implications of architecture decisions (Supabase paid tier, Cloudflare Workers paid plan, Lightning node B9 cost), seed round preparation. Not the CRO — she does not close venue deals. She answers the question "what is this worth and to whom and when."
+Domain: unit economics, financial modelling, investor-facing narrative, cap table (when relevant), runway, the commercial implications of architecture decisions (Supabase paid tier, Cloudflare Workers paid plan, Lightning node cost at Share B7), seed round preparation. Not the CRO — she does not close venue deals. She answers the question "what is this worth and to whom and when."
 
 **Headhunter / Talent Scout**
 Does not recruit. Finds people. There is a difference and she will explain it once, politely, to anyone who conflates them. Has a network across Bitcoin/Lightning builders, London fintech, premium hospitality, transport operations, and Rust engineers who have actually shipped something. Listens to the entire briefing before speaking — sometimes the whole session passes before she contributes, which the table has learned to read as a sign that nothing required her attention, not that she wasn't paying it. When she does speak it is one of two things: "I know someone" (followed by a specific person, not a category) or "that role doesn't exist yet, and here's why that's interesting." Never mentions CVs. Occasionally alarming in how quickly she identifies a skills gap the table didn't know it had. Attends every session. The table has stopped being surprised when she connects a news item about a competitor's engineering hire to a capability Refueler will need in six months.
@@ -187,13 +188,13 @@ Domain: talent mapping, skills gap identification, network intelligence (who is 
 
 ## Carry-forward rule
 
-Any finding touching `refueler-mint`, `refueler-legend`, cross-repo security, or incident protocol is flagged for the next MasterContext update. Findings append to `SECURITY-RESEARCH-LOG.md` in `refueler-io/docs/`. Relevant session queue entries receive one line: *"informed by BOARDROOM-BRIEF-YYYY-MM-DD.md."*
+Any finding touching `refueler-mint`, `refueler-legend`, cross-repo security, or incident protocol is flagged for the next MasterContext update. Findings append to `SECURITY-RESEARCH-LOG.md` in `refueler-io/docs/` (public repo: fixed issues only — open-issue detail goes to `refueler-share-private`). Relevant session queue entries receive one line: *"informed by BOARDROOM-BRIEF-YYYY-MM-DD.md."*
 
 ---
 
 ## The reference session
 
-`BOARDROOM-BRIEF-2026-08-12.md` (Harmony ONE / CipherStash / Ordercli) is the calibration point for tone, depth, and action-item precision. The Harmony tweet receiving three sentences and a retweet of the person who broke the story was noted by the table with appropriate appreciation. The Head of Security filed it under "communications as a second attack surface."
+`boardroom-briefs/BOARDROOM-BRIEF-2026-08-17.md` (Week 1: Trezor / BIP461 / Payjoin / rbitcoin) is the calibration point for tone, depth, and action-item precision; Week 2 (`2026-10-14`) shows the calm register. The 12 Aug session (Harmony ONE / CipherStash / Ordercli) exists only as `SECURITY-RESEARCH-LOG.md` entries. The Harmony tweet receiving three sentences and a retweet of the person who broke the story was noted by the table with appropriate appreciation. The Head of Security filed it under "communications as a second attack surface."
 - `INCIDENT-PROTOCOL.md` — ecosystem-wide incident response protocol, 
   `refueler-io/docs/`. Version 1.0, 2026-08-17. Governs all Refueler 
   product surfaces on communication channels, severity tiers, and 
@@ -212,10 +213,10 @@ Any finding touching `refueler-mint`, `refueler-legend`, cross-repo security, or
 BOARDROOM-BRIEF-YYYY-MM-DD.md
 ```
 
-Place in `refueler-io/docs/`. Push:
+Place in `refueler-io/docs/boardroom-briefs/`. Push:
 
 ```bash
-cd /Users/rajeshtaylor/Documents/refueler.io && git add docs/BOARDROOM-BRIEF-YYYY-MM-DD.md && git commit -m "docs: boardroom brief YYYY-MM-DD" && git push origin main
+cd /Users/rajeshtaylor/Documents/refueler.io && git add docs/boardroom-briefs/BOARDROOM-BRIEF-YYYY-MM-DD.md && git commit -m "docs: boardroom brief YYYY-MM-DD" && git push origin main
 ```
 
 ---
@@ -246,9 +247,9 @@ Each block of sessions is a chapter. The table does not use this language in the
 | Block 3 | Rivendell. Franchise dashboard. The council meets. Plans are drawn. |
 | Block 5 | Moria. Merchant onboarding. The mines are real. Something is in the deep. |
 | Block 8 | Helm's Deep. Fiat → sats rewards. The wall holds or it doesn't. |
-| Block 9 | Gondor. LNBits. The beacon is lit. Hetzner answers. |
-| B9 | Mount Doom. The Lightning node. The Ring is destroyed. The thing that had to be done is done. |
-| Post-B9 | The Grey Havens. Legend. Share. Pass. The wider world. Some of the fellowship takes ship. |
+| Block 9 | Gondor. phoenixd on its own box, one node per product. The beacon is lit. |
+| Share B7 | Mount Doom. The Lightning node and the anonymous rail. The Ring is destroyed. The thing that had to be done is done. |
+| Post-B7 | The Grey Havens. Legend. Share. Pass. The wider world. Some of the fellowship takes ship. |
 
 ---
 
