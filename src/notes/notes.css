@@ -3,7 +3,9 @@
    All tokens, reset, nav, footer: global.css (via head.njk).
    CSS-6: :root stripped, --text-* migrated to --fg*, duplicate chrome removed,
           backdrop-filter removed, solid-hex borders → var(--border),
-          article-body h2 / blockquote → var(--accent) explicitly (both themes).
+          article-body blockquote → var(--accent) explicitly (both themes).
+   14 Oct 2026: Editorial finish — h2 dividers neutral; gold left edge on tables,
+          charts and modal top in Carbon; square boxes; trigger bottom right.
    ───────────────────────────────────────────────────────────────────────────── */
 
 /* ── Layout vars (non-token, local to this file) ──────────────────────────── */
@@ -235,16 +237,17 @@
   margin-bottom: 1.5em;
 }
 
-/* Gold on h2 dividers — both themes (ruling 7). Explicit var(--accent), not --inset-rule. */
+/* h2 dividers: neutral, as on Editorial (Rajesh, 14 Oct 2026 — replaces ruling 7's gold).
+   Gold now marks the left edge of tables, charts and their buttons in Carbon (below). */
 .article-body h2 {
   font-family: var(--font-heading);
   font-size: 1.0625rem;
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--fg);
-  margin: 2.5em 0 0.875em;
-  padding-top: 0.25em;
-  border-top: 0.5px solid var(--accent);
+  margin: 3rem 0 1.125rem;
+  padding-top: 2.5rem;
+  border-top: var(--border-weight) solid var(--border);
 }
 
 .article-body h3 {
@@ -277,7 +280,19 @@
   overflow-x: auto;
   margin: 2em 0;
   border: var(--border-weight) solid var(--border);
-  border-radius: var(--radius-card);
+  border-radius: 0;
+}
+/* Editorial finish: a 2 px gold left edge on in-article tables and charts, Carbon only. */
+[data-theme="carbon"] .article-body .table-wrap,
+[data-theme="carbon"] .notes-widget {
+  border-left: 2px solid var(--accent);
+}
+/* A boxed chart or figure, matching Editorial's widgets */
+.notes-widget {
+  margin: 2.25em 0;
+  padding: 1.125rem 1.5rem;
+  border: var(--border-weight) solid var(--border);
+  background: var(--bg);
 }
 .data-table {
   width: 100%;
@@ -299,8 +314,8 @@
   background: var(--surface);
   white-space: nowrap;
 }
-.data-table th:first-child { border-radius: var(--radius-card) 0 0 0; }
-.data-table th:last-child { border-radius: 0 var(--radius-card) 0 0; }
+.data-table th:first-child,
+.data-table th:last-child { border-radius: 0; }
 .data-table td {
   padding: 0.75rem 1rem;
   border-bottom: var(--border-weight) solid var(--border);
@@ -322,27 +337,38 @@
 }
 
 /* "See full analysis" trigger */
+/* Bottom right, as Editorial's "View full breakdown ›"; gold in Carbon. */
+.table-group { display: flex; flex-direction: column; }
 .table-expand-trigger {
   display: inline-flex;
   align-items: center;
+  align-self: flex-end;
   gap: 0.4rem;
   font-family: var(--font-heading);
   font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--fg-subtle);
-  border: var(--border-weight) solid var(--border);
-  border-radius: var(--radius-btn);
-  padding: 0.4rem 0.875rem;
+  color: var(--fg-muted);
+  border: var(--border-weight) solid var(--border-mid);
+  border-radius: 2px;
+  padding: 0.45rem 0.9rem;
   background: transparent;
   cursor: pointer;
   transition: border-color 0.2s, color 0.2s;
   margin-top: 0.75rem;
 }
 .table-expand-trigger:hover {
-  border-color: var(--border-mid);
-  color: var(--fg-muted);
+  border-color: var(--fg-muted);
+  color: var(--fg);
+}
+[data-theme="carbon"] .table-expand-trigger {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+[data-theme="carbon"] .table-expand-trigger:hover {
+  border-color: #E0C48A;
+  color: #E0C48A;
 }
 
 /* ── Modal — backdrop-filter stripped (ruling 8), solid semi-opaque scrim ── */
@@ -362,7 +388,8 @@
 .modal-box {
   background: var(--bg);
   border: var(--border-weight) solid var(--border);
-  border-radius: var(--radius-modal);
+  border-top: 2px solid var(--border-mid);
+  border-radius: 0;
   max-width: 780px;
   width: 100%;
   max-height: 85vh;
@@ -381,13 +408,14 @@
   text-transform: uppercase;
   color: var(--fg-subtle);
   border: var(--border-weight) solid var(--border);
-  border-radius: 100px;
+  border-radius: 2px;
   padding: 0.3rem 0.75rem;
   background: transparent;
   cursor: pointer;
   transition: color 0.2s, border-color 0.2s;
 }
 .modal-close:hover { color: var(--fg); border-color: var(--border-mid); }
+[data-theme="carbon"] .modal-box { border-top-color: var(--accent); }
 
 .modal-title {
   font-family: var(--font-heading);

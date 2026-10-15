@@ -78,7 +78,7 @@ readTime: "3 min"
   }
 
   /* ── Memory chart ── */
-  .chart { margin: 2.25em 0; }
+  .chart { display: flex; flex-direction: column; }
   .chart-title {
     font-family: var(--font-heading);
     font-size: 0.6875rem;
@@ -139,7 +139,6 @@ readTime: "3 min"
     max-width: 30rem;
     height: auto;
     border: var(--border-weight) solid var(--border);
-    border-radius: var(--radius-card);
   }
 </style>
 </head>
@@ -278,7 +277,7 @@ readTime: "3 min"
 
     <p class="table-legend">Byte-exact: a SHA-256 hash of the saved file matched one taken of the original before upload. Sizes are binary: 100 GB here is 100 GiB, or 107.4 billion bytes. Times and speeds are in the full results.</p>
 
-    <figure class="chart" role="img" aria-label="Line chart. As the 100 GB file downloaded in Safari, the amount saved rose steadily to 100 GB, while Safari's memory stayed between 1.3 and 4.0 GB the whole way.">
+    <figure class="chart notes-widget" role="img" aria-label="Line chart. As the 100 GB file downloaded in Safari, the amount saved rose steadily to 100 GB, while Safari's memory stayed between 1.3 and 4.0 GB the whole way.">
       <p class="chart-title">Safari's memory while 100 GB downloaded (GB)</p>
       {{ memoryPlot(false) }}
       <figcaption>10 October, Safari on the Mac. Memory is all of Safari's processes together, sampled every 30 seconds. It stayed between 1.3 and 4.0 GB and didn't grow with the file. The old method held the whole file in memory, roughly twice over.</figcaption>
