@@ -321,3 +321,28 @@ One-tap reorder of last/habitual order, timed to the train. A commuter on the 07
 **Root cause:** the email was treated as a credential. Pre-B12 shortcut that outlived its context.
 **What changes:** the portal returns at B12-6 as `POST /billing/portal` behind a signed-in session (cookie + CSRF + exact Origin), return URL fixed server-side, portal email editing off (B12-SR S6.9). Rule recorded in Share-Master-Context §Known broken: never an email-only lookup.
 **Also found the same session:** the Stripe webhook pointed at the disabled workers.dev host (events failing; endpoint auto-disabled) — moved to `api.share.refueler.io` and re-enabled. INCIDENT-PROTOCOL v1.0 is stale for Share (Citizen emails now held; Supabase contents) → Incident-Protocol-2.
+
+---
+
+## 2026-10-14 — File-transfer breaches (Finastra, MFT pattern) / own Nostr relay question
+
+**Session type:** Weekly Boardroom Brief — ad-hoc uncounted. Week 2 (Lord of the Pings lens). Run 15 Oct 2026.
+**Informed by:** BOARDROOM-BRIEF-2026-10-14.md
+**Open findings:** none. Research notes only; credential inventory is private (`refueler-share-private`).
+
+**Sources reviewed:**
+- Tech Monitor, 21 Nov 2024: Finastra internally hosted SFTP platform breached via compromised credentials (detected 7 Nov 2024; actor "abyss0" claimed 400 GB)
+- BankInfoSecurity (M. J. Schwartz), Oct 2023: repeated attacks on MFT products (MOVEit, GoAnywhere, Accellion, Serv-U, ShareFile, WS_FTP, Globalscape EFT, JSCAPE, Titan)
+- CVE-2023-4528: JSCAPE MFT Server, Java deserialization on the management port (TCP 10880), fixed 2023.1.9 (Rapid7, Sept 2023)
+- OVHcloud UK VPS page (15 Oct 2026); strfry write-policy plugins (damus-io/noteguard, soapbox strfry-policies), rnostr; Block "Buzz" (21 Jul 2026)
+
+### Finding 1 — File-transfer services fall through three doors, not their crypto
+Stolen credentials (Finastra), internet-facing admin interfaces (JSCAPE), parsing bugs in old code (MOVEit, JSCAPE). Share's ciphertext-only storage limits what a storage breach yields, but Share holds sizes (exact via R2), timing, Citizen emails and Stripe ids. **For Share the high-impact case is served-code compromise** (Cloudflare account → altered `upload.js` → future link keys exfiltrated), which is why Block A / Share-Release-1 matter more than any scanner.
+**Gaps noted (not vulnerabilities):** no dependency scanning in CI, no Dependabot config, vendored browser libraries unwatched, ~20 admin routes share the public API hostname behind token checks.
+**Actions:** Vuln-Watch-1 (Dependabot, osv-scanner in CI, `frontend/VENDORED.md`, route inventory vs `docs/ROUTES.md`), weekly read-only advisory routine, private credential inventory + quarterly rotation, admin surface behind Cloudflare Access at B12-Audit, release gate at Share-Release-1, Incident-Protocol-2 additions (direct notices get quoted; served-code SEV-1 playbook).
+
+### Finding 2 — Own Nostr relay: resources fine, co-location and the IP/content split are not
+An OVH VPS-1 (2 vCores / 4 GB / 40 GB / £3.31 ex VAT) runs phoenixd comfortably. A public relay must never share the node's box (untrusted parser beside a hot seed; containers are not a boundary). Running a relay for Refueler users would give Refueler both the reader IP and the transfer content, the split row 19 exists to keep apart; "third-party relays only" stands. Relay IP *blocking* is common; the real gap is that no relay publishes a no-IP-log policy (RR-3). Relays cannot replace OpenTimestamps (`created_at` is signer-set; NIP-03 itself uses OTS); they can mirror anchored proofs.
+**Actions:** B7-Opus records "no public-facing service on the node box"; Nostr-Opus records the second reason for row 19 and considers paid membership of partner relays; separate relay product parked behind solicitor (Online Safety Act) + B7 + Pricing-v2.
+
+**Watch-lines:** Buzz (Block's Nostr agent workspace, single relay per workspace) for the MCP/agent direction; ACINQ phoenixd releases once the node is live.
