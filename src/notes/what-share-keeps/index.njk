@@ -1,0 +1,198 @@
+---
+title: "What Share keeps, and why · Refueler Notes"
+description: "Every item Refueler Share keeps, the reason for it, its limit, and how to check it yourself in your own browser."
+canonical: "https://refueler.io/notes/what-share-keeps/"
+activePage: notes
+permalink: /notes/what-share-keeps/index.html
+# Notes list: drives the /notes/ card and /notes/latest.json
+cardTitle: "What Share keeps, and why"
+summary: "Every item Share keeps, the reason for it, its limit, and how to check it yourself in your own browser."
+topics: ["Share", "Privacy"]
+date: 2026-10-16
+readTime: "4 min"
+---
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+{% include "head.njk" %}
+<meta property="og:type" content="article" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="preload" href="{{ '/notes/notes.css' | cssv }}" as="style">
+<link rel="preload" href="/notes/notes.js" as="script">
+<link rel="stylesheet" href="{{ '/notes/notes.css' | cssv }}">
+<style>
+  /* ── Check-along table: reads as two blocks on a phone, three columns from tablet up ── */
+  .check-table td { white-space: normal; vertical-align: top; font-family: var(--font-sans); }
+  #check-along { scroll-margin-top: 5rem; }
+  .check-table td:first-child { min-width: 7.5rem; }
+  .check-table .where-host {
+    display: block;
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    margin-top: 0.2rem;
+  }
+  @media (max-width: 640px) {
+    .check-table thead { display: none; }
+    .check-table tr { display: block; padding: 0.4rem 0; border-bottom: var(--border-weight) solid var(--border); }
+    .check-table tr:last-child { border-bottom: 0; }
+    .check-table td { display: block; border: 0; }
+    .check-table td[data-label]::before {
+      content: attr(data-label);
+      display: block;
+      font-family: var(--font-heading);
+      font-size: 0.625rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 0.2rem;
+    }
+  }
+  .steps { padding-left: 0; list-style: none; }
+  .steps li { margin-bottom: 0.9em; }
+</style>
+</head>
+<body>
+
+{% include "nav.njk" %}
+
+<div class="article-wrap">
+
+  <p class="breadcrumb">
+    <a href="/notes/">Notes</a><span class="breadcrumb-sep">/</span>Share · Privacy
+  </p>
+
+  <header class="article-header">
+    <div class="article-eyebrow">
+      <span>Share</span>
+      <span class="eyebrow-dot"></span>
+      <span>Privacy</span>
+    </div>
+    <h1 class="article-title">What Share keeps, and why</h1>
+    <p class="article-standfirst">Every item Share keeps, the reason for it, and how to check it yourself.</p>
+    <div class="article-meta">
+      <span>16 October 2026</span>
+      <span class="meta-dot"></span>
+      <span>4 min read</span>
+    </div>
+  </header>
+
+  <article class="article-body">
+
+    <h2>How to read this</h2>
+
+    <p>The <a href="/privacy/#share">privacy policy</a> lists what Share keeps. This note gives the reason for each item, and the limit that comes with it. At the end there is a short guide to checking it in your own browser.</p>
+
+    <h2>Your files</h2>
+
+    <p>Share encrypts your files in your browser before anything is sent to servers. The key travels in the link after <code>#</code>, which browsers never send to a server. That part of a link has been for the page alone since the early days of the web, so the key stays between your browser and your receiver's. I can't open your files or read their filenames.</p>
+
+    <p>Only encrypted pieces reach storage at Cloudflare. They're kept so your receiver can collect them. They're deleted when the transfer is deleted, or within two days of it expiring.</p>
+
+    <p>The limit: the stored size is visible to me, so I can tell roughly how large a transfer is, though not what it is. This helps me understand how much storage is needed overall. Anyone with the whole link, <code>#</code> part included, can open the files. Share can't tell your receiver from someone the link was forwarded to.</p>
+
+    <p>One more limit applies to every web app of this kind. You are trusting the page your browser loads from share.refueler.io to do what it says.</p>
+
+    <h2>The transfer id</h2>
+
+    <p>Each transfer has an id, with the time it was sent and the time it expires. That is how Share finds the right pieces and ends the transfer on time.</p>
+
+    <p>When a transfer ends, only the id and the time it ended remain. For 30 days an old link says plainly that the transfer has gone rather than show an error. Then it is deleted too.</p>
+
+    <p>The limit: for those 30 days, the record shows that a transfer existed and when it ended.</p>
+
+    <h2>Error notes</h2>
+
+    <p>When a step goes wrong, Share keeps a short note: which step, the status code and part of the transfer id. These help me find and fix what breaks. They are kept for up to 90 days.</p>
+
+    <p>They never hold file names, keys, your IP address or anything about your browser. The limit: the partial id can tie a note to a transfer, not to a person.</p>
+
+    <h2>Signing in, for Citizens</h2>
+
+    <p>You don't need an account to send. If you become a Citizen, Share keeps your email address, a reference to your Stripe customer record, your plan and its renewal date. These sit in a database run by Supabase in Ireland, for as long as you are a Citizen.</p>
+
+    <p>The email is there so you can sign in with a link instead of a password. Each link works once, for 15 minutes.</p>
+
+    <p>While you're signed in, Share keeps a one-way fingerprint of your sign-in and when it was last used. A copy of the database couldn't be used to sign in as you. They stop working after an hour unused, or 24 hours at most, and are deleted within the hour. They hold no IP address, device or location.</p>
+
+    <p>The limit: a Citizen account links your email to your plan and the transfers you send while signed in. Transfers sent while signed out aren't linked to anyone.</p>
+
+    <h2>Payment</h2>
+
+    <p>Stripe takes card payments for paying Citizens. I never see your card. Stripe keeps its own records, under its own privacy policy.</p>
+
+    <h2>Cloudflare</h2>
+
+    <p>Cloudflare runs the servers, so it sees your IP address. A VPN hides it from both of us.</p>
+
+    <p>Before an upload, Cloudflare runs a short check that you're a real person. It reads signals from your browser inside Cloudflare's own frame and Share receives only the result. The check is there so automated bot traffic can't fill storage.</p>
+
+    <p>The limit: those signals go to Cloudflare, under its policy. Now and then it also sets a short-lived cookie of its own, <code>__cf_bm</code> or <code>cf_clearance</code>.</p>
+
+    <h2>A permanent record, if you choose one</h2>
+
+    <p>On paid plans you can ask for a permanent record of a file: proof, anchored in Bitcoin through OpenTimestamps, that the file existed by a certain time. Your browser sends a one-way fingerprint of the file straight to OpenTimestamps' calendar servers, not through Share. The fingerprint reveals nothing of what the file says. The calendar servers see your IP address.</p>
+
+    <p>The limit: anyone who already holds the same file can work out the same fingerprint and see that it matches. The record shows when a file existed, not who made it.</p>
+
+    <h2>What Share doesn't run</h2>
+
+    <p>Share runs no analytics, advertising or tracking scripts. Visit numbers come only from Cloudflare's own traffic totals. As I cannot turn this feature off, I use it to monitor overall site traffic.</p>
+
+    <h2 id="check-along">Check along</h2>
+
+    <p>Everything above can be seen from your own browser.</p>
+
+    <div class="table-wrap">
+      <table class="data-table check-table" aria-label="What you may find in your browser">
+        <thead>
+          <tr>
+            <th>Where</th>
+            <th>Cookies</th>
+            <th>Other storage and requests</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Share app</strong><span class="where-host">share.refueler.io</span></td>
+            <td data-label="Cookies">None until you sign in. Then <code>__Host-rfs_session</code>, listed under api.share.refueler.io. Now and then Cloudflare's <code>__cf_bm</code> or <code>cf_clearance</code>.</td>
+            <td data-label="Other storage and requests">Local storage: <code>rs-theme</code>, once you pick Paper or Carbon. IndexedDB: <code>refueler-share-resume</code>, for carrying on an interrupted upload. Session storage: which notices you've seen. Third parties: Cloudflare's check (challenges.cloudflare.com) before an upload; OpenTimestamps only if you ask for a permanent record.</td>
+          </tr>
+          <tr>
+            <td><strong>refueler.io pages</strong><span class="where-host">this site</span></td>
+            <td data-label="Cookies">None from Refueler. Now and then Cloudflare's. On Share's Plans pages, Stripe's <code>__stripe_mid</code> and <code>__stripe_sid</code>, only once you start a payment.</td>
+            <td data-label="Other storage and requests">Local storage: <code>rs-theme</code>, once chosen. Some pages, this one included, send one visit count to analytics.refueler.io: no cookie, no IP address kept. Fonts from Google Fonts and Fontshare. Cloudflare adds a small script of its own to check for automated traffic, and one that hides email addresses from scrapers on pages that show one.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ul class="steps">
+      <li><strong>Safari (Mac).</strong> Safari → Settings → Advanced → tick <em>Show features for web developers</em>. On the page, Develop → Show Web Inspector. The Storage tab lists Cookies, Local Storage, Session Storage and Indexed Databases. The Network tab, after a reload, lists every server the page talks to.</li>
+      <li><strong>Firefox.</strong> Tools → Browser Tools → Web Developer Tools (⌥⌘I on a Mac, Ctrl+Shift+I elsewhere). Storage tab, then Network tab and reload.</li>
+      <li><strong>Chrome, Brave and Edge.</strong> View → Developer → Developer Tools (⌥⌘I or Ctrl+Shift+I). Application tab → Storage, then Network tab and reload.</li>
+    </ul>
+
+    <p>It helps to look in steps: open the page, pick a theme, start an upload, and watch what appears at each one. Phones don't offer these tools without a computer attached, so a Mac or PC is the easier place to check.</p>
+
+    <h2>If something doesn't match</h2>
+
+    <p>Write to <a href="mailto:privacy@refueler.io">privacy@refueler.io</a>. Every message is read and answered personally.</p>
+
+    <div class="article-cta">
+      <p class="cta-label">Refueler Share</p>
+      <p class="cta-text">Encrypted file transfer. No account required. Free for transfers up to 4 GB.</p>
+      <a class="cta-link" href="/share/">Try it →</a>
+    </div>
+
+  </article>
+
+</div><!-- /article-wrap -->
+
+{% include "footer.njk" %}
+
+<script src="/notes/notes.js"></script>
+<script src="/analytics.js" defer></script>
+</body>
+</html>
