@@ -10,7 +10,6 @@ stripeThemeRemount: true
 <head>
 {% set extraHead %}
 <link rel="stylesheet" href="/upgrade.css">
-<script src="https://js.stripe.com/v3/"></script>
 {% endset %}
 {% include "head.njk" %}
 <!-- ── Status banner (hidden until JS populates from /status) ─────────────── -->
@@ -298,9 +297,34 @@ function resetPaymentElement() {
 }
 
 // ── Stripe ──────────────────────────────────────────────────────
-async function initStripe() {
-  stripe = Stripe(STRIPE_PK);
-  await mountPaymentElement();
+// Stripe.js loads only once a payment starts (email entered), never on page open: as soon as it
+// runs it sets its fraud-prevention cookies __stripe_mid / __stripe_sid (Privacy-Stripe-1, 16 Oct 2026).
+let stripeJs       = null;
+let stripeStarting = null;
+
+function loadStripeJs() {
+  if (!stripeJs) stripeJs = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://js.stripe.com/v3/';
+    s.onload  = resolve;
+    s.onerror = () => { s.remove(); stripeJs = null; reject(new Error('Could not load the payment form. Please try again.')); };
+    document.head.appendChild(s);
+  });
+  return stripeJs;
+}
+
+// One start at a time: each mount asks the Worker for a new checkout.
+function initStripe() {
+  if (!stripeStarting) stripeStarting = (async () => {
+    try {
+      await loadStripeJs();
+      if (!stripe) stripe = Stripe(STRIPE_PK);
+      if (!elements) await mountPaymentElement();
+    } catch (e) {
+      showStatus(e.message, 'error');
+    }
+  })().finally(() => { stripeStarting = null; });
+  return stripeStarting;
 }
 
 async function mountPaymentElement() {
@@ -347,7 +371,7 @@ async function handleSubmit() {
     return;
   }
   if (!elements) {
-    await mountPaymentElement();
+    await initStripe();
     return;
   }
   const btn = document.getElementById('submitBtn');
