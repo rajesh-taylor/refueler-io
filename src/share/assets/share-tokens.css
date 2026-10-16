@@ -17,12 +17,12 @@
   --gold-dim:        #9E8050;
 
   /* Paper mode (default) */
-  --bg:              var(--paper);
+  --bg:              #E8E2D8;   /* = global.css Paper (was --paper #F5F0E8, read as white; Privacy-Stripe-1) */
   --fg:              var(--carbon);
   --fg-muted:        #5A5550;
   --fg-subtle:       #9A9590;
   --border:          rgba(26,26,26,0.12);
-  --nav-bg:          #F5F0E8;
+  --nav-bg:          #E8E2D8;
   --card-bg:         rgba(26,26,26,0.04);
   --card-border:     rgba(26,26,26,0.08);
   --input-bg:        #FFFFFF;
@@ -56,7 +56,7 @@
 
 /* ── Carbon override ────────────────────────────────────────────────────────── */
 [data-theme="carbon"] {
-  --bg:              var(--carbon);
+  --bg:              #1A1917;   /* = global.css Carbon */
   --fg:              var(--paper);
   --fg-muted:        #B0AAA2;
   --fg-subtle:       #6A6560;
