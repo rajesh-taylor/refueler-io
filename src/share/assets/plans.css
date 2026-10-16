@@ -360,6 +360,20 @@ input::placeholder { color: var(--fg-subtle); }
   cursor: default;
   user-select: none;
 }
+/* Payment rail chip (Privacy-Stripe-1, 16 Oct 2026): outline only, suite two-colour rule;
+   rail colours are a Plans-Design-Opus question. */
+.tier-rail {
+  display: inline-block;
+  margin-top: 16px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  border: 1px solid var(--card-border);
+  border-radius: 3px;
+  padding: 2px 8px;
+}
 .coming-soon-tag {
   position: absolute;
   top: 12px;

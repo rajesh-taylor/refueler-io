@@ -92,7 +92,7 @@ stripeThemeRemount: true
   <div class="page-header">
     <h1>Choose your plan</h1>
     <p>Free transfers need no account. Upgrade for larger files and longer expiry.</p>
-    <div class="soft-launch-notice">Free tier open · Paid plans launching soon</div>
+    <div class="soft-launch-notice">Pro Bono open · Citizen and Sovereign coming soon</div>
   </div>
 
   <!-- Billing toggle -->
@@ -108,11 +108,11 @@ stripeThemeRemount: true
   <!-- Tier cards -->
   <div class="tiers">
 
-    <!-- Free -->
+    <!-- Pro Bono (wire tier free) -->
     <div class="tier-card free-card">
       <div class="current-plan-tag">Current</div>
       <div class="tier-label">Free</div>
-      <div class="tier-name">Skint Tog</div>
+      <div class="tier-name">Pro Bono</div>
       <div class="tier-price">
         <span class="tier-price-main">£0</span>
         <span class="tier-price-period">/ forever</span>
@@ -120,49 +120,50 @@ stripeThemeRemount: true
       <div class="tier-yearly">&nbsp;</div>
       <ul class="tier-features">
         <li>4 GB per transfer</li>
-        <li>1 / 7 day expiry</li>
+        <li>Up to 7 days</li>
         <li>Encrypted in your browser</li>
-        <li>No account needed</li>
+        <li>Password and Destroy after Download</li>
+        <li>No account, no email</li>
       </ul>
     </div>
 
-    <!-- Creative Premium -->
-    <div class="tier-card coming-soon" id="card-creative">
-      <div class="coming-soon-tag">Coming Soon</div>
-      <div class="tier-label gold">Creative</div>
-      <div class="tier-name">Creative Premium</div>
-      <div class="tier-price">
-        <span class="tier-price-main" id="price-creative">£12</span>
-        <span class="tier-price-period" id="period-creative">/ month</span>
-      </div>
-      <div class="tier-yearly" id="yearly-creative">or £144/yr</div>
-      <ul class="tier-features">
-        <li>100 GB per transfer</li>
-        <li>1 / 7 / 30 day expiry</li>
-        <li>Encrypted in your browser</li>
-        <li>Password-protected downloads</li>
-        <li>Lightning payments</li>
-      </ul>
-    </div>
-
-    <!-- Production Max -->
+    <!-- Citizen (wire tier max, Stripe lookup keys share-max-*; card rail) -->
     <div class="tier-card coming-soon" id="card-max">
       <div class="coming-soon-tag">Coming Soon</div>
-      <div class="tier-label gold">Professional</div>
-      <div class="tier-name">Production Max</div>
+      <div class="tier-label gold">Card</div>
+      <div class="tier-name">Citizen</div>
       <div class="tier-price">
         <span class="tier-price-main" id="price-max">£24</span>
         <span class="tier-price-period" id="period-max">/ month</span>
       </div>
       <div class="tier-yearly" id="yearly-max">or £288/yr</div>
       <ul class="tier-features">
-        <li>250 GB per transfer</li>
-        <li>1 / 7 / 30 / 90 day expiry</li>
+        <li>100 GB per transfer</li>
+        <li>7 / 30 / 90 days</li>
         <li>Encrypted in your browser</li>
-        <li>Password-protected downloads</li>
-        <li>Lightning payments</li>
-        <li>Priority transfers</li>
+        <li>Password and Destroy after Download</li>
+        <li>Permanent record (OpenTimestamps)</li>
+        <li>Signs in with email</li>
       </ul>
+      <div class="tier-rail">Pays by card · Stripe</div>
+    </div>
+
+    <!-- Sovereign (bearer rail; same product as Citizen, paid in bitcoin) -->
+    <div class="tier-card coming-soon" id="card-sovereign">
+      <div class="coming-soon-tag">Coming Soon</div>
+      <div class="tier-label gold">Bitcoin</div>
+      <div class="tier-name">Sovereign</div>
+      <div class="tier-price">
+        <span class="tier-price-main" id="price-sovereign">£24</span>
+        <span class="tier-price-period" id="period-sovereign">/ month</span>
+      </div>
+      <div class="tier-yearly" id="yearly-sovereign">or £288/yr, paid in sats</div>
+      <ul class="tier-features">
+        <li>Everything in Citizen</li>
+        <li>Silent Drop</li>
+        <li>No email: an anonymous credential</li>
+      </ul>
+      <div class="tier-rail">Pays in bitcoin · Lightning</div>
     </div>
 
   </div>
@@ -171,7 +172,7 @@ stripeThemeRemount: true
   <div class="payment-section" id="paymentSection">
     <div class="payment-header">
       <div class="payment-title">Payment</div>
-      <div class="payment-summary" id="paymentSummary">Creative Premium — £12/month</div>
+      <div class="payment-summary" id="paymentSummary">Citizen — £24/month</div>
     </div>
 
     <div class="payment-tabs">
@@ -226,11 +227,8 @@ stripeThemeRemount: true
 const WORKER_URL = 'https://api.share.refueler.io';
 const STRIPE_PK  = 'pk_live_qTLdmzRXg6KHXtxbgGYQZc7L00Kl4saD2q';
 
+// Citizen = wire tier max (Stripe lookup keys share-max-*). Sovereign has no Stripe price: it pays in bitcoin.
 const PRICE_IDS = {
-  creative: {
-    monthly: 'price_1Ts7lsGlctwiB9U3hdtgChU2',
-    yearly:  'price_1Ts7sqGlctwiB9U3YRloCFfi',
-  },
   max: {
     monthly: 'price_1Ts7vIGlctwiB9U3kb3NCLue',
     yearly:  'price_1Ts7xIGlctwiB9U3JyZB8Kwj',
@@ -238,11 +236,11 @@ const PRICE_IDS = {
 };
 
 const PRICES_DISPLAY = {
-  creative: { monthly: { price: '£12', period: '/ month' }, yearly: { price: '£144', period: '/ year' } },
-  max:      { monthly: { price: '£24', period: '/ month' }, yearly: { price: '£288', period: '/ year' } },
+  max:       { monthly: { price: '£24', period: '/ month' }, yearly: { price: '£288', period: '/ year' } },
+  sovereign: { monthly: { price: '£24', period: '/ month' }, yearly: { price: '£288', period: '/ year' } },
 };
 
-let selectedTier   = 'creative';
+let selectedTier   = 'max';
 let billingYearly  = false;
 let stripe         = null;
 let elements       = null;
@@ -280,7 +278,7 @@ function toggleBilling() {
 }
 
 function updatePriceDisplay() {
-  ['creative', 'max'].forEach(tier => {
+  ['max', 'sovereign'].forEach(tier => {
     const d = PRICES_DISPLAY[tier][billingYearly ? 'yearly' : 'monthly'];
     document.getElementById(`price-${tier}`).textContent = d.price;
     document.getElementById(`period-${tier}`).textContent = d.period;
@@ -299,11 +297,11 @@ function selectTier(tier) {
 }
 
 function updateSummary() {
-  const names   = { creative: 'Creative Premium', max: 'Production Max' };
+  const names   = { max: 'Citizen' };
   const billing = billingYearly ? 'yearly' : 'monthly';
   const d       = PRICES_DISPLAY[selectedTier][billing];
   document.getElementById('paymentSummary').textContent =
-    `${names[selectedTier]} — ${d.price}${d.period.replace('/', '').trim()}`;
+    `${names[selectedTier]} — ${d.price} ${d.period}`;
 }
 
 function resetPaymentElement() {
