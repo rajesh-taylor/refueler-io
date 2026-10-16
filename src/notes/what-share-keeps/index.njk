@@ -24,6 +24,17 @@ readTime: "4 min"
   /* ── Check-along table: reads as two blocks on a phone, three columns from tablet up ── */
   .check-table td { white-space: normal; vertical-align: top; font-family: var(--font-sans); }
   #check-along { scroll-margin-top: 5rem; }
+  .table-group { margin: 2rem 0 2.5rem; }
+  .table-group .table-wrap { margin: 0; }
+  #modal-check-along .modal-box { max-width: 1100px; }
+  #modal-check-along .table-wrap { margin: 1.25rem 0 0; }
+  .modal-note {
+    font-family: var(--font-serif);
+    font-size: 0.875rem;
+    color: var(--text-tertiary);
+    line-height: 1.65;
+    margin-top: 1.5rem;
+  }
   .check-table td:first-child { min-width: 7.5rem; }
   .check-table .where-host {
     display: block;
@@ -56,6 +67,32 @@ readTime: "4 min"
 <body>
 
 {% include "nav.njk" %}
+
+{% macro checkTable(label) %}
+    <div class="table-wrap">
+      <table class="data-table check-table" aria-label="{{ label }}">
+        <thead>
+          <tr>
+            <th>Where</th>
+            <th>Cookies</th>
+            <th>Other storage and requests</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Share app</strong><span class="where-host">share.refueler.io</span></td>
+            <td data-label="Cookies">None until you sign in. Then <code>__Host-rfs_session</code>, listed under api.share.refueler.io. Now and then Cloudflare's <code>__cf_bm</code> or <code>cf_clearance</code>.</td>
+            <td data-label="Other storage and requests">Local storage: <code>rs-theme</code>, once you pick Paper or Carbon. IndexedDB: <code>refueler-share-resume</code>, for carrying on an interrupted upload. Session storage: which notices you've seen. Third parties: Cloudflare's check (challenges.cloudflare.com) before an upload; OpenTimestamps only if you ask for a permanent record.</td>
+          </tr>
+          <tr>
+            <td><strong>refueler.io pages</strong><span class="where-host">this site</span></td>
+            <td data-label="Cookies">None from Refueler. Now and then Cloudflare's. On Share's Plans pages, Stripe's <code>__stripe_mid</code> and <code>__stripe_sid</code>, only once you start a payment.</td>
+            <td data-label="Other storage and requests">Local storage: <code>rs-theme</code>, once chosen. Some pages, this one included, send one visit count to analytics.refueler.io: no cookie, no IP address kept. Fonts from Google Fonts and Fontshare. Cloudflare adds a small script of its own to check for automated traffic, and one that hides email addresses from scrapers on pages that show one.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+{% endmacro %}
 
 <div class="article-wrap">
 
@@ -144,28 +181,9 @@ readTime: "4 min"
 
     <p>Everything above can be seen from your own browser.</p>
 
-    <div class="table-wrap">
-      <table class="data-table check-table" aria-label="What you may find in your browser">
-        <thead>
-          <tr>
-            <th>Where</th>
-            <th>Cookies</th>
-            <th>Other storage and requests</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Share app</strong><span class="where-host">share.refueler.io</span></td>
-            <td data-label="Cookies">None until you sign in. Then <code>__Host-rfs_session</code>, listed under api.share.refueler.io. Now and then Cloudflare's <code>__cf_bm</code> or <code>cf_clearance</code>.</td>
-            <td data-label="Other storage and requests">Local storage: <code>rs-theme</code>, once you pick Paper or Carbon. IndexedDB: <code>refueler-share-resume</code>, for carrying on an interrupted upload. Session storage: which notices you've seen. Third parties: Cloudflare's check (challenges.cloudflare.com) before an upload; OpenTimestamps only if you ask for a permanent record.</td>
-          </tr>
-          <tr>
-            <td><strong>refueler.io pages</strong><span class="where-host">this site</span></td>
-            <td data-label="Cookies">None from Refueler. Now and then Cloudflare's. On Share's Plans pages, Stripe's <code>__stripe_mid</code> and <code>__stripe_sid</code>, only once you start a payment.</td>
-            <td data-label="Other storage and requests">Local storage: <code>rs-theme</code>, once chosen. Some pages, this one included, send one visit count to analytics.refueler.io: no cookie, no IP address kept. Fonts from Google Fonts and Fontshare. Cloudflare adds a small script of its own to check for automated traffic, and one that hides email addresses from scrapers on pages that show one.</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="table-group">
+      {{ checkTable("What you may find in your browser") }}
+      <button class="table-expand-trigger" onclick="openModal('modal-check-along')" aria-haspopup="dialog">Full view ↗</button>
     </div>
 
     <ul class="steps">
@@ -189,6 +207,23 @@ readTime: "4 min"
   </article>
 
 </div><!-- /article-wrap -->
+
+<!-- ── Modal: check-along table, full view ── -->
+<div
+  class="modal-overlay"
+  id="modal-check-along"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-check-along-title"
+  aria-hidden="true"
+>
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('modal-check-along')" aria-label="Close">Close</button>
+    <h2 class="modal-title" id="modal-check-along-title">Check along</h2>
+    {{ checkTable("What you may find in your browser, full view") }}
+    <p class="modal-note">How to open each browser's tools is under the table in the article.</p>
+  </div>
+</div>
 
 {% include "footer.njk" %}
 
