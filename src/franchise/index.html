@@ -15,11 +15,15 @@
   <!-- Theme: apply before first paint -->
   <script>
     (function() {
-      function getCookie(name) {
-        const m = document.cookie.match('(?:^|;)\\s*' + name + '=([^;]*)');
-        return m ? decodeURIComponent(m[1]) : null;
+      // Privacy-Share-1: theme in localStorage, never a cookie; the old cookie moves over once.
+      let t = null;
+      try { t = localStorage.getItem('rs-theme'); } catch (e) {}
+      const m = document.cookie.match('(?:^|;)\\s*rs-theme=([^;]*)');
+      if (m) {
+        if (!t) { t = decodeURIComponent(m[1]); try { localStorage.setItem('rs-theme', t); } catch (e) {} }
+        document.cookie = 'rs-theme=; max-age=0; path=/; domain=.refueler.io; SameSite=Lax';
       }
-      const t = getCookie('rs-theme') || 'carbon';
+      t = t === 'paper' ? 'paper' : 'carbon';
       document.documentElement.setAttribute('data-theme', t);
       document.documentElement.dataset.theme = t;
     })();
@@ -1046,7 +1050,7 @@
     const next = target || (document.documentElement.dataset.theme === 'carbon' ? 'paper' : 'carbon');
     document.documentElement.setAttribute('data-theme', next);
     document.documentElement.dataset.theme = next;
-    setCookie('rs-theme', next, 30);
+    try { localStorage.setItem('rs-theme', next); } catch (e) {}
     syncThemePill();
   }
   function syncThemePill() {

@@ -7,13 +7,13 @@
 # these rules' comment about it on 12 Jan 2027. no-transform: stops Cloudflare injecting its bot-check
 # inline script here (our CSP would block it anyway; seen live 15 Oct), as on share.refueler.io.
 /share/
-  Content-Security-Policy: script-src 'self' 'unsafe-hashes' 'sha256-aUAZY1RgJiWE+QlVwXbMrMb0SLv1wQJ48x6hlFytCZw=' 'sha256-usgF/RFyZjqAHP7w4+MbLw+uPbxCw0NBsWR4qQh9FHY=' 'sha256-5J8QIN0uHa3X4+TaUpRKBKn3pljcpBNl9MhDpDECP+U='; object-src 'none'; base-uri 'none'; frame-ancestors 'none'
+  Content-Security-Policy: script-src 'self' 'unsafe-hashes' 'sha256-VxJH/Jz9Quinj6l/FxxqYZn39LH//bIrl7TZ2V0Bg68=' 'sha256-usgF/RFyZjqAHP7w4+MbLw+uPbxCw0NBsWR4qQh9FHY=' 'sha256-5J8QIN0uHa3X4+TaUpRKBKn3pljcpBNl9MhDpDECP+U='; object-src 'none'; base-uri 'none'; frame-ancestors 'none'
   Referrer-Policy: no-referrer
   X-Content-Type-Options: nosniff
   Cache-Control: public, max-age=0, must-revalidate, no-transform
 
 /share/signin/
-  Content-Security-Policy: script-src 'self' 'unsafe-hashes' 'sha256-aUAZY1RgJiWE+QlVwXbMrMb0SLv1wQJ48x6hlFytCZw=' 'sha256-usgF/RFyZjqAHP7w4+MbLw+uPbxCw0NBsWR4qQh9FHY=' 'sha256-5J8QIN0uHa3X4+TaUpRKBKn3pljcpBNl9MhDpDECP+U='; object-src 'none'; base-uri 'none'; frame-ancestors 'none'
+  Content-Security-Policy: script-src 'self' 'unsafe-hashes' 'sha256-VxJH/Jz9Quinj6l/FxxqYZn39LH//bIrl7TZ2V0Bg68=' 'sha256-usgF/RFyZjqAHP7w4+MbLw+uPbxCw0NBsWR4qQh9FHY=' 'sha256-5J8QIN0uHa3X4+TaUpRKBKn3pljcpBNl9MhDpDECP+U='; object-src 'none'; base-uri 'none'; frame-ancestors 'none'
   Referrer-Policy: no-referrer
   X-Content-Type-Options: nosniff
   Cache-Control: public, max-age=0, must-revalidate, no-transform

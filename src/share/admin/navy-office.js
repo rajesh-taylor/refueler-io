@@ -39,17 +39,21 @@ let _growthSnapshot = null;  // GET /admin/growth-snapshot (three lines)
 let _btcPrice       = null;  // GET /admin/btc-price (right-axis overlay)
 
 // ── Theme ──────────────────────────────────────────────────────────────────
+// Privacy-Share-1: theme in localStorage, never a cookie; the old cookie moves over once.
 function getTheme() {
+  let t = null;
+  try { t = localStorage.getItem('rs-theme'); } catch { /* default */ }
   const cookie = document.cookie.split(';').map(c => c.trim())
     .find(c => c.startsWith('rs-theme='));
-  return cookie ? cookie.split('=')[1] : 'carbon';
+  if (cookie && !t) t = cookie.split('=')[1];
+  return t === 'paper' ? 'paper' : 'carbon';
 }
 function setTheme(t) {
   document.documentElement.setAttribute('data-theme', t);
   document.getElementById('theme-paper').classList.toggle('active', t === 'paper');
   document.getElementById('theme-carbon').classList.toggle('active', t === 'carbon');
-  document.cookie = `rs-theme=${t};path=/;domain=.refueler.io;max-age=2592000;SameSite=Lax;Secure`;
-  document.cookie = `rs-theme=;path=/;domain=refueler.io;max-age=0;SameSite=Lax`;
+  try { localStorage.setItem('rs-theme', t); } catch { /* not kept; fine */ }
+  document.cookie = 'rs-theme=;path=/;domain=.refueler.io;max-age=0;SameSite=Lax';
 }
 setTheme(getTheme());
 

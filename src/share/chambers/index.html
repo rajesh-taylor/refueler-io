@@ -260,12 +260,19 @@
       const m = document.cookie.match('(?:^|;)\\s*' + name + '=([^;]*)');
       return m ? decodeURIComponent(m[1]) : null;
     }
+    // Privacy-Share-1: theme in localStorage, never a cookie; the old cookie moves over once.
     function setThemeCookie(theme) {
-      const exp = new Date(Date.now() + 30 * 24 * 3600 * 1000).toUTCString();
-      document.cookie = `rs-theme=${theme};expires=${exp};path=/;domain=.refueler.io;SameSite=Lax`;
+      try { localStorage.setItem('rs-theme', theme); } catch (e) {}
     }
     (function initTheme() {
-      const saved = getCookie('rs-theme') || 'carbon';
+      let saved = null;
+      try { saved = localStorage.getItem('rs-theme'); } catch (e) {}
+      const old = getCookie('rs-theme');
+      if (old) {
+        if (!saved) { saved = old; setThemeCookie(old); }
+        document.cookie = 'rs-theme=; max-age=0; path=/; domain=.refueler.io; SameSite=Lax';
+      }
+      saved = saved === 'paper' ? 'paper' : 'carbon';
       document.documentElement.dataset.theme = saved;
       const btn = document.getElementById('theme-toggle-btn');
       if (btn) btn.textContent = saved === 'carbon' ? '\u25CB' : '\u263D';

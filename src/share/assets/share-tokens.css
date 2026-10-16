@@ -5,7 +5,7 @@
    Rule: no Share page may define its own :root token block.
    Token reference: REFUELER-BRIDGE.md § Design system
    Theme detection: document.documentElement.dataset.theme === 'carbon'
-   Theme persistence: cookie rs-theme scoped to .refueler.io (30-day rolling)
+   Theme persistence: localStorage rs-theme, never a cookie (Privacy-Share-1, 16 Oct 2026)
    Carbon is default site-wide (R-13). A visitor's saved choice wins.
    ──────────────────────────────────────────────────────────────────────────── */
 

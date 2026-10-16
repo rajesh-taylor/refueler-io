@@ -38,20 +38,26 @@
 
 <!-- Theme: applied before first paint.
      Detection: document.documentElement.dataset.theme === 'carbon'
-     Persistence: cookie rs-theme scoped to .refueler.io (30-day rolling)
+     Persistence: localStorage rs-theme, never a cookie (Privacy-Share-1, 16 Oct 2026). The old
+     .refueler.io cookie is read once, moved into localStorage, then expired.
      Carbon is default on the whole site (R-13). A visitor's saved choice wins.
      The pill label is set again once the page has loaded: the pill doesn't exist yet
      when this runs (F-7). theme-color (browser toolbar tint) follows the page's --bg. -->
 <!-- X5-2: this script is allowed by hash in src/_headers (/share/ + /share/signin/ CSP). Change it → recompute the hash there. -->
 <script>
   (function () {
-    function getCookie(name) {
-      var m = document.cookie.match('(?:^|; )' + name + '=([^;]*)');
-      return m ? decodeURIComponent(m[1]) : null;
+    function getTheme() {
+      var t = null;
+      try { t = localStorage.getItem('rs-theme'); } catch (e) {}
+      var m = document.cookie.match('(?:^|; )rs-theme=([^;]*)');
+      if (m) {
+        if (!t) { t = decodeURIComponent(m[1]); try { localStorage.setItem('rs-theme', t); } catch (e) {} }
+        document.cookie = 'rs-theme=; max-age=0; path=/; domain=.refueler.io; SameSite=Lax';
+      }
+      return t === 'paper' ? 'paper' : 'carbon';
     }
-    function setCookie(name, value) {
-      var expires = new Date(Date.now() + 30 * 864e5).toUTCString();
-      document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/; domain=.refueler.io; SameSite=Lax';
+    function setTheme(t) {
+      try { localStorage.setItem('rs-theme', t); } catch (e) {}
     }
     function applyTheme(theme) {
       var root = document.documentElement;
@@ -68,15 +74,14 @@
       if (tint && bg) tint.setAttribute('content', bg);
     }
     window.toggleTheme = function () {
-      var current = getCookie('rs-theme') || 'carbon';
-      var next = current === 'paper' ? 'carbon' : 'paper';
-      setCookie('rs-theme', next);
+      var next = getTheme() === 'paper' ? 'carbon' : 'paper';
+      setTheme(next);
       applyTheme(next);
       {% if stripeThemeRemount %}if (typeof remountStripeForTheme === 'function') remountStripeForTheme();{% endif %}
     };
-    applyTheme(getCookie('rs-theme') || 'carbon');
+    applyTheme(getTheme());
     document.addEventListener('DOMContentLoaded', function () {
-      applyTheme(getCookie('rs-theme') || 'carbon');
+      applyTheme(getTheme());
     });
     window.toggleNavDrawer = function () {
       var h = document.getElementById('site-header');
