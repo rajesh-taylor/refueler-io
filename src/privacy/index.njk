@@ -101,13 +101,13 @@ permalink: /privacy/index.html
               <td>Encrypted pieces of your files, and their stored size</td>
               <td>Deliver them to your receiver</td>
               <td>Cloudflare</td>
-              <td>Until the transfer expires or is deleted</td>
+              <td>Until the transfer is deleted, or two days after it expires</td>
             </tr>
             <tr>
               <td>A transfer id, when it was sent and when it expires</td>
               <td>Find the transfer and end it on time</td>
               <td>Cloudflare</td>
-              <td>Until it ends; then only the id and the time it ended, so the link can say it has gone</td>
+              <td>Until it ends; then only the id and the time it ended, for 30 days, so the link can say it has gone</td>
             </tr>
             <tr>
               <td>Short error notes: a step name, a status code, part of a transfer id</td>
@@ -125,7 +125,7 @@ permalink: /privacy/index.html
               <td>Citizens only: when you signed in, to the minute, kept as one-way fingerprints</td>
               <td>Keep you signed in</td>
               <td>Supabase (EU, Ireland)</td>
-              <td>24 hours at most</td>
+              <td>Stop working after 1 hour unused, 24 hours at most; deleted within the hour</td>
             </tr>
           </tbody>
         </table>
@@ -137,6 +137,7 @@ permalink: /privacy/index.html
           <li><strong>OpenTimestamps</strong> calendar servers receive a one-way fingerprint only if you choose a permanent record (paid plans). It reveals nothing about your file. They see your IP address as any server does.</li>
         </ul>
         <p>Share runs no analytics, advertising or tracking script. Visit numbers come only from Cloudflare's own traffic totals as our host.</p>
+        <p>The reason for each item, and its limit: <a href="/notes/what-share-keeps/">What Share keeps, and why</a>.</p>
       </div>
     </section>
 
@@ -174,7 +175,7 @@ permalink: /privacy/index.html
         </div>
         <p>These, and nothing for advertising or tracking across sites.</p>
         <p>Some choices stay in your own browser and are never sent to us: Paper or Carbon, the notes that let an interrupted upload carry on, and whether you have seen a notice (cleared when you close the tab).</p>
-        <p>You can check this yourself: your browser's developer tools → Storage (or Application) → Cookies.</p>
+        <p>You can check this yourself: your browser's developer tools → Storage (or Application) → Cookies. <a href="/notes/what-share-keeps/#check-along">Step by step, for each browser</a>.</p>
       </div>
     </section>
 
