@@ -358,3 +358,15 @@ An OVH VPS-1 (2 vCores / 4 GB / 40 GB / £3.31 ex VAT) runs phoenixd comfortably
 **Exploited?** No way to tell: refueler.io keeps no request logs with query strings. No reports received.
 **Root cause:** code from another product carried over in a migration, and no CSP on the homepage to contain it.
 **What changes:** a CSP for every refueler.io page, and a review of the remaining legacy pages, are scheduled.
+
+---
+
+## 2026-10-17 — Navy Office: annotation id placed inside an inline handler (fixed, same day)
+
+**Found:** Speed-View-Opus, while moving Navy Office (`refueler.io/share/admin/`) to a strict Content-Security-Policy.
+**What:** the delete button on each Growth annotation built its click handler as text, with the annotation's id inside single quotes. The escape used there covered `<`, `>`, `&` and `"` but not `'`, so an id containing a quote could have run script in the admin page.
+**Reach:** Navy Office only. The Worker gives every annotation a random UUID (`handlers/news_events.js`), so no request to the API could create an id with a quote; only a direct write to the Workers KV store holding the annotations could have planted one (KV is treated as writable by an attacker in Share's own design, which is why this is fixed rather than left).
+**Timeline:** found and fixed 17 Oct 2026 (refueler-io, Speed-View-Opus commit): the id now travels in a data attribute read by a listener; the one HTML escape also covers `'`; every Worker value in Navy Office's HTML is escaped or read as a number.
+**Exploited?** No reason to think so: it needed a planted KV value, and none has been reported. Not checked against the stored annotations.
+**Root cause:** inline handlers built from data, and no CSP on the admin page to contain them.
+**What changes:** Navy Office now sends `default-src 'none'; script-src 'self'; style-src 'self'; …` with no inline scripts, handlers or styles, and self-hosted fonts (`src/_headers`, `/share/admin/*`).

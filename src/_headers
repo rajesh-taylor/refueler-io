@@ -18,6 +18,18 @@
   X-Content-Type-Options: nosniff
   Cache-Control: public, max-age=0, must-revalidate, no-transform
 
+# Navy Office (Speed-View-Opus · 17 Oct 2026): strict CSP. No inline script, handler or style in
+# the page (classes, data-* and listeners in navy-office.js / speed-view.js); fonts self-hosted in
+# share/admin/fonts/; the only network call is the Worker. Speed files are read with FileReader
+# (no network). noindex: an admin page has no business in search results. Change anything that
+# loads from elsewhere → widen exactly one directive here, never 'unsafe-inline'.
+/share/admin/*
+  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src https://api.share.refueler.io; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'
+  Referrer-Policy: no-referrer
+  X-Content-Type-Options: nosniff
+  X-Robots-Tag: noindex
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
+
 # Newest Notes article, read by the Share receiver card (cross-origin from share.refueler.io since X5-2). Short cache so a
 # new article shows within minutes. Pages serves .json as application/json.
 /notes/latest.json

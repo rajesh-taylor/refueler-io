@@ -17,6 +17,12 @@
  *        Annotation ticks. Add-event form. Delete. Source: /admin/news-events.
  *   (4)  Execution Dock detail: size_bytes human-readable, rail label map,
  *        merkle_root "pending (available at Share-6-5)", download count pending.
+ *
+ * Speed-View-Opus (17 Oct 2026) — strict CSP on /share/admin/* (src/_headers):
+ *   no inline handlers: every control carries data-* and one delegated listener (bottom of
+ *   this file) acts on it; no style= in markup or in HTML strings (classes, the hidden
+ *   attribute, or CSSOM element.style for data-driven sizes); every Worker value that goes
+ *   into an HTML string passes escHtml() or is a Number. Speed is drawn by speed-view.js.
  * ─────────────────────────────────────────────────────────────────────────── */
 
 const WORKER = 'https://api.share.refueler.io';
@@ -67,6 +73,7 @@ function signOut() {
 document.getElementById('key-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') tryUnlock();
 });
+document.getElementById('unlock-btn').addEventListener('click', () => tryUnlock());
 
 function showDashboard() {
   document.getElementById('gate').style.display = 'none';
@@ -213,11 +220,11 @@ function renderHostnameHealth(data) {
     const statusClass =
       r.status === 'ok'      ? 'hh-ok'      :
       r.status === 'timeout' ? 'hh-timeout' : 'hh-error';
-    const httpCol = r.http_status > 0 ? String(r.http_status) : '—';
-    const latCol  = r.latency_ms  > 0 ? `${r.latency_ms} ms` : '—';
+    const httpCol = Number(r.http_status) > 0 ? String(Number(r.http_status)) : '—';
+    const latCol  = Number(r.latency_ms)  > 0 ? `${Number(r.latency_ms)} ms` : '—';
     return `<tr>
       <td class="hh-host">${escHtml(r.hostname)}</td>
-      <td class="${statusClass}">${r.status}</td>
+      <td class="${statusClass}">${escHtml(r.status)}</td>
       <td class="hh-http">${httpCol}</td>
       <td class="hh-lat">${latCol}</td>
     </tr>`;
@@ -381,7 +388,7 @@ function renderStorage(s) {
 }
 
 function _storageModalHtml(s) {
-  const row = (k, v) => _apiRow(k, escHtml(v));
+  const row = (k, v) => _apiRow(k, v);
   const live = Object.entries(s.live ?? {}).sort((a, b) => b[1].bytes - a[1].bytes);
   const liveRows = live.length
     ? live.map(([t, v]) => row(TIER_LABEL[t] ?? t, `${v.transfers} · ${_fmtGib(v.bytes)}`)).join('')
@@ -454,11 +461,10 @@ function renderApiStatsCard(data) {
     // Bearer). `total` is dominated by Pro Bono and reads as if the API tier is
     // busy when it is not. Pro Bono is shown as a separate, muted sub-line.
     if (r30 && r30.ae_available !== false) {
-      const billable = r30.billable ?? ((r30.by_rail?.identity ?? 0) + (r30.by_rail?.anonymous ?? 0));
-      const proBono  = r30.pro_bono ?? (r30.by_rail?.none ?? 0);
-      reqsEl.innerHTML =
-        `${billable.toLocaleString('en-GB')} billable reqs (30d)` +
-        `<br><span style="color:var(--text-tertiary)">+ ${proBono.toLocaleString('en-GB')} Pro Bono</span>`;
+      const billable = _n(r30.billable ?? (_n(r30.by_rail?.identity) + _n(r30.by_rail?.anonymous)));
+      const proBono  = _n(r30.pro_bono ?? r30.by_rail?.none);
+      reqsEl.replaceChildren(`${billable.toLocaleString('en-GB')} billable reqs (30d)`, document.createElement('br'),
+        Object.assign(document.createElement('span'), { className: 'text-muted', textContent: `+ ${proBono.toLocaleString('en-GB')} Pro Bono` }));
     } else {
       reqsEl.textContent = '';
     }
@@ -557,7 +563,7 @@ function ceCounts(ae, kv) {
 function _ceGroupHtml(groups) {
   return '<div class="ce-groups">' + groups.map(g => `
     <div class="ce-code">
-      <div class="ce-code-head"><span class="ce-code-label">${escHtml(g.label)}</span><span class="ce-code-n">${g.n}</span></div>
+      <div class="ce-code-head"><span class="ce-code-label">${escHtml(g.label)}</span><span class="ce-code-n">${escHtml(g.n)}</span></div>
       <div class="ce-code-id">${escHtml(g.key)}</div>
       <div class="ce-code-means">${escHtml(g.means)}</div>
       <div class="ce-code-worry">${escHtml(g.worry)}</div>
@@ -681,7 +687,7 @@ function openModal(key, triggerEl) {
 
   const deferredNote = document.getElementById('modal-deferred-note');
   const isLightning  = key === 'lightning';
-  deferredNote.style.display = isLightning ? '' : 'none';
+  deferredNote.hidden = !isLightning;
   if (isLightning) {
     deferredNote.innerHTML = '<strong>B7</strong><span class="deferred-badge">deferred</span><br><br>This metric is live at Block 7 when Lightning/Blink integration ships.';
   }
@@ -739,7 +745,7 @@ function openModal(key, triggerEl) {
       const sparkEl = document.getElementById('modal-sparkline');
       if (sparkEl) {
         sparkEl.classList.remove('modal-sparkline-stub');
-        sparkEl.innerHTML = '<div style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary)">Loading daily trend…</div>';
+        sparkEl.innerHTML = '<div class="modal-loading">Loading daily trend…</div>';
         _renderIssuanceTrend(sparkEl);
       }
       break;
@@ -750,7 +756,7 @@ function openModal(key, triggerEl) {
       sparkEl.classList.remove('modal-sparkline-stub');
       sparkEl.closest('.modal-body').querySelectorAll('.modal-section-title').forEach(el => { el.style.display = 'none'; });
       document.getElementById('modal-csv-btn').style.display  = 'none';
-      document.getElementById('modal-csv-note').style.display = 'none';
+      document.getElementById('modal-csv-note').hidden = true;
       if (s) {
         value = _fmtGib(s.total_bytes);
         sub = `${s.budget_band_pct} % of ${s.budget_gib} GiB budget · as of ${_fmtDay(s.as_of_day)}`;
@@ -850,7 +856,7 @@ function openModal(key, triggerEl) {
         el.style.display = 'none';
       });
       document.getElementById('modal-csv-btn').style.display  = 'none';
-      document.getElementById('modal-csv-note').style.display = 'none';
+      document.getElementById('modal-csv-note').hidden = true;
 
       // Render the toggle + content
       _renderCeModalContent(sparkEl, ae);
@@ -866,7 +872,7 @@ function openModal(key, triggerEl) {
       sparkEl.classList.remove('modal-sparkline-stub');
       sparkEl.closest('.modal-body').querySelectorAll('.modal-section-title').forEach(el => { el.style.display = 'none'; });
       document.getElementById('modal-csv-btn').style.display  = 'none';
-      document.getElementById('modal-csv-note').style.display = 'none';
+      document.getElementById('modal-csv-note').hidden = true;
       _renderExpectedModal(sparkEl, ae, kvErrorsCache);
       break;
     }
@@ -889,10 +895,10 @@ function openModal(key, triggerEl) {
     }
     case 'kv-monitor': {
       const kv = window._kvCache ?? {};
-      const writes   = kv.writes_today   ?? 0;
-      const reads    = kv.reads_today    ?? 0;
-      const storage  = kv.storage_bytes  ?? 0;
-      const keys     = kv.key_count      ?? 0;
+      const writes   = _n(kv.writes_today);
+      const reads    = _n(kv.reads_today);
+      const storage  = _n(kv.storage_bytes);
+      const keys     = _n(kv.key_count);
       const W_LIMIT = 1_000;
       const R_LIMIT = 100_000;
       const S_LIMIT = 1_073_741_824;
@@ -915,7 +921,7 @@ function openModal(key, triggerEl) {
         el.style.display = 'none';
       });
       document.getElementById('modal-csv-btn').style.display  = 'none';
-      document.getElementById('modal-csv-note').style.display = 'none';
+      document.getElementById('modal-csv-note').hidden = true;
 
       value = keys.toLocaleString('en-GB');
       sub   = 'Keys stored (no cap — Cloudflare does not limit key count)';
@@ -928,7 +934,7 @@ function openModal(key, triggerEl) {
               <span class="kv-bar-figure">${writes.toLocaleString('en-GB')} / ${W_LIMIT.toLocaleString('en-GB')}</span>
             </div>
             <div class="kv-bar-track">
-              <div class="kv-bar-fill ${_barClass(writePct)}" style="width:${writePct.toFixed(1)}%"></div>
+              <div class="kv-bar-fill ${_barClass(writePct)}" data-w="${writePct.toFixed(1)}"></div>
             </div>
             <div class="kv-bar-caption">${writePct.toFixed(1)}% of daily free-plan allowance · resets midnight UTC</div>
           </div>
@@ -938,7 +944,7 @@ function openModal(key, triggerEl) {
               <span class="kv-bar-figure">${reads.toLocaleString('en-GB')} / ${R_LIMIT.toLocaleString('en-GB')}</span>
             </div>
             <div class="kv-bar-track">
-              <div class="kv-bar-fill ${_barClass(readPct)}" style="width:${readPct.toFixed(1)}%"></div>
+              <div class="kv-bar-fill ${_barClass(readPct)}" data-w="${readPct.toFixed(1)}"></div>
             </div>
             <div class="kv-bar-caption">${readPct.toFixed(1)}% of daily free-plan allowance · resets midnight UTC</div>
           </div>
@@ -948,7 +954,7 @@ function openModal(key, triggerEl) {
               <span class="kv-bar-figure">${_fmtBytes(storage)} / 1 GB</span>
             </div>
             <div class="kv-bar-track">
-              <div class="kv-bar-fill ${_barClass(storagePct)}" style="width:${storagePct.toFixed(1)}%"></div>
+              <div class="kv-bar-fill ${_barClass(storagePct)}" data-w="${storagePct.toFixed(1)}"></div>
             </div>
             <div class="kv-bar-caption">${storagePct.toFixed(2)}% of 1 GB cap · persistent</div>
           </div>
@@ -962,6 +968,7 @@ function openModal(key, triggerEl) {
           Upgrade to Workers Paid ($5/mo) to move to MONTHLY accrual with 10× higher allowances.<br>
           Flip <code>PLAN='paid'</code> in navy-office.js after upgrade — no GraphQL auto-detect yet.
         </div>`;
+      _applyWidths(sparkEl);
       break;
     }
 
@@ -979,7 +986,7 @@ function openModal(key, triggerEl) {
         el.style.display = 'none';
       });
       document.getElementById('modal-csv-btn').style.display  = 'none';
-      document.getElementById('modal-csv-note').style.display = 'none';
+      document.getElementById('modal-csv-note').hidden = true;
 
       sparkEl.innerHTML = _buildApiMcpModalHtml(d);
       break;
@@ -1005,13 +1012,15 @@ function _railLabel(rail) {
   return escHtml(String(rail ?? '—'));
 }
 
-function _apiRow(k, v, cls) {
-  return `<div class="api-row"><span class="api-row-k">${escHtml(k)}</span><span class="api-row-v${cls ? ' ' + cls : ''}">${v}</span></div>`;
+// v is escaped; _apiRowHtml takes markup built here (never Worker text unescaped).
+function _apiRow(k, v, cls) { return _apiRowHtml(k, escHtml(v ?? '—'), cls); }
+function _apiRowHtml(k, html, cls) {
+  return `<div class="api-row"><span class="api-row-k">${escHtml(k)}</span><span class="api-row-v${cls ? ' ' + cls : ''}">${html}</span></div>`;
 }
 
 function _buildApiMcpModalHtml(d) {
   if (!d) {
-    return `<div class="api-modal-section"><p style="font-family:var(--mono);font-size:12px;color:var(--text-tertiary)">No data — /admin/api-stats not yet reached.</p></div>`;
+    return `<div class="api-modal-section"><p class="modal-loading">No data — /admin/api-stats not yet reached.</p></div>`;
   }
 
   const aeWarn  = d.ae_available  === false ? '<span class="api-row-v unavail">AE unavailable</span>' : null;
@@ -1023,32 +1032,31 @@ function _buildApiMcpModalHtml(d) {
   const keyRows = [
     _apiRow('Provisioned', ak.provisioned ?? '—'),
     _apiRow('Active',      ak.active      ?? '—'),
-    ...Object.entries(byPlan).map(([plan, n]) => _apiRow(`  ${escHtml(plan)}`, String(n))),
+    ...Object.entries(byPlan).map(([plan, n]) => _apiRow(`  ${plan}`, String(n))),
   ];
 
   // Section 2: Requests 30d — B10-1: lead with billable (Registered + Bearer),
   // then the rail breakdown, then Pro Bono and the all-in total for reference.
   const r30 = d.requests_30d ?? {};
   const byRail = r30.by_rail ?? {};
-  const billable = r30.billable ?? ((byRail.identity ?? 0) + (byRail.anonymous ?? 0));
-  const proBono  = r30.pro_bono ?? (byRail.none ?? 0);
+  const billable = _n(r30.billable ?? (_n(byRail.identity) + _n(byRail.anonymous)));
+  const proBono  = _n(r30.pro_bono ?? byRail.none);
   const reqRows = (r30.ae_available === false)
-    ? [ _apiRow('Requests (30d)', aeWarn || 'Analytics Engine unavailable') ]
+    ? [ aeWarn ? _apiRowHtml('Requests (30d)', aeWarn) : _apiRow('Requests (30d)', 'Analytics Engine unavailable') ]
     : [
         _apiRow('Billable (30d)', billable.toLocaleString('en-GB')),
         _apiRow('  Registered',   String(byRail.identity ?? 0)),
         _apiRow('  Bearer',       String(byRail.anonymous ?? 0)),
         _apiRow('Pro Bono',       proBono.toLocaleString('en-GB')),
-        _apiRow('All requests',   (r30.total ?? 0).toLocaleString('en-GB')),
+        _apiRow('All requests',   _n(r30.total).toLocaleString('en-GB')),
       ];
 
   // Section 3: Attach rate
   const ar = d.api_attach_rate ?? {};
-  const ratePct = ar.rate != null ? `${(ar.rate * 100).toFixed(1)}%` : (kvWarn ? kvWarn : '—');
   const attachRows = [
-    _apiRow('API transfers',   ar.api_transfers?.toLocaleString('en-GB') ?? '—'),
-    _apiRow('Total transfers', ar.total_transfers?.toLocaleString('en-GB') ?? '—'),
-    _apiRow('Attach rate',     ratePct),
+    _apiRow('API transfers',   ar.api_transfers   != null ? _n(ar.api_transfers).toLocaleString('en-GB')   : '—'),
+    _apiRow('Total transfers', ar.total_transfers != null ? _n(ar.total_transfers).toLocaleString('en-GB') : '—'),
+    ar.rate != null ? _apiRow('Attach rate', `${(_n(ar.rate) * 100).toFixed(1)}%`) : kvWarn ? _apiRowHtml('Attach rate', kvWarn) : _apiRow('Attach rate', '—'),
   ];
 
   // Section 4: Sandbox → live
@@ -1072,7 +1080,7 @@ function _buildApiMcpModalHtml(d) {
     </div>
     <div class="api-modal-section">
       <div class="api-modal-section-title">Sandbox → live</div>
-      ${_apiRow('Status', s2lVal)}
+      ${_apiRowHtml('Status', s2lVal)}
     </div>
   `;
 }
@@ -1100,7 +1108,7 @@ function _ceSub() {
 function _ceRowsHtml(rows) {
   if (!rows.length) return '';
   return `
-    <div class="modal-section-title" style="display:block">Lines</div>
+    <div class="modal-section-title">Lines</div>
     <div class="ce-table-wrap">
       <table class="ce-table">
         <thead><tr><th>Time</th><th>Code</th><th>Message</th></tr></thead>
@@ -1113,10 +1121,10 @@ const _ceTime = (d) => d.toLocaleString('en-GB', { day: '2-digit', month: 'short
 function _renderCeModalContent(sparkEl, ae) {
   const toggleHtml = `
     <div class="ce-source-toggle">
-      <button class="ce-source-btn${ceSource === 'ae' ? ' active' : ''}" onclick="_setCeSource('ae')">
+      <button type="button" class="ce-source-btn${ceSource === 'ae' ? ' active' : ''}" data-ce-source="ae">
         Reported by browser (24h)
       </button>
-      <button class="ce-source-btn${ceSource === 'kv' ? ' active' : ''}" onclick="_setCeSource('kv')">
+      <button type="button" class="ce-source-btn${ceSource === 'kv' ? ' active' : ''}" data-ce-source="kv">
         Observed by Worker
       </button>
     </div>`;
@@ -1129,12 +1137,13 @@ function _renderCeModalContent(sparkEl, ae) {
       .filter(r => ceCode(r.context).kind !== 'expected')
       .map(r => {
         const ts  = r.ts ? _ceTime(new Date(r.ts)) : '—';
-        const msg = r.message ? escHtml(r.message.slice(0, 80)) + (r.message.length > 80 ? '&hellip;' : '') : '—';
-        return `<tr><td class="ce-ts">${ts}</td><td class="ce-ctx">${escHtml(r.context || '—')}</td><td class="ce-msg">${msg}</td></tr>`;
+        const m   = r.message == null ? '' : String(r.message);
+        const msg = m ? escHtml(m.slice(0, 80)) + (m.length > 80 ? '&hellip;' : '') : '—';
+        return `<tr><td class="ce-ts">${escHtml(ts)}</td><td class="ce-ctx">${escHtml(r.context || '—')}</td><td class="ce-msg">${msg}</td></tr>`;
       });
     sparkEl.innerHTML = toggleHtml + line +
       (real.length ? _ceGroupHtml(real) : '<div class="ce-empty">No real failures in the last 24 hours.</div>') +
-      (detail.length ? '<div class="modal-section-title" style="display:block">Detail behind a stop · not counted</div>' + _ceGroupHtml(detail) : '') +
+      (detail.length ? '<div class="modal-section-title">Detail behind a stop · not counted</div>' + _ceGroupHtml(detail) : '') +
       _ceRowsHtml(rows);
     return;
   }
@@ -1142,7 +1151,7 @@ function _renderCeModalContent(sparkEl, ae) {
   // Worker tab — KV log (refreshed every minute with the page).
   const render = (data) => {
     if (!data) {
-      sparkEl.innerHTML = toggleHtml + '<div class="ce-empty" style="color:var(--c-amber)">Worker log unavailable — /admin/client-errors-log returned an error.</div>';
+      sparkEl.innerHTML = toggleHtml + '<div class="ce-empty ce-empty-warn">Worker log unavailable — /admin/client-errors-log returned an error.</div>';
       return;
     }
     const line = `<p class="ce-count-line">Counts requests the Worker refused or failed, except closed links, bot probes and the price feed (see Expected events). ${escHtml(_kvCoverage(data))}</p>`;
@@ -1152,14 +1161,14 @@ function _renderCeModalContent(sparkEl, ae) {
       .slice(0, 100)
       .map(r => {
         const ts = r.ts ? _ceTime(new Date(r.ts * 1000)) : '—';
-        return `<tr><td class="ce-ts">${ts}</td><td class="ce-ctx">${escHtml(`${r.status} ${r.endpoint ?? ''}`)}</td><td class="ce-msg">${escHtml(r.path ?? '—')}</td></tr>`;
+        return `<tr><td class="ce-ts">${escHtml(ts)}</td><td class="ce-ctx">${escHtml(`${r.status} ${r.endpoint ?? ''}`)}</td><td class="ce-msg">${escHtml(r.path ?? '—')}</td></tr>`;
       });
     sparkEl.innerHTML = toggleHtml + line +
       (real.length ? _ceGroupHtml(real) : '<div class="ce-empty">No real failures in the log.</div>') +
       _ceRowsHtml(rows);
   };
   if (kvErrorsCache) { render(kvErrorsCache); return; }
-  sparkEl.innerHTML = toggleHtml + '<div class="ce-empty" style="color:var(--text-tertiary)">Loading Worker log…</div>';
+  sparkEl.innerHTML = toggleHtml + '<div class="ce-empty text-muted">Loading Worker log…</div>';
   fetchKvErrorsLog().then(data => { kvErrorsCache = data; render(data); });
 }
 
@@ -1198,7 +1207,7 @@ function _trapFocus(e) {
 }
 
 function onCsvClick() {
-  document.getElementById('modal-csv-note').style.display = '';
+  document.getElementById('modal-csv-note').hidden = false;
 }
 
 function closeModal() {
@@ -1206,7 +1215,7 @@ function closeModal() {
   modal.classList.remove('open');
   modal.removeEventListener('keydown', _trapFocus);
   document.body.style.overflow = '';
-  document.getElementById('modal-csv-note').style.display = 'none';
+  document.getElementById('modal-csv-note').hidden = true;
 
   // Restore elements hidden by client-errors / kv-monitor / api-mcp modals
   const sparkEl = document.getElementById('modal-sparkline');
@@ -1219,7 +1228,7 @@ function closeModal() {
     const csvBtn = document.getElementById('modal-csv-btn');
     if (csvBtn) csvBtn.style.display = '';
     const csvNote = document.getElementById('modal-csv-note');
-    if (csvNote) csvNote.style.display = 'none';
+    if (csvNote) csvNote.hidden = true;
   }
 
   if (_modalTrigger) {
@@ -1260,12 +1269,20 @@ function parseUA(ua) {
   return `${browser} / ${os}`;
 }
 
+// The one escape for HTML strings (text and attribute values, either quote).
 function escHtml(s) {
-  return String(s)
+  return String(s ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+// A Worker value used as a number: anything else becomes 0, never text.
+function _n(x) { const v = Number(x); return Number.isFinite(v) ? v : 0; }
+// Sizes that come from data: data-w="<percent>" set through CSSOM after the HTML is in place.
+function _applyWidths(root) {
+  root.querySelectorAll('[data-w]').forEach(el => { el.style.width = `${Math.max(0, Math.min(100, Number(el.dataset.w) || 0))}%`; });
 }
 
 function setText(id, text) {
@@ -1403,13 +1420,7 @@ window.smokeTest = async function() {
 
 const SANDBOX_TOKEN_COUNT = 10;
 
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
+const escapeHtml = escHtml;   // one escape (Speed-View-Opus)
 
 function scrollToCard(id) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1426,7 +1437,7 @@ function openSoonModal(feature) {
   document.getElementById('soon-modal-title').textContent = feature;
   document.getElementById('soon-modal-body').innerHTML =
     `${escHtml(SOON_COPY[feature] ?? 'A dedicated view for this section.')}` +
-    `<br><br><span style="opacity:.6">Coming in a future session.</span>`;
+    `<br><br><span class="text-faint">Coming in a future session.</span>`;
   document.getElementById('soon-modal').classList.add('open');
 }
 function closeSoonModal() {
@@ -1437,7 +1448,8 @@ function updateSandboxState(label) {
   const el = document.getElementById('sandbox-state');
   if (!el) return;
   el.textContent = label;
-  el.style.color = label === 'Active' ? 'var(--green,#5cb85c)' : label === 'Error' ? '#e05353' : '';
+  el.classList.toggle('sandbox-ok', label === 'Active');
+  el.classList.toggle('sandbox-err', label === 'Error');
 }
 
 async function sandboxActivate() {
@@ -1456,45 +1468,45 @@ async function sandboxActivate() {
     });
     const data = await res.json();
     const resultEl = document.getElementById('sandbox-result');
-    resultEl.style.display = 'block';
+    resultEl.hidden = false;
 
     if (!res.ok) {
-      resultEl.innerHTML = `<span style="color:#e05353">Error ${res.status}: ${escapeHtml(data.error ?? 'Unknown error')}</span>`;
+      resultEl.innerHTML = `<span class="sandbox-err">Error ${res.status}: ${escapeHtml(data.error ?? 'Unknown error')}</span>`;
       updateSandboxState('Error');
       return;
     }
 
     const lines = [
-      `<strong style="color:var(--fg,#F5F0E8)">✓ Sandbox client issued</strong>`,
+      `<strong class="sandbox-head">✓ Sandbox client issued</strong>`,
       ``,
       `Rail:      <strong>${escapeHtml(data.rail)}</strong>`,
-      `Live key:  <span style="color:#C8A96E">${escapeHtml(data.live_key)}</span>`,
-      `Sign key:  <span style="color:#C8A96E">${escapeHtml(data.sign_key)}</span>  ← shown once`,
+      `Live key:  <span class="sandbox-key">${escapeHtml(data.live_key)}</span>`,
+      `Sign key:  <span class="sandbox-key">${escapeHtml(data.sign_key)}</span>  ← shown once`,
       data.credits !== null
-        ? `Credits:   ${data.credits}`
-        : `Tokens:    ${data.test_tokens?.length ?? 0} test tokens issued`,
+        ? `Credits:   ${escapeHtml(data.credits)}`
+        : `Tokens:    ${_n(data.test_tokens?.length)} test tokens issued`,
       `Expires:   ${new Date(data.expires_at * 1000).toISOString()}`,
       ``,
-      `<span style="opacity:.5;font-size:10px">Full response (copy before timer clears):</span>`,
-      `<span style="opacity:.7">${escapeHtml(JSON.stringify(data, null, 2))}</span>`,
+      `<span class="sandbox-small">Full response (copy before timer clears):</span>`,
+      `<span class="sandbox-dim">${escapeHtml(JSON.stringify(data, null, 2))}</span>`,
     ];
     window._sandboxRaw = data;
     resultEl.innerHTML =
-      `<div class="sandbox-result-head"><button class="ghost-btn" onclick="copySandboxResult(this)">Copy JSON</button></div>` +
+      `<div class="sandbox-result-head"><button type="button" class="ghost-btn" data-action="copy-sandbox">Copy JSON</button></div>` +
       lines.join('<br>');
 
     updateSandboxState('Active');
     document.getElementById('sandbox-sub').textContent =
-      `${data.rail} rail · ${data.credits !== null ? data.credits + ' credits' : SANDBOX_TOKEN_COUNT + ' test tokens'} · expires ${new Date(data.expires_at * 1000).toLocaleDateString()}`;
+      `${String(data.rail)} rail · ${data.credits !== null ? data.credits + ' credits' : SANDBOX_TOKEN_COUNT + ' test tokens'} · expires ${new Date(data.expires_at * 1000).toLocaleDateString()}`;
 
     setTimeout(() => {
-      resultEl.innerHTML = '<span style="opacity:.4">Result cleared after 5 min — record credentials immediately next time.</span>';
+      resultEl.innerHTML = '<span class="text-faint">Result cleared after 5 min — record credentials immediately next time.</span>';
     }, 5 * 60 * 1000);
 
   } catch (e) {
     const resultEl = document.getElementById('sandbox-result');
-    resultEl.style.display = 'block';
-    resultEl.innerHTML = `<span style="color:#e05353">Network error: ${escapeHtml(String(e))}</span>`;
+    resultEl.hidden = false;
+    resultEl.innerHTML = `<span class="sandbox-err">Network error: ${escapeHtml(String(e))}</span>`;
   } finally {
     btn.disabled = false; btn.textContent = 'Issue keypair';
   }
@@ -1520,33 +1532,33 @@ async function sandboxReset() {
     });
     const data     = await res.json();
     const resultEl = document.getElementById('sandbox-result');
-    resultEl.style.display = 'block';
+    resultEl.hidden = false;
 
     if (!res.ok) {
-      resultEl.innerHTML = `<span style="color:#e05353">Error ${res.status}: ${escapeHtml(data.error ?? 'Unknown error')}</span>`;
+      resultEl.innerHTML = `<span class="sandbox-err">Error ${res.status}: ${escapeHtml(data.error ?? 'Unknown error')}</span>`;
       return;
     }
 
     const lines = [
-      `<strong style="color:var(--fg,#F5F0E8)">✓ Sandbox reset</strong>`,
+      `<strong class="sandbox-head">✓ Sandbox reset</strong>`,
       `Rail:     ${escapeHtml(data.rail)}`,
       data.credits !== null
-        ? `Credits reissued: ${data.credits}`
-        : `Test tokens reissued: ${data.test_tokens?.length ?? 0}`,
+        ? `Credits reissued: ${escapeHtml(data.credits)}`
+        : `Test tokens reissued: ${_n(data.test_tokens?.length)}`,
       `Reset at: ${new Date(data.reset_at * 1000).toISOString()}`,
     ];
     if (data.test_tokens?.length) {
-      lines.push(``, `<span style="opacity:.7">${escapeHtml(JSON.stringify(data.test_tokens, null, 2))}</span>`);
+      lines.push(``, `<span class="sandbox-dim">${escapeHtml(JSON.stringify(data.test_tokens, null, 2))}</span>`);
     }
     window._sandboxRaw = data;
     resultEl.innerHTML =
-      `<div class="sandbox-result-head"><button class="ghost-btn" onclick="copySandboxResult(this)">Copy JSON</button></div>` +
+      `<div class="sandbox-result-head"><button type="button" class="ghost-btn" data-action="copy-sandbox">Copy JSON</button></div>` +
       lines.join('<br>');
 
   } catch (e) {
     const resultEl = document.getElementById('sandbox-result');
-    resultEl.style.display = 'block';
-    resultEl.innerHTML = `<span style="color:#e05353">Network error: ${escapeHtml(String(e))}</span>`;
+    resultEl.hidden = false;
+    resultEl.innerHTML = `<span class="sandbox-err">Network error: ${escapeHtml(String(e))}</span>`;
   } finally {
     btn.disabled = false; btn.textContent = 'Reset credits';
   }
@@ -1559,9 +1571,9 @@ async function fetchKvStats() {
     const data = await res.json();
     const el   = document.getElementById('snap-kv-keys');
     if (!el) return;
-    const count = data.key_count ?? 0;
+    const count = _n(data.key_count);
     el.textContent = count.toLocaleString('en-GB');
-    el.style.color = count > 500_000 ? 'var(--c-red)' : count > 100_000 ? 'var(--c-amber)' : '';
+    el.className = 'sm-value' + (count > 500_000 ? ' red' : count > 100_000 ? ' amber' : '');
     window._kvCache = data;
   } catch (e) { console.warn('[kv-stats]', e); }
 }
@@ -1606,7 +1618,7 @@ function renderExecutionDock(data) {
     const pill  = DOCK_PILL[t.status] ?? { cls: 'expired', label: t.status ?? '—' };
     const short = t.uuid ? `${escHtml(t.uuid.slice(0, 8))}…${escHtml(t.uuid.slice(-4))}` : '—';
     const tierLabel = TIER_DISPLAY[t.tier] ?? escHtml(t.tier ?? '—');
-    return `<tr onclick="openDockModal(${i})">
+    return `<tr data-dock-idx="${i}" tabindex="0">
       <td class="dock-uuid">${short}</td>
       <td>${tierLabel}</td>
       <td><span class="dock-pill ${pill.cls}">${escHtml(pill.label)}</span></td>
@@ -1868,7 +1880,7 @@ function _growthTickMarks(annotations, xOfT, t0, t1, PAD_T, H, PAD_B, series, yO
     // Pennant points LEFT (toward earlier dates) so right-edge flags don't clip.
     const pennant = `M ${xs} ${poleTop} L ${(x - 12).toFixed(1)} ${(y - 14).toFixed(1)} L ${xs} ${(y - 10).toFixed(1)} Z`;
     const data = `data-annot-id="${escHtml(ev.id ?? '')}" data-tick-date="${escHtml(ev.date)}" data-tick-label="${escHtml(ev.label ?? '')}" data-tick-note="${escHtml(ev.note ?? '')}"`;
-    return `<g class="growth-flag" ${data} style="cursor:pointer;">
+    return `<g class="growth-flag" ${data}>
       <line x1="${xs}" y1="${ys}" x2="${xs}" y2="${baseY}" stroke="#C8A96E" stroke-width="0.75" stroke-dasharray="2,3" opacity="0.45"/>
       <line class="growth-flag-pole" x1="${xs}" y1="${ys}" x2="${xs}" y2="${poleTop}" stroke="#C8A96E" stroke-width="1.25"/>
       <path class="growth-flag-pennant" d="${pennant}" fill="#C8A96E"/>
@@ -1901,7 +1913,7 @@ function _setAnnotHi(id, on) {
 function _renderGrowthList(list, body, annotations) {
   if (!list || !body) return;
   if (annotations.length > 0) {
-    list.style.display = '';
+    list.hidden = false;
     body.innerHTML = _buildEventListHtml(annotations);
     // Row hover → highlight the flag on the chart.
     body.querySelectorAll('.growth-event-row').forEach(row => {
@@ -1910,7 +1922,7 @@ function _renderGrowthList(list, body, annotations) {
       row.addEventListener('mouseleave', () => _setAnnotHi(id, false));
     });
   } else {
-    list.style.display = 'none';
+    list.hidden = true;
   }
 }
 
@@ -1935,7 +1947,7 @@ async function _renderIssuanceTrend(sparkEl) {
     return;
   }
 
-  const pts = series.map(p => ({ t: p.t, n: (p.free ?? 0) + (p.paid ?? 0) + (p.api ?? 0) }));
+  const pts = series.map(p => ({ t: _n(p.t), n: _n(p.free) + _n(p.paid) + _n(p.api) }));
   const totalNew = pts.reduce((s, p) => s + p.n, 0);
   const t0 = pts[0].t, t1 = pts[pts.length - 1].t;
   const maxN = Math.max(1, ...pts.map(p => p.n));
@@ -1965,7 +1977,7 @@ async function _renderIssuanceTrend(sparkEl) {
   }).join('');
 
   sparkEl.innerHTML = `
-    <svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;height:auto">
+    <svg viewBox="0 0 ${W} ${H}" width="100%" class="modal-trend-svg">
       ${yGrid}
       <!-- axes -->
       <line x1="${PAD_L}" y1="${PAD_T}" x2="${PAD_L}" y2="${baseY.toFixed(1)}" stroke="${axis}" stroke-width="0.75"/>
@@ -1979,7 +1991,7 @@ async function _renderIssuanceTrend(sparkEl) {
       <text x="${((PAD_L + W - PAD_R) / 2).toFixed(1)}" y="${(baseY + 16).toFixed(1)}" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="${muted}">date</text>
       <text x="${W - PAD_R}" y="${(baseY + 16).toFixed(1)}" text-anchor="end" font-family="var(--mono)" font-size="10" fill="${muted}">${dfmt(t1)}</text>
     </svg>
-    <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-top:4px">Credentials issued per day · last 30 days · ${totalNew.toLocaleString('en-GB')} total · peak ${maxN.toLocaleString('en-GB')}/day</div>`;
+    <div class="modal-trend-caption">Credentials issued per day · last 30 days · ${totalNew.toLocaleString('en-GB')} total · peak ${maxN.toLocaleString('en-GB')}/day</div>`;
 }
 
 function _buildEventListHtml(events) {
@@ -1988,7 +2000,7 @@ function _buildEventListHtml(events) {
       <span class="growth-event-date">${escHtml(ev.date ?? '—')}</span>
       ${ev.label ? `<span class="growth-event-label">${escHtml(ev.label)}</span>` : ''}
       <span class="growth-event-note">${escHtml(ev.note ?? '')}</span>
-      <button class="growth-event-delete" onclick="growthDeleteEvent('${escHtml(ev.id)}', this)" title="Delete">✕</button>
+      <button type="button" class="growth-event-delete" data-delete-id="${escHtml(ev.id ?? '')}" title="Delete">✕</button>
     </div>`
   ).join('');
 }
@@ -2031,7 +2043,8 @@ async function growthAddEvent() {
   if (note)  body.note  = note;
 
   const statusEl = document.getElementById('growth-form-status');
-  statusEl.style.display = '';
+  statusEl.hidden = false;
+  statusEl.className = 'growth-form-status';
   statusEl.textContent = 'Saving…';
 
   try {
@@ -2043,20 +2056,20 @@ async function growthAddEvent() {
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       statusEl.textContent = `Error ${res.status}: ${err.error ?? 'unknown'}`;
-      statusEl.style.color = 'var(--c-red)';
+      statusEl.classList.add('growth-status-err');
       return;
     }
     statusEl.textContent = '✓ Saved.';
-    statusEl.style.color = 'var(--c-green)';
+    statusEl.classList.add('growth-status-ok');
     // Clear fields
     ['growth-date','growth-label','growth-note']
       .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-    setTimeout(() => { statusEl.style.display = 'none'; statusEl.style.color = ''; }, 3000);
+    setTimeout(() => { statusEl.hidden = true; statusEl.className = 'growth-form-status'; }, 3000);
     // Re-fetch (annotations + lines + overlay)
     await fetchGrowthAll();
   } catch (e) {
     statusEl.textContent = `Network error: ${e.message}`;
-    statusEl.style.color = 'var(--c-red)';
+    statusEl.classList.add('growth-status-err');
   }
 }
 
@@ -2082,162 +2095,74 @@ async function growthDeleteEvent(id, btn) {
     if (btn) { btn.disabled = false; btn.textContent = orig; }
   }
 }
-// ── Speed (Share-Release-1c · 17 Oct 2026) ──────────────────────────────────
-// Opens a summary.json written by refueler-share dev/speed/speed.mjs --summarise (kept in
-// refueler-share-private/speed/). Read here with FileReader: no fetch, no upload, nothing stored —
-// the numbers live in this tab until it closes. Built for a strict CSP later: listeners only,
-// file data through textContent and SVG attributes, never innerHTML.
-// Flags a > 20 % rise in Ready or Bytes against the previous run with the same page, engine,
-// label and place (the same rule speed.mjs prints after each run).
-const SPEED_RISE = 0.2;
-const SPEED_MAX_FILE = 5 * 1024 * 1024;
-const SVG_NS = 'http://www.w3.org/2000/svg';
-
-const speedNum = (x) => (typeof x === 'number' && Number.isFinite(x) ? x : null);
-const speedStr = (x, max) => (typeof x === 'string' && x ? x.slice(0, max) : null);
-const speedKey = (r) => [r.page, r.engine, r.label ?? '', r.place ?? ''].join('|');
-const speedMs = (x) => (x == null ? '—' : `${Math.round(x)} ms`);
-const speedKb = (x) => (x == null ? '—' : `${Math.round(x / 1024)} KB`);
-const speedPct = (x) => `${x > 0 ? '+' : ''}${Math.round(x * 100)} %`;
-
-function speedEl(tag, text, cls) {
-  const e = document.createElement(tag);
-  if (text != null) e.textContent = text;
-  if (cls) e.className = cls;
-  return e;
-}
-
-// Only known fields, each checked; anything else in the file is ignored.
-function speedRows(json) {
-  if (!json || json.schema !== 1 || !Array.isArray(json.rows)) throw new Error('not a speed summary (schema 1)');
-  return json.rows.map((r) => {
-    const m = r && typeof r.median === 'object' && r.median ? r.median : {};
-    const c = r && typeof r.cond === 'object' && r.cond ? r.cond : null;
-    return {
-      when: speedStr(r?.when, 30), release: speedStr(r?.release, 16), label: speedStr(r?.label, 24),
-      place: /^[A-Z][0-9]{1,2}$/.test(r?.place || '') ? r.place : null,
-      engine: speedStr(r?.engine, 16), page: speedStr(r?.page, 40), note: speedStr(r?.note, 140),
-      m: { fcp: speedNum(m.fcp), lcp: speedNum(m.lcp), ready: speedNum(m.ready), requests: speedNum(m.requests), bytes: speedNum(m.bytes) },
-      cond: c && {
-        down: speedNum(c.down_mbps), up: speedNum(c.up_mbps), vpn: speedStr(c.vpn, 24),
-        link: speedStr(c.link, 12), power: speedStr(c.power, 12), city: speedStr(c.exit_city, 40),
-      },
-    };
-  }).filter((r) => r.when && !Number.isNaN(Date.parse(r.when)) && r.engine && r.page)
-    .sort((a, b) => a.when.localeCompare(b.when));
-}
-
-// Series per comparable key, oldest first; each run carries its rise flags against the previous one.
-function speedSeries(rows) {
-  const series = new Map();
-  for (const r of rows) {
-    const s = series.get(speedKey(r)) || [];
-    const prev = s[s.length - 1];
-    r.rise = {};
-    if (prev) {
-      for (const k of ['ready', 'bytes']) {
-        const a = prev.m[k], b = r.m[k];
-        if (a > 0 && b != null && (b - a) / a > SPEED_RISE) r.rise[k] = { by: (b - a) / a, prev };
-      }
-    }
-    s.push(r);
-    series.set(speedKey(r), s);
-  }
-  return series;
-}
-
-function speedSpark(values, riseLast, what) {
-  const W = 96, H = 22, v = values.filter((x) => x != null).slice(-12);
-  const svg = document.createElementNS(SVG_NS, 'svg');
-  svg.setAttribute('class', 'speed-spark');
-  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  svg.setAttribute('width', W); svg.setAttribute('height', H);
-  svg.setAttribute('role', 'img');
-  if (!v.length) return svg;
-  const lo = Math.min(...v), hi = Math.max(...v), span = hi - lo || 1;
-  const pts = v.map((x, i) => [v.length === 1 ? W - 3 : 3 + (i / (v.length - 1)) * (W - 6), H - 3 - ((x - lo) / span) * (H - 6)]);
-  svg.setAttribute('aria-label', `${what}, last ${v.length} runs`);
-  const title = document.createElementNS(SVG_NS, 'title');
-  title.textContent = `${what} · last ${v.length} runs`;
-  svg.append(title);
-  if (pts.length > 1) {
-    const line = document.createElementNS(SVG_NS, 'polyline');
-    line.setAttribute('class', 'speed-line');
-    line.setAttribute('points', pts.map((p) => p.map((n) => n.toFixed(1)).join(',')).join(' '));
-    svg.append(line);
-  }
-  const dot = document.createElementNS(SVG_NS, 'circle');
-  dot.setAttribute('class', riseLast ? 'speed-dot rise' : 'speed-dot');
-  dot.setAttribute('cx', pts[pts.length - 1][0].toFixed(1));
-  dot.setAttribute('cy', pts[pts.length - 1][1].toFixed(1));
-  dot.setAttribute('r', '2');
-  svg.append(dot);
-  return svg;
-}
-
-function speedCond(c) {
-  if (!c) return '—';
-  const net = c.down != null ? `${Math.round(c.down)}↓ ${Math.round(c.up ?? 0)}↑ Mbps` : null;
-  const vpn = c.vpn === 'off' ? 'no VPN' : c.vpn ? `Mullvad ${c.vpn}${c.city ? ` · ${c.city}` : ''}` : null;
-  return [net, vpn, c.link, c.power].filter(Boolean).join(' · ') || '—';
-}
-
-function speedRender(json, fileName) {
-  const status = document.getElementById('speed-status');
-  const rows = speedRows(json);
-  const series = speedSeries(rows);
-  const tbody = document.getElementById('speed-tbody');
-  tbody.replaceChildren();
-  const latest = [...series.values()].map((s) => s[s.length - 1])
-    .sort((a, b) => speedKey(a).localeCompare(speedKey(b)));
-  for (const r of latest) {
-    const s = series.get(speedKey(r));
-    const tr = speedEl('tr');
-    if (r.note) tr.title = r.note;
-    const cell = (text, cls) => tr.append(speedEl('td', text, cls));
-    cell(r.page); cell(r.engine); cell(r.label ?? '—'); cell(r.place ?? '—', r.place ? null : 'speed-dim');
-    cell(new Date(r.when).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }));
-    cell(r.release ?? '—');
-    cell(speedMs(r.m.fcp));
-    cell(r.rise.ready ? `${speedMs(r.m.ready)} ${speedPct(r.rise.ready.by)}` : speedMs(r.m.ready), r.rise.ready ? 'speed-rise' : null);
-    cell(r.rise.bytes ? `${speedKb(r.m.bytes)} ${speedPct(r.rise.bytes.by)}` : speedKb(r.m.bytes), r.rise.bytes ? 'speed-rise' : null);
-    cell(r.m.requests == null ? '—' : String(r.m.requests));
-    const t1 = speedEl('td'); t1.append(speedSpark(s.map((x) => x.m.ready), !!r.rise.ready, 'Ready')); tr.append(t1);
-    const t2 = speedEl('td'); t2.append(speedSpark(s.map((x) => x.m.bytes), !!r.rise.bytes, 'Bytes')); tr.append(t2);
-    cell(speedCond(r.cond));
-    tbody.append(tr);
-  }
-  // Every rise in the file, newest first (at most 20).
-  const flags = document.getElementById('speed-flags');
-  flags.replaceChildren();
-  const all = rows.flatMap((r) => Object.entries(r.rise).map(([k, x]) => ({ r, k, x }))).reverse().slice(0, 20);
-  for (const { r, k, x } of all) {
-    flags.append(speedEl('li', `${r.when.slice(0, 10)} · ${r.engine} ${r.page} · ${r.label ?? ''}${r.place ? ` · ${r.place}` : ''} — ${k} ${speedPct(x.by)} against ${x.prev.when.slice(0, 10)} (release ${x.prev.release ?? '?'})`));
-  }
-  flags.hidden = !all.length;
-  document.getElementById('speed-wrap').hidden = !latest.length;
-  const gen = speedStr(json.generated, 30);
-  status.textContent = `${fileName} · ${rows.length} rows · ${latest.length} series${gen && !Number.isNaN(Date.parse(gen)) ? ` · summarised ${new Date(gen).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}` : ''} · ${all.length ? `${all.length} rise${all.length === 1 ? '' : 's'} over 20 %` : 'no rise over 20 %'} · read in this page only`;
-}
-
+// ── Speed (Speed-View-Opus · 17 Oct 2026; Share-Release-1c) ──────────────────
+// summary.json (+ places.md) from the Mac → speed-view.js. Clicking Speed in the sidebar opens the
+// picker straight away; dropping the files on the panel works too. Nothing fetched, sent or kept.
 (() => {
   const input = document.getElementById('speed-file');
-  const open = document.getElementById('speed-open');
-  if (!input || !open) return;
-  open.addEventListener('click', () => input.click());
-  document.getElementById('sb-speed')?.addEventListener('click', (e) => { e.preventDefault(); scrollToCard('card-speed'); });
-  input.addEventListener('change', () => {
-    const file = input.files && input.files[0];
-    input.value = '';                                   // the same file can be opened again
-    if (!file) return;
-    const status = document.getElementById('speed-status');
-    if (file.size > SPEED_MAX_FILE) { status.textContent = `${file.name}: larger than 5 MB — not a speed summary`; return; }
-    const reader = new FileReader();
-    reader.onload = () => {
-      try { speedRender(JSON.parse(String(reader.result)), file.name); }
-      catch (e) { status.textContent = `${file.name}: ${e.message}`; }
-    };
-    reader.onerror = () => { status.textContent = `${file.name}: could not be read`; };
-    reader.readAsText(file);
-  });
+  const panel = document.getElementById('card-speed');
+  const root  = document.getElementById('speed-root');
+  const status = document.getElementById('speed-status');
+  if (!input || !panel || typeof SpeedView === 'undefined') return;
+  let data = null, names = {};
+  async function read(files) {
+    if (!files || !files.length) return;
+    const r = await SpeedView.readFiles(files);
+    if (r.names) names = r.names;
+    if (r.data) data = r.data;
+    const read = [r.summaryFile, r.placesFile].filter(Boolean).join(' + ');
+    status.textContent = r.errors.length ? `${r.errors.join(' · ')}` : `${read} · read in this page only; nothing sent or kept.`;
+    if (data) SpeedView.mount(root, data, names);
+  }
+  document.getElementById('speed-open').addEventListener('click', () => input.click());
+  document.getElementById('sb-speed')?.addEventListener('click', (e) => { e.preventDefault(); scrollToCard('card-speed'); input.click(); });
+  input.addEventListener('change', () => { const f = [...input.files]; input.value = ''; read(f); });
+  panel.addEventListener('dragover', (e) => { e.preventDefault(); panel.classList.add('sv-dragging'); });
+  panel.addEventListener('dragleave', (e) => { if (!panel.contains(e.relatedTarget)) panel.classList.remove('sv-dragging'); });
+  panel.addEventListener('drop', (e) => { e.preventDefault(); panel.classList.remove('sv-dragging'); read([...e.dataTransfer.files]); });
 })();
+
+// ── Wiring (strict CSP: no inline handlers) ──────────────────────────────────
+// One listener for every data-* control, including those inside HTML built above.
+const ACTIONS = {
+  refresh:        () => refreshAll(),
+  print:          () => window.print(),
+  'sign-out':     () => signOut(),
+  'print-growth': () => printGrowthChart(),
+  'growth-add':   () => growthAddEvent(),
+  'close-soon':   () => closeSoonModal(),
+  'close-dock':   () => closeDockModal(),
+  'copy-sandbox': (el) => copySandboxResult(el),
+};
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-action],[data-modal],[data-scroll],[data-soon],[data-theme-set],[data-ce-source],[data-dock-idx],[data-delete-id]');
+  if (!el) return;
+  const d = el.dataset;
+  if (d.action && ACTIONS[d.action]) ACTIONS[d.action](el);
+  else if (d.modal) openModal(d.modal, el);
+  else if (d.scroll) scrollToCard(d.scroll);
+  else if (d.soon) openSoonModal(d.soon);
+  else if (d.themeSet) setTheme(d.themeSet === 'paper' ? 'paper' : 'carbon');
+  else if (d.ceSource) _setCeSource(d.ceSource === 'kv' ? 'kv' : 'ae');
+  else if (d.dockIdx != null) openDockModal(Number(d.dockIdx));
+  else if (d.deleteId != null) growthDeleteEvent(d.deleteId, el);
+});
+// Keyboard: Enter / Space on the focusable cards and dock rows, as the old onkeydown did.
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const el = e.target.closest?.('.snap-metric[data-modal],tr[data-dock-idx]');
+  if (!el || el !== e.target) return;
+  e.preventDefault();
+  if (el.dataset.modal) openModal(el.dataset.modal, el);
+  else openDockModal(Number(el.dataset.dockIdx));
+});
+document.getElementById('btn-sandbox-activate').addEventListener('click', () => sandboxActivate());
+document.getElementById('btn-sandbox-reset').addEventListener('click', () => sandboxReset());
+document.getElementById('snapshot-copy-btn').addEventListener('click', () => copySnapshot());
+document.getElementById('modal-close').addEventListener('click', () => closeModal());
+document.getElementById('modal-csv-btn').addEventListener('click', () => onCsvClick());
+for (const id of ['soon-modal', 'dock-modal']) {
+  document.getElementById(id).addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) (id === 'soon-modal' ? closeSoonModal : closeDockModal)();
+  });
+}
