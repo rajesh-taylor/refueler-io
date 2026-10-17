@@ -77,40 +77,6 @@ permalink: /index.html
 
   {% include "footer.njk" %}
 
-  <!-- Mobile auth deep-link handler (PKCE callback for consumer app) -->
-  <script>
-  (function () {
-    var params = new URLSearchParams(window.location.search);
-    if (params.get('mobileAuth') !== '1') return;
-
-    var code = params.get('code');
-    var errorDescription = params.get('error_description');
-
-    if (errorDescription) {
-      document.body.innerHTML = '<p style="font-family:sans-serif;padding:40px;text-align:center;">Sign-in failed: ' + errorDescription + '</p>';
-      return;
-    }
-    if (!code) {
-      document.body.innerHTML = '<p style="font-family:sans-serif;padding:40px;text-align:center;">Missing sign-in code. Please request a new link.</p>';
-      return;
-    }
-
-    var deepLink = 'refuelerapp://login-callback?code=' + encodeURIComponent(code);
-
-    document.body.innerHTML =
-      '<div style="font-family:sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;background:#1A1A1A;color:#F5F0E8;">' +
-        '<p style="font-size:16px;margin-bottom:24px;">You\'re signed in.</p>' +
-        '<button id="rfContinueBtn" style="font-family:sans-serif;font-size:16px;font-weight:600;padding:14px 32px;border-radius:999px;border:none;background:#C8A96E;color:#1A1A1A;cursor:pointer;">Continue to Refueler</button>' +
-      '</div>';
-
-    document.getElementById('rfContinueBtn').addEventListener('click', function () {
-      window.location.href = deepLink;
-    });
-
-    try { window.location.href = deepLink; } catch (e) {}
-  })();
-  </script>
-
   <script src="/analytics.js" defer></script>
 
 </body>
