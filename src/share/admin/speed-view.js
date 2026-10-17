@@ -213,19 +213,43 @@ const SpeedView = (() => {
     node.addEventListener('blur', hideTip);
   }
 
-  // Full view: the same piece, drawn again large in a <dialog> (Esc and Close shut it).
-  function fullView(title, build) {
+  // Full view: one piece at a time in a <dialog>; ← / → (or the arrow buttons) step through its
+  // siblings — the four This week charts, the two Trend charts, the four engines in Share vs others.
+  // Esc, Close or a click outside shuts it.
+  function fullView(slides, start = 0) {
     return el('button', {
       type: 'button', class: 'sv-full-btn', 'aria-haspopup': 'dialog', text: 'Full view ↗',
       onclick: () => {
-        const box = el('dialog', { class: 'sv-dialog', 'aria-label': title });
-        box.append(el('div', { class: 'sv-dialog-head' },
-          el('h2', { class: 'sv-dialog-title', text: title }),
-          el('button', { type: 'button', class: 'sv-dialog-close', onclick: () => box.close(), text: 'Close' })),
-        el('div', { class: 'sv-dialog-body' }, build(true)));
+        let i = start;
+        const title = el('h2', { class: 'sv-dialog-title' });
+        const count = el('span', { class: 'sv-dialog-count' });
+        const body = el('div', { class: 'sv-dialog-body' });
+        const step = (d) => { i = (i + d + slides.length) % slides.length; show(); };
+        const nav = slides.length > 1 ? [
+          el('button', { type: 'button', class: 'sv-dialog-nav', 'aria-label': 'Previous chart', onclick: () => step(-1), text: '←' }),
+          count,
+          el('button', { type: 'button', class: 'sv-dialog-nav', 'aria-label': 'Next chart', onclick: () => step(1), text: '→' }),
+        ] : [];
+        const box = el('dialog', { class: 'sv-dialog' },
+          el('div', { class: 'sv-dialog-head' }, title,
+            el('div', { class: 'sv-dialog-tools' }, nav,
+              el('button', { type: 'button', class: 'sv-dialog-close', onclick: () => box.close(), text: 'Close' }))),
+          body);
+        function show() {
+          hideTip();
+          title.textContent = slides[i].title;
+          count.textContent = `${i + 1} of ${slides.length}`;
+          box.setAttribute('aria-label', slides[i].title);
+          body.replaceChildren(slides[i].build(true));
+        }
+        box.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowRight' && slides.length > 1) { e.preventDefault(); step(1); }
+          if (e.key === 'ArrowLeft' && slides.length > 1) { e.preventDefault(); step(-1); }
+        });
         box.addEventListener('close', () => { hideTip(); box.remove(); });
         box.addEventListener('click', (e) => { if (e.target === box) box.close(); });
         document.body.append(box);
+        show();
         box.showModal();
       },
     });
@@ -313,7 +337,7 @@ const SpeedView = (() => {
 
   // ── the view ─────────────────────────────────────────────────────────────────────────────
   function mount(root, data, names = {}) {
-    const st = { tab: 'week', place: null, week: null, vpn: 'vpn-off', metric: 'ready', page: '/', engine: 'webkit', others: false, cvpn: 'vpn-off', copied: null };
+    const st = { tab: 'week', wk: 0, place: null, week: null, vpn: 'vpn-off', metric: 'ready', page: '/', engine: 'webkit', others: false, cvpn: 'vpn-off', copied: null };
     const placed = data.runs.filter((r) => r.place && LABELS.includes(r.label));
     const places = placesOf(placed);
     st.place = places.includes('L1') ? 'L1' : places[0] || null;
@@ -378,24 +402,30 @@ const SpeedView = (() => {
       const all = [];
       for (const l of LABELS) for (const p of PAGES) for (const e of ENGINES) all.push(cur[l]?.results?.[e]?.[p]?.ready, prev[l]?.results?.[e]?.[p]?.ready);
       const { max } = niceMax(Math.max(100, ...all.filter((v) => num(v) != null)) * 1.04);
-      const panels = (big) => el('div', { class: `sv-panels${big ? ' sv-panels-big' : ''}` }, PAGES.flatMap((p) => LABELS.map((l) => {
-        const panel = el('section', { class: 'sv-panel', 'aria-label': `${PAGE_NAME[p]}, ${LABEL_NAME[l]}` });
-        panel.append(el('h3', { class: 'sv-panel-title' }, el('span', { text: PAGE_NAME[p] }), el('span', { class: 'sv-panel-vpn', text: LABEL_NAME[l] })),
-          cur[l] ? bars({
-            max, aria: `${PAGE_NAME[p]}, ${LABEL_NAME[l]}, ready in ms`, tickName: 'week before', host: () => panel,
-            rows: ENGINES.map((e) => {
-              const m = cur[l].results?.[e]?.[p] || {};
-              const was = prev[l]?.results?.[e]?.[p]?.ready;
-              const d = num(was) && num(m.ready) != null ? (m.ready - was) / was : null;
-              return {
-                name: ENGINE_NAME[e], gold: e === 'webkit', value: m.ready, tick: was,
-                extra: d == null ? '' : `${d > RISE ? '⚑ ' : ''}${pct(d)}`, rise: d != null && d > RISE,
-                tip: () => [[`${ENGINE_NAME[e]} · ${PAGE_NAME[p]} · ${LABEL_NAME[l]}`, '', true], ['Ready', `${ms(m.ready)} ms`], ['First paint', `${ms(m.fcp)} ms`], ['Largest paint', `${ms(m.lcp)} ms`], ['Requests', ms(m.requests)], ['Week before', num(was) == null ? '—' : `${ms(was)} ms`]],
-              };
-            }),
-          }) : el('p', { class: 'sv-quiet', text: `No ${LABEL_NAME[l]} run this week.` }));
+      // Four charts — page × VPN — one per sub-tab; Full view steps through all four with ← / →.
+      const COMBOS = PAGES.flatMap((p) => LABELS.map((l) => [p, l]));
+      const comboName = ([p, l]) => `${PAGE_NAME[p]} · ${LABEL_NAME[l]}`;
+      const chart = ([p, l], big) => {
+        const panel = el('section', { class: `sv-panel${big ? ' sv-panel-big' : ''}`, 'aria-label': comboName([p, l]) });
+        panel.append(cur[l] ? bars({
+          max, aria: `${comboName([p, l])}, ready in ms`, tickName: 'week before', host: () => panel,
+          rows: ENGINES.map((e) => {
+            const m = cur[l].results?.[e]?.[p] || {};
+            const was = prev[l]?.results?.[e]?.[p]?.ready;
+            const d = num(was) && num(m.ready) != null ? (m.ready - was) / was : null;
+            return {
+              name: ENGINE_NAME[e], gold: e === 'webkit', value: m.ready, tick: was,
+              extra: d == null ? '' : `${d > RISE ? '⚑ ' : ''}${pct(d)}`, rise: d != null && d > RISE,
+              tip: () => [[`${ENGINE_NAME[e]} · ${comboName([p, l])}`, '', true], ['Ready', `${ms(m.ready)} ms`], ['First paint', `${ms(m.fcp)} ms`], ['Largest paint', `${ms(m.lcp)} ms`], ['Requests', ms(m.requests)], ['Week before', num(was) == null ? '—' : `${ms(was)} ms`]],
+            };
+          }),
+        }) : el('p', { class: 'sv-quiet', text: `No ${LABEL_NAME[l]} run this week.` }));
         return panel;
-      })));
+      };
+      const k = Math.min(st.wk, COMBOS.length - 1);
+      const subtabs = el('div', { class: 'sv-subtabs', role: 'tablist', 'aria-label': 'Chart' },
+        COMBOS.map((c, i) => el('button', { type: 'button', role: 'tab', class: 'sv-subtab', 'aria-selected': String(i === k), text: comboName(c), onclick: () => { st.wk = i; draw(); } })));
+      const slides = COMBOS.map((c) => ({ title: `${comboName(c)} · ${placeName(st.place)} · ${weekName(wk)}`, build: (big) => chart(c, big) }));
       const others = data.runs.filter((r) => r.place === st.place && weekOf(r.when) === wk && !LABELS.some((l) => cur[l] === r));
       return [
         headline(head),
@@ -404,10 +434,11 @@ const SpeedView = (() => {
           select('Week', weeks.slice().reverse().map((w) => [w, weekName(w)]), wk, set('week')),
           el('span', { class: 'sv-controls-note', text: prevWeek ? `Tick = ${weekName(weekOf(prevWeek.when))}` : '' })),
         el('div', { class: 'sv-conds' }, LABELS.map((l) => cur[l]).filter(Boolean).map(condLine)),
-        panels(false),
+        subtabs,
+        chart(COMBOS[k], false),
         el('div', { class: 'sv-under' },
-          el('p', { class: 'sv-note', text: 'Ready = the page’s load event, in milliseconds, median of 5 cold loads. The thin mark is the week before. Gold = Safari’s engine. Hover a row for paints and requests.' }),
-          fullView(`This week at ${placeName(st.place)}, ${weekName(wk)}`, () => panels(true))),
+          el('p', { class: 'sv-note', text: 'Ready = the page’s load event, in milliseconds, median of 5 cold loads. The thin mark is the week before. Gold = Safari’s engine. Hover a row for paints and requests; in Full view, ← and → step through the four charts.' }),
+          fullView(slides, k)),
         others.length ? el('p', { class: 'sv-quiet', text: `Also this week: ${others.map((r) => `${when(r.when)} ${LABEL_NAME[r.label] || r.label || ''}${r.note ? ` “${r.note}”` : ''}`).join(' · ')}` }) : null,
         earlier(),
       ];
@@ -439,8 +470,8 @@ const SpeedView = (() => {
           seg('VPN', LABELS.map((l) => [l, LABEL_NAME[l]]), st.vpn, set('vpn')),
           seg('Measure', Object.entries(METRIC_NAME), st.metric, set('metric'))),
         legend(),
-        el('div', { class: 'sv-charts' }, PAGES.map((p) => el('div', { class: 'sv-chart-cell' }, chart(p, false),
-          fullView(`${PAGE_NAME[p]} · ${METRIC_NAME[st.metric]} · ${placeName(st.place)} · ${LABEL_NAME[st.vpn]}`, () => el('div', {}, legend(), chart(p, true)))))),
+        el('div', { class: 'sv-charts' }, PAGES.map((p, i) => el('div', { class: 'sv-chart-cell' }, chart(p, false),
+          fullView(PAGES.map((q) => ({ title: `${PAGE_NAME[q]} · ${METRIC_NAME[st.metric]} · ${placeName(st.place)} · ${LABEL_NAME[st.vpn]}`, build: () => el('div', {}, legend(), chart(q, true)) })), i)))),
         el('p', { class: 'sv-note', text: 'One point per week: the week’s --weekly run, or its latest run if there was none. Hover for the week’s figures; Numbers opens them as a table.' }),
       ];
     }
@@ -478,18 +509,18 @@ const SpeedView = (() => {
         seg('VPN', LABELS.map((l) => [l, LABEL_NAME[l]]), st.cvpn, set('cvpn')),
         seg('Engine', ENGINES.map((e) => [e, ENGINE_NAME[e]]), st.engine, set('engine')),
         el('button', { type: 'button', class: 'sv-toggle', 'aria-pressed': String(st.others), onclick: () => { st.others = !st.others; draw(); }, text: st.others ? 'Hide the other sites' : 'Show the other sites' }));
-      if (!share) return [headline(`No Share run at ${pl ? placeName(pl) : 'any place'} with the ${LABEL_NAME[st.cvpn]}.`), controls];
+      if (!share) return [headline(`No Share run at ${pl || 'any place'} with the ${LABEL_NAME[st.cvpn]}.`), controls];
       const m = share.results?.[st.engine]?.['/'] || {};
       const near = data.competitors.filter((c) => c.place === pl && c.label === st.cvpn && Math.abs(Date.parse(c.when) - Date.parse(share.when)) <= 90 * 60e3 && c.results[st.engine]);
       const ranked = [{ name: 'Share', share: true, m, when: share.when }, ...near.map((c) => ({ name: c.name, m: c.results[st.engine], when: c.when }))]
-        .sort((a, b) => (a.m.lcp ?? a.m.fcp ?? 1e9) - (b.m.lcp ?? b.m.fcp ?? 1e9));
+        .sort((a, b) => (a.m.lcp ?? a.m.fcp ?? 1e9) - (b.m.lcp ?? b.m.fcp ?? 1e9));  // for the headline
       const rank = ranked.findIndex((r) => r.share) + 1;
       const head = st.others && near.length
         ? `Share’s upload page comes ${rank} of ${ranked.length} by largest paint on ${ENGINE_NAME[st.engine]}, ${LABEL_NAME[st.cvpn]}: ${secs(m.lcp)}.`
-        : `Share at ${placeName(pl)}, ${weekName(wk)}: the upload page paints in ${secs(m.fcp)} on ${ENGINE_NAME[st.engine]}, ${LABEL_NAME[st.cvpn]}.`;
+        : `Share at ${pl}, ${weekName(wk)}: the upload page paints in ${secs(m.fcp)} on ${ENGINE_NAME[st.engine]}, ${LABEL_NAME[st.cvpn]}.`;
       const out = [headline(head), controls,
         el('div', { class: 'sv-hero' },
-          el('div', { class: 'sv-hero-k', text: `Share at ${placeName(pl)}, ${weekName(wk)} · ${LABEL_NAME[st.cvpn]} · ${ENGINE_NAME[st.engine]}${ENGINE_NOTE[st.engine] ? ` (${ENGINE_NOTE[st.engine]})` : ''} · upload page` }),
+          el('div', { class: 'sv-hero-k', text: `Share at ${pl}, ${weekName(wk)} · ${LABEL_NAME[st.cvpn]} · ${ENGINE_NAME[st.engine]}${ENGINE_NOTE[st.engine] ? ` (${ENGINE_NOTE[st.engine]})` : ''} · upload page` }),
           el('div', { class: 'sv-hero-row' },
             [['First paint', m.fcp, ' ms'], ['Largest paint', m.lcp, ' ms'], ['Ready', m.ready, ' ms'], ['Requests', m.requests, '']].map(([k, v, u]) => el('div', { class: 'sv-hero-cell' },
               el('div', { class: 'sv-hero-v' }, el('span', { text: ms(v) }), u ? el('span', { class: 'sv-unit', text: u }) : null),
@@ -497,12 +528,17 @@ const SpeedView = (() => {
           el('div', { class: 'sv-hero-when', text: `${when(share.when)} · release ${share.release ?? '?'}` }))];
       if (!st.others) return out;
       if (!near.length) return [...out, el('p', { class: 'sv-quiet', text: 'No run of the other sites alongside this Share run (same place and VPN, within 90 minutes). The monthly command measures them straight after Share.' })];
-      const { max } = niceMax(Math.max(...ranked.map((r) => Math.max(r.m.lcp ?? 0, r.m.fcp ?? 0))) * 1.02);
-      const list = (big) => {
+      // One ranked list per engine; Full view steps through the four engines with ← / →.
+      const rankFor = (eng) => [{ name: 'Share', share: true, m: share.results?.[eng]?.['/'] || {}, when: share.when },
+        ...near.filter((c) => c.results[eng]).map((c) => ({ name: c.name, m: c.results[eng], when: c.when }))]
+        .sort((a, b) => (a.m.lcp ?? a.m.fcp ?? 1e9) - (b.m.lcp ?? b.m.fcp ?? 1e9));
+      const list = (eng, big) => {
+        const rows = rankFor(eng);
+        const { max } = niceMax(Math.max(100, ...rows.map((r) => Math.max(r.m.lcp ?? 0, r.m.fcp ?? 0))) * 1.02);
         const wrap = el('div', { class: `sv-frame sv-frame-pad${big ? ' sv-big' : ''}` });
         wrap.append(bars({
-          max, aria: 'Largest paint, ranked', tickName: 'first paint', host: () => wrap,
-          rows: ranked.map((r, i) => ({
+          max, aria: `Largest paint, ranked, ${ENGINE_NAME[eng]}`, tickName: 'first paint', host: () => wrap,
+          rows: rows.map((r, i) => ({
             name: `${i + 1}  ${r.name}`, gold: r.share, value: r.m.lcp ?? r.m.fcp, tick: r.m.fcp, extra: ms(r.m.fcp),
             tip: () => [[r.name, '', true], ['First paint', `${ms(r.m.fcp)} ms`], ['Largest paint', r.m.lcp == null ? 'not reported' : `${ms(r.m.lcp)} ms`], ['Ready', `${ms(r.m.ready)} ms`], ['Requests', ms(r.m.requests)], ['Measured', hhmm(r.when)]],
           })),
@@ -510,9 +546,9 @@ const SpeedView = (() => {
         return wrap;
       };
       const span = near.map((c) => c.when).sort();
-      out.push(list(false), el('div', { class: 'sv-under' },
+      out.push(list(st.engine, false), el('div', { class: 'sv-under' },
         el('p', { class: 'sv-note', text: `Bar = largest paint, ms; the thin mark is first paint. Their public landing pages against our app’s upload page, so not like for like: theirs are marketing pages, ours is the app itself. Same Mac, place and VPN; Share at ${hhmm(share.when)}, the others ${hhmm(span[0])}–${hhmm(span.at(-1))}. Sizes left out: other sites’ byte counts undercount. For the table with an investor, never for publishing.` }),
-        fullView(`Share vs others · ${placeName(pl)} · ${ENGINE_NAME[st.engine]} · ${LABEL_NAME[st.cvpn]}`, () => list(true))));
+        fullView(ENGINES.map((eng) => ({ title: `Share vs others · ${pl} · ${ENGINE_NAME[eng]} · ${LABEL_NAME[st.cvpn]}`, build: (big) => list(eng, big) })), ENGINES.indexOf(st.engine))));
       return out;
     }
 
