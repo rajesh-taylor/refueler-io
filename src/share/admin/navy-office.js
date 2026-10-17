@@ -2082,3 +2082,162 @@ async function growthDeleteEvent(id, btn) {
     if (btn) { btn.disabled = false; btn.textContent = orig; }
   }
 }
+// ── Speed (Share-Release-1c · 17 Oct 2026) ──────────────────────────────────
+// Opens a summary.json written by refueler-share dev/speed/speed.mjs --summarise (kept in
+// refueler-share-private/speed/). Read here with FileReader: no fetch, no upload, nothing stored —
+// the numbers live in this tab until it closes. Built for a strict CSP later: listeners only,
+// file data through textContent and SVG attributes, never innerHTML.
+// Flags a > 20 % rise in Ready or Bytes against the previous run with the same page, engine,
+// label and place (the same rule speed.mjs prints after each run).
+const SPEED_RISE = 0.2;
+const SPEED_MAX_FILE = 5 * 1024 * 1024;
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+const speedNum = (x) => (typeof x === 'number' && Number.isFinite(x) ? x : null);
+const speedStr = (x, max) => (typeof x === 'string' && x ? x.slice(0, max) : null);
+const speedKey = (r) => [r.page, r.engine, r.label ?? '', r.place ?? ''].join('|');
+const speedMs = (x) => (x == null ? '—' : `${Math.round(x)} ms`);
+const speedKb = (x) => (x == null ? '—' : `${Math.round(x / 1024)} KB`);
+const speedPct = (x) => `${x > 0 ? '+' : ''}${Math.round(x * 100)} %`;
+
+function speedEl(tag, text, cls) {
+  const e = document.createElement(tag);
+  if (text != null) e.textContent = text;
+  if (cls) e.className = cls;
+  return e;
+}
+
+// Only known fields, each checked; anything else in the file is ignored.
+function speedRows(json) {
+  if (!json || json.schema !== 1 || !Array.isArray(json.rows)) throw new Error('not a speed summary (schema 1)');
+  return json.rows.map((r) => {
+    const m = r && typeof r.median === 'object' && r.median ? r.median : {};
+    const c = r && typeof r.cond === 'object' && r.cond ? r.cond : null;
+    return {
+      when: speedStr(r?.when, 30), release: speedStr(r?.release, 16), label: speedStr(r?.label, 24),
+      place: /^[A-Z][0-9]{1,2}$/.test(r?.place || '') ? r.place : null,
+      engine: speedStr(r?.engine, 16), page: speedStr(r?.page, 40), note: speedStr(r?.note, 140),
+      m: { fcp: speedNum(m.fcp), lcp: speedNum(m.lcp), ready: speedNum(m.ready), requests: speedNum(m.requests), bytes: speedNum(m.bytes) },
+      cond: c && {
+        down: speedNum(c.down_mbps), up: speedNum(c.up_mbps), vpn: speedStr(c.vpn, 24),
+        link: speedStr(c.link, 12), power: speedStr(c.power, 12), city: speedStr(c.exit_city, 40),
+      },
+    };
+  }).filter((r) => r.when && !Number.isNaN(Date.parse(r.when)) && r.engine && r.page)
+    .sort((a, b) => a.when.localeCompare(b.when));
+}
+
+// Series per comparable key, oldest first; each run carries its rise flags against the previous one.
+function speedSeries(rows) {
+  const series = new Map();
+  for (const r of rows) {
+    const s = series.get(speedKey(r)) || [];
+    const prev = s[s.length - 1];
+    r.rise = {};
+    if (prev) {
+      for (const k of ['ready', 'bytes']) {
+        const a = prev.m[k], b = r.m[k];
+        if (a > 0 && b != null && (b - a) / a > SPEED_RISE) r.rise[k] = { by: (b - a) / a, prev };
+      }
+    }
+    s.push(r);
+    series.set(speedKey(r), s);
+  }
+  return series;
+}
+
+function speedSpark(values, riseLast, what) {
+  const W = 96, H = 22, v = values.filter((x) => x != null).slice(-12);
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('class', 'speed-spark');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('width', W); svg.setAttribute('height', H);
+  svg.setAttribute('role', 'img');
+  if (!v.length) return svg;
+  const lo = Math.min(...v), hi = Math.max(...v), span = hi - lo || 1;
+  const pts = v.map((x, i) => [v.length === 1 ? W - 3 : 3 + (i / (v.length - 1)) * (W - 6), H - 3 - ((x - lo) / span) * (H - 6)]);
+  svg.setAttribute('aria-label', `${what}, last ${v.length} runs`);
+  const title = document.createElementNS(SVG_NS, 'title');
+  title.textContent = `${what} · last ${v.length} runs`;
+  svg.append(title);
+  if (pts.length > 1) {
+    const line = document.createElementNS(SVG_NS, 'polyline');
+    line.setAttribute('class', 'speed-line');
+    line.setAttribute('points', pts.map((p) => p.map((n) => n.toFixed(1)).join(',')).join(' '));
+    svg.append(line);
+  }
+  const dot = document.createElementNS(SVG_NS, 'circle');
+  dot.setAttribute('class', riseLast ? 'speed-dot rise' : 'speed-dot');
+  dot.setAttribute('cx', pts[pts.length - 1][0].toFixed(1));
+  dot.setAttribute('cy', pts[pts.length - 1][1].toFixed(1));
+  dot.setAttribute('r', '2');
+  svg.append(dot);
+  return svg;
+}
+
+function speedCond(c) {
+  if (!c) return '—';
+  const net = c.down != null ? `${Math.round(c.down)}↓ ${Math.round(c.up ?? 0)}↑ Mbps` : null;
+  const vpn = c.vpn === 'off' ? 'no VPN' : c.vpn ? `Mullvad ${c.vpn}${c.city ? ` · ${c.city}` : ''}` : null;
+  return [net, vpn, c.link, c.power].filter(Boolean).join(' · ') || '—';
+}
+
+function speedRender(json, fileName) {
+  const status = document.getElementById('speed-status');
+  const rows = speedRows(json);
+  const series = speedSeries(rows);
+  const tbody = document.getElementById('speed-tbody');
+  tbody.replaceChildren();
+  const latest = [...series.values()].map((s) => s[s.length - 1])
+    .sort((a, b) => speedKey(a).localeCompare(speedKey(b)));
+  for (const r of latest) {
+    const s = series.get(speedKey(r));
+    const tr = speedEl('tr');
+    if (r.note) tr.title = r.note;
+    const cell = (text, cls) => tr.append(speedEl('td', text, cls));
+    cell(r.page); cell(r.engine); cell(r.label ?? '—'); cell(r.place ?? '—', r.place ? null : 'speed-dim');
+    cell(new Date(r.when).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }));
+    cell(r.release ?? '—');
+    cell(speedMs(r.m.fcp));
+    cell(r.rise.ready ? `${speedMs(r.m.ready)} ${speedPct(r.rise.ready.by)}` : speedMs(r.m.ready), r.rise.ready ? 'speed-rise' : null);
+    cell(r.rise.bytes ? `${speedKb(r.m.bytes)} ${speedPct(r.rise.bytes.by)}` : speedKb(r.m.bytes), r.rise.bytes ? 'speed-rise' : null);
+    cell(r.m.requests == null ? '—' : String(r.m.requests));
+    const t1 = speedEl('td'); t1.append(speedSpark(s.map((x) => x.m.ready), !!r.rise.ready, 'Ready')); tr.append(t1);
+    const t2 = speedEl('td'); t2.append(speedSpark(s.map((x) => x.m.bytes), !!r.rise.bytes, 'Bytes')); tr.append(t2);
+    cell(speedCond(r.cond));
+    tbody.append(tr);
+  }
+  // Every rise in the file, newest first (at most 20).
+  const flags = document.getElementById('speed-flags');
+  flags.replaceChildren();
+  const all = rows.flatMap((r) => Object.entries(r.rise).map(([k, x]) => ({ r, k, x }))).reverse().slice(0, 20);
+  for (const { r, k, x } of all) {
+    flags.append(speedEl('li', `${r.when.slice(0, 10)} · ${r.engine} ${r.page} · ${r.label ?? ''}${r.place ? ` · ${r.place}` : ''} — ${k} ${speedPct(x.by)} against ${x.prev.when.slice(0, 10)} (release ${x.prev.release ?? '?'})`));
+  }
+  flags.hidden = !all.length;
+  document.getElementById('speed-wrap').hidden = !latest.length;
+  const gen = speedStr(json.generated, 30);
+  status.textContent = `${fileName} · ${rows.length} rows · ${latest.length} series${gen && !Number.isNaN(Date.parse(gen)) ? ` · summarised ${new Date(gen).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}` : ''} · ${all.length ? `${all.length} rise${all.length === 1 ? '' : 's'} over 20 %` : 'no rise over 20 %'} · read in this page only`;
+}
+
+(() => {
+  const input = document.getElementById('speed-file');
+  const open = document.getElementById('speed-open');
+  if (!input || !open) return;
+  open.addEventListener('click', () => input.click());
+  document.getElementById('sb-speed')?.addEventListener('click', (e) => { e.preventDefault(); scrollToCard('card-speed'); });
+  input.addEventListener('change', () => {
+    const file = input.files && input.files[0];
+    input.value = '';                                   // the same file can be opened again
+    if (!file) return;
+    const status = document.getElementById('speed-status');
+    if (file.size > SPEED_MAX_FILE) { status.textContent = `${file.name}: larger than 5 MB — not a speed summary`; return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      try { speedRender(JSON.parse(String(reader.result)), file.name); }
+      catch (e) { status.textContent = `${file.name}: ${e.message}`; }
+    };
+    reader.onerror = () => { status.textContent = `${file.name}: could not be read`; };
+    reader.readAsText(file);
+  });
+})();

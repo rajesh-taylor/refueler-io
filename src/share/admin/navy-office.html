@@ -28,6 +28,7 @@
     <a class="sb-item stub" onclick="scrollToCard('metric-token-security')">Token security</a>
     <a class="sb-item stub" onclick="scrollToCard('metric-client-errors')">Client errors</a>
     <a class="sb-item stub" onclick="scrollToCard('card-storage')">Storage &amp; Billing</a>
+    <a class="sb-item stub" id="sb-speed" href="#card-speed">Speed</a>
     <div class="sb-section">Data</div>
     <a class="sb-item stub" onclick="scrollToCard('card-execution-dock')">Transfers</a>
     <a class="sb-item stub" onclick="openSoonModal('Subscribers')">Subscribers<span class="sb-soon">soon</span></a>
@@ -353,6 +354,28 @@
           <button class="growth-submit-btn" onclick="growthAddEvent()">Add event</button>
         </div>
         <div id="growth-form-status" style="display:none;font-family:var(--mono);font-size:11px;"></div>
+      </div>
+    </div>
+
+    <!-- ─── Speed (Share-Release-1c) ─────────────────────────────────────────
+         Opens refueler-share-private/speed/summary.json from this Mac (dev/speed/speed.mjs --summarise).
+         Read in the page with FileReader: nothing fetched, uploaded or stored. Listeners in navy-office.js. -->
+    <div class="dock-panel speed-panel" id="card-speed">
+      <div class="dock-header">
+        <div class="dock-title">Speed · share.refueler.io from the Mac</div>
+        <button class="ghost-btn" id="speed-open" type="button">Open summary.json</button>
+        <input type="file" id="speed-file" accept=".json,application/json" hidden>
+      </div>
+      <p class="speed-status" id="speed-status">Open speed/summary.json from refueler-share-private. It is read in this page only; nothing is sent or kept.</p>
+      <ul class="speed-flags" id="speed-flags" hidden></ul>
+      <div class="dock-table-wrap" id="speed-wrap" hidden>
+        <table class="dock-table speed-table">
+          <thead><tr>
+            <th>Page</th><th>Engine</th><th>Label</th><th>Place</th><th>Last run</th><th>Release</th>
+            <th>First paint</th><th>Ready</th><th>Bytes</th><th>Requests</th><th>Ready trend</th><th>Bytes trend</th><th>Conditions</th>
+          </tr></thead>
+          <tbody id="speed-tbody"></tbody>
+        </table>
       </div>
     </div>
 
