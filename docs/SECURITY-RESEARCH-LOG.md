@@ -346,3 +346,15 @@ An OVH VPS-1 (2 vCores / 4 GB / 40 GB / £3.31 ex VAT) runs phoenixd comfortably
 **Actions:** B7-Opus records "no public-facing service on the node box"; Nostr-Opus records the second reason for row 19 and considers paid membership of partner relays; separate relay product parked behind solicitor (Online Safety Act) + B7 + Pricing-v2.
 
 **Watch-lines:** Buzz (Block's Nostr agent workspace, single relay per workspace) for the MCP/agent direction; ACINQ phoenixd releases once the node is live.
+
+---
+
+## 2026-10-17 — refueler.io homepage: script injection through an old sign-in handler (fixed, same day)
+
+**Found:** Share-Release-1b, while checking refueler.io's `/.well-known/security.txt`.
+**What:** the homepage still carried a sign-in callback for an earlier mobile app. It placed a value from the address bar into the page as HTML, and the homepage sends no Content-Security-Policy, so a crafted refueler.io link could run its own script on refueler.io.
+**Reach:** refueler.io pages only. Not share.refueler.io (its own origin, strict CSP) and not the Share sign-in session (HttpOnly cookie on the API host).
+**Timeline:** found and fixed 17 Oct 2026: handler deleted (refueler-io `61a0ed5`).
+**Exploited?** No way to tell: refueler.io keeps no request logs with query strings. No reports received.
+**Root cause:** code from another product carried over in a migration, and no CSP on the homepage to contain it.
+**What changes:** a CSP for every refueler.io page, and a review of the remaining legacy pages, are scheduled.
