@@ -324,7 +324,9 @@ function resetPaymentElement() {
 // Order after the press: Turnstile → Worker checks the token and only then creates the Stripe
 // customer + checkout → only then Stripe.js loads (advancedFraudSignals=false), which sets its
 // two fraud cookies __stripe_mid / __stripe_sid. Nothing from Stripe or Turnstile before the press.
-const TURNSTILE_SITEKEY = '0x4AAAAAAD0N7GlHlCRuWITr';
+// Plans has its own Turnstile widget (hostname refueler.io only; pay.refueler.io when Plans moves).
+// The app's widget is share.refueler.io only. Empty = the press says so and loads nothing.
+const TURNSTILE_SITEKEY = '0x4AAAAAAFacLp0bLt3fdOP0';
 let stripeJs     = null;
 let turnstileJs  = null;
 let turnstileId  = null;
@@ -374,6 +376,10 @@ async function handleContinue() {
   const email = document.getElementById('emailInput').value.trim();
   if (!email || !email.includes('@')) {
     showStatus('Please enter a valid email address.', 'error');
+    return;
+  }
+  if (!TURNSTILE_SITEKEY) {
+    showStatus('Card payments are not open yet.', 'error');
     return;
   }
   const priceId = PRICE_IDS[selectedTier][billingYearly ? 'yearly' : 'monthly'];
