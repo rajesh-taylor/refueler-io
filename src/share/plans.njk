@@ -402,7 +402,8 @@ async function handleContinue() {
     await loadStripeJs();
     if (!stripe) stripe = Stripe(STRIPE_PK);
     elements = stripe.elements({ clientSecret: data.client_secret, appearance: stripeAppearance() });
-    paymentElement = elements.create('payment');
+    // Google Pay off (loads Google into the page); Apple Pay kept; Link is off server-side (card only).
+    paymentElement = elements.create('payment', { wallets: { googlePay: 'never', applePay: 'auto' } });
     document.getElementById('stripe-element-container').hidden = false;
     paymentElement.mount('#payment-element');
     document.getElementById('continueWrap').hidden = true;
