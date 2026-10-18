@@ -280,6 +280,8 @@
 .field input { font-family: var(--sans); font-size: 14px; }
 input::placeholder { color: var(--fg-subtle); }
 
+#stripe-element-container[hidden] { display: none; }
+#turnstileBox:not(:empty) { margin-bottom: 12px; }
 #stripe-element-container {
   background: var(--input-bg);
   border: 1px solid var(--input-border);

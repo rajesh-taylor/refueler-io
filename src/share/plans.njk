@@ -189,11 +189,18 @@ stripeThemeRemount: true
         <input type="email" id="emailInput" placeholder="you@example.com" autocomplete="email" />
       </div>
 
-      <div id="stripe-element-container">
+      <!-- Plans-Stripe-1: nothing from Stripe or Turnstile loads until this press. -->
+      <div id="continueWrap">
+        <div id="turnstileBox"></div>
+        <button class="btn-subscribe" id="continueBtn" onclick="handleContinue()">Continue to payment</button>
+        <p class="payment-note">Continue loads Stripe, our card processor. It sets two cookies to stop card fraud.</p>
+      </div>
+
+      <div id="stripe-element-container" hidden>
         <div id="payment-element"></div>
       </div>
 
-      <button class="btn-subscribe" id="submitBtn" onclick="handleSubmit()">Subscribe now</button>
+      <button class="btn-subscribe" id="submitBtn" onclick="handleSubmit()" hidden>Subscribe now</button>
 
       <p class="payment-note">
         Secured by <a href="https://stripe.com" target="_blank" rel="noopener">Stripe</a>
@@ -253,16 +260,10 @@ if (params.get('success') === '1') {
   document.getElementById('successPanel').classList.add('visible');
 }
 
-// ── Theme-aware Stripe remount ──────────────────────────────────
+// ── Theme-aware Stripe restyle ──────────────────────────────────
+// A theme switch only restyles the mounted form: no new checkout, no new subscription.
 function remountStripeForTheme() {
-  if (!elements) return;
-  const email = document.getElementById('emailInput').value.trim();
-  if (email && email.includes('@') && stripe) {
-    elements = null;
-    paymentElement = null;
-    document.getElementById('payment-element').innerHTML = '';
-    mountPaymentElement();
-  }
+  if (elements) elements.update({ appearance: stripeAppearance() });
 }
 
 // ── Billing toggle ──────────────────────────────────────────────
@@ -304,79 +305,112 @@ function updateSummary() {
     `${names[selectedTier]} — ${d.price} ${d.period}`;
 }
 
+// Back to before the press: a changed plan, billing period or email needs a new press,
+// so nothing is created at Stripe for a choice the person has not confirmed.
 function resetPaymentElement() {
+  if (elements) { try { elements.getElement('payment')?.unmount(); } catch {} }
   elements = null;
   paymentElement = null;
   document.getElementById('payment-element').innerHTML = '';
-  const email = document.getElementById('emailInput').value.trim();
-  if (email && email.includes('@') && stripe) mountPaymentElement();
+  document.getElementById('stripe-element-container').hidden = true;
+  document.getElementById('submitBtn').hidden = true;
+  document.getElementById('continueWrap').hidden = false;
+  const cont = document.getElementById('continueBtn');
+  cont.disabled = false;
+  cont.textContent = 'Continue to payment';
 }
 
-// ── Stripe ──────────────────────────────────────────────────────
-// Stripe.js loads only once a payment starts (email entered), never on page open: as soon as it
-// runs it sets its fraud-prevention cookies __stripe_mid / __stripe_sid (Privacy-Stripe-1, 16 Oct 2026).
-let stripeJs       = null;
-let stripeStarting = null;
+// ── Continue to payment (Plans-Stripe-1, 18 Oct 2026) ──────────
+// Order after the press: Turnstile → Worker checks the token and only then creates the Stripe
+// customer + checkout → only then Stripe.js loads (advancedFraudSignals=false), which sets its
+// two fraud cookies __stripe_mid / __stripe_sid. Nothing from Stripe or Turnstile before the press.
+const TURNSTILE_SITEKEY = '0x4AAAAAAD0N7GlHlCRuWITr';
+let stripeJs     = null;
+let turnstileJs  = null;
+let turnstileId  = null;
+let continuing   = false;
 
-function loadStripeJs() {
-  if (!stripeJs) stripeJs = new Promise((resolve, reject) => {
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
     const s = document.createElement('script');
-    s.src = 'https://js.stripe.com/v3/';
+    s.src = src;
     s.onload  = resolve;
-    s.onerror = () => { s.remove(); stripeJs = null; reject(new Error('Could not load the payment form. Please try again.')); };
+    s.onerror = () => { s.remove(); reject(new Error('Could not load the payment form. Please try again.')); };
     document.head.appendChild(s);
   });
+}
+
+function loadStripeJs() {
+  if (!stripeJs) stripeJs = loadScript('https://js.stripe.com/v3/?advancedFraudSignals=false')
+    .catch(e => { stripeJs = null; throw e; });
   return stripeJs;
 }
 
-// One start at a time: each mount asks the Worker for a new checkout.
-function initStripe() {
-  if (!stripeStarting) stripeStarting = (async () => {
-    try {
-      await loadStripeJs();
-      if (!stripe) stripe = Stripe(STRIPE_PK);
-      if (!elements) await mountPaymentElement();
-    } catch (e) {
-      showStatus(e.message, 'error');
-    }
-  })().finally(() => { stripeStarting = null; });
-  return stripeStarting;
+function loadTurnstileJs() {
+  if (!turnstileJs) turnstileJs = loadScript('https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit')
+    .catch(e => { turnstileJs = null; throw e; });
+  return turnstileJs;
 }
 
-async function mountPaymentElement() {
-  const priceId = PRICE_IDS[selectedTier][billingYearly ? 'yearly' : 'monthly'];
-  const email   = document.getElementById('emailInput').value.trim();
-  if (!email) return;
+// One single-use Turnstile token per press.
+async function turnstileToken() {
+  await loadTurnstileJs();
+  return new Promise((resolve, reject) => {
+    const opts = {
+      sitekey: TURNSTILE_SITEKEY,
+      theme: document.documentElement.dataset.theme === 'carbon' ? 'dark' : 'light',
+      appearance: 'interaction-only',
+      size: 'flexible',
+      callback: resolve,
+      'error-callback': () => reject(new Error('Check failed. Please try again.')),
+      'expired-callback': () => reject(new Error('Check expired. Please try again.')),
+    };
+    turnstileId = window.turnstile.render('#turnstileBox', opts);
+  });
+}
 
+async function handleContinue() {
+  if (continuing || elements) return;
+  const email = document.getElementById('emailInput').value.trim();
+  if (!email || !email.includes('@')) {
+    showStatus('Please enter a valid email address.', 'error');
+    return;
+  }
+  const priceId = PRICE_IDS[selectedTier][billingYearly ? 'yearly' : 'monthly'];
+  const cont = document.getElementById('continueBtn');
+  continuing = true;
+  cont.disabled = true;
+  cont.textContent = 'Loading…';
   showStatus('');
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true;
-  btn.textContent = 'Loading…';
 
   try {
+    const token = await turnstileToken();
     const res = await fetch(`${WORKER_URL}/subscription/checkout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ price_id: priceId, email }),
+      body: JSON.stringify({ price_id: priceId, email, turnstile_token: token }),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || 'Checkout failed');
 
-    if (elements) elements.unmount();
-    elements = stripe.elements({
-      clientSecret: data.client_secret,
-      appearance: stripeAppearance(),
-    });
+    await loadStripeJs();
+    if (!stripe) stripe = Stripe(STRIPE_PK);
+    elements = stripe.elements({ clientSecret: data.client_secret, appearance: stripeAppearance() });
     paymentElement = elements.create('payment');
+    document.getElementById('stripe-element-container').hidden = false;
     paymentElement.mount('#payment-element');
-    paymentElement.on('ready', () => {
-      btn.disabled = false;
-      btn.textContent = 'Subscribe now';
-    });
+    document.getElementById('continueWrap').hidden = true;
+    const btn = document.getElementById('submitBtn');
+    btn.hidden = false;
+    btn.disabled = true;
+    paymentElement.on('ready', () => { btn.disabled = false; });
   } catch (e) {
     showStatus(e.message, 'error');
-    btn.disabled = false;
-    btn.textContent = 'Subscribe now';
+    cont.disabled = false;
+    cont.textContent = 'Continue to payment';
+  } finally {
+    continuing = false;
+    if (turnstileId !== null && window.turnstile) { window.turnstile.remove(turnstileId); turnstileId = null; }
   }
 }
 
@@ -386,10 +420,7 @@ async function handleSubmit() {
     showStatus('Please enter a valid email address.', 'error');
     return;
   }
-  if (!elements) {
-    await initStripe();
-    return;
-  }
+  if (!elements) return;
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
   btn.textContent = 'Processing…';
@@ -415,10 +446,9 @@ async function handleSubmit() {
   }
 }
 
-// Mount Stripe on email blur
-document.getElementById('emailInput').addEventListener('blur', () => {
-  const email = document.getElementById('emailInput').value.trim();
-  if (email && email.includes('@') && !elements) initStripe();
+// A changed email after the press needs a new press (the checkout is tied to the email).
+document.getElementById('emailInput').addEventListener('input', () => {
+  if (elements) resetPaymentElement();
 });
 
 // ── Tab switching ───────────────────────────────────────────────
