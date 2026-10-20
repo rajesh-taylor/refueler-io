@@ -193,7 +193,7 @@ stripeThemeRemount: true
       <div id="continueWrap">
         <div id="turnstileBox"></div>
         <button class="btn-subscribe" id="continueBtn" onclick="handleContinue()">Continue to payment</button>
-        <p class="payment-note">Continue loads Stripe, our card processor. It sets two cookies to stop card fraud.</p>
+        <p class="payment-note">Continue loads Stripe, our card processor, and the fraud checks it runs. They may set cookies on their own sites, not on refueler.io.</p>
       </div>
 
       <div id="stripe-element-container" hidden>
@@ -323,7 +323,8 @@ function resetPaymentElement() {
 // ── Continue to payment (Plans-Stripe-1, 18 Oct 2026) ──────────
 // Order after the press: Turnstile → Worker checks the token and only then creates the Stripe
 // customer + checkout → only then Stripe.js loads (advancedFraudSignals=false), which sets its
-// two fraud cookies __stripe_mid / __stripe_sid. Nothing from Stripe or Turnstile before the press.
+// nothing on refueler.io (advancedFraudSignals=false; Safari Private check 20 Oct 2026: only hCaptcha's
+// __cf_bm on .hcaptcha.com). Nothing from Stripe or Turnstile before the press.
 // Plans has its own Turnstile widget (hostname refueler.io only; pay.refueler.io when Plans moves).
 // The app's widget is share.refueler.io only. Empty = the press says so and loads nothing.
 const TURNSTILE_SITEKEY = '0x4AAAAAAFacLp0bLt3fdOP0';
