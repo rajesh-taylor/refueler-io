@@ -370,3 +370,14 @@ An OVH VPS-1 (2 vCores / 4 GB / 40 GB / £3.31 ex VAT) runs phoenixd comfortably
 **Exploited?** No reason to think so: it needed a planted KV value, and none has been reported. Not checked against the stored annotations.
 **Root cause:** inline handlers built from data, and no CSP on the admin page to contain them.
 **What changes:** Navy Office now sends `default-src 'none'; script-src 'self'; style-src 'self'; …` with no inline scripts, handlers or styles, and self-hosted fonts (`src/_headers`, `/share/admin/*`).
+
+---
+
+## Supplier watch
+
+Advisories for software we depend on, checked against how we use it. Summaries only; anything that affects us and is still open is kept private until fixed.
+
+- **16 Oct 2026 · GHSA-px8p-9vwx-vf98 (fflate)** — not affected: Share only creates zips and never unzips. Bump at the next vendoring pass.
+- **16 Oct 2026 · GHSA-36p8-mvp6-cv38 (wrangler)** — not affected: fixed in 4.59.1, we run 4.145.0; dev tool only.
+- **20 Oct 2026 · CVE-2026-96889 / GHSA-wq5f-xc86-pv6w (sharp/librsvg)** — dev tools only (wrangler/miniflare, vitest plugin), not in anything served. Tooling bump scheduled.
+- **20 Oct 2026 · GHSA-vqf5-2xx6-9wfm (codeql-action)** — not affected: our pinned version is outside the affected range.
