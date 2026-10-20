@@ -112,7 +112,7 @@ readTime: "7 min"
 {% include "nav.njk" %}
 
 {#- Comparison data: one row per service. Cell codes: y = ✓, n = ✕, anything else = a short label.
-    Label chips: "2027"/"Planned" amber, all other labels grey. Checked 10 Oct 2026 against each service's own policy. -#}
+    Label chips: "2027"/"Planned" amber, all other labels grey. Checked 10 Oct 2026 against each service's own policy. Refueler Share's IP cell corrected 20 Oct 2026 (Cloudflare sampled records). -#}
 {% set groups = [
   { label: "The service holds the key", rows: [
     { name: "WeTransfer",     sub: "Netherlands · AWS",        c: ["n","n","n","n","n","n"] },
@@ -126,7 +126,7 @@ readTime: "7 min"
     { name: "Proton Drive",   sub: "Switzerland",              c: ["y","n","y","n","Planned","Short-term"] },
     { name: "Tresorit Send",  sub: "Switzerland",              c: ["y","y","n","n","n","n"] },
     { name: "crypt.fyi",      sub: "Base not stated",          c: ["y","y","y","y","y","Short-term"] },
-    { name: "Refueler Share", sub: "UK · Cloudflare",          c: ["y","y","y","2027","2027","~1 min"] }
+    { name: "Refueler Share", sub: "UK · Cloudflare",          c: ["y","y","y","2027","2027","~1 month"] }
   ]}
 ] %}
 {% macro compareTable(label, groups) %}
@@ -158,7 +158,7 @@ readTime: "7 min"
     </tbody>
   </table>
 </div>
-<p class="table-legend">✓ yes · ✕ no · Short-term: kept briefly to stop abuse · Not stated: the service's own policy doesn't say · Base · storage under each name</p>
+<p class="table-legend">✓ yes · ✕ no · Short-term: kept briefly to stop abuse · ~1 month: a sample of requests, with IP addresses, kept by our host for our account · Not stated: the service's own policy doesn't say · Base · storage under each name</p>
 {% endmacro %}
 
 <div class="article-wrap">
@@ -255,10 +255,12 @@ readTime: "7 min"
       <li><strong>Timing and settings.</strong> When the file was uploaded and when it expires, how many parts it has, which plan it used, and whether delete-after-download or a download window was set.</li>
       <li><strong>A fingerprint of the password, if you set one.</strong> Today this is a plain SHA-256 hash, and the password reaches our server as typed when the recipient unlocks the file. A weak password could be guessed from the hash. The password only gates the download: it is not part of the key, so the file stays encrypted either way. A fix is designed and on our roadmap. The password will be strengthened on your device and become part of the key, and our server will never see it. We'll update this page when it ships.</li>
       <li><strong>A record that each upload pass was used,</strong> so none can be used twice. It doesn't name you.</li>
-      <li><strong>IP addresses, briefly.</strong> Our own systems keep a visitor's IP address for about a minute, to slow down abuse.</li>
+      <li><strong>IP addresses, for about a month.</strong> Our own code keeps a visitor's IP address for about a minute, to slow down abuse. Cloudflare, which runs our servers, also keeps a sample of requests for our account for about a month: the IP address, the time and the web address asked for, which can include the transfer's ID. That covers people opening a link as well as people sending one.</li>
     </ul>
 
     <p>Cloudflare runs the servers your browser connects to, between you and our code. Those servers see your IP address and the web address you asked for, including the transfer's ID. They never see the key: that sits after the #, and browsers don't send that part. If you'd rather Cloudflare didn't see your IP, use a VPN, ideally one with multi-hop.</p>
+
+    <p><em>Corrected 20 October 2026.</em> This page said our systems keep IP addresses for about a minute. That was true of our own code, but it left out Cloudflare's sampled records, which we found on 20 October. The table and the list above now say so.</p>
 
     <p>There are no payment records, because paid plans haven't opened yet. When they do, there will be two ways to pay. Paying by card means the card company and our payment processor hold your name and email, linked to your plan. Paying with bitcoin over Lightning goes through our own node, which sees an amount, a payment ID and a time, but not who paid. Once that route is live, upload passes will be bought separately from transfers, so a payment can't be matched to a file.</p>
 
@@ -297,7 +299,7 @@ readTime: "7 min"
     <button class="modal-close" onclick="closeModal('modal-full-analysis')" aria-label="Close">Close</button>
     <h2 class="modal-title" id="modal-full-analysis-title">Ten services side by side</h2>
     {{ compareTable("Ten file transfer services compared, full screen", groups) }}
-    <p class="modal-note">A court order can only reach what a service holds. Where the file is encrypted on your device and the service has no key, an order produces data that can't be read. Checked 10 October 2026.</p>
+    <p class="modal-note">A court order can only reach what a service holds. Where the file is encrypted on your device and the service has no key, an order produces data that can't be read. Checked 10 October 2026; Refueler Share's IP entry corrected 20 October 2026.</p>
   </div>
 </div>
 
