@@ -19,6 +19,13 @@ ALLOWED_ORIGIN = "https://refueler.io"
 pattern = "analytics.refueler.io/event"
 zone_name = "refueler.io"
 
+# RIO-Jobs-1 (20 Oct 2026): Workers Logs and traces stay OFF, same as Share H1 —
+# no request log, so no IP is kept by us. Pinned so a deploy cannot turn them on.
 [observability]
-enabled = true
-head_sampling_rate = 1
+enabled = false
+
+[observability.logs]
+enabled = false
+
+[observability.traces]
+enabled = false
