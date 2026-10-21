@@ -1,0 +1,303 @@
+---
+title: "When a transfer doesn't work · Refueler Notes"
+description: "What you can check yourself when a Share upload or download fails, what the messages on the page mean, and what to send if you'd like help."
+canonical: "https://refueler.io/notes/when-a-transfer-doesnt-work/"
+activePage: notes
+permalink: /notes/when-a-transfer-doesnt-work/index.html
+# Notes list: drives the /notes/ card and /notes/latest.json
+cardTitle: "When a transfer doesn't work"
+summary: "What you can check yourself, what the messages on the page mean, and what to send me if you'd like help. You decide what to share."
+topics: ["Help", "Privacy", "File transfer"]
+date: 2026-10-21
+readTime: "6 min"
+---
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+{% include "head.njk" %}
+<meta property="og:type" content="article" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="preload" href="{{ '/notes/notes.css' | cssv }}" as="style">
+<link rel="preload" href="/notes/notes.js" as="script">
+<link rel="stylesheet" href="{{ '/notes/notes.css' | cssv }}">
+<style>
+  /* Anchors linked from Share (Share-Copy-3 → #what-the-page-says): keep the ids stable. */
+  #check-first, #what-the-page-says, #reference, #report { scroll-margin-top: 5rem; }
+
+  .article-body ol, .article-body ul { padding-left: 1.25em; margin-bottom: 1.5em; }
+  .article-body li { margin-bottom: 0.6em; }
+  .article-body ol li::marker { font-family: var(--font-heading); font-size: 0.875em; color: var(--fg-subtle); }
+
+  .table-group { margin: 2rem 0 2.5rem; }
+  .table-group .table-wrap { margin: 0; }
+  .help-table td { white-space: normal; font-family: var(--font-sans); }
+  .help-table td:first-child { white-space: normal; min-width: 9rem; }
+  .says-table td:first-child { min-width: 13rem; }
+  #modal-page-says .modal-box { max-width: 1100px; }
+  #modal-page-says .table-wrap { margin: 1.25rem 0 0; }
+  #modal-page-says .says-table { min-width: 44rem; }
+  .modal-note {
+    font-family: var(--font-serif);
+    font-size: 0.875rem;
+    color: var(--text-tertiary);
+    line-height: 1.65;
+    margin-top: 1.5rem;
+  }
+
+  /* Phones: each row reads as one block; the modal keeps the three columns. */
+  @media (max-width: 640px) {
+    .article-body .says-table thead { display: none; }
+    .article-body .says-table tr { display: block; padding: 0.4rem 0; border-bottom: var(--border-weight) solid var(--border); }
+    .article-body .says-table tr:last-child { border-bottom: 0; }
+    .article-body .says-table td { display: block; border: 0; }
+    .article-body .says-table td[data-label]::before {
+      content: attr(data-label);
+      display: block;
+      font-family: var(--font-heading);
+      font-size: 0.625rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 0.2rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+{% include "nav.njk" %}
+{% from "ref-box.njk" import refBox %}
+
+{#- Page strings quoted exactly as shipped (Share-Copy-2, 16 Oct 2026; checked against refueler-share
+    frontend at 99c871d on 21 Oct). If a copy session changes one in Share, change it here too. -#}
+{% set says = [
+  ["This link isn’t complete.", "Part of the link was lost when it was copied or sent.", "Ask the sender to send it again, in full."],
+  ["The security check couldn’t load.", "A blocker or VPN stopped Cloudflare's check.", "Allow <code>challenges.cloudflare.com</code>, or try once without the blocker or VPN."],
+  ["The file couldn’t be decrypted.", "The key in the link doesn't fit the file, usually because the link was changed on the way. Nothing was saved.", "Ask the sender to send it again."],
+  ["Refueler couldn’t be reached.", "Your connection dropped, or something between you and Share blocked it.", "Check your connection, then open the link again."],
+  ["Refueler couldn’t be reached after several tries.", "As above, for longer. Nothing was saved.", "Check your connection, then open the link again."],
+  ["Refueler couldn’t open this transfer just now.", "Share's side had a problem.", "Open the link again in a minute. If it keeps happening, check the Status page."],
+  ["Refueler’s answer was incomplete.", "Share's reply was cut short.", "Open the link again. If it keeps happening, check the Status page."],
+  ["Refueler didn’t accept this download.", "The download's permission ran out or was refused.", "Open the link again to start over."],
+  ["The file couldn’t be saved there.", "The browser couldn't write to the place you chose.", "Open the link again and choose another place."],
+  ["Something went wrong in this browser.", "Something unexpected, inside the browser.", "Open the link again. If it keeps happening, try another browser."],
+  ["Refueler couldn’t check the password.", "The password check didn't finish.", "Try again."]
+] %}
+{% macro saysTable(label) %}
+    <div class="table-wrap">
+      <table class="data-table help-table says-table" aria-label="{{ label }}">
+        <thead>
+          <tr>
+            <th>The page says</th>
+            <th>What it means</th>
+            <th>What to do</th>
+          </tr>
+        </thead>
+        <tbody>
+          {%- for r in says %}
+          <tr>
+            <td>{{ r[0] }}</td>
+            <td data-label="What it means">{{ r[1] }}</td>
+            <td data-label="What to do">{{ r[2] | safe }}</td>
+          </tr>
+          {%- endfor %}
+        </tbody>
+      </table>
+    </div>
+{% endmacro %}
+
+<div class="article-wrap">
+
+  <p class="breadcrumb">
+    <a href="/notes/">Notes</a><span class="breadcrumb-sep">/</span>Help · Privacy · File transfer
+  </p>
+
+  <header class="article-header">
+    <div class="article-eyebrow">
+      <span>Help</span>
+      <span class="eyebrow-dot"></span>
+      <span>Privacy</span>
+      <span class="eyebrow-dot"></span>
+      <span>File transfer</span>
+    </div>
+    <h1 class="article-title">When a transfer doesn't work</h1>
+    <div class="article-meta">
+      <span>21 October 2026</span>
+      <span class="meta-dot"></span>
+      <span>6 min read</span>
+    </div>
+  </header>
+
+  <article class="article-body">
+
+    <p>Share runs no analytics and no session recording, so when an upload or download goes wrong in your browser, I usually can't see it. This page covers what you can check yourself, what the messages on the page mean, and what to send me if you'd like help. You decide what to share.</p>
+
+    <h2>What reaches me without asking</h2>
+
+    <p>Very little, on purpose.</p>
+
+    <p><strong>When a step fails</strong>, the page sends a short note: which step, the error's name, and the first eight characters of the transfer's ID. It never includes the file, its name, the key in your link, your password, your IP address or your browser. I keep these notes for up to 90 days, which is long enough to see a pattern and short enough not to become a record of anyone.</p>
+
+    <p>Here is what one looks like. This one is made up for the page:</p>
+
+<pre class="note-code" aria-label="An example error note, made up for this page"><span class="k">step  </span>    decrypt
+<span class="k">error </span>    OperationError
+<span class="k">detail</span>    uuid:1a2b3c4d  chunk:12
+<span class="k">time  </span>    21 Oct 2026, 14:05 UTC</pre>
+
+    <p>That is enough to notice that something is failing for many people at once. It isn't enough to tell me what went wrong for you.</p>
+
+    <p><strong>Cloudflare</strong>, which runs the servers, sees your IP address, as any website host does. It also keeps a sample of requests for about a month, with the IP address and the address each request went to, which for Share includes the transfer's ID. A VPN hides your IP address from both of us.</p>
+
+    <h2 id="check-first">Check these first</h2>
+
+    <p>Most failures come from one of these, roughly in this order.</p>
+
+    <ol>
+      <li><strong>Is Share having a problem?</strong> Look at the <a href="/share/status/">Status page</a>. If there's a notice, the fix is mine. Try again later.</li>
+      <li><strong>Content blockers.</strong> Share needs three addresses a blocker might stop: Cloudflare's "are you a person" check (<code>challenges.cloudflare.com</code>), Share's server (<code>api.share.refueler.io</code>) and Cloudflare's storage (<code>r2.cloudflarestorage.com</code>). Allow them for this site, or try once with the blocker off.</li>
+      <li><strong>A VPN.</strong> Some VPN exits make Cloudflare's check harder, or stop it finishing. Try another country location, or switch the VPN off for one try.</li>
+      <li><strong>The tab went to sleep.</strong> Transfers run in your browser, so the tab has to stay open and the computer awake. If a laptop lid closed or a phone locked during an upload, go back to Share: it offers to carry on, and asks you to choose the same file again. A download starts from the beginning, so open the link again.</li>
+      <li><strong>Private windows.</strong> Some private modes limit what a page may keep, which stops an upload carrying on. A normal window is best for big files.</li>
+      <li><strong>Space and memory.</strong> A download needs room for the whole file on the drive you save to. As of October 2026, a very large download in Safari or Firefox also needs a lot of free memory; a fix is being built. On a phone, keep downloads small.</li>
+      <li><strong>Another browser.</strong> If it fails in one browser, try another. That tells me whether the problem is the browser or the transfer, which halves the search.</li>
+    </ol>
+
+    <h2 id="what-the-page-says">What the page says, and what to do</h2>
+
+    <div class="table-group">
+      {{ saysTable("What the page says, what it means, and what to do") }}
+      <button class="table-expand-trigger" onclick="openModal('modal-page-says')" aria-haspopup="dialog">Full screen ↗</button>
+    </div>
+
+    <p>"Open the link again" means the link from your message or email. Reloading the page won't do it: once a link opens, Share clears it from the address bar, so the key doesn't linger there.</p>
+
+    <h2>On a phone</h2>
+
+    <div class="table-wrap">
+      <table class="data-table help-table" aria-label="What to try first on a phone">
+        <thead>
+          <tr>
+            <th>Phone and browser</th>
+            <th>What to try first</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Safari on iPhone</td>
+            <td>Keep the screen on until it finishes. Content blockers live in Settings → Apps → Safari → Extensions.</td>
+          </tr>
+          <tr>
+            <td>Chrome on Android</td>
+            <td>Keep the screen on. Try once outside Data Saver or any VPN app.</td>
+          </tr>
+          <tr>
+            <td>Firefox on Android</td>
+            <td>Check add-ons such as uBlock Origin, and allow the three addresses above.</td>
+          </tr>
+          <tr>
+            <td>Vanadium on GrapheneOS</td>
+            <td>Keep the screen on. If the security check doesn't finish, try once without the VPN.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>On a phone the browser's error log is hard to reach. A screenshot of the page is all I need.</p>
+
+    <h2>If it still fails</h2>
+
+    <h3>What to write down</h3>
+
+    <ul>
+      <li>what the page said, word for word (a screenshot is ideal)</li>
+      <li>your browser and device, for example "Safari 26 on a MacBook" or "Vanadium on a Pixel 9a"</li>
+      <li>roughly how big the file was</li>
+      <li>roughly when it happened</li>
+      <li>what you'd already tried from the list above</li>
+    </ul>
+
+    <h3 id="reference">Your reference</h3>
+
+    <p>If I need to find the transfer, eight characters are enough. They're the first eight after <code>uuid=</code> in the link:</p>
+
+    {{ refBox("1a2b3c4d", "-5e6f-4a7b-8c9d-0e1f2a3b4c5d") }}
+
+    <p>Everything after the <code>#</code> is the key to the file, and anyone holding it can open the file. It never reaches Share's servers, and I'd rather keep it that way. Please don't send me the whole link, and never the password. I don't need either, and couldn't use them.</p>
+
+    <h3>The browser console (optional, on a computer)</h3>
+
+    <p>Your browser keeps a log of errors the page never shows.</p>
+
+    <div class="table-wrap">
+      <table class="data-table help-table" aria-label="How to open the browser console">
+        <thead>
+          <tr>
+            <th>Browser</th>
+            <th>How to open the console</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Safari</td>
+            <td>Settings → Advanced → tick <em>Show features for web developers</em>, then Develop → Show JavaScript Console</td>
+          </tr>
+          <tr>
+            <td>Chrome, Edge, Brave</td>
+            <td>⌥ ⌘ J on a Mac, Ctrl Shift J on Windows or Linux</td>
+          </tr>
+          <tr>
+            <td>Firefox</td>
+            <td>⌥ ⌘ K on a Mac, Ctrl Shift K on Windows or Linux</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Repeat the step that failed, then copy the lines shown in red. Before you send them, look for a <code>#</code> followed by a long run of letters and numbers, and delete it.</p>
+
+    <h2>How to reach me</h2>
+
+    <p>Email <a href="mailto:support@refueler.io"><strong>support@refueler.io</strong></a> with whatever you're happy to share. A plain description is a good start; there's no form to fill in.</p>
+
+    <h2 id="report">If a link carries something illegal</h2>
+
+    <p>That's a different address: <a href="mailto:report@refueler.io"><strong>report@refueler.io</strong></a>. Send the link up to the <code>#</code> (that's enough for me to take it down), what kind of content it is, and when you saw it. If you believe it shows a child being abused, don't send the file or the full link. I can act without them.</p>
+
+    <h2>Why it works this way</h2>
+
+    <p>Measuring every visitor would make problems easier to spot. It would also mean running someone else's code on the page that encrypts your files, and collecting details about people who never asked for help. I'd rather ask the few who need help, and let them decide what to tell me.</p>
+
+    <div class="article-cta">
+      <p class="cta-label">Refueler Share</p>
+      <p class="cta-text">Encrypted file transfer. No account required. Free for transfers up to 4 GB.</p>
+      <a class="cta-link" href="/share/">Try it →</a>
+    </div>
+
+  </article>
+
+</div><!-- /article-wrap -->
+
+<!-- ── Modal: what the page says, full screen ── -->
+<div
+  class="modal-overlay"
+  id="modal-page-says"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-page-says-title"
+  aria-hidden="true"
+>
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('modal-page-says')" aria-label="Close">Close</button>
+    <h2 class="modal-title" id="modal-page-says-title">What the page says, and what to do</h2>
+    {{ saysTable("What the page says, what it means, and what to do, full view") }}
+  </div>
+</div>
+
+{% include "footer.njk" %}
+
+<script src="/notes/notes.js"></script>
+<script src="/analytics.js" defer></script>
+</body>
+</html>

@@ -427,6 +427,77 @@
   padding-right: 4rem;
 }
 
+/* ── Example note (a made-up record, set as code) ── */
+/* Notes-Transfer-Help-Publish · 21 Oct 2026. Ink and muted only: no syntax colours. */
+.note-code {
+  margin: 2em 0;
+  padding: 1rem 1.25rem;
+  border: var(--border-weight) solid var(--border);
+  background: var(--surface);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.75;
+  color: var(--fg);
+  overflow-x: auto;
+  white-space: pre;
+}
+.note-code .k { color: var(--fg-subtle); }
+[data-theme="carbon"] .note-code { border-left: 2px solid var(--accent); }
+
+/* ── Reference box (_includes/ref-box.njk) ── */
+/* The first eight characters of a link's id in gold, the rest muted, the key a blur.
+   Gold as text on Paper is Share's #7A5F2E (4.65 : 1); #C8A96E is too light on Paper. */
+.ref-box {
+  --ref-gold: #7A5F2E;
+  margin: 2em 0;
+  padding: 1.25rem 1.25rem 1rem;
+  border: var(--border-weight) solid var(--border);
+}
+[data-theme="carbon"] .ref-box { --ref-gold: var(--accent); }
+.article-body .ref-link {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  row-gap: 1.75rem;
+  margin: 0 0 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--fg);
+}
+.ref-muted { color: var(--fg-subtle); word-break: break-all; }
+/* Labels hang under their segment without widening it, so the link reads as one line. */
+.ref-seg { position: relative; }
+.ref-code {
+  color: var(--ref-gold);
+  text-decoration: underline;
+  text-decoration-color: var(--ref-gold);
+  text-decoration-thickness: 0.5px;
+  text-underline-offset: 4px;
+}
+.ref-blur {
+  color: var(--fg-subtle);
+  filter: blur(3.5px);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.ref-key { max-width: 100%; min-width: 0; }
+.ref-key .ref-blur { display: block; overflow: hidden; }
+.ref-label {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 0.3rem);
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--fg-subtle);
+}
+.ref-seg:not(.ref-key) .ref-label { color: var(--ref-gold); }
+
 /* ── Article CTA strip ── */
 .article-cta {
   margin-top: 3rem;
