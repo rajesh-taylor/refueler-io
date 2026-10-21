@@ -9,7 +9,7 @@ cardTitle: "When a transfer doesn't work"
 summary: "What you can check yourself, what the messages on the page mean, and what to send me if you'd like help. You decide what to share."
 topics: ["Help", "Privacy", "File transfer"]
 date: 2026-10-21
-readTime: "6 min"
+readTime: "4 min"
 ---
 <!DOCTYPE html>
 <html lang="en-GB">
@@ -22,7 +22,7 @@ readTime: "6 min"
 <link rel="stylesheet" href="{{ '/notes/notes.css' | cssv }}">
 <style>
   /* Anchors linked from Share (Share-Copy-3 → #what-the-page-says): keep the ids stable. */
-  #check-first, #what-the-page-says, #reference, #report { scroll-margin-top: 5rem; }
+  #check-first, #what-the-page-says, #reference { scroll-margin-top: 5rem; }
 
   .article-body ol, .article-body ul { padding-left: 1.25em; margin-bottom: 1.5em; }
   .article-body li { margin-bottom: 0.6em; }
@@ -125,30 +125,13 @@ readTime: "6 min"
     <div class="article-meta">
       <span>21 October 2026</span>
       <span class="meta-dot"></span>
-      <span>6 min read</span>
+      <span>4 min read</span>
     </div>
   </header>
 
   <article class="article-body">
 
     <p>Share runs no analytics and no session recording, so when an upload or download goes wrong in your browser, I usually can't see it. This page covers what you can check yourself, what the messages on the page mean, and what to send me if you'd like help. You decide what to share.</p>
-
-    <h2>What reaches me without asking</h2>
-
-    <p>Very little, on purpose.</p>
-
-    <p><strong>When a step fails</strong>, the page sends a short note: which step, the error's name, and the first eight characters of the transfer's ID. It never includes the file, its name, the key in your link, your password, your IP address or your browser. I keep these notes for up to 90 days, which is long enough to see a pattern and short enough not to become a record of anyone.</p>
-
-    <p>Here is what one looks like. This one is made up for the page:</p>
-
-<pre class="note-code" aria-label="An example error note, made up for this page"><span class="k">step  </span>    decrypt
-<span class="k">error </span>    OperationError
-<span class="k">detail</span>    uuid:1a2b3c4d  chunk:12
-<span class="k">time  </span>    21 Oct 2026, 14:05 UTC</pre>
-
-    <p>That is enough to notice that something is failing for many people at once. It isn't enough to tell me what went wrong for you.</p>
-
-    <p><strong>Cloudflare</strong>, which runs the servers, sees your IP address, as any website host does. It also keeps a sample of requests for about a month, with the IP address and the address each request went to, which for Share includes the transfer's ID. A VPN hides your IP address from both of us.</p>
 
     <h2 id="check-first">Check these first</h2>
 
@@ -224,7 +207,7 @@ readTime: "6 min"
 
     {{ refBox("1a2b3c4d", "-5e6f-4a7b-8c9d-0e1f2a3b4c5d") }}
 
-    <p>Everything after the <code>#</code> is the key to the file, and anyone holding it can open the file. It never reaches Share's servers, and I'd rather keep it that way. Please don't send me the whole link, and never the password. I don't need either, and couldn't use them.</p>
+    <p>Everything after the <code>#</code> is the key to the file. Please don't send me the whole link, and never the password.</p>
 
     <h3>The browser console (optional, on a computer)</h3>
 
@@ -261,13 +244,7 @@ readTime: "6 min"
 
     <p>Email <a href="mailto:support@refueler.io"><strong>support@refueler.io</strong></a> with whatever you're happy to share. A plain description is a good start; there's no form to fill in.</p>
 
-    <h2 id="report">If a link carries something illegal</h2>
-
-    <p>That's a different address: <a href="mailto:report@refueler.io"><strong>report@refueler.io</strong></a>. Send the link up to the <code>#</code> (that's enough for me to take it down), what kind of content it is, and when you saw it. If you believe it shows a child being abused, don't send the file or the full link. I can act without them.</p>
-
-    <h2>Why it works this way</h2>
-
-    <p>Measuring every visitor would make problems easier to spot. It would also mean running someone else's code on the page that encrypts your files, and collecting details about people who never asked for help. I'd rather ask the few who need help, and let them decide what to tell me.</p>
+    <p>What Share keeps, and for how long, is set out in <a href="/notes/what-share-keeps/">What Share keeps, and why</a>.</p>
 
     <div class="article-cta">
       <p class="cta-label">Refueler Share</p>

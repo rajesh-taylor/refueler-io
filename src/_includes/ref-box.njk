@@ -6,7 +6,7 @@
 {% macro refBox(ref, rest, refLabel="your reference", keyLabel="the key, never send this") %}
 <figure class="ref-box">
   <p class="ref-link" role="img" aria-label="A Share link: share.refueler.io/?uuid= then {{ ref }}, which is {{ refLabel }}, then the rest of the id, then a hash sign and the key, hidden here: {{ keyLabel }}.">
-    <span class="ref-muted">share.refueler.io/?uuid=</span><span class="ref-seg"><span class="ref-code">{{ ref }}</span><span class="ref-label">{{ refLabel }}</span></span><span class="ref-muted">{{ rest }}</span><span class="ref-seg ref-key"><span class="ref-blur">#k4Rw9Tq2Lm7Xv0Bc5Nz8Hj3Yp6Ds1Fg</span><span class="ref-label">{{ keyLabel }}</span></span>
+    <span class="ref-muted">share.refueler.io/?uuid=</span><span class="ref-seg"><span class="ref-code">{{ ref }}</span><span class="ref-label">{{ refLabel }}</span></span><span class="ref-muted">{{ rest }}</span><span class="ref-seg ref-key"><span class="ref-hash">#</span><span class="ref-blur">k4Rw9Tq2Lm7Xv0Bc5Nz8Hj3Yp6Ds1Fg</span><span class="ref-label">{{ keyLabel }}</span></span>
   </p>
 </figure>
 {% endmacro %}

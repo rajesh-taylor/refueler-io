@@ -427,23 +427,6 @@
   padding-right: 4rem;
 }
 
-/* ── Example note (a made-up record, set as code) ── */
-/* Notes-Transfer-Help-Publish · 21 Oct 2026. Ink and muted only: no syntax colours. */
-.note-code {
-  margin: 2em 0;
-  padding: 1rem 1.25rem;
-  border: var(--border-weight) solid var(--border);
-  background: var(--surface);
-  font-family: var(--font-mono);
-  font-size: 0.8125rem;
-  line-height: 1.75;
-  color: var(--fg);
-  overflow-x: auto;
-  white-space: pre;
-}
-.note-code .k { color: var(--fg-subtle); }
-[data-theme="carbon"] .note-code { border-left: 2px solid var(--accent); }
-
 /* ── Reference box (_includes/ref-box.njk) ── */
 /* The first eight characters of a link's id in gold, the rest muted, the key a blur.
    Gold as text on Paper is Share's #7A5F2E (4.65 : 1); #C8A96E is too light on Paper. */
@@ -481,8 +464,10 @@
   user-select: none;
   -webkit-user-select: none;
 }
-.ref-key { max-width: 100%; min-width: 0; }
-.ref-key .ref-blur { display: block; overflow: hidden; }
+/* "#" stays sharp so the reader can see where the key starts; only what follows is blurred. */
+.ref-key { display: flex; max-width: 100%; min-width: 0; }
+.ref-hash { color: var(--fg-muted); padding-right: 0.15em; }
+.ref-key .ref-blur { overflow: hidden; min-width: 0; }
 .ref-label {
   position: absolute;
   left: 0;

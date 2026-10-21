@@ -22,7 +22,7 @@ permalink: /privacy/index.html
     <h1>Privacy Policy</h1>
     <p class="hero-sub">Refueler keeps the least it can to run its services. This page covers Refueler Share and the refueler.io website.</p>
     <dl class="hero-dates">
-      <div><dt>Last changed</dt><dd><time datetime="2026-10-20">20 Oct 2026</time></dd></div>
+      <div><dt>Last changed</dt><dd><time datetime="2026-10-21">21 Oct 2026</time></dd></div>
       <div><dt>Last checked</dt><dd><time datetime="2026-10-20">20 Oct 2026</time></dd></div>
     </dl>
   </div>
@@ -110,10 +110,16 @@ permalink: /privacy/index.html
               <td>Until it ends; then only the id and the time it ended, for 30 days, so the link can say it has gone</td>
             </tr>
             <tr>
-              <td>Short error notes: a step name, a status code, part of a transfer id</td>
+              <td>Short error notes: a step name, the error's name, part of a transfer id</td>
               <td>Find and fix what breaks</td>
               <td>Cloudflare</td>
-              <td>Up to 90 days</td>
+              <td>1 day</td>
+            </tr>
+            <tr>
+              <td>Counts of those errors by step and error name, with no transfer id</td>
+              <td>See when something fails for many people at once</td>
+              <td>Cloudflare</td>
+              <td>Three months, a period Cloudflare sets</td>
             </tr>
             <tr>
               <td>A sample of requests to Share: your IP address, country, the time and the web address asked for, which can include a transfer id. This covers opening a link as well as sending one</td>
@@ -136,6 +142,7 @@ permalink: /privacy/index.html
           </tbody>
         </table>
         <p>Error notes never hold file names, keys, your IP address or your browser. Sign-in records hold no IP address, device or location.</p>
+        <p>Two of these periods are set by Cloudflare and can't be shortened: the error counts and the sample of requests.</p>
         <p><strong>Others who play a part:</strong></p>
         <ul>
           <li><strong>Cloudflare</strong> runs the servers, so it sees your IP address as any host does, and keeps the sample of requests listed above. A VPN hides your IP address from Cloudflare and from us. Before an upload it runs a short check that you are a person, which reads signals from your browser inside Cloudflare's own frame. It also sends Citizens' sign-in emails; each link works once, for 15 minutes.</li>

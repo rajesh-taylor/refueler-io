@@ -141,7 +141,9 @@ readTime: "4 min"
 
     <h2>Error notes</h2>
 
-    <p>When a step goes wrong, Share keeps a short note: which step, the status code and part of the transfer id. These help me find and fix what breaks. They are kept for up to 90 days.</p>
+    <p>When a step goes wrong, Share keeps a short note: which step, the error's name and part of the transfer id. These help me find and fix what breaks. They are kept for one day.</p>
+
+    <p>Cloudflare also keeps a count of these errors, by step and error name, with no transfer id, for three months. That period is Cloudflare's and can't be shortened.</p>
 
     <p>They never hold file names, keys, your IP address or anything about your browser. The limit: the partial id can tie a note to a transfer, not to a person.</p>
 
