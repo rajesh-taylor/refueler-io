@@ -1,4 +1,6 @@
 /* ─── navy-office.js — refueler-share · Navy Office admin ───────────────────
+ * OSA-Tools-3 (22 Oct 2026): unlock by role (GET /admin/reports/whoami); a helper key sees
+ *   Reports only (reports-view.js) and never calls a metrics route.
  * Last updated: B12-2 (Client errors split into real / Expected events with
  *   plain explanations; Storage & Billing row from /admin/storage; nudge badge
  *   retired; Sign out moved to the header).
@@ -75,29 +77,57 @@ document.getElementById('key-input').addEventListener('keydown', e => {
 });
 document.getElementById('unlock-btn').addEventListener('click', () => tryUnlock());
 
-function showDashboard() {
+// OSA-Tools-3: the key unlocks by role — GET /admin/reports/whoami → { role } (never /admin/metrics,
+// which a helper key must never pass). Admin sees every section; helper sees Reports only (the
+// elements marked data-staff). The page only hides what the Worker already refuses a helper.
+async function whoami(key) {
+  const res = await fetch(`${WORKER}/admin/reports/whoami`, { headers: { 'X-Admin-Key': key }, cache: 'no-store' });
+  if (res.status === 401) return null;
+  if (!res.ok) throw new Error(`whoami ${res.status}`);
+  const { role } = await res.json();
+  return role === 'admin' || role === 'helper' ? role : null;
+}
+
+function showDashboard(role) {
   document.getElementById('gate').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
   document.title = 'refueler-share · Navy Office';
-  initLightningToggle();
+  document.body.dataset.role = role;
+  if (role === 'helper') {
+    const staffOnly = (parent) => { for (const el of parent.children) if (!el.hasAttribute('data-staff')) el.hidden = true; };
+    staffOnly(document.querySelector('.sb-nav'));
+    staffOnly(document.getElementById('dashboard'));
+    staffOnly(document.querySelector('#dashboard .header-right'));
+    for (const el of document.querySelectorAll('[data-admin-only]')) el.hidden = true;
+    setText('section-title', 'Reports');
+    const chip = document.getElementById('role-chip');
+    chip.textContent = 'Helper key · Reports only';
+    chip.hidden = false;
+  } else {
+    initLightningToggle();
+  }
+  NavyReports.mount({ worker: WORKER, key: adminKey, role });
+}
+
+async function enter(key, role) {
+  adminKey = key;
+  sessionStorage.setItem('dash_key', adminKey);
+  showDashboard(role);
+  if (role !== 'admin') return;   // a helper gets no metrics, no timer
+  await refreshAll();
+  startTimer();
 }
 
 async function tryUnlock() {
   const input = document.getElementById('key-input').value.trim();
   if (!input) return;
   try {
-    const res = await fetch(`${WORKER}/admin/metrics`, {
-      headers: { 'X-Admin-Key': input }
-    });
-    if (res.status === 401) {
+    const role = await whoami(input);
+    if (!role) {
       document.getElementById('gate-error').textContent = 'Invalid key.';
       return;
     }
-    adminKey = input;
-    sessionStorage.setItem('dash_key', adminKey);
-    showDashboard();
-    await refreshAll();
-    startTimer();
+    await enter(input, role);
   } catch {
     document.getElementById('gate-error').textContent = 'Worker unreachable.';
   }
@@ -106,15 +136,10 @@ async function tryUnlock() {
 window.addEventListener('DOMContentLoaded', async () => {
   const stored = sessionStorage.getItem('dash_key');
   if (stored) {
-    adminKey = stored;
     try {
-      const res = await fetch(`${WORKER}/admin/metrics`, {
-        headers: { 'X-Admin-Key': adminKey }
-      });
-      if (res.status === 401) { sessionStorage.removeItem('dash_key'); return; }
-      showDashboard();
-      await refreshAll();
-      startTimer();
+      const role = await whoami(stored);
+      if (!role) { sessionStorage.removeItem('dash_key'); return; }
+      await enter(stored, role);
     } catch {}
   }
 });

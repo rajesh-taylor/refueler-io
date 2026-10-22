@@ -1443,3 +1443,118 @@ body {
 .sandbox-small { opacity: .5; font-size: 10px; }
 .sandbox-dim { opacity: .7; }
 .dock-table tbody tr:focus-visible { outline: 1px solid var(--accent); outline-offset: -1px; }
+
+/* ── Reports (OSA-Tools-3 · 22 Oct 2026) — reports-view.js ──────────────────
+ * Two colours, as the rest: ink and gold. No status colours — the words carry the state. */
+.role-chip {
+  font-family: var(--mono); font-size: 0.65rem; color: var(--accent);
+  border: 0.5px solid var(--accent); border-radius: 3px; padding: 2px 8px; white-space: nowrap;
+}
+.rp-box {
+  background: var(--surface); border: 0.5px solid var(--border); border-radius: 10px;
+  padding: 16px 18px; margin-bottom: 12px;
+}
+.rp-box-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.rp-card-title {
+  font-family: var(--heading); font-size: 0.65rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-tertiary); margin-bottom: 8px;
+}
+.rp-box-head .rp-card-title { margin-bottom: 0; }
+.rp-label {
+  display: block; font-family: var(--mono); font-size: 11px; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--text-secondary); margin-bottom: 6px;
+}
+.rp-row { display: flex; gap: 8px; align-items: center; }
+.rp-grow { flex: 1; min-width: 0; }
+.rp-input {
+  background: var(--surface-raised); color: var(--text-primary);
+  border: 0.5px solid var(--border-mid); border-radius: 4px;
+  padding: 6px 8px; font-size: 12px; font-family: var(--mono); width: 100%;
+}
+.rp-row .rp-input { width: auto; }
+.rp-input:focus { outline: none; border-color: var(--accent); }
+.rp-input:disabled { opacity: .5; }
+textarea.rp-input { font-family: var(--sans); font-size: 13px; line-height: 1.5; resize: vertical; }
+.rp-mono { font-family: var(--mono); letter-spacing: .08em; }
+.rp-hint { font-family: var(--sans); font-size: 0.75rem; color: var(--text-tertiary); margin-top: 6px; }
+.rp-note { font-family: var(--sans); font-size: 0.8rem; color: var(--text-secondary); margin-top: 8px; }
+.rp-note:empty, .rp-msg:empty { display: none; }
+.rp-msg {
+  font-family: var(--sans); font-size: 0.85rem; color: var(--text-primary); margin-top: 10px;
+  border-left: 2px solid var(--accent); padding: 2px 0 2px 10px;
+}
+.rp-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.rp-strong {
+  background: var(--accent); color: #1E1F22; border: none; border-radius: 4px;
+  padding: 6px 14px; font-family: var(--mono); font-size: 11px; font-weight: 500; cursor: pointer;
+}
+.rp-strong:hover { background: var(--accent-hover); }
+.rp-strong:disabled { background: var(--surface-raised); color: var(--text-tertiary); cursor: default; }
+
+.rp-pair { display: grid; grid-template-columns: 3fr 2fr; gap: 12px; margin-top: 14px; }
+.rp-card { border: 0.5px solid var(--border); border-radius: 8px; padding: 14px 16px; background: var(--bg); }
+#rp-td-form { display: flex; flex-direction: column; gap: 4px; }
+#rp-td-form .rp-label { margin-top: 6px; }
+#rp-td-form .rp-strong { margin-top: 10px; align-self: flex-start; }
+#rp-td-confirm { max-width: 12ch; }
+.rp-dl-row {
+  display: flex; justify-content: space-between; gap: 16px; padding: 6px 0;
+  border-bottom: 0.5px solid var(--border); font-family: var(--mono); font-size: 12px;
+}
+.rp-dl-k { color: var(--text-tertiary); white-space: nowrap; }
+.rp-dl-v { color: var(--text-primary); text-align: right; word-break: break-all; }
+.rp-dl-v strong { font-weight: 500; }
+.rp-sub { display: block; font-family: var(--sans); font-size: 11px; color: var(--text-tertiary); margin-top: 2px; word-break: normal; }
+.rp-u8 { color: var(--accent); }
+
+.rp-confirm {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px;
+  font-family: var(--sans); font-size: 0.85rem; color: var(--text-primary);
+}
+.rp-form { border: 0.5px solid var(--border); border-radius: 8px; padding: 14px 16px; background: var(--bg); margin-bottom: 12px; }
+.rp-grid { display: grid; grid-template-columns: 11rem 1fr; gap: 8px 12px; align-items: center; margin-bottom: 8px; }
+.rp-grid .rp-label { margin-bottom: 0; }
+.rp-table td { white-space: nowrap; }
+.rp-table tbody tr.rp-selected { background: var(--surface-raised); box-shadow: inset 2px 0 0 var(--accent); }
+.rp-tag {
+  font-size: 9px; letter-spacing: .08em; color: var(--text-secondary);
+  border: 0.5px solid var(--border-mid); border-radius: 3px; padding: 0 4px; margin-left: 4px;
+}
+.rp-templates { margin-top: 4px; }
+.rp-tabs { display: flex; align-items: flex-end; gap: 2px; border-bottom: 0.5px solid var(--border-mid); margin: 6px 0 8px; flex-wrap: wrap; }
+.rp-tab {
+  background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -0.5px;
+  font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--text-tertiary); padding: 6px 10px; cursor: pointer;
+}
+.rp-tab:hover { color: var(--text-primary); }
+.rp-tab[aria-selected="true"] { color: var(--text-primary); border-bottom-color: var(--accent); }
+.rp-tab-copy { margin-left: auto; margin-bottom: 4px; }
+.rp-tpl-text { min-height: 9rem; }
+.rp-pair.rp-single { grid-template-columns: 1fr; }
+
+@media (max-width: 900px) {
+  .rp-pair { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .rp-grid { grid-template-columns: 1fr; }
+  .rp-grid .rp-label { margin-top: 6px; }
+  .rp-row { flex-wrap: wrap; }
+  .rp-row .rp-input { width: 100%; }
+}
+@media print { .reports-panel { display: none !important; } }
+
+/* Phones (OSA-Tools-3): Navy Office had no phone layout; a helper may only have a phone.
+ * The sidebar becomes a block above the page, the page uses the full width. The dock's own
+ * phone layout is OSA-Tools-4. */
+@media (max-width: 640px) {
+  #sidebar { position: static; width: auto; border-right: none; border-bottom: 0.5px solid var(--border); padding: 1rem 0 0.75rem; }
+  .sb-nav { overflow: visible; }
+  .sb-section { margin-top: 1rem; }
+  #main { margin-left: 0; padding: 1rem; }
+  .content-header { flex-wrap: wrap; }
+  .header-right { flex-wrap: wrap; }
+  .rp-box { padding: 12px; }
+  .rp-dl-row { flex-direction: column; gap: 2px; }
+  .rp-dl-v { text-align: left; }
+}

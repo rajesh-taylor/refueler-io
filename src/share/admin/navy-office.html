@@ -28,6 +28,11 @@
     <div class="sb-section">Data</div>
     <a class="sb-item stub" data-scroll="card-execution-dock">Transfers</a>
     <a class="sb-item stub" data-soon="Subscribers">Subscribers<span class="sb-soon">soon</span></a>
+    <!-- Reports (OSA-Tools-3): the one section a helper key sees (data-staff). -->
+    <div class="sb-section" data-staff>Reports</div>
+    <a class="sb-item stub" data-scroll="card-reports" data-staff>Look up a link</a>
+    <a class="sb-item stub" data-scroll="rp-register" data-staff>Register</a>
+    <a class="sb-item stub" data-scroll="rp-case" data-staff>Templates</a>
     <div class="sb-section">Ops</div>
     <a class="sb-item stub" data-soon="Maintenance mode">Maintenance mode<span class="sb-soon">soon</span></a>
     <a class="sb-item stub" data-soon="Rate limits">Rate limits<span class="sb-soon">soon</span></a>
@@ -48,21 +53,22 @@
   <!-- Password gate -->
   <div id="gate">
     <h1>Navy Office</h1>
-    <input type="password" id="key-input" placeholder="Admin key" autocomplete="off">
+    <input type="password" id="key-input" placeholder="Key" autocomplete="off">
     <button type="button" id="unlock-btn">Unlock</button>
     <div id="gate-error"></div>
   </div>
 
   <!-- Dashboard -->
   <div id="dashboard">
-    <div class="content-header">
-      <div class="section-title">System Summary</div>
+    <div class="content-header" data-staff>
+      <div class="section-title" id="section-title">System Summary</div>
       <div class="header-right">
         <span id="refreshed-at"></span>
         <span id="countdown"></span>
         <button class="ghost-btn" id="refresh-btn" type="button" data-action="refresh">↻ Refresh</button>
         <button class="ghost-btn" type="button" data-action="print">Print / Export PDF</button>
-        <button class="ghost-btn signout-btn" type="button" data-action="sign-out">Sign out</button>
+        <span class="role-chip" id="role-chip" data-staff hidden></span>
+        <button class="ghost-btn signout-btn" type="button" data-action="sign-out" data-staff>Sign out</button>
       </div>
     </div>
 
@@ -300,6 +306,143 @@
       </div>
     </div>
 
+    <!-- ─── Reports (OSA-Tools-3 · 22 Oct 2026) ──────────────────────────────
+         Look up a link, take it down for a case, the register, templates A/B/C, export.
+         Admin and helper keys; the Worker enforces the helper's limits. Drawn by reports-view.js.
+         A pasted link is cut at the # before anything else runs: the key part never gets in. -->
+    <div class="dock-panel reports-panel" id="card-reports" data-staff>
+      <div class="dock-header">
+        <div class="dock-title">Reports · look up, take down, register</div>
+        <span class="storage-asof">London time</span>
+      </div>
+
+      <div class="rp-box">
+        <label class="rp-label" for="rp-link">Look up a link</label>
+        <div class="rp-row">
+          <input id="rp-link" class="rp-input rp-grow" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste the link or the transfer ID (UUID)">
+          <button class="toggle-btn" id="rp-lookup-btn" type="button">Look up</button>
+        </div>
+        <p class="rp-hint">Everything from the # on is removed as you paste. Only the transfer ID (UUID) part stays in the field and is sent; the key part after the # never is.</p>
+        <p class="rp-msg" id="rp-lookup-msg" role="status"></p>
+
+        <div class="rp-pair" id="rp-result" hidden>
+          <div class="rp-card" id="rp-card"></div>
+          <div class="rp-card" id="rp-td">
+            <div class="rp-card-title">Take down</div>
+            <div id="rp-td-form">
+              <label class="rp-label" for="rp-td-case">Case</label>
+              <select id="rp-td-case" class="rp-input"></select>
+              <label class="rp-label" for="rp-td-confirm">Type the first 8 characters</label>
+              <input id="rp-td-confirm" class="rp-input rp-mono" type="text" maxlength="8" autocomplete="off" autocapitalize="off" spellcheck="false">
+              <button class="rp-strong" id="rp-td-btn" type="button" disabled>Take down</button>
+            </div>
+            <p class="rp-note" id="rp-td-note"></p>
+          </div>
+        </div>
+        <p class="rp-msg" id="rp-td-msg" role="status"></p>
+        <p class="rp-note" id="rp-td-after"></p>
+      </div>
+
+      <div class="rp-box" id="rp-register">
+        <div class="rp-box-head">
+          <div class="rp-card-title">Register</div>
+          <div class="rp-actions">
+            <button class="toggle-btn" id="rp-new-btn" type="button">New report</button>
+            <button class="toggle-btn" id="rp-reload-btn" type="button">↻ Refresh</button>
+            <button class="toggle-btn" id="rp-export-btn" type="button" data-admin-only>Export</button>
+            <button class="toggle-btn" id="rp-export-training-btn" type="button" data-admin-only>Export training</button>
+            <button class="toggle-btn" id="rp-delete-training-btn" type="button" data-admin-only>Delete training rows</button>
+          </div>
+        </div>
+        <p class="rp-msg" id="rp-register-msg" role="status"></p>
+        <div class="rp-confirm" id="rp-delete-confirm" hidden>
+          <span id="rp-delete-confirm-text">Delete every training (T-) row?</span>
+          <button class="rp-strong" id="rp-delete-yes" type="button">Delete training rows</button>
+          <button class="toggle-btn" id="rp-delete-no" type="button">Cancel</button>
+        </div>
+
+        <form class="rp-form" id="rp-new" hidden>
+          <div class="rp-card-title">New report</div>
+          <div class="rp-grid">
+            <label class="rp-label" for="rp-new-training">Training or real</label>
+            <select id="rp-new-training" class="rp-input" required></select>
+            <label class="rp-label" for="rp-new-route">How it arrived</label>
+            <select id="rp-new-route" class="rp-input" required></select>
+            <label class="rp-label" for="rp-new-category">Category</label>
+            <select id="rp-new-category" class="rp-input" required></select>
+            <label class="rp-label" for="rp-new-link">The link</label>
+            <input id="rp-new-link" class="rp-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste the link or transfer ID (UUID), or leave empty if none was given">
+            <label class="rp-label" for="rp-new-reason">Short note</label>
+            <textarea id="rp-new-reason" class="rp-input" rows="2" maxlength="500" placeholder="No email addresses, no links"></textarea>
+          </div>
+          <p class="rp-hint">Only the first 8 characters of the transfer ID are kept. Never type the reporter's email or name.</p>
+          <div class="rp-actions">
+            <button class="rp-strong" type="submit">Open case</button>
+            <button class="toggle-btn" id="rp-new-cancel" type="button">Cancel</button>
+          </div>
+          <p class="rp-msg" id="rp-new-msg" role="status"></p>
+        </form>
+
+        <div class="dock-table-wrap">
+          <table class="dock-table rp-table">
+            <thead><tr>
+              <th>Case</th>
+              <th>Received</th>
+              <th>Category</th>
+              <th>Link</th>
+              <th>Decision</th>
+              <th>Taken down</th>
+            </tr></thead>
+            <tbody id="rp-tbody">
+              <tr><td colspan="6" class="dock-empty">Loading the register…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="rp-box" id="rp-case" hidden>
+        <div class="rp-box-head">
+          <div class="rp-card-title" id="rp-case-title">—</div>
+        </div>
+        <p class="rp-note" id="rp-case-summary"></p>
+
+        <form class="rp-form" id="rp-close">
+          <div class="rp-card-title">Close</div>
+          <div class="rp-grid">
+            <label class="rp-label" for="rp-close-decision">Decision</label>
+            <select id="rp-close-decision" class="rp-input" required></select>
+            <label class="rp-label" for="rp-close-reason">Reason</label>
+            <textarea id="rp-close-reason" class="rp-input" rows="2" maxlength="500" placeholder="No email addresses, no links"></textarea>
+            <label class="rp-label" for="rp-close-told">Reporter told</label>
+            <select id="rp-close-told" class="rp-input" required></select>
+            <label class="rp-label" for="rp-close-nca">NCA reference</label>
+            <input id="rp-close-nca" class="rp-input rp-mono" type="text" maxlength="64" autocomplete="off" spellcheck="false" placeholder="Leave empty if none">
+            <label class="rp-label" for="rp-close-key">Key part removed</label>
+            <select id="rp-close-key" class="rp-input" required></select>
+          </div>
+          <div class="rp-actions">
+            <button class="rp-strong" id="rp-close-btn" type="submit">Close case</button>
+          </div>
+          <p class="rp-note" id="rp-close-note"></p>
+          <p class="rp-msg" id="rp-close-msg" role="status"></p>
+        </form>
+
+        <div class="rp-templates">
+          <div class="rp-card-title">Templates</div>
+          <p class="rp-hint" id="rp-tpl-hint"></p>
+          <div class="rp-tabs" role="tablist">
+            <button class="rp-tab" type="button" role="tab" id="rp-tab-a" data-tpl="a" aria-selected="true">A — Acknowledgement</button>
+            <button class="rp-tab" type="button" role="tab" id="rp-tab-b" data-tpl="b" aria-selected="false">B — Outcome</button>
+            <button class="rp-tab" type="button" role="tab" id="rp-tab-c" data-tpl="c" aria-selected="false">C — Appeal decision</button>
+            <button class="toggle-btn rp-tab-copy" type="button" id="rp-tpl-copy">Copy</button>
+          </div>
+          <textarea id="rp-tpl-a" class="rp-input rp-tpl-text" rows="8" aria-labelledby="rp-tab-a"></textarea>
+          <textarea id="rp-tpl-b" class="rp-input rp-tpl-text" rows="8" aria-labelledby="rp-tab-b" hidden></textarea>
+          <textarea id="rp-tpl-c" class="rp-input rp-tpl-text" rows="8" aria-labelledby="rp-tab-c" hidden></textarea>
+        </div>
+      </div>
+    </div>
+
     <!-- ─── Growth signal card (Share-Dash-3) ───────────────────────────────── -->
     <div class="growth-panel" id="card-growth">
       <div class="growth-header">
@@ -426,6 +569,7 @@
 </div>
 
 <script src="speed-view.js"></script>
+<script src="reports-view.js"></script>
 <script src="navy-office.js"></script>
 </body>
 </html>
