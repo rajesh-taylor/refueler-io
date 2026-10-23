@@ -307,20 +307,26 @@
     </section>
 
     <!-- ═══ Data — Execution Dock (Share-Dash-1; redesigned OSA-Tools-4 · 23 Oct 2026) ═════════
-         Eight columns at most; anything more is in the card. The look-up in the header line reads the
+         Eight columns at most; anything more is in the card. "Find a transfer" (above the table) reads the
          live record (GET /admin/reports/lookup) when the transfer is not in the list, and opens the same
          card as a row. A pasted link is cut at the # first: the key part never reaches a field or a request.
          Drawn by dock-view.js. -->
     <section class="page" data-page="data" data-title="Data" hidden>
       <div class="dock-panel" id="card-execution-dock">
-        <div class="dock-header dock-header-lookup">
-          <div class="dock-title" id="dock-title">Execution Dock · last 10 transfers</div>
-          <div class="dock-lookup">
-            <input id="dock-lookup-input" class="dock-lookup-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Look up a transfer ID" aria-label="Look up a transfer ID (UUID): paste the link or the ID">
-            <button class="dock-lookup-go" id="dock-lookup-go" type="button" aria-label="Look up">→</button>
+        <div class="dock-find">
+          <label class="rp-label rp-label-big" for="dock-lookup-input">Find a transfer</label>
+          <div class="rp-row">
+            <div class="dock-find-field rp-grow">
+              <input id="dock-lookup-input" class="rp-input rp-input-big" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste its link or transfer ID (UUID)">
+              <button class="dock-find-clear" id="dock-lookup-clear" type="button" aria-label="Clear the field" hidden>×</button>
+            </div>
+            <button class="rp-strong" id="dock-lookup-go" type="button">Find</button>
           </div>
+          <p class="rp-msg" id="dock-lookup-msg" role="status"></p>
         </div>
-        <p class="rp-msg" id="dock-lookup-msg" role="status"></p>
+        <div class="dock-header">
+          <div class="dock-title" id="dock-title">Execution Dock · last 10 transfers</div>
+        </div>
         <div class="dock-table-wrap">
           <table class="dock-table">
             <thead><tr>
@@ -342,8 +348,9 @@
     </section>
 
     <!-- ═══ Reports (OSA-Tools-3 · 22 Oct 2026; one case in route order, OSA-Tools-4 · 23 Oct 2026) ═══
-         1 Case · 2 Template A · 3 Look up · 4 Take down · 5 Close · 6 Template B. One step is open at a
-         time (gold rule); a finished step is one line. Admin and helper keys; the Worker enforces the
+         Case (from the link in the report) · Template A · Take down · Close · Template B; for CSEA and
+         terrorism the take-down comes before Template A. One step is open at a time (gold rule); a
+         finished step is one line. Admin and helper keys; the Worker enforces the
          helper's limits. A pasted link is cut at the # before anything else runs. Drawn by reports-view.js. -->
     <section class="page reports-panel" data-page="reports" data-title="Reports" id="card-reports" data-staff hidden>
       <div class="dock-header">
@@ -351,34 +358,49 @@
         <span class="storage-asof">London time</span>
       </div>
 
+      <!-- The steps' order is set by reports-view.js (CSEA / terrorism: take down before the
+           acknowledgement); numbers are drawn from that order. -->
       <ol class="rp-route" id="rp-route">
 
-        <!-- 1 · Case -->
-        <li class="rp-step" id="rp-s1" data-state="current">
-          <div class="rp-step-line"><span class="rp-step-mark" aria-hidden="true"></span><span class="rp-step-n">1</span><span class="rp-step-text" id="rp-s1-text">Case</span><button class="rp-link-btn" id="rp-change-btn" type="button" hidden>Change</button></div>
-          <div class="rp-step-body" id="rp-s1-body">
-            <p class="rp-hint">Open a new case for a new report, or pick a case from the register.</p>
-            <div class="rp-actions">
-              <button class="rp-strong" id="rp-new-btn" type="button">New report</button>
+        <!-- Case: start from the link in the report -->
+        <li class="rp-step" id="rp-s-case" data-state="current">
+          <div class="rp-step-line"><span class="rp-step-mark" aria-hidden="true"></span><span class="rp-step-n"></span><span class="rp-step-text" id="rp-s-case-text">Case</span><button class="rp-link-btn" id="rp-change-btn" type="button" hidden>Change</button></div>
+          <div class="rp-step-body" id="rp-s-case-body">
+            <label class="rp-label rp-label-big" for="rp-link">Paste the link from the report</label>
+            <div class="rp-row">
+              <input id="rp-link" class="rp-input rp-grow rp-input-big" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://share.refueler.io/?uuid=…">
+              <button class="rp-strong" id="rp-lookup-btn" type="button">Look up</button>
+            </div>
+            <p class="rp-hint">Everything from the # on is removed as you paste: only the transfer ID (UUID) part is kept and sent, never the key part after the #.</p>
+            <p class="rp-msg" id="rp-lookup-msg" role="status"></p>
+
+            <div class="rp-found" id="rp-found" hidden>
+              <div class="rp-card" id="rp-card"></div>
+              <p class="rp-note" id="rp-found-note"></p>
+              <div class="rp-actions" id="rp-found-actions"></div>
+            </div>
+
+            <div class="rp-actions rp-case-actions">
+              <button class="toggle-btn" id="rp-nolink-btn" type="button">The report has no link</button>
               <button class="toggle-btn" id="rp-reload-btn" type="button">↻ Refresh</button>
             </div>
             <p class="rp-msg" id="rp-register-msg" role="status"></p>
 
             <form class="rp-form" id="rp-new" hidden>
-              <div class="rp-card-title">New report</div>
+              <div class="rp-card-title">New case</div>
               <div class="rp-grid">
-                <label class="rp-label" for="rp-new-training">Training or real</label>
+                <label class="rp-label" for="rp-new-training">Real report or training drill</label>
                 <select id="rp-new-training" class="rp-input" required></select>
                 <label class="rp-label" for="rp-new-route">How it arrived</label>
                 <select id="rp-new-route" class="rp-input" required></select>
                 <label class="rp-label" for="rp-new-category">Category</label>
                 <select id="rp-new-category" class="rp-input" required></select>
                 <label class="rp-label" for="rp-new-link">The link</label>
-                <input id="rp-new-link" class="rp-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste the link from the report, or leave empty if none was given">
+                <input id="rp-new-link" class="rp-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Empty: the report has no link">
                 <label class="rp-label" for="rp-new-reason">Short note</label>
                 <textarea id="rp-new-reason" class="rp-input" rows="2" maxlength="500" placeholder="No email addresses, no links"></textarea>
               </div>
-              <p class="rp-hint">Everything from the # on is removed as you paste. The register keeps the first 8 characters of the transfer ID only. Never type the reporter's email or name.</p>
+              <p class="rp-hint">The register keeps the first 8 characters of the transfer ID only. Never type the reporter's email or name.</p>
               <div class="rp-actions">
                 <button class="rp-strong" id="rp-new-submit" type="button">Open case</button>
                 <button class="toggle-btn" id="rp-new-cancel" type="button">Back</button>
@@ -386,12 +408,13 @@
               <p class="rp-msg" id="rp-new-msg" role="status"></p>
             </form>
 
+            <div class="rp-card-title rp-register-title">Or pick a case from the register</div>
             <div class="dock-table-wrap">
               <table class="dock-table rp-table">
                 <thead><tr>
                   <th>Case</th>
-                  <th>Received</th>
-                  <th>Category</th>
+                  <th class="rp-col-rec">Received</th>
+                  <th class="rp-col-cat">Category</th>
                   <th>Link</th>
                   <th>Decision</th>
                   <th class="rp-col-td">Taken down</th>
@@ -404,12 +427,12 @@
           </div>
         </li>
 
-        <!-- 2 · Template A -->
-        <li class="rp-step" id="rp-s2" data-state="todo">
-          <div class="rp-step-line"><span class="rp-step-mark" aria-hidden="true"></span><span class="rp-step-n">2</span><span class="rp-step-text" id="rp-s2-text">Template A — acknowledgement</span></div>
-          <div class="rp-step-body" id="rp-s2-body" hidden>
+        <!-- Template A -->
+        <li class="rp-step" id="rp-s-ack" data-state="todo">
+          <div class="rp-step-line"><span class="rp-step-mark" aria-hidden="true"></span><span class="rp-step-n"></span><span class="rp-step-text" id="rp-s-ack-text">Template A — acknowledgement</span></div>
+          <div class="rp-step-body" id="rp-s-ack-body" hidden>
             <p class="rp-hint">Copy it into a reply to the reporter, from report@, then press Sent.</p>
-            <div class="rp-tpl-slot" id="rp-s2-slot"></div>
+            <div class="rp-tpl-slot" id="rp-s-ack-slot"></div>
             <div class="rp-actions rp-step-actions">
               <button class="rp-strong" id="rp-a-sent" type="button">Sent</button>
               <button class="toggle-btn" id="rp-a-none" type="button">No way to reply</button>
@@ -417,44 +440,41 @@
           </div>
         </li>
 
-        <!-- 3 · Look up -->
-        <li class="rp-step" id="rp-s3" data-state="todo">
-          <div class="rp-step-line"><span class="rp-step-mark" aria-hidden="true"></span><span class="rp-step-n">3</span><span class="rp-step-text" id="rp-s3-text">Look up the link</span></div>
-          <div class="rp-step-body" id="rp-s3-body" hidden>
-            <label class="rp-label" for="rp-link">The full link from the report</label>
-            <div class="rp-row">
-              <input id="rp-link" class="rp-input rp-grow" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste the link or the transfer ID (UUID)">
-              <button class="rp-strong" id="rp-lookup-btn" type="button">Look up</button>
-            </div>
-            <p class="rp-hint">Everything from the # on is removed as you paste. Only the transfer ID (UUID) part stays in the field and is sent; the key part after the # never is.</p>
-            <p class="rp-msg" id="rp-lookup-msg" role="status"></p>
-          </div>
-        </li>
-
-        <!-- 4 · Take down -->
-        <li class="rp-step" id="rp-s4" data-state="todo">
-          <div class="rp-step-line"><span class="rp-step-mark" aria-hidden="true"></span><span class="rp-step-n">4</span><span class="rp-step-text" id="rp-s4-text">Take down</span></div>
-          <p class="rp-step-after" id="rp-s4-after" hidden></p>
-          <div class="rp-step-body" id="rp-s4-body" hidden>
-            <div class="rp-card" id="rp-card"></div>
-            <div id="rp-td-form">
-              <label class="rp-label" for="rp-td-confirm" id="rp-td-label">Type the first 8 characters</label>
-              <input id="rp-td-confirm" class="rp-input rp-mono" type="text" maxlength="8" autocomplete="off" autocapitalize="off" spellcheck="false">
-              <div class="rp-actions rp-step-actions">
-                <button class="rp-strong" id="rp-td-btn" type="button" disabled>Take down</button>
-                <button class="toggle-btn" id="rp-td-skip" type="button">Not taking it down</button>
+        <!-- Take down -->
+        <li class="rp-step" id="rp-s-td" data-state="todo">
+          <div class="rp-step-line"><span class="rp-step-mark" aria-hidden="true"></span><span class="rp-step-n"></span><span class="rp-step-text" id="rp-s-td-text">Take down</span></div>
+          <p class="rp-step-after" id="rp-s-td-after" hidden></p>
+          <div class="rp-step-body" id="rp-s-td-body" hidden>
+            <div id="rp-td-look" hidden>
+              <label class="rp-label" for="rp-td-link">Paste the link from the report to look it up</label>
+              <div class="rp-row">
+                <input id="rp-td-link" class="rp-input rp-grow" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste the link or the transfer ID (UUID)">
+                <button class="rp-strong" id="rp-td-lookup-btn" type="button">Look up</button>
               </div>
+              <p class="rp-msg" id="rp-td-look-msg" role="status"></p>
             </div>
-            <p class="rp-note" id="rp-td-note"></p>
-            <p class="rp-msg" id="rp-td-msg" role="status"></p>
+            <div id="rp-td-ready" hidden>
+              <div class="rp-card" id="rp-td-card"></div>
+              <p class="rp-warn">This deletes the file for good. It can’t be undone; we never hold the encryption key.</p>
+              <div id="rp-td-form">
+                <label class="rp-label" for="rp-td-confirm" id="rp-td-label">Type the first 8 characters</label>
+                <input id="rp-td-confirm" class="rp-input rp-mono" type="text" maxlength="8" autocomplete="off" autocapitalize="off" spellcheck="false">
+                <div class="rp-actions rp-step-actions">
+                  <button class="rp-strong" id="rp-td-btn" type="button" disabled>Take down</button>
+                  <button class="toggle-btn" id="rp-td-skip" type="button">Not taking it down</button>
+                </div>
+              </div>
+              <p class="rp-note" id="rp-td-note"></p>
+              <p class="rp-msg" id="rp-td-msg" role="status"></p>
+            </div>
           </div>
         </li>
 
-        <!-- 5 · Close -->
-        <li class="rp-step" id="rp-s5" data-state="todo">
-          <div class="rp-step-line"><span class="rp-step-mark" aria-hidden="true"></span><span class="rp-step-n">5</span><span class="rp-step-text" id="rp-s5-text">Close the case</span></div>
-          <p class="rp-step-after" id="rp-s5-after" hidden></p>
-          <div class="rp-step-body" id="rp-s5-body" hidden>
+        <!-- Close -->
+        <li class="rp-step" id="rp-s-close" data-state="todo">
+          <div class="rp-step-line"><span class="rp-step-mark" aria-hidden="true"></span><span class="rp-step-n"></span><span class="rp-step-text" id="rp-s-close-text">Close the case</span></div>
+          <p class="rp-step-after" id="rp-s-close-after" hidden></p>
+          <div class="rp-step-body" id="rp-s-close-body" hidden>
             <form class="rp-form rp-form-plain" id="rp-close">
               <div class="rp-grid">
                 <label class="rp-label" for="rp-close-decision">Decision</label>
@@ -477,12 +497,12 @@
           </div>
         </li>
 
-        <!-- 6 · Template B -->
-        <li class="rp-step" id="rp-s6" data-state="todo">
-          <div class="rp-step-line"><span class="rp-step-mark" aria-hidden="true"></span><span class="rp-step-n">6</span><span class="rp-step-text" id="rp-s6-text">Template B — outcome</span></div>
-          <div class="rp-step-body" id="rp-s6-body" hidden>
+        <!-- Template B -->
+        <li class="rp-step" id="rp-s-out" data-state="todo">
+          <div class="rp-step-line"><span class="rp-step-mark" aria-hidden="true"></span><span class="rp-step-n"></span><span class="rp-step-text" id="rp-s-out-text">Template B — outcome</span></div>
+          <div class="rp-step-body" id="rp-s-out-body" hidden>
             <p class="rp-hint">Copy it into the same email thread, then press Sent.</p>
-            <div class="rp-tpl-slot" id="rp-s6-slot"></div>
+            <div class="rp-tpl-slot" id="rp-s-out-slot"></div>
             <div class="rp-actions rp-step-actions">
               <button class="rp-strong" id="rp-b-sent" type="button">Sent</button>
               <button class="toggle-btn" id="rp-b-none" type="button">No way to reply</button>
@@ -645,9 +665,11 @@
     <div class="micro-modal-title dock-card-id" id="dock-modal-title">—</div>
     <div id="dock-modal-body"></div>
     <p class="rp-note" id="dock-modal-note"></p>
-    <div class="micro-modal-actions micro-modal-actions-gap">
+    <!-- Recheck's answer; the space is kept so the buttons never move. -->
+    <p class="dock-check" id="dock-check" role="status"></p>
+    <div class="micro-modal-actions">
       <button class="ghost-btn" type="button" id="dock-copy-id">Copy full ID</button>
-      <button class="ghost-btn" type="button" id="dock-card-lookup">Check live record</button>
+      <button class="ghost-btn" type="button" id="dock-card-lookup">Recheck</button>
       <button class="ghost-btn" type="button" data-action="close-dock">Close</button>
     </div>
   </div>

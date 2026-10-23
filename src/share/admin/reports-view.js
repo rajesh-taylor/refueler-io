@@ -1,7 +1,8 @@
 /* ─── reports-view.js — Navy Office → Reports (OSA-Tools-3 · 22 Oct 2026; route order OSA-Tools-4 · 23 Oct 2026) ─────
  * The report route's staff tools, one case at a time, in route order, one column:
- *   1 Case (New report, or pick one from the register) · 2 Template A · 3 Look up · 4 Take down ·
- *   5 Close · 6 Template B — then the case record (print / Save as PDF) and template C.
+ *   Case (start from the link in the report: look it up, then continue its open case or open a new
+ *   one; or "the report has no link") · Template A · Take down · Close · Template B — then the case
+ *   record (print / Save as PDF) and template C. CSEA and terrorism: take down before Template A.
  * One step is open at a time (gold rule, the cursor in it); a finished step shrinks to one line.
  * No motion. Why: in the OSA-Tools-3 live run the tools sat side by side and the way through
  * them got lost; this is the route itself.
@@ -41,7 +42,9 @@ const NavyReports = (() => {
     terms: 'Breaks our terms', complaint: 'Complaint', appeal: 'Appeal', no_link: 'No link given',
   };
   const ROUTE    = { 'report@': 'report@', 'support@': 'support@', 'privacy@': 'privacy@', signal: 'Signal', other: 'Other' };
-  const DECISION = { open: 'Open', removed: 'Removed', not_removed: 'Not removed', already_gone: 'Already gone', manifestly_unfounded: 'Manifestly unfounded' };
+  // "Nothing to act on" is the everyday word; the legal term stays beside it (Rajesh, 23 Oct).
+  const DECISION = { open: 'Open', removed: 'Removed', not_removed: 'Not removed', already_gone: 'Already gone', manifestly_unfounded: 'Nothing to act on (manifestly unfounded)' };
+  const DECISION_SHORT = { manifestly_unfounded: 'Nothing to act on' };
   const TOLD     = { y: 'Yes', n: 'No', no_contact: 'No contact given' };
   const TIER     = { free: 'Pro Bono', max: 'Citizen', api: 'Chartered (API)' };
   const short = (c) => (CATEGORY[c] ?? c).split(' — ')[0];
@@ -75,18 +78,19 @@ const NavyReports = (() => {
   // field is edited another way (so a typed key part never lands in it); an autofill is cut on input.
   function cutAtHash(s) { const i = s.indexOf('#'); return (i < 0 ? s : s.slice(0, i)).trim(); }
   function guard(input, after) {
-    let sealed = false;
-    const put = (text) => { input.value = cutAtHash(text); sealed = false; after?.(); };
+    let sealed = null;   // the field's value when a typed # cut it; any other value (cleared, changed) unseals
+    const put = (text) => { input.value = cutAtHash(text); sealed = null; after?.(); };
     input.addEventListener('paste', (e) => { e.preventDefault(); put(e.clipboardData?.getData('text') ?? ''); });
     input.addEventListener('drop', (e) => { e.preventDefault(); put(e.dataTransfer?.getData('text/plain') ?? ''); });
     input.addEventListener('beforeinput', (e) => {
-      if (!e.inputType.startsWith('insert')) { sealed = false; return; }
-      if (input.selectionStart !== input.value.length || input.selectionEnd !== input.value.length) sealed = false;
-      if (sealed) { e.preventDefault(); return; }
+      if (sealed !== null && input.value !== sealed) sealed = null;
+      if (!e.inputType.startsWith('insert')) { sealed = null; return; }
+      if (input.selectionStart !== input.value.length || input.selectionEnd !== input.value.length) sealed = null;
+      if (sealed !== null) { e.preventDefault(); return; }
       if (e.data?.includes('#')) {
         e.preventDefault();
         input.value = cutAtHash(input.value.slice(0, input.selectionStart) + e.data);
-        sealed = true;
+        sealed = input.value;
       }
     });
     input.addEventListener('input', () => { if (input.value.includes('#')) input.value = cutAtHash(input.value); });
@@ -157,11 +161,11 @@ const NavyReports = (() => {
     tb.innerHTML = S.rows.map((r) => {
       const td = r.takedown_at ? `${esc(t(F_SHORT, r.takedown_at))} · ${esc(r.takedown_by ?? '')}` : '—';
       return `<tr data-case="${esc(r.case_ref)}" tabindex="0">
-        <td class="dock-uuid">${esc(r.case_ref)}${r.training ? ' <span class="rp-tag">TRAINING</span>' : ''}</td>
-        <td>${esc(t(F_SHORT, r.received_at))}</td>
-        <td>${esc(short(r.category))}</td>
+        <td class="dock-uuid">${esc(r.case_ref)}${r.training ? ' <span class="rp-tag">TRAINING DRILL</span>' : ''}</td>
+        <td class="rp-col-rec">${esc(t(F_SHORT, r.received_at))}</td>
+        <td class="rp-col-cat">${esc(short(r.category))}</td>
         <td>${esc(r.uuid8 ?? '—')}</td>
-        <td>${esc(DECISION[r.decision] ?? r.decision)}</td>
+        <td>${esc(DECISION_SHORT[r.decision] ?? DECISION[r.decision] ?? r.decision)}</td>
         <td class="rp-col-td">${td}</td>
       </tr>`;
     }).join('');
@@ -170,31 +174,38 @@ const NavyReports = (() => {
   function pick(ref) {
     if (S.selected !== ref) {
       $('rp-close').reset();
-      say('rp-close-msg', ''); say('rp-td-msg', ''); say('rp-lookup-msg', '');
+      say('rp-close-msg', ''); say('rp-td-msg', ''); say('rp-td-look-msg', '');
       $('rp-td-confirm').value = '';
       S.tplHere = null;
     }
     S.selected = ref;
     const c = S.rows.find((r) => r.case_ref === ref);
     if (S.look && !(c?.uuid8 && S.look.uuid.startsWith(c.uuid8))) S.look = null;
-    $('rp-link').value = S.links[ref] ? SHARE + S.links[ref] : '';
+    $('rp-td-link').value = S.links[ref] ? SHARE + S.links[ref] : '';
     $('rp-new').hidden = true;
     say('rp-register-msg', '');
     route();
   }
 
+  // Back to the start: a new link, or another case.
   function change() {
     S.selected = null;
     S.look = null;
     S.tplHere = null;
+    $('rp-link').value = '';
+    $('rp-found').hidden = true;
+    say('rp-lookup-msg', '');
     route();
-    $('rp-new-btn').focus();
+    $('rp-link').focus();
   }
 
-  // ── New report ────────────────────────────────────────────────────────────
-  function openNew() {
+  // ── New case ──────────────────────────────────────────────────────────────
+  // From a looked-up link (the link filled in), or "The report has no link" (category No link given).
+  function openNew(uuid) {
     const f = $('rp-new');
     f.reset();
+    $('rp-new-link').value = uuid ? SHARE + uuid : '';
+    if (!uuid) $('rp-new-category').value = 'no_link';
     say('rp-new-msg', '');
     f.hidden = false;
     $('rp-new-training').focus();
@@ -221,13 +232,16 @@ const NavyReports = (() => {
     $('rp-new').hidden = true;
     const ref = r.data.case_ref;
     if (uuid) S.links[ref] = uuid;
+    if (uuid && S.look?.uuid !== uuid) await lookUpUuid(uuid);
     await loadRegister();
     pick(ref);
-    say('rp-register-msg', `Opened ${ref}${training ? ' (TRAINING)' : ''}. Use this reference in every email to the reporter.`);
+    say('rp-register-msg', `Opened ${ref}${training ? ' (training drill)' : ''}. Use this reference in every email to the reporter.`);
   }
 
   // ── The route: which step is where ────────────────────────────────────────
-  // States: current (open, gold rule) · done ✓ · skipped — · past (not recorded here) · todo.
+  // Each step is resolved (done ✓ · skipped — · past = not recorded here) or still open; the
+  // first open step in route order is the current one (gold rule, the cursor), the rest wait.
+  // CSEA and terrorism: take down first, acknowledge after.
   const STATE = {
     live:      ['Live', ''],
     expired:   ['Time ran out — parts not yet cleared', 'It can still be taken down.'],
@@ -235,91 +249,93 @@ const NavyReports = (() => {
     removed:   ['Removed after a report', ''],
     not_found: ['No such link', 'It never existed, or its record was cleared after 30 days.'],
   };
+  const STEPS = ['case', 'ack', 'td', 'close', 'out'];
+  const orderFor = (c) => (c && HELPER_CATEGORIES.includes(c.category)
+    ? ['case', 'td', 'ack', 'close', 'out'] : STEPS);
 
   function plan(c) {
-    if (!c) return { 1: ['current', 'Case'] };
+    if (!c) return { case: ['open', 'Case'] };
     const m = markOf(c.case_ref);
     const closed = c.decision !== 'open';
     const L = S.look && c.uuid8 && S.look.uuid.startsWith(c.uuid8) ? S.look : null;
     const td = S.tookDown?.case_ref === c.case_ref ? S.tookDown : null;
-    const helperRefused = S.role === 'helper' && !HELPER_CATEGORIES.includes(c.category);
     const st = {};
-    st[1] = ['done', `${c.case_ref}${c.training ? ' · TRAINING' : ''} · ${short(c.category)} · received ${t(F_SHORT, c.received_at)}`];
+    st.case = ['done', `${c.case_ref}${c.training ? ' · TRAINING DRILL' : ''} · ${short(c.category)} · received ${t(F_SHORT, c.received_at)}`];
 
-    if (m.a) st[2] = ['done', m.a === 'none' ? 'Template A · no way to reply' : `Template A sent ${t(F_CLOCK, m.a)}`];
-    else st[2] = closed ? ['past', 'Template A'] : ['current', 'Template A — acknowledgement'];
-    const after2 = st[2][0] !== 'current';
+    if (m.a) st.ack = ['done', m.a === 'none' ? 'Template A · no way to reply' : `Template A sent ${t(F_CLOCK, m.a)}`];
+    else st.ack = closed ? ['past', 'Template A'] : ['open', 'Template A — acknowledgement'];
 
-    if (!c.uuid8) st[3] = ['skipped', 'No link given — nothing to look up'];
-    else if (L) st[3] = ['done', `Looked up ${t(F_CLOCK, L.at)} · ${STATE[L.state]?.[0] ?? L.state}`];
-    else if (c.takedown_at || closed) st[3] = ['past', 'Look up the link'];
-    else st[3] = [after2 ? 'current' : 'todo', 'Look up the link'];
+    if (c.takedown_at) st.td = ['done', `Taken down ${t(F_CLOCK, c.takedown_at)}${c.takedown_by === 'helper' ? ' · by the helper' : ''}`];
+    else if (td && !td.recorded) st.td = ['done', `Taken down ${t(F_CLOCK, td.at)} · not in the register — write it in when you close`];
+    else if (!c.uuid8) st.td = ['skipped', 'No link given — nothing to take down'];
+    else if (closed) st.td = ['skipped', 'Not taken down'];
+    else if (L?.state === 'removed') st.td = ['skipped', 'Nothing to take down — already removed after a report'];
+    else if (L?.state === 'gone') st.td = ['skipped', 'Nothing to take down — already gone'];
+    else if (L?.state === 'not_found') st.td = ['skipped', 'Nothing to take down — no such link'];
+    else if (L && m.skip) st.td = ['skipped', 'Not taken down'];
+    else st.td = ['open', 'Take down'];
 
-    if (c.takedown_at) st[4] = ['done', `Taken down ${t(F_CLOCK, c.takedown_at)}${c.takedown_by === 'helper' ? ' · by the helper' : ''}`];
-    else if (td && !td.recorded) st[4] = ['done', `Taken down ${t(F_CLOCK, td.at)} · not in the register — write it in when you close`];
-    else if (!c.uuid8) st[4] = ['skipped', 'No link given — nothing to take down'];
-    else if (closed) st[4] = ['skipped', 'Not taken down'];
-    else if (L?.state === 'removed') st[4] = ['skipped', 'Nothing to take down — already removed after a report'];
-    else if (L?.state === 'gone') st[4] = ['skipped', 'Nothing to take down — already gone'];
-    else if (L?.state === 'not_found') st[4] = ['skipped', 'Nothing to take down — no such link'];
-    else if (L && m.skip) st[4] = ['skipped', 'Not taken down'];
-    else st[4] = [L ? 'current' : 'todo', 'Take down'];
+    if (closed) st.close = ['done', `Closed ${t(F_CLOCK, c.closed_at)} · ${DECISION[c.decision] ?? c.decision}`];
+    else st.close = ['open', 'Close the case'];
 
-    const after4 = ['done', 'skipped'].includes(st[4][0]);
-    if (closed) st[5] = ['done', `Closed ${t(F_CLOCK, c.closed_at)} · ${DECISION[c.decision] ?? c.decision}`];
-    else st[5] = [after2 && after4 ? 'current' : 'todo', 'Close the case'];
+    if (m.b) st.out = ['done', m.b === 'none' ? 'Template B · no way to reply' : `Template B sent ${t(F_CLOCK, m.b)}`];
+    else st.out = ['open', 'Template B — outcome'];
 
-    if (m.b) st[6] = ['done', m.b === 'none' ? 'Template B · no way to reply' : `Template B sent ${t(F_CLOCK, m.b)}`];
-    else st[6] = [closed ? 'current' : 'todo', 'Template B — outcome'];
-
-    st.L = L; st.td = td; st.closed = closed; st.helperRefused = helperRefused;
+    st.L = L; st.td_ = td; st.closed = closed;
+    st.helperRefused = S.role === 'helper' && !HELPER_CATEGORIES.includes(c.category);
     return st;
   }
 
   function route() {
     const c = S.rows.find((r) => r.case_ref === S.selected) ?? null;
     const st = plan(c);
+    const order = orderFor(c);
     let current = null;
-    for (const n of [1, 2, 3, 4, 5, 6]) {
-      const [state, text] = st[n] ?? ['todo', $(`rp-s${n}-text`).dataset.name];
-      const li = $(`rp-s${n}`), txt = $(`rp-s${n}-text`);
+    order.forEach((k, i) => {
+      const li = $(`rp-s-${k}`), txt = $(`rp-s-${k}-text`);
       if (!txt.dataset.name) txt.dataset.name = txt.textContent;
-      li.dataset.state = c || n === 1 ? state : 'todo';
-      txt.textContent = c || n === 1 ? text : txt.dataset.name;
-      $(`rp-s${n}-body`).hidden = li.dataset.state !== 'current';
-      if (li.dataset.state === 'current' && !current) current = n;
-    }
+      $('rp-route').append(li);   // the order on screen is the route's order
+      li.querySelector('.rp-step-n').textContent = String(i + 1);
+      const [state, text] = st[k] ?? ['open', txt.dataset.name];
+      li.dataset.state = state === 'open' ? (current ? 'todo' : (current = k, 'current')) : state;
+      txt.textContent = text ?? txt.dataset.name;
+      $(`rp-s-${k}-body`).hidden = li.dataset.state !== 'current';
+    });
     $('rp-change-btn').hidden = !c;
-    $('rp-route').classList.toggle('rp-route-idle', !c);
 
     // After-notes: what to do next once a step has shrunk.
-    const a4 = $('rp-s4-after'), a5 = $('rp-s5-after');
-    a4.hidden = true; a5.hidden = true;
-    if (c && st[4][0] === 'done' && !st.closed) {
-      a4.textContent = 'Open the full link in Safari: it should say “This file is no longer available.”';
-      a4.hidden = false;
+    const aTd = $('rp-s-td-after'), aClose = $('rp-s-close-after');
+    aTd.hidden = true; aClose.hidden = true;
+    if (c && st.td[0] === 'done' && !st.closed) {
+      aTd.textContent = 'Open the full link in Safari: it should say “This file is no longer available.”';
+      aTd.hidden = false;
     }
     if (c && st.closed) {
-      a5.textContent = S.role === 'admin'
+      aClose.textContent = S.role === 'admin'
         ? 'Export the register when the case is finished (Register → Export below, or export-register.sh on the Mac).'
         : 'Rajesh exports the register.';
-      a5.hidden = false;
+      aClose.hidden = false;
     }
 
     if (c) {
-      if (current === 4) renderTakedown(c, st);
-      if (current === 5) renderClose(c, st);
+      if (current === 'td') renderTakedown(c, st);
+      if (current === 'close') renderClose(c, st);
       renderTemplates(c, st);
     }
     placeTemplates(current);
 
     // Finish: the case record and the templates, once the case is closed.
     $('rp-finish').hidden = !(c && st.closed);
-    if (c && st.closed) say('rp-finish-note', st[6][0] === 'done' ? `${c.case_ref} is finished.` : '');
+    if (c && st.closed) {
+      const folder = `refueler-share-private/strategy/osa/cases/${c.training ? 'training' : (c.case_ref.slice(2, 6))}/`;
+      say('rp-finish-note', S.role === 'admin'
+        ? `${st.out[0] === 'done' ? `${c.case_ref} is finished. ` : ''}Save the case record in ${folder} and commit it.`
+        : `${st.out[0] === 'done' ? `${c.case_ref} is finished. ` : ''}Save the case record and send it to Rajesh.`);
+    }
 
     // The cursor goes to the step that just opened (not on every redraw).
     // A hidden page takes no focus: the key stays unset until Reports is on screen (shown()).
-    const key = `${c?.case_ref ?? ''}:${current ?? ''}`;
+    const key = `${c?.case_ref ?? ''}:${current ?? ''}:${st.L ? 'L' : ''}`;
     if (key !== S.focus && !$('card-reports').hidden) {
       S.focus = key;
       if (current) focusStep(current);
@@ -327,43 +343,103 @@ const NavyReports = (() => {
     }
   }
 
-  function focusStep(n) {
-    const body = $(`rp-s${n}-body`);
-    const first = n === 3 && $('rp-link').value ? $('rp-lookup-btn')
-      : n === 2 || n === 6 ? $('rp-tpl-copy')
+  function focusStep(k) {
+    const body = $(`rp-s-${k}-body`);
+    const first = k === 'case' ? $('rp-link')
+      : k === 'ack' || k === 'out' ? $('rp-tpl-copy')
+      : k === 'td' ? (!$('rp-td-look').hidden ? ($('rp-td-link').value ? $('rp-td-lookup-btn') : $('rp-td-link'))
+        : $('rp-td-confirm').disabled ? null : $('rp-td-confirm'))
       : body.querySelector('input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled])');
     first?.focus({ preventScroll: true });
-    $(`rp-s${n}`).scrollIntoView({ block: 'nearest' });
+    $(`rp-s-${k}`).scrollIntoView({ block: 'nearest' });
   }
 
   // Called when the Reports page comes on screen: the cursor goes to the open step.
   function shown() { S.focus = ''; route(); }
 
-  // ── 3 · Look up ───────────────────────────────────────────────────────────
-  async function lookUp() {
-    const c = S.rows.find((r) => r.case_ref === S.selected);
-    if (!c) return;
-    const text = $('rp-link').value.trim();
+  // ── Look up ───────────────────────────────────────────────────────────────
+  // Two places: the start (the link in the report, before any case) and the take-down step of
+  // a case picked from the register (the register keeps 8 characters, not the link).
+  async function lookUpUuid(uuid) {
+    const r = await api('GET', '/admin/reports/lookup', { uuid });
+    if (r.status !== 200) return common(r.status) ?? `Unexpected answer (${r.status}). Nothing was done.`;
+    S.look = { uuid, ...r.data, at: now() };
+    return null;
+  }
+
+  function readLink(fieldId, msgId) {
+    const text = $(fieldId).value.trim();
     const uuid = uuidIn(text);
     if (!uuid) {
-      return say('rp-lookup-msg', UUID8_RE.test(text) ? ONLY_8 : 'That is not a Share link or transfer ID (UUID). Nothing was looked up.');
+      say(msgId, !text ? '' : UUID8_RE.test(text) ? ONLY_8 : 'That is not a Share link or transfer ID (UUID). Nothing was looked up.');
+      return null;
     }
-    $('rp-link').value = SHARE + uuid;   // the field shows only the transfer ID part, whatever came with it
-    if (c.uuid8 && !uuid.startsWith(c.uuid8)) {
-      return say('rp-lookup-msg', `That link starts ${uuid.slice(0, 8)}; case ${c.case_ref} is about ${c.uuid8}. Check the link in the report. Nothing was looked up.`);
-    }
+    $(fieldId).value = SHARE + uuid;   // the field shows only the transfer ID part, whatever came with it
+    return uuid;
+  }
+
+  // The start: look the link up, then offer the open cases for it or a new case.
+  async function lookUpStart() {
+    const uuid = readLink('rp-link', 'rp-lookup-msg');
+    if (!uuid) return;
     say('rp-lookup-msg', 'Looking up…');
-    const r = await api('GET', '/admin/reports/lookup', { uuid });
-    if (r.status !== 200) return say('rp-lookup-msg', common(r.status) ?? `Unexpected answer (${r.status}). Nothing was done.`);
-    S.look = { uuid, ...r.data, at: now() };
-    S.links[c.case_ref] = uuid;
+    const err = await lookUpUuid(uuid);
+    if (err) { $('rp-found').hidden = true; return say('rp-lookup-msg', err); }
     say('rp-lookup-msg', '');
-    await loadRegister();   // a take-down from the scripts or a helper must show
+    await loadRegister();   // a case opened elsewhere (the scripts, a helper) must show
+    renderFound();
+  }
+
+  function renderFound() {
+    const L = S.look;
+    renderCard(L, 'rp-card');
+    const u8 = L.uuid.slice(0, 8);
+    const open = S.rows.filter((r) => r.uuid8 === u8 && r.decision === 'open');
+    const closed = S.rows.filter((r) => r.uuid8 === u8 && r.decision !== 'open');
+    say('rp-found-note', open.length
+      ? `There ${open.length === 1 ? 'is an open case' : `are ${open.length} open cases`} for this link. Continue it, or open a new case if this is a different report.`
+      : closed.length ? `Earlier cases for this link: ${closed.map((r) => r.case_ref).join(', ')} (closed).` : 'No case for this link yet.');
+    const btn = (id, label, strong) => `<button class="${strong ? 'rp-strong' : 'toggle-btn'}" type="button" data-rp="${esc(id)}">${esc(label)}</button>`;
+    $('rp-found-actions').innerHTML = [
+      ...open.map((r) => btn(`continue:${r.case_ref}`, `Continue ${r.case_ref}`, true)),
+      btn('new', 'Open a case for this link', !open.length),
+    ].join('');
+    $('rp-found').hidden = false;
+    (open.length ? $('rp-found-actions').firstElementChild : $('rp-found-actions').lastElementChild)?.focus({ preventScroll: true });
+  }
+
+  function foundAction(e) {
+    const b = e.target.closest('[data-rp]');
+    if (!b) return;
+    const a = b.dataset.rp;
+    if (a === 'new') return openNew(S.look.uuid);
+    if (a.startsWith('continue:')) {
+      const ref = a.slice('continue:'.length);
+      S.links[ref] = S.look.uuid;
+      pick(ref);
+    }
+  }
+
+  // The take-down step of a case picked from the register, before its link is known.
+  async function lookUpCase() {
+    const c = S.rows.find((r) => r.case_ref === S.selected);
+    if (!c) return;
+    const uuid = readLink('rp-td-link', 'rp-td-look-msg');
+    if (!uuid) return;
+    if (c.uuid8 && !uuid.startsWith(c.uuid8)) {
+      return say('rp-td-look-msg', `That link starts ${uuid.slice(0, 8)}; case ${c.case_ref} is about ${c.uuid8}. Check the link in the report. Nothing was looked up.`);
+    }
+    say('rp-td-look-msg', 'Looking up…');
+    const err = await lookUpUuid(uuid);
+    if (err) return say('rp-td-look-msg', err);
+    say('rp-td-look-msg', '');
+    S.links[c.case_ref] = uuid;
+    await loadRegister();
   }
 
   const row = (k, v) => `<div class="rp-dl-row"><span class="rp-dl-k">${esc(k)}</span><span class="rp-dl-v">${v}</span></div>`;
 
-  function renderCard(L) {
+  function renderCard(L, id) {
     const [word, sub] = STATE[L.state] ?? [L.state, ''];
     const rows = [
       row('Transfer ID', `<span class="rp-u8">${esc(L.uuid.slice(0, 8))}</span>${esc(L.uuid.slice(8))}`),
@@ -378,15 +454,18 @@ const NavyReports = (() => {
         row('Downloaded and closed', L.consumed ? 'Yes' : 'No'),
       );
     }
-    $('rp-card').innerHTML = rows.join('') + `<p class="rp-hint">Read from the live record at ${esc(t(F_CLOCK, L.at))}.</p>`;
+    $(id).innerHTML = rows.join('') + `<p class="rp-hint">Read from the live record at ${esc(t(F_CLOCK, L.at))}.</p>`;
   }
 
-  // ── 4 · Take down ─────────────────────────────────────────────────────────
+  // ── Take down ─────────────────────────────────────────────────────────────
   function renderTakedown(c, st) {
-    renderCard(st.L);
-    const u8 = st.L.uuid.slice(0, 8);
+    const L = st.L;
+    $('rp-td-look').hidden = !!L;
+    $('rp-td-ready').hidden = !L;
+    if (!L) { if (S.links[c.case_ref] && !$('rp-td-link').value) $('rp-td-link').value = SHARE + S.links[c.case_ref]; return; }
+    renderCard(L, 'rp-td-card');
     // The 8 characters are shown, never offered to copy: typing them is the deliberate pause.
-    $('rp-td-label').innerHTML = `Type the first 8 characters: <span class="rp-td-u8">${esc(u8)}</span>`;
+    $('rp-td-label').innerHTML = `Type the first 8 characters: <span class="rp-td-u8">${esc(L.uuid.slice(0, 8))}</span>`;
     $('rp-td-confirm').disabled = st.helperRefused;
     $('rp-td-skip').hidden = st.helperRefused;
     say('rp-td-note', st.helperRefused ? ONLY_RAJESH : '');
@@ -409,7 +488,7 @@ const NavyReports = (() => {
     const d = r.data, at = d.removed_at;
     let msg = '', rerun = false;
     if (r.status === 200 && d.already_removed) {
-      rerun = true;   // step 4 then says "already removed"; Close: Removed, naming the first case
+      rerun = true;   // the step then says "already removed"; Close: Removed, naming the first case
     } else if (r.status === 200) {
       S.tookDown = { case_ref: caseRef, at, recorded: !!d.register_updated };
       if (!d.register_updated) {
@@ -437,7 +516,7 @@ const NavyReports = (() => {
     }
     $('rp-td-confirm').value = '';
     say('rp-td-msg', msg);
-    if (rerun) await lookUp();
+    if (rerun) { await lookUpUuid(L.uuid); await loadRegister(); }
     else updateTakedownButton();
   }
 
@@ -446,7 +525,7 @@ const NavyReports = (() => {
     route();
   }
 
-  // ── 5 · Close ─────────────────────────────────────────────────────────────
+  // ── Close ─────────────────────────────────────────────────────────────
   // The decision is pre-set once from what the route found (it can be changed); nothing else is.
   function renderClose(c, st) {
     const refused = S.role === 'helper' && !HELPER_CATEGORIES.includes(c.category);
@@ -455,7 +534,7 @@ const NavyReports = (() => {
     if (S.prefilled[c.case_ref]) return;
     S.prefilled[c.case_ref] = true;
     const L = st.L, m = markOf(c.case_ref);
-    const decision = c.takedown_at || st.td ? 'removed'
+    const decision = c.takedown_at || st.td_ ? 'removed'
       : !c.uuid8 ? 'manifestly_unfounded'
       : L?.state === 'removed' ? 'removed'
       : L?.state === 'gone' ? 'already_gone'
@@ -487,7 +566,7 @@ const NavyReports = (() => {
     await loadRegister();
   }
 
-  // ── 2 / 6 · Templates ─────────────────────────────────────────────────────
+  // ── Templates ─────────────────────────────────────────────────────
   // Route §9 text, the case reference on top, signed "Refueler Share" (drill 1, change 1). [ ] marks
   // what is still to fill in. The link is the part before the # — known once it was pasted in New
   // report or looked up here (the register keeps the first 8 characters, not the transfer ID).
@@ -503,6 +582,7 @@ const NavyReports = (() => {
     if (c.category === 'csea' && c.decision !== 'not_removed') outcome = 'We have acted on it.';
     else if (c.decision === 'removed' || c.decision === 'already_gone') outcome = 'We have removed the link.';
     else if (c.decision === 'not_removed') outcome = 'We have not removed the link because [reason].';
+    else if (c.decision === 'manifestly_unfounded') outcome = 'There was nothing we could act on [because …].';
     else outcome = 'We have [removed the link / not removed the link because …].';
     const b = `We have looked at your report about ${link}. ${outcome} If you disagree, reply to this email.`;
     const took = S.rows.find((r) => r.uuid8 && r.uuid8 === c.uuid8 && r.takedown_at);
@@ -514,19 +594,19 @@ const NavyReports = (() => {
       if (ta.dataset.case !== c.case_ref || ta.dataset.auto === ta.value) { ta.value = v; ta.dataset.auto = v; ta.dataset.case = c.case_ref; }
     }
     say('rp-tpl-hint', uuid ? 'Edit the [ ] parts before copying. The link is the part before the #.'
-      : 'Edit the [ ] parts before copying. The link fills in once it is pasted in New report or looked up (step 3).');
+      : 'Edit the [ ] parts before copying. The link fills in once it is looked up.');
   }
 
   // One templates block (tabs A/B/C, one Copy), moved into the step that needs it.
   function placeTemplates(current) {
     const tpl = $('rp-templates');
-    const slot = current === 2 ? 's2' : current === 6 ? 's6' : S.tplHere === 'finish' && !$('rp-finish').hidden ? 'finish' : null;
+    const slot = current === 'ack' ? 's-ack' : current === 'out' ? 's-out' : S.tplHere === 'finish' && !$('rp-finish').hidden ? 'finish' : null;
     if (!slot) { tpl.hidden = true; return; }
     const host = $(`rp-${slot}-slot`);
     if (tpl.parentElement !== host) {
       host.append(tpl);
-      if (slot === 's2') showTab('a');
-      if (slot === 's6') showTab('b');
+      if (slot === 's-ack') showTab('a');
+      if (slot === 's-out') showTab('b');
     }
     tpl.hidden = false;
   }
@@ -623,7 +703,9 @@ const NavyReports = (() => {
     page.href = 'case-record-page.css';
     await new Promise((res) => { page.onload = res; page.onerror = res; document.head.append(page); });
     const title = document.title;
-    document.title = 'Refueler Share case record';   // the case reference stays out of the file name (plan §4)
+    // Safari's Save as PDF suggests the title: "R-2026-001 case record", filed in the private repo's
+    // strategy/osa/cases/ (Rajesh, 23 Oct; the record never leaves his disks).
+    document.title = `${c.case_ref} case record`;
     document.body.classList.add('printing-case');
     const done = () => {
       document.body.classList.remove('printing-case');
@@ -701,22 +783,26 @@ const NavyReports = (() => {
     Object.assign(S, { worker, key, role });
     if (!wired) {
       wired = true;
-      fill('rp-new-training', { no: 'A real report (R-)', yes: 'Training — a drill (T-)' }, 'Choose…');
+      fill('rp-new-training', { no: 'A real report (R-)', yes: 'A training drill (T-)' }, 'Choose…');
       fill('rp-new-route', ROUTE, 'Choose…');
       fill('rp-new-category', CATEGORY, 'Choose…');
       fill('rp-close-decision', Object.fromEntries(Object.entries(DECISION).filter(([k]) => k !== 'open')), 'Choose…');
       fill('rp-close-told', TOLD, 'Choose…');
       fill('rp-close-key', { no: 'No (or no full link was sent)', yes: 'Yes — removed from the mailbox thread' });
 
-      guard($('rp-link'), lookUp);
+      guard($('rp-link'), lookUpStart);
+      guard($('rp-td-link'), lookUpCase);
       guard($('rp-new-link'));
-      $('rp-link').addEventListener('keydown', (e) => { if (e.key === 'Enter') lookUp(); });
-      $('rp-lookup-btn').addEventListener('click', lookUp);
+      $('rp-link').addEventListener('keydown', (e) => { if (e.key === 'Enter') lookUpStart(); });
+      $('rp-lookup-btn').addEventListener('click', lookUpStart);
+      $('rp-td-link').addEventListener('keydown', (e) => { if (e.key === 'Enter') lookUpCase(); });
+      $('rp-td-lookup-btn').addEventListener('click', lookUpCase);
+      $('rp-found-actions').addEventListener('click', foundAction);
       $('rp-td-confirm').addEventListener('input', updateTakedownButton);
       $('rp-td-confirm').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !$('rp-td-btn').disabled) takeDown(); });
       $('rp-td-btn').addEventListener('click', takeDown);
       $('rp-td-skip').addEventListener('click', notTakingDown);
-      $('rp-new-btn').addEventListener('click', openNew);
+      $('rp-nolink-btn').addEventListener('click', () => openNew(null));
       $('rp-new-cancel').addEventListener('click', () => { $('rp-new').hidden = true; });
       // The forms are never submitted (CSP form-action 'none'; WebKit then fires no submit event):
       // the buttons and Enter run the same check-then-send.

@@ -7,7 +7,7 @@
  *   • eight columns at most: Transfer ID · Tier · Status · Upload · Created · Expires · Left · Collected;
  *     anything more is in the card. Ten rows, then "Show more" as the table's last row.
  *   • one card for a row click and for the header look-up. A transfer not in the list opens filled
- *     from the live record. The card's "Check live record" re-reads it and marks every field
+ *     from the live record. The card's Recheck re-reads it and marks every field
  *     where the dock index disagrees.
  *   • "Admin only" marks fields only Refueler staff will ever see (tier, rail), so the same card can
  *     serve the company view later (Harbourmaster). No size (never kept, B12-SR X4), no download
@@ -110,7 +110,17 @@ const DockView = (() => {
     $('dock-modal').classList.add('open');
     requestAnimationFrame(() => $('dock-card-lookup').focus());
   }
-  function close() { $('dock-modal')?.classList.remove('open'); }
+  // Closing the card empties "Find a transfer", ready for the next one.
+  function close() {
+    if (!$('dock-modal')?.classList.contains('open')) return;
+    $('dock-modal').classList.remove('open');
+    clearFind();
+  }
+  function clearFind() {
+    $('dock-lookup-input').value = '';
+    $('dock-lookup-clear').hidden = true;
+    $('dock-lookup-msg').textContent = '';
+  }
 
   const chip = '<span class="dock-chip">Admin only</span>';
   function line(k, v, { admin = false, field = null } = {}) {
@@ -168,15 +178,21 @@ const DockView = (() => {
     }
     $('dock-modal-body').innerHTML = rows.join('');
     $('dock-modal-note').textContent = note();
+    const chk = $('dock-check');
+    chk.className = 'dock-check';
+    if (C.live && C.index) {
+      chk.textContent = C.diffs.size ? `⚑ ${C.diffs.size === 1 ? '1 differs' : `${C.diffs.size} differ`}` : '✓ Matches';
+      chk.classList.add('dock-check-on');
+    } else chk.textContent = '';
   }
 
   function note() {
     const C = S.card;
-    if (!C.live) return 'This card is the dock’s own list entry. Check live record reads the transfer’s record itself and marks anything that differs.';
-    const when = `Live record read at ${t(F_CLOCK, C.at)} (London).`;
-    if (!C.index) return `Not in the dock list (older than the list, or never indexed). Filled from the live record. ${when}`;
-    if (!C.diffs.size) return `${when} It agrees with the dock index.`;
-    return `${when} ${C.diffs.size === 1 ? '1 field differs' : `${C.diffs.size} fields differ`} from the dock index (marked ⚑). The live record is the one to trust.`;
+    if (!C.live) return 'This card is the dock’s own list entry. Recheck reads the transfer itself and marks anything the list has wrong.';
+    const when = `Read from the transfer itself at ${t(F_CLOCK, C.at)} (London).`;
+    if (!C.index) return `Not in the dock list (older than the list, or never listed). ${when}`;
+    if (!C.diffs.size) return `${when} The list is right.`;
+    return `${when} The list has ${C.diffs.size === 1 ? 'one field' : `${C.diffs.size} fields`} wrong (marked ⚑); trust the transfer itself.`;
   }
 
   // Index vs live record. Times within a minute count as the same (the index and the manifest
@@ -215,7 +231,7 @@ const DockView = (() => {
     const C = S.card, btn = $('dock-card-lookup');
     btn.disabled = true; btn.textContent = 'Checking…';
     const r = await lookupLive(C.uuid);
-    btn.disabled = false; btn.textContent = 'Check live record';
+    btn.disabled = false; btn.textContent = 'Recheck';
     if (r.status !== 200) { $('dock-modal-note').textContent = failed(r.status); return; }
     C.live = r.data;
     C.at = Math.floor(Date.now() / 1000);
@@ -230,11 +246,12 @@ const DockView = (() => {
     setTimeout(() => { btn.textContent = 'Copy full ID'; }, 2000);
   }
 
-  // ── Header look-up ────────────────────────────────────────────────────────
+  // ── Find a transfer ────────────────────────────────────────────────────────
   async function go() {
     const input = $('dock-lookup-input'), msg = $('dock-lookup-msg');
     const text = input.value.trim();
     msg.textContent = '';
+    $('dock-lookup-clear').hidden = !input.value;
     if (!text) return;
     const uuid = NavyReports.uuidIn(text);
     if (!uuid) {
@@ -243,6 +260,7 @@ const DockView = (() => {
       return;
     }
     input.value = uuid;   // only the transfer ID part, whatever came with it
+    $('dock-lookup-clear').hidden = false;
     const idx = S.rows.findIndex((r) => r.uuid === uuid);
     if (idx >= 0) return open(idx);
     msg.textContent = 'Looking up…';
@@ -260,6 +278,8 @@ const DockView = (() => {
     const input = $('dock-lookup-input');
     NavyReports.guard(input, go);
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
+    input.addEventListener('input', () => { $('dock-lookup-clear').hidden = !input.value; });
+    $('dock-lookup-clear').addEventListener('click', () => { clearFind(); input.focus(); });
     $('dock-lookup-go').addEventListener('click', go);
     $('dock-card-lookup').addEventListener('click', relook);
     $('dock-copy-id').addEventListener('click', copyId);

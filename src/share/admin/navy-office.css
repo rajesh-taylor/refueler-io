@@ -1569,6 +1569,13 @@ textarea.rp-input { font-family: var(--sans); font-size: 13px; line-height: 1.5;
 .rp-step-body { padding-left: calc(1ch + 10px); }
 .rp-step-after { font-family: var(--sans); font-size: 0.8rem; color: var(--text-secondary); margin: 4px 0 0 calc(1ch + 10px); }
 .rp-step-actions { margin-top: 12px; }
+.rp-label-big { font-size: 12px; color: var(--text-primary); }
+.rp-input-big { padding: 10px 12px; font-size: 13px; }
+.rp-found { margin-top: 12px; }
+.rp-found .rp-actions { margin-top: 10px; }
+.rp-case-actions { margin-top: 14px; }
+.rp-register-title { margin-top: 18px; }
+.rp-warn { font-family: var(--sans); font-size: 0.85rem; color: var(--text-primary); margin: 12px 0 10px; }
 .rp-step-body > .rp-hint:first-child { margin-top: 0; }
 .rp-step-body > .rp-hint + .rp-actions { margin-top: 10px; }
 .rp-link-btn {
@@ -1595,20 +1602,25 @@ textarea.rp-input { font-family: var(--sans); font-size: 13px; line-height: 1.5;
 /* ── Execution Dock (OSA-Tools-4): header look-up, Show more row, the one card ───────────────
  * The look-up sits in the dock's own header line, right, in the title's small mono capitals:
  * underline only, no box, a small arrow at the end. */
-.dock-header-lookup { align-items: center; flex-wrap: wrap; }
-.dock-lookup { display: flex; align-items: center; gap: 6px; border-bottom: 0.5px solid var(--border-mid); min-width: 19rem; }
-.dock-lookup:focus-within { border-bottom-color: var(--accent); }
-.dock-lookup-input {
-  flex: 1; min-width: 0; background: none; border: none; outline: none; padding: 3px 0;
-  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.12em; color: var(--text-primary);
+/* "Find a transfer" sits above the table, as large as the Cases link box (23 Oct: the small
+ * header field went unseen). × clears it; closing the card clears it too. */
+.dock-find { margin-bottom: 1.5rem; }
+.dock-find-field { position: relative; }
+.dock-find-field .rp-input-big { width: 100%; padding-right: 2.2rem; }
+.dock-find-clear {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; padding: 2px 6px;
+  font-family: var(--mono); font-size: 16px; line-height: 1; color: var(--text-tertiary);
 }
-.dock-lookup-input::placeholder { text-transform: uppercase; color: var(--text-tertiary); }
-.dock-lookup-go {
-  background: none; border: none; padding: 0 0 0 4px; cursor: pointer;
-  font-family: var(--mono); font-size: 0.8rem; color: var(--text-tertiary);
+.dock-find-clear:hover { color: var(--text-primary); }
+#dock-lookup-msg { margin: 8px 0 0; }
+/* Recheck's answer: its line is always there, so the buttons below never move. Gold, not green
+ * (two colours in the suite, 13 Oct). */
+.dock-check { min-height: 1.6rem; margin: 10px 0 4px; font-family: var(--mono); font-size: 11px; }
+.dock-check-on {
+  display: inline-block; color: var(--accent); border: 0.5px solid var(--accent); border-radius: 3px;
+  padding: 2px 8px; letter-spacing: .04em;
 }
-.dock-lookup-go:hover, .dock-lookup:focus-within .dock-lookup-go { color: var(--accent); }
-#dock-lookup-msg { margin: -2px 0 10px; }
 .dock-table tbody tr.dock-more td { color: var(--text-secondary); }
 .dock-table tbody tr.dock-more:hover td { color: var(--text-primary); }
 .dock-table tbody tr.dock-more:focus-visible { outline: 1px solid var(--accent); outline-offset: -1px; }
@@ -1620,18 +1632,16 @@ textarea.rp-input { font-family: var(--sans); font-size: 13px; line-height: 1.5;
 }
 .dock-diff { display: block; color: var(--accent); font-size: 11px; margin-top: 2px; }
 .dock-detail-row.dock-differs .dock-detail-k { color: var(--text-primary); }
-#dock-modal-note { font-size: 0.75rem; }
+#dock-modal-note { font-size: 0.75rem; min-height: 3.2em; }   /* two lines kept, so Recheck never moves the buttons */
 
 @media (max-width: 640px) {
-  .dock-header-lookup { flex-direction: column; align-items: stretch; gap: 8px; }
-  .dock-lookup { min-width: 0; width: 100%; }
   .dock-col-created, .dock-col-collected { display: none; }
   .dock-table th, .dock-table td { padding: 7px 4px; }
   .dock-table th:first-child, .dock-table td:first-child { padding-left: 8px; }
   .dock-table th, .dock-table td { white-space: normal; }
   .dock-table td.dock-uuid { white-space: nowrap; }
   .dock-pill { padding: 2px 5px; }
-  .rp-col-td { display: none; }
+  .rp-col-td, .rp-col-rec, .rp-col-cat { display: none; }
   .rp-step { padding-left: 10px; padding-right: 12px; }
   .rp-step-body, .rp-step-after { padding-left: 0; margin-left: 0; }
   .rp-register-foot, .rp-finish { padding: 12px; }
