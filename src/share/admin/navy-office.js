@@ -138,6 +138,9 @@ function showPage(name, scrollId) {
     if (a === current) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   }
   if (location.hash.slice(1) !== name) history.replaceState(null, '', `#${name}`);
+  const changed = currentPage !== name;
+  currentPage = name;
+  if (changed && document.body.dataset.role === 'admin' && refreshTimer !== null) refreshAll();
   if (scrollId) scrollToCard(scrollId);
   else window.scrollTo(0, 0);
   if (name === 'overview' && typeof renderGrowth === 'function' && _growthSnapshot) renderGrowth();
@@ -181,33 +184,42 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ── Refresh ────────────────────────────────────────────────────────────────
+// OSA-Tools-4: only the page on screen is refreshed — Overview (and the Metrics shortcuts) the
+// figures and the growth chart, Metrics the storage, Data the dock; Reports, Ops and API fetch
+// nothing here (Reports keeps its own calls).
+let currentPage = 'overview';
 async function refreshAll() {
   clearInterval(refreshTimer);
   countdown = 60;
   updateCountdown();
+  const p = currentPage;
+  const figures = p === 'overview' || p === 'metrics';
+  const none = async () => null;
   const [m, ae, snap, , hh, dock, kvLog] = await Promise.all([
-    fetchMetrics(),
-    fetchAeMetrics(),
-    fetchSnapshot(),
-    fetchKvStats(),
-    fetchHostnameHealth(),
-    fetchExecutionDock(),
-    fetchKvErrorsLog(),
+    figures ? fetchMetrics() : none(),
+    figures ? fetchAeMetrics() : none(),
+    figures ? fetchSnapshot() : none(),
+    figures ? fetchKvStats() : none(),
+    figures ? fetchHostnameHealth() : none(),
+    p === 'data' ? fetchExecutionDock() : none(),
+    figures ? fetchKvErrorsLog() : none(),
   ]);
   if (m)    { lastMetrics  = m;    renderMetrics(m); }
   if (ae)   { lastAe       = ae;   renderAeMetrics(ae); }
   if (kvLog) kvErrorsCache = kvLog;
-  renderErrorCards(lastAe, kvErrorsCache);
+  if (figures) renderErrorCards(lastAe, kvErrorsCache);
   // B12-2: storage lists the whole R2 bucket — every 15 min, not every 60 s.
-  if (!_storageAt || Date.now() - _storageAt > 15 * 60 * 1000) fetchStorage();
+  if (p === 'metrics' && (!_storageAt || Date.now() - _storageAt > 15 * 60 * 1000)) fetchStorage();
   if (snap) { lastSnapshot = snap; renderSnapshot(snap); }
   if (hh)   { renderHostnameHealth(hh); }
   if (dock) { DockView.render(dock); }
   if (m || ae) renderFarming(lastMetrics, lastAe);
-  // (3b) API & MCP card
-  fetchApiStats();
-  // (3c/B10-1) Growth card — annotations + AE lines + BTC overlay
-  fetchGrowthAll();
+  if (p === 'overview') {
+    // (3b) API & MCP card
+    fetchApiStats();
+    // (3c/B10-1) Growth card — annotations + AE lines + BTC overlay
+    fetchGrowthAll();
+  }
   const ts = new Date();
   setText('refreshed-at', `Refreshed ${ts.toLocaleTimeString('en-GB')}`);
   document.getElementById('main').setAttribute('data-print-ts', ts.toUTCString());
@@ -1303,7 +1315,7 @@ function closeModal() {
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSoonModal(); DockView.close(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSoonModal(); });
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 function parseUA(ua) {
@@ -2101,13 +2113,12 @@ const ACTIONS = {
   'print-growth': () => printGrowthChart(),
   'growth-add':   () => growthAddEvent(),
   'close-soon':   () => closeSoonModal(),
-  'close-dock':   () => DockView.close(),
   'copy-sandbox': (el) => copySandboxResult(el),
 };
 document.addEventListener('click', (e) => {
   // .sb-item only: the page sections carry data-page too, and a click inside one must not re-show it
   // (that put the cursor back on the step's first button and blocked typing — OSA-Tools-4 live run).
-  const el = e.target.closest('[data-action],.sb-item[data-page],[data-modal],[data-scroll],[data-soon],[data-theme-set],[data-ce-source],[data-dock-idx],[data-dock-more],[data-delete-id]');
+  const el = e.target.closest('[data-action],.sb-item[data-page],[data-modal],[data-scroll],[data-soon],[data-theme-set],[data-ce-source],[data-dock-more],[data-delete-id]');
   if (!el) return;
   const d = el.dataset;
   if (d.action && ACTIONS[d.action]) ACTIONS[d.action](el);
@@ -2117,27 +2128,23 @@ document.addEventListener('click', (e) => {
   else if (d.soon) openSoonModal(d.soon);
   else if (d.themeSet) setTheme(d.themeSet === 'paper' ? 'paper' : 'carbon');
   else if (d.ceSource) _setCeSource(d.ceSource === 'kv' ? 'kv' : 'ae');
-  else if (d.dockIdx != null) DockView.open(Number(d.dockIdx));
   else if (d.dockMore != null) DockView.more();
   else if (d.deleteId != null) growthDeleteEvent(d.deleteId, el);
 });
 // Keyboard: Enter / Space on the focusable cards and dock rows, as the old onkeydown did.
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Enter' && e.key !== ' ') return;
-  const el = e.target.closest?.('.snap-metric[data-modal],.sb-item[data-modal],tr[data-dock-idx],tr[data-dock-more]');
+  const el = e.target.closest?.('.snap-metric[data-modal],.sb-item[data-modal],tr[data-dock-more]');
   if (!el || el !== e.target) return;
   e.preventDefault();
   if (el.dataset.modal) openModal(el.dataset.modal, el);
-  else if (el.dataset.dockMore != null) DockView.more();
-  else DockView.open(Number(el.dataset.dockIdx));
+  else DockView.more();
 });
 document.getElementById('btn-sandbox-activate').addEventListener('click', () => sandboxActivate());
 document.getElementById('btn-sandbox-reset').addEventListener('click', () => sandboxReset());
 document.getElementById('snapshot-copy-btn').addEventListener('click', () => copySnapshot());
 document.getElementById('modal-close').addEventListener('click', () => closeModal());
 document.getElementById('modal-csv-btn').addEventListener('click', () => onCsvClick());
-for (const id of ['soon-modal', 'dock-modal']) {
-  document.getElementById(id).addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) (id === 'soon-modal' ? closeSoonModal : DockView.close)();
-  });
-}
+document.getElementById('soon-modal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeSoonModal();
+});
