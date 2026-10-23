@@ -7,7 +7,7 @@
  *   • eight columns at most: Transfer ID · Tier · Status · Upload · Created · Expires · Left · Collected;
  *     anything more is in the card. Ten rows, then "Show more" as the table's last row.
  *   • one card for a row click and for the header look-up. A transfer not in the list opens filled
- *     from the live record. The card's Look up re-reads the live record and marks every field
+ *     from the live record. The card's "Check live record" re-reads it and marks every field
  *     where the dock index disagrees.
  *   • "Admin only" marks fields only Refueler staff will ever see (tier, rail), so the same card can
  *     serve the company view later (Harbourmaster). No size (never kept, B12-SR X4), no download
@@ -137,8 +137,7 @@ const DockView = (() => {
 
   function drawCard() {
     const C = S.card, r = C.index, L = C.live;
-    $('dock-modal-title').innerHTML = `<span class="dock-u8">${esc(C.uuid.slice(0, 8))}</span>` +
-      `<button class="toggle-btn dock-copy" type="button" id="dock-copy-id">Copy full ID</button>`;
+    $('dock-modal-title').innerHTML = `<span class="dock-u8">${esc(C.uuid.slice(0, 8))}</span>`;
     const rows = [];
     if (r) {
       const pill = STATUS[r.status] ?? { cls: 'expired', label: r.status ?? '—' };
@@ -169,12 +168,11 @@ const DockView = (() => {
     }
     $('dock-modal-body').innerHTML = rows.join('');
     $('dock-modal-note').textContent = note();
-    $('dock-copy-id').addEventListener('click', copyId);
   }
 
   function note() {
     const C = S.card;
-    if (!C.live) return 'From the dock index. Look up reads the live record and marks anything that differs.';
+    if (!C.live) return 'This card is the dock’s own list entry. Check live record reads the transfer’s record itself and marks anything that differs.';
     const when = `Live record read at ${t(F_CLOCK, C.at)} (London).`;
     if (!C.index) return `Not in the dock list (older than the list, or never indexed). Filled from the live record. ${when}`;
     if (!C.diffs.size) return `${when} It agrees with the dock index.`;
@@ -212,12 +210,12 @@ const DockView = (() => {
     return `Share answered with an error (${status}). Try again shortly.`;
   }
 
-  // The card's Look up: re-read the live record and mark the differences.
+  // Check live record: re-read the live record and mark the differences.
   async function relook() {
     const C = S.card, btn = $('dock-card-lookup');
-    btn.disabled = true; btn.textContent = 'Looking up…';
+    btn.disabled = true; btn.textContent = 'Checking…';
     const r = await lookupLive(C.uuid);
-    btn.disabled = false; btn.textContent = 'Look up';
+    btn.disabled = false; btn.textContent = 'Check live record';
     if (r.status !== 200) { $('dock-modal-note').textContent = failed(r.status); return; }
     C.live = r.data;
     C.at = Math.floor(Date.now() / 1000);
@@ -264,6 +262,7 @@ const DockView = (() => {
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
     $('dock-lookup-go').addEventListener('click', go);
     $('dock-card-lookup').addEventListener('click', relook);
+    $('dock-copy-id').addEventListener('click', copyId);
   }
 
   return { mount, render, open, more, close };

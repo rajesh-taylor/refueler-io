@@ -2105,7 +2105,9 @@ const ACTIONS = {
   'copy-sandbox': (el) => copySandboxResult(el),
 };
 document.addEventListener('click', (e) => {
-  const el = e.target.closest('[data-action],[data-page],[data-modal],[data-scroll],[data-soon],[data-theme-set],[data-ce-source],[data-dock-idx],[data-dock-more],[data-delete-id]');
+  // .sb-item only: the page sections carry data-page too, and a click inside one must not re-show it
+  // (that put the cursor back on the step's first button and blocked typing — OSA-Tools-4 live run).
+  const el = e.target.closest('[data-action],.sb-item[data-page],[data-modal],[data-scroll],[data-soon],[data-theme-set],[data-ce-source],[data-dock-idx],[data-dock-more],[data-delete-id]');
   if (!el) return;
   const d = el.dataset;
   if (d.action && ACTIONS[d.action]) ACTIONS[d.action](el);

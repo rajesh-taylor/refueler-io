@@ -1614,7 +1614,6 @@ textarea.rp-input { font-family: var(--sans); font-size: 13px; line-height: 1.5;
 .dock-table tbody tr.dock-more:focus-visible { outline: 1px solid var(--accent); outline-offset: -1px; }
 .dock-card-id { display: flex; align-items: baseline; gap: 12px; font-family: var(--mono); font-weight: 400; }
 .dock-u8 { color: var(--accent); letter-spacing: .04em; }
-.dock-copy { font-size: 10px; }
 .dock-chip {
   display: inline-block; margin-left: 8px; font-size: 9px; letter-spacing: .08em; text-transform: uppercase;
   color: var(--text-tertiary); border: 0.5px solid var(--border-mid); border-radius: 3px; padding: 0 4px; vertical-align: 1px;
