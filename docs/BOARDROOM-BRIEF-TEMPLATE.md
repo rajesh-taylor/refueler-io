@@ -42,6 +42,16 @@ Add new lenses as culture demands. Rule: the reference must be *British*, *dry*,
 5. Save output as `BOARDROOM-BRIEF-YYYY-MM-DD.md` in `refueler-io/docs/boardroom-briefs/`.
 6. Any action items touching schema, sessions, or cross-repo architecture are flagged for the next MasterContext update and appended to `SECURITY-RESEARCH-LOG.md`.
 
+### After the brief — the close-out (one follow-up turn in the same session)
+
+1. Commit and push the brief (command below).
+2. **SECURITY-RESEARCH-LOG.md** (`refueler.io/docs/`): one dated entry: sources, findings, actions. No open findings in public.
+3. **Fold each action into a session that's already planned.** Share work goes in `refueler-share-private/strategy/Share-Master-Context.md`: the session-order line under §Roadmap, plus the row it belongs to. New sessions get a new row in the right place in the order.
+4. **Log it** in `refueler-share-private/strategy/share-sessions.md`: one entry listing where each action went, ending *"Informed by BOARDROOM-BRIEF-YYYY-MM-DD.md."*
+5. **Decisions Rajesh agreed** become locks in `refueler-share-private/strategy/CLAUDE-strategy.md` (copy rules go under *Editorial voice*).
+6. Touch any other plan the brief affects (e.g. `docs/Tester-Programme-v1.md`, `INCIDENT-PROTOCOL.md`), and nothing else.
+7. Give Rajesh the commit commands for both repos. Claude never pushes.
+
 Push command:
 ```bash
 cd /Users/rajeshtaylor/Documents/refueler.io && git add docs/boardroom-briefs/BOARDROOM-BRIEF-YYYY-MM-DD.md && git commit -m "docs: boardroom brief YYYY-MM-DD" && git push origin main

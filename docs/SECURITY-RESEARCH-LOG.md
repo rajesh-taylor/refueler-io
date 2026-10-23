@@ -373,6 +373,24 @@ An OVH VPS-1 (2 vCores / 4 GB / 40 GB / £3.31 ex VAT) runs phoenixd comfortably
 
 ---
 
+## 2026-10-23 — File-transfer exploitation before patching (NHIMG FAQ) / audience growth
+
+**Session type:** Weekly Boardroom Brief — ad-hoc uncounted. Week 3 (Harry Potter lens).
+**Informed by:** BOARDROOM-BRIEF-2026-10-23.md
+**Open findings:** none. Research notes only; secret scopes are recorded in the private credential inventory.
+
+**Sources reviewed:**
+- NHI Mgmt Group, "What happens when attackers exploit a file transfer vulnerability before organisations can patch it?" (FAQ, updated 19 Sep 2026). General guidance, no named incident or CVE. Its framework table uses a NIST CSF 1.1 control ID (PR.IP-12) under a CSF 2.0 heading, so it is background reading, not a citable source.
+
+### Finding 1 — A transfer service's blast radius is the secrets and access it holds
+For Share that is the Worker's secrets (R2 S3 key pair, Stripe, Supabase service role, Turnstile, seal keys, admin and helper keys), not file contents, which it never has keys for. Since the take-down tool (22 Oct 2026) the admin key can delete a file irreversibly, so the admin surface needs more than a token check.
+**Actions:** a scope column per Worker secret at H6 (R2 token limited to the Share bucket, Stripe restricted key, service role only where row-level security can't do the job); admin surface behind Cloudflare Access on its own hostname moved forward to H6a; an alert for a delete with no matching case record goes on the B12-Audit agenda; Stripe moves to a new Refueler-only account with fresh, narrowly scoped secrets.
+
+### Finding 2 — Integrity: stored files are covered, served code is the gap
+AES-GCM per part with a counter nonce and last-part flag detects altered, reordered, dropped or added parts. Altering the served app is the remaining integrity risk; the release watchdog and `/verify/` page (Share-Release-1b) address it until fixed code (Block B).
+
+---
+
 ## Supplier watch
 
 Advisories for software we depend on, checked against how we use it. Summaries only; anything that affects us and is still open is kept private until fixed.
