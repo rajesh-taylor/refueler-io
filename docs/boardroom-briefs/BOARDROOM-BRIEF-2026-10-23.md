@@ -88,3 +88,7 @@ The Headhunter, for the record: **item 7 implies the capability gap in item 12.*
 ---
 
 *Help will always be given at Refueler to those who ask for it. We just don't keep a list of who asked.*
+
+---
+
+**Carried to Week 4 (The Beatles, 30 Oct), agreed by Rajesh:** three items: (1) UK subscription-contract rules under the DMCC Act 2024 (reminders, easy cancel, in force or not) ahead of Citizen; (2) a Stripe / payments item, alongside the Stripe-Account move; (3) one security item.
