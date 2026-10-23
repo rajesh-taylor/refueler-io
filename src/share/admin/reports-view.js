@@ -197,6 +197,7 @@ const NavyReports = (() => {
     $('rp-link').value = '';
     $('rp-found').hidden = true;
     say('rp-lookup-msg', '');
+    say('rp-register-msg', '');
     route();
     $('rp-link').focus();
   }
@@ -808,8 +809,9 @@ const NavyReports = (() => {
       fill('rp-close-told', TOLD, 'Choose…');
       fill('rp-close-key', { no: 'No (or no full link was sent)', yes: 'Yes — removed from the mailbox thread' });
 
-      guard($('rp-link'), lookUpStart);
-      guard($('rp-td-link'), lookUpCase);
+      // A paste only fills the box (cut at the #); nothing runs until Look up or Enter (23 Oct).
+      guard($('rp-link'));
+      guard($('rp-td-link'));
       guard($('rp-new-link'));
       $('rp-link').addEventListener('keydown', (e) => { if (e.key === 'Enter') lookUpStart(); });
       $('rp-lookup-btn').addEventListener('click', lookUpStart);

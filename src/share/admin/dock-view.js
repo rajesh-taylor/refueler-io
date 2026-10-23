@@ -219,7 +219,8 @@ const DockView = (() => {
     if (wired) return;
     wired = true;
     const input = $('dock-lookup-input');
-    NavyReports.guard(input, go);
+    NavyReports.guard(input);   // a paste only fills the box; Find or Enter runs it
+    input.addEventListener('paste', () => setTimeout(() => { $('dock-lookup-clear').hidden = !input.value; }));
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
     input.addEventListener('input', () => { $('dock-lookup-clear').hidden = !input.value; });
     $('dock-lookup-clear').addEventListener('click', () => { clearFind(); input.focus(); });
