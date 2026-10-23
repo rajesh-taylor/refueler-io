@@ -1,4 +1,6 @@
 /* ─── navy-office.js — refueler-share · Navy Office admin ───────────────────
+ * OSA-Tools-4 (23 Oct 2026): each sidebar section is its own page (showPage; the address ends
+ *   #overview · #metrics · #data · #reports · #ops · #api). The Execution Dock moved to dock-view.js.
  * OSA-Tools-3 (22 Oct 2026): unlock by role (GET /admin/reports/whoami); a helper key sees
  *   Reports only (reports-view.js) and never calls a metrics route.
  * Last updated: B12-2 (Client errors split into real / Expected events with
@@ -99,15 +101,49 @@ function showDashboard(role) {
     staffOnly(document.getElementById('dashboard'));
     staffOnly(document.querySelector('#dashboard .header-right'));
     for (const el of document.querySelectorAll('[data-admin-only]')) el.hidden = true;
-    setText('section-title', 'Reports');
     const chip = document.getElementById('role-chip');
     chip.textContent = 'Helper key · Reports only';
     chip.hidden = false;
   } else {
     initLightningToggle();
+    DockView.mount({ worker: WORKER, key: adminKey });
   }
   NavyReports.mount({ worker: WORKER, key: adminKey, role });
+  showPage(pageFromHash());
 }
+
+// ── Pages (OSA-Tools-4) ─────────────────────────────────────────────────────
+// One section on screen at a time; the address keeps it (#data …) so a reload or Back stays put.
+// A helper key has the Reports page only, whatever the address says.
+const PAGES = ['overview', 'metrics', 'data', 'reports', 'ops', 'api'];
+function pageFromHash() {
+  if (document.body.dataset.role === 'helper') return 'reports';
+  const h = location.hash.slice(1);
+  return PAGES.includes(h) ? h : 'overview';
+}
+function showPage(name, scrollId) {
+  if (document.body.dataset.role === 'helper') name = 'reports';
+  let title = '';
+  for (const sec of document.querySelectorAll('#dashboard > .page')) {
+    const on = sec.dataset.page === name;
+    sec.hidden = !on;
+    if (on) title = sec.dataset.title;
+  }
+  setText('section-title', title);
+  const items = [...document.querySelectorAll('.sb-item[data-page]')];
+  const current = items.find((a) => a.dataset.page === name && scrollId && a.dataset.scroll === scrollId)
+    ?? items.find((a) => a.dataset.page === name);
+  for (const a of items) {
+    a.classList.toggle('active', a === current);
+    if (a === current) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+  }
+  if (location.hash.slice(1) !== name) history.replaceState(null, '', `#${name}`);
+  if (scrollId) scrollToCard(scrollId);
+  else window.scrollTo(0, 0);
+  if (name === 'overview' && typeof renderGrowth === 'function' && _growthSnapshot) renderGrowth();
+  if (name === 'reports') NavyReports.shown();
+}
+window.addEventListener('hashchange', () => { if (document.body.dataset.role) showPage(pageFromHash()); });
 
 async function enter(key, role) {
   adminKey = key;
@@ -166,7 +202,7 @@ async function refreshAll() {
   if (!_storageAt || Date.now() - _storageAt > 15 * 60 * 1000) fetchStorage();
   if (snap) { lastSnapshot = snap; renderSnapshot(snap); }
   if (hh)   { renderHostnameHealth(hh); }
-  if (dock) { renderExecutionDock(dock); }
+  if (dock) { DockView.render(dock); }
   if (m || ae) renderFarming(lastMetrics, lastAe);
   // (3b) API & MCP card
   fetchApiStats();
@@ -1267,7 +1303,7 @@ function closeModal() {
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSoonModal(); closeDockModal(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSoonModal(); DockView.close(); } });
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 function parseUA(ua) {
@@ -1322,13 +1358,6 @@ function formatBytes(bytes) {
   const raw = bytes / Math.pow(1024, i);
   const val = parseFloat(raw.toFixed(i >= 4 ? 2 : 1)).toString();
   return { val, unit: units[i] };
-}
-
-// Human-readable bytes for dock detail — (4)
-function fmtSizeBytes(n) {
-  if (n == null) return '—';
-  const { val, unit } = formatBytes(n);
-  return `${val} ${unit}`;
 }
 
 function showError(msg) {
@@ -1603,99 +1632,13 @@ async function fetchKvStats() {
   } catch (e) { console.warn('[kv-stats]', e); }
 }
 
-// ── Execution Dock (Share-Dash-1/2/3) ─────────────────────────────────────
-let dockTransfers = [];
-
+// ── Execution Dock (Share-Dash-1/2/3) — drawn by dock-view.js (OSA-Tools-4) ─────
 async function fetchExecutionDock() {
   try {
     const res = await fetch(`${WORKER}/admin/execution-dock`, { headers: { 'X-Admin-Key': adminKey } });
     if (!res.ok) { showError(`/admin/execution-dock ${res.status}`); return null; }
     return res.json();
   } catch (e) { showError(`/admin/execution-dock: ${e.message}`); return null; }
-}
-
-const DOCK_PILL = {
-  active:       { cls: 'active',    label: 'active'    },
-  active_nudge: { cls: 'active',    label: 'active'    },   // B12-2: nudge retired (spec §2.3 — not outreach)
-  collected:    { cls: 'collected', label: 'collected' },
-  expired:      { cls: 'expired',   label: 'expired'   },
-};
-
-function fmtDockDate(unixSeconds) {
-  if (!unixSeconds) return '—';
-  return new Date(unixSeconds * 1000).toLocaleString('en-GB', {
-    day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false,
-  });
-}
-
-function renderExecutionDock(data) {
-  dockTransfers = Array.isArray(data.transfers) ? data.transfers : [];
-  const tbody = document.getElementById('dock-tbody');
-  if (!tbody) return;
-
-  if (dockTransfers.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" class="dock-empty">No transfers on the dock.</td></tr>';
-    return;
-  }
-
-  const TIER_DISPLAY = { free: 'Pro Bono', creative: 'Citizen', max: 'Sovereign', api: 'API/MCP' };
-  tbody.innerHTML = dockTransfers.slice(0, 10).map((t, i) => {
-    const pill  = DOCK_PILL[t.status] ?? { cls: 'expired', label: t.status ?? '—' };
-    const short = t.uuid ? `${escHtml(t.uuid.slice(0, 8))}…${escHtml(t.uuid.slice(-4))}` : '—';
-    const tierLabel = TIER_DISPLAY[t.tier] ?? escHtml(t.tier ?? '—');
-    return `<tr data-dock-idx="${i}" tabindex="0">
-      <td class="dock-uuid">${short}</td>
-      <td>${tierLabel}</td>
-      <td><span class="dock-pill ${pill.cls}">${escHtml(pill.label)}</span></td>
-      <td>${fmtDockDate(t.created_at)}</td>
-      <td>${fmtDockDate(t.expiry_timestamp)}</td>
-    </tr>`;
-  }).join('');
-}
-
-function _dockDetailRow(k, v, deferred) {
-  return `<div class="dock-detail-row">
-    <span class="dock-detail-k">${escHtml(k)}</span>
-    <span class="dock-detail-v${deferred ? ' deferred-field' : ''}">${v}</span>
-  </div>`;
-}
-
-// (4) Rail label map — matches share-sessions spec
-const RAIL_LABEL = {
-  identity:  'Registered',
-  anonymous: 'Bearer',
-};
-
-function openDockModal(idx) {
-  const t = dockTransfers[idx];
-  if (!t) return;
-  const pill = DOCK_PILL[t.status] ?? { cls: 'expired', label: t.status ?? '—' };
-  const days = t.collected
-    ? 'collected'
-    : (t.days_remaining != null ? `${t.days_remaining} day${t.days_remaining === 1 ? '' : 's'} left` : '—');
-
-  // (4) size_bytes — human-readable; rail — label map; merkle_root — pending note; download count — pending
-  const sizeVal  = t.size_bytes != null ? fmtSizeBytes(t.size_bytes) : '—';
-  const railVal  = t.rail ? (RAIL_LABEL[t.rail] ?? escHtml(t.rail)) : '—';
-
-  document.getElementById('dock-modal-title').textContent = 'Transfer';
-  document.getElementById('dock-modal-body').innerHTML = [
-    _dockDetailRow('UUID',               escHtml(t.uuid ?? '—')),
-    _dockDetailRow('Status',             `<span class="dock-pill ${pill.cls}">${escHtml(pill.label)}</span>`),
-    _dockDetailRow('Tier',               escHtml(t.tier ?? '—')),
-    _dockDetailRow('Created',            fmtDockDate(t.created_at)),
-    _dockDetailRow('Expires',            fmtDockDate(t.expiry_timestamp)),
-    _dockDetailRow('Remaining',          escHtml(days)),
-    _dockDetailRow('Collected at',       t.collected_at ? fmtDockDate(t.collected_at) : '—'),
-    _dockDetailRow('Size',               sizeVal),
-    _dockDetailRow('Rail',               railVal),
-    _dockDetailRow('Download count',     'pending', true),
-    _dockDetailRow('BLAKE3 merkle root', 'pending (available at Share-6-5)', true),
-  ].join('');
-  document.getElementById('dock-modal').classList.add('open');
-}
-function closeDockModal() {
-  document.getElementById('dock-modal').classList.remove('open');
 }
 
 // ── Sandbox result copy (Share-Dash-1) ────────────────────────────────────
@@ -2140,7 +2083,9 @@ async function growthDeleteEvent(id, btn) {
     if (data) SpeedView.mount(root, data, names);
   }
   document.getElementById('speed-open').addEventListener('click', () => input.click());
-  document.getElementById('sb-speed')?.addEventListener('click', (e) => { e.preventDefault(); scrollToCard('card-speed'); input.click(); });
+  // Speed in the sidebar: the Metrics page at the Speed panel, then the picker (the delegated
+  // listener below shows the page first).
+  document.getElementById('sb-speed')?.addEventListener('click', () => input.click());
   input.addEventListener('change', () => { const f = [...input.files]; input.value = ''; read(f); });
   panel.addEventListener('dragover', (e) => { e.preventDefault(); panel.classList.add('sv-dragging'); });
   panel.addEventListener('dragleave', (e) => { if (!panel.contains(e.relatedTarget)) panel.classList.remove('sv-dragging'); });
@@ -2156,30 +2101,33 @@ const ACTIONS = {
   'print-growth': () => printGrowthChart(),
   'growth-add':   () => growthAddEvent(),
   'close-soon':   () => closeSoonModal(),
-  'close-dock':   () => closeDockModal(),
+  'close-dock':   () => DockView.close(),
   'copy-sandbox': (el) => copySandboxResult(el),
 };
 document.addEventListener('click', (e) => {
-  const el = e.target.closest('[data-action],[data-modal],[data-scroll],[data-soon],[data-theme-set],[data-ce-source],[data-dock-idx],[data-delete-id]');
+  const el = e.target.closest('[data-action],[data-page],[data-modal],[data-scroll],[data-soon],[data-theme-set],[data-ce-source],[data-dock-idx],[data-dock-more],[data-delete-id]');
   if (!el) return;
   const d = el.dataset;
   if (d.action && ACTIONS[d.action]) ACTIONS[d.action](el);
+  else if (d.page) { e.preventDefault(); showPage(d.page, d.scroll); }
   else if (d.modal) openModal(d.modal, el);
   else if (d.scroll) scrollToCard(d.scroll);
   else if (d.soon) openSoonModal(d.soon);
   else if (d.themeSet) setTheme(d.themeSet === 'paper' ? 'paper' : 'carbon');
   else if (d.ceSource) _setCeSource(d.ceSource === 'kv' ? 'kv' : 'ae');
-  else if (d.dockIdx != null) openDockModal(Number(d.dockIdx));
+  else if (d.dockIdx != null) DockView.open(Number(d.dockIdx));
+  else if (d.dockMore != null) DockView.more();
   else if (d.deleteId != null) growthDeleteEvent(d.deleteId, el);
 });
 // Keyboard: Enter / Space on the focusable cards and dock rows, as the old onkeydown did.
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Enter' && e.key !== ' ') return;
-  const el = e.target.closest?.('.snap-metric[data-modal],tr[data-dock-idx]');
+  const el = e.target.closest?.('.snap-metric[data-modal],.sb-item[data-modal],tr[data-dock-idx],tr[data-dock-more]');
   if (!el || el !== e.target) return;
   e.preventDefault();
   if (el.dataset.modal) openModal(el.dataset.modal, el);
-  else openDockModal(Number(el.dataset.dockIdx));
+  else if (el.dataset.dockMore != null) DockView.more();
+  else DockView.open(Number(el.dataset.dockIdx));
 });
 document.getElementById('btn-sandbox-activate').addEventListener('click', () => sandboxActivate());
 document.getElementById('btn-sandbox-reset').addEventListener('click', () => sandboxReset());
@@ -2188,6 +2136,6 @@ document.getElementById('modal-close').addEventListener('click', () => closeModa
 document.getElementById('modal-csv-btn').addEventListener('click', () => onCsvClick());
 for (const id of ['soon-modal', 'dock-modal']) {
   document.getElementById(id).addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) (id === 'soon-modal' ? closeSoonModal : closeDockModal)();
+    if (e.target === e.currentTarget) (id === 'soon-modal' ? closeSoonModal : DockView.close)();
   });
 }

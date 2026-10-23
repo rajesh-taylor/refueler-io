@@ -1182,11 +1182,11 @@ body {
   background: var(--surface-raised); border-bottom: 0.5px solid var(--border-mid);
 }
 .dock-table th {
-  padding: 8px 14px; text-align: left; font-weight: 500;
+  padding: 8px 10px; text-align: left; font-weight: 500;
   color: var(--text-secondary); letter-spacing: 0.04em; white-space: nowrap;
 }
 .dock-table td {
-  padding: 8px 14px; border-bottom: 0.5px solid var(--border);
+  padding: 7px 10px; border-bottom: 0.5px solid var(--border);
   vertical-align: middle; white-space: nowrap;
 }
 .dock-table tbody tr:last-child td { border-bottom: none; }
@@ -1495,7 +1495,6 @@ textarea.rp-input { font-family: var(--sans); font-size: 13px; line-height: 1.5;
 .rp-card { border: 0.5px solid var(--border); border-radius: 8px; padding: 14px 16px; background: var(--bg); }
 #rp-td-form { display: flex; flex-direction: column; gap: 4px; }
 #rp-td-form .rp-label { margin-top: 6px; }
-#rp-td-form .rp-strong { margin-top: 10px; align-self: flex-start; }
 #rp-td-confirm { max-width: 12ch; }
 .rp-dl-row {
   display: flex; justify-content: space-between; gap: 16px; padding: 6px 0;
@@ -1515,7 +1514,6 @@ textarea.rp-input { font-family: var(--sans); font-size: 13px; line-height: 1.5;
 .rp-grid { display: grid; grid-template-columns: 11rem 1fr; gap: 8px 12px; align-items: center; margin-bottom: 8px; }
 .rp-grid .rp-label { margin-bottom: 0; }
 .rp-table td { white-space: nowrap; }
-.rp-table tbody tr.rp-selected { background: var(--surface-raised); box-shadow: inset 2px 0 0 var(--accent); }
 .rp-tag {
   font-size: 9px; letter-spacing: .08em; color: var(--text-secondary);
   border: 0.5px solid var(--border-mid); border-radius: 3px; padding: 0 4px; margin-left: 4px;
@@ -1543,6 +1541,130 @@ textarea.rp-input { font-family: var(--sans); font-size: 13px; line-height: 1.5;
   .rp-row .rp-input { width: 100%; }
 }
 @media print { .reports-panel { display: none !important; } }
+
+/* ── Pages (OSA-Tools-4 · 23 Oct 2026): one sidebar section on screen at a time ──────────── */
+.page > :first-child { margin-top: 0; }
+
+/* ── Reports route (OSA-Tools-4): one case, six steps, one open at a time ────────────────────
+ * The open step has the gold rule and the cursor; a finished step is one line (✓ done · — not
+ * needed · · not recorded here). No motion, no shimmer: nothing on this page animates. */
+.rp-route { list-style: none; border: 0.5px solid var(--border); border-radius: 10px; background: var(--surface); margin-bottom: 12px; }
+.rp-step { border-left: 2px solid transparent; border-bottom: 0.5px solid var(--border); padding: 10px 18px 10px 16px; }
+.rp-step:last-child { border-bottom: none; }
+.rp-step-line {
+  display: flex; align-items: baseline; gap: 10px; min-height: 1.5rem;
+  font-family: var(--mono); font-size: 12px; color: var(--text-tertiary);
+}
+.rp-step-mark { width: 1ch; flex: none; text-align: center; }
+.rp-step-n { flex: none; }
+.rp-step-text { min-width: 0; overflow-wrap: anywhere; }
+.rp-step[data-state="current"] { border-left-color: var(--accent); background: var(--bg); padding-top: 14px; padding-bottom: 16px; }
+.rp-step[data-state="current"] .rp-step-line { color: var(--text-primary); font-size: 13px; margin-bottom: 10px; }
+.rp-step[data-state="current"] .rp-step-n { color: var(--accent); }
+.rp-step[data-state="done"] .rp-step-line { color: var(--text-primary); }
+.rp-step[data-state="done"] .rp-step-mark::before { content: '✓'; color: var(--accent); }
+.rp-step[data-state="skipped"] .rp-step-line { color: var(--text-secondary); }
+.rp-step[data-state="skipped"] .rp-step-mark::before { content: '—'; }
+.rp-step[data-state="past"] .rp-step-mark::before { content: '·'; }
+.rp-step-body { padding-left: calc(1ch + 10px); }
+.rp-step-after { font-family: var(--sans); font-size: 0.8rem; color: var(--text-secondary); margin: 4px 0 0 calc(1ch + 10px); }
+.rp-step-actions { margin-top: 12px; }
+.rp-step-body > .rp-hint:first-child { margin-top: 0; }
+.rp-step-body > .rp-hint + .rp-actions { margin-top: 10px; }
+.rp-link-btn {
+  margin-left: auto; background: none; border: none; padding: 0; cursor: pointer;
+  font-family: var(--mono); font-size: 11px; color: var(--text-secondary); text-decoration: underline; text-underline-offset: 3px;
+}
+.rp-link-btn:hover { color: var(--text-primary); }
+.rp-step .dock-table-wrap { margin-top: 12px; background: var(--surface); }
+.rp-form-plain { border: none; padding: 0; background: none; margin-bottom: 0; }
+.rp-step #rp-card { margin-bottom: 12px; }
+#rp-td-form .rp-label { margin-top: 2px; }
+.rp-td-u8 { font-family: var(--mono); color: var(--accent); letter-spacing: .08em; text-transform: none; }
+#rp-td-confirm { max-width: 12ch; }
+.rp-finish, .rp-register-foot {
+  background: var(--surface); border: 0.5px solid var(--border); border-radius: 10px;
+  padding: 14px 18px; margin-bottom: 12px;
+}
+.rp-register-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.rp-register-foot .rp-card-title { margin-bottom: 0; }
+.rp-register-foot .rp-confirm, .rp-register-foot .rp-msg { flex-basis: 100%; margin: 0; }
+.rp-finish .rp-templates { margin-top: 14px; }
+.rp-templates { margin-top: 4px; }
+
+/* ── Execution Dock (OSA-Tools-4): header look-up, Show more row, the one card ───────────────
+ * The look-up sits in the dock's own header line, right, in the title's small mono capitals:
+ * underline only, no box, a small arrow at the end. */
+.dock-header-lookup { align-items: center; flex-wrap: wrap; }
+.dock-lookup { display: flex; align-items: center; gap: 6px; border-bottom: 0.5px solid var(--border-mid); min-width: 19rem; }
+.dock-lookup:focus-within { border-bottom-color: var(--accent); }
+.dock-lookup-input {
+  flex: 1; min-width: 0; background: none; border: none; outline: none; padding: 3px 0;
+  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.12em; color: var(--text-primary);
+}
+.dock-lookup-input::placeholder { text-transform: uppercase; color: var(--text-tertiary); }
+.dock-lookup-go {
+  background: none; border: none; padding: 0 0 0 4px; cursor: pointer;
+  font-family: var(--mono); font-size: 0.8rem; color: var(--text-tertiary);
+}
+.dock-lookup-go:hover, .dock-lookup:focus-within .dock-lookup-go { color: var(--accent); }
+#dock-lookup-msg { margin: -2px 0 10px; }
+.dock-table tbody tr.dock-more td { color: var(--text-secondary); }
+.dock-table tbody tr.dock-more:hover td { color: var(--text-primary); }
+.dock-table tbody tr.dock-more:focus-visible { outline: 1px solid var(--accent); outline-offset: -1px; }
+.dock-card-id { display: flex; align-items: baseline; gap: 12px; font-family: var(--mono); font-weight: 400; }
+.dock-u8 { color: var(--accent); letter-spacing: .04em; }
+.dock-copy { font-size: 10px; }
+.dock-chip {
+  display: inline-block; margin-left: 8px; font-size: 9px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--text-tertiary); border: 0.5px solid var(--border-mid); border-radius: 3px; padding: 0 4px; vertical-align: 1px;
+}
+.dock-diff { display: block; color: var(--accent); font-size: 11px; margin-top: 2px; }
+.dock-detail-row.dock-differs .dock-detail-k { color: var(--text-primary); }
+#dock-modal-note { font-size: 0.75rem; }
+
+@media (max-width: 640px) {
+  .dock-header-lookup { flex-direction: column; align-items: stretch; gap: 8px; }
+  .dock-lookup { min-width: 0; width: 100%; }
+  .dock-col-created, .dock-col-collected { display: none; }
+  .dock-table th, .dock-table td { padding: 7px 4px; }
+  .dock-table th:first-child, .dock-table td:first-child { padding-left: 8px; }
+  .dock-table th, .dock-table td { white-space: normal; }
+  .dock-table td.dock-uuid { white-space: nowrap; }
+  .dock-pill { padding: 2px 5px; }
+  .rp-col-td { display: none; }
+  .rp-step { padding-left: 10px; padding-right: 12px; }
+  .rp-step-body, .rp-step-after { padding-left: 0; margin-left: 0; }
+  .rp-register-foot, .rp-finish { padding: 12px; }
+  .micro-modal { padding: 20px; }
+}
+
+/* ── Case record (OSA-Tools-4): printed alone, Save as PDF ───────────────────────────────────
+ * Filled by reports-view.js; body.printing-case hides everything else for the one print. */
+.case-record { display: none; }
+@media print {
+  body.printing-case #sidebar, body.printing-case #gate, body.printing-case #dashboard,
+  body.printing-case #modal, body.printing-case .micro-modal-backdrop { display: none !important; }
+  body.printing-case #main::before { content: none; display: none; }
+  body.printing-case .case-record { display: block; }
+  .case-record { font-family: var(--sans); color: #1A1A1A; font-size: 10.5pt; line-height: 1.45; }
+  .cr-head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 0.5pt solid #B8B2A8; padding-bottom: 6pt; }
+  .cr-eyebrow, .cr-training { font-family: var(--mono); font-size: 7.5pt; letter-spacing: .14em; text-transform: uppercase; color: #5A5751; }
+  .cr-training { color: #1A1A1A; border: 0.5pt solid #1A1A1A; padding: 1pt 5pt; }
+  .cr-title { font-family: var(--heading); font-weight: 500; font-size: 17pt; margin: 18pt 0 2pt; }
+  .cr-ref { font-family: var(--mono); font-size: 13pt; color: #7A5F2E; margin-bottom: 14pt; letter-spacing: .04em; }
+  .cr-table, .cr-events { width: 100%; border-collapse: collapse; }
+  .cr-table th, .cr-table td, .cr-events td { text-align: left; vertical-align: top; padding: 4.5pt 0; border-bottom: 0.5pt solid #D6D1C8; }
+  .cr-table th { width: 9.5rem; font-weight: 400; color: #5A5751; padding-right: 12pt; }
+  .cr-events td { padding-right: 12pt; }
+  .cr-when { white-space: nowrap; font-family: var(--mono); font-size: 9pt; }
+  .cr-fields { color: #5A5751; }
+  .cr-h2 { font-family: var(--mono); font-weight: 400; font-size: 7.5pt; letter-spacing: .14em; text-transform: uppercase; color: #5A5751; margin: 20pt 0 4pt; }
+  .cr-mono { font-family: var(--mono); }
+  .cr-quiet { color: #5A5751; font-size: 9pt; margin-top: 4pt; }
+  .cr-foot { margin-top: 24pt; padding-top: 6pt; border-top: 0.5pt solid #B8B2A8; font-size: 8.5pt; color: #5A5751; }
+  .case-record tr { break-inside: avoid; }
+}
 
 /* Phones (OSA-Tools-3): Navy Office had no phone layout; a helper may only have a phone.
  * The sidebar becomes a block above the page, the page uses the full width. The dock's own

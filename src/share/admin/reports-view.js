@@ -1,22 +1,38 @@
-/* ─── reports-view.js — Navy Office → Reports (OSA-Tools-3 · 22 Oct 2026) ─────
- * The report route's staff tools: look up a link, take it down for a case, the register
- * (list, New report, Close), templates A/B/C with Copy, and (admin) export.
- * Design: private docs/OSA-Tools-plan-v1.md §7 "Reports section". Worker answers:
- * refueler-share worker/src/handlers/reports.js. Terminal twins: private strategy/osa/tools/.
+/* ─── reports-view.js — Navy Office → Reports (OSA-Tools-3 · 22 Oct 2026; route order OSA-Tools-4 · 23 Oct 2026) ─────
+ * The report route's staff tools, one case at a time, in route order, one column:
+ *   1 Case (New report, or pick one from the register) · 2 Template A · 3 Look up · 4 Take down ·
+ *   5 Close · 6 Template B — then the case record (print / Save as PDF) and template C.
+ * One step is open at a time (gold rule, the cursor in it); a finished step shrinks to one line.
+ * No motion. Why: in the OSA-Tools-3 live run the tools sat side by side and the way through
+ * them got lost; this is the route itself.
+ * Design: private docs/OSA-Tools-plan-v1.md §7. Worker answers: refueler-share
+ * worker/src/handlers/reports.js. Terminal twins: private strategy/osa/tools/.
  *
  * Rules:
  *   • a pasted link is cut at the # before anything else runs, so the key part after the #
  *     is never in a field, a request, storage or this page
- *   • the transfer ID (UUID) travels only in X-Transfer-UUID; the register keeps uuid8 only
+ *   • the transfer ID (UUID) travels only in X-Transfer-UUID; the register keeps uuid8 only. The
+ *     page keeps the full transfer ID of a case in memory only (never sessionStorage), to fill the
+ *     templates and the look-up
+ *   • what the register doesn't record (template A / B sent, "not taking it down") is kept for this
+ *     tab only in sessionStorage, by case reference and time — nothing else
  *   • admin and helper keys both reach this section; the Worker enforces the helper's limits
  *     (CSEA/terrorism cases only, no export) — the page explains them, it doesn't decide them
+ *   • the case record holds no email, no full transfer ID and no key part (the register has none)
  *   • strict CSP, as navy-office.js: no inline handlers, no style=; every Worker value in an
  *     HTML string passes esc(); times in London time
  * ─────────────────────────────────────────────────────────────────────────── */
 'use strict';
 
 const NavyReports = (() => {
-  const S = { worker: '', key: '', role: '', look: null, rows: [], selected: null, tookDown: null };
+  const S = {
+    worker: '', key: '', role: '', rows: [], selected: null, look: null,
+    links: {},       // case_ref → full transfer ID, memory only (from New report or a look-up)
+    tookDown: null,  // { case_ref, at, recorded } — the last take-down from this page
+    prefilled: {},   // case_ref → true once the Close form was pre-set from the facts
+    focus: '',       // `${case_ref}:${step}` — the cursor moves only when the step changes
+    tplHere: null,   // 'finish' when the templates were opened under a closed case
+  };
 
   // ── Fixed choices (the database's lists; register.sh offers the same) ─────
   const CATEGORY = {
@@ -31,8 +47,10 @@ const NavyReports = (() => {
   const short = (c) => (CATEGORY[c] ?? c).split(' — ')[0];
   const HELPER_CATEGORIES = ['csea', 'terrorism'];
   const ONLY_RAJESH = 'Only Rajesh can take this down. It can wait for him.';
+  const ONLY_8 = 'That’s only the first 8 characters. Paste the whole link.';
 
   const UUID_RE = /([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
+  const UUID8_RE = /^[0-9a-f]{8}$/i;
   const FORBIDDEN = /@|#|http/i;
   const SHARE = 'https://share.refueler.io/?uuid=';
 
@@ -40,6 +58,7 @@ const NavyReports = (() => {
   const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   const say = (id, text) => { $(id).textContent = text ?? ''; };
+  const now = () => Math.floor(Date.now() / 1000);
 
   // ── London time ───────────────────────────────────────────────────────────
   const fmt = (opts) => new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', hour12: false, ...opts });
@@ -52,15 +71,38 @@ const NavyReports = (() => {
 
   // ── The # cut ─────────────────────────────────────────────────────────────
   // Paste and drop are taken over: only the part before the # is ever put in the field.
-  // Typing a # (or an autofill) cuts the field at once on the input event.
+  // Typing a # cuts the field there, and what is typed after it at the end is not taken until the
+  // field is edited another way (so a typed key part never lands in it); an autofill is cut on input.
   function cutAtHash(s) { const i = s.indexOf('#'); return (i < 0 ? s : s.slice(0, i)).trim(); }
   function guard(input, after) {
-    const put = (text) => { input.value = cutAtHash(text); after?.(); };
+    let sealed = false;
+    const put = (text) => { input.value = cutAtHash(text); sealed = false; after?.(); };
     input.addEventListener('paste', (e) => { e.preventDefault(); put(e.clipboardData?.getData('text') ?? ''); });
     input.addEventListener('drop', (e) => { e.preventDefault(); put(e.dataTransfer?.getData('text/plain') ?? ''); });
+    input.addEventListener('beforeinput', (e) => {
+      if (!e.inputType.startsWith('insert')) { sealed = false; return; }
+      if (input.selectionStart !== input.value.length || input.selectionEnd !== input.value.length) sealed = false;
+      if (sealed) { e.preventDefault(); return; }
+      if (e.data?.includes('#')) {
+        e.preventDefault();
+        input.value = cutAtHash(input.value.slice(0, input.selectionStart) + e.data);
+        sealed = true;
+      }
+    });
     input.addEventListener('input', () => { if (input.value.includes('#')) input.value = cutAtHash(input.value); });
   }
   const uuidIn = (s) => (UUID_RE.exec(cutAtHash(s)) ?? [])[1]?.toLowerCase() ?? null;
+
+  // ── What the register doesn't record, for this tab only ───────────────────
+  // { case_ref: { a: unix | 'none', b: unix | 'none', skip: unix } }
+  const MARKS_KEY = 'rp-marks';
+  let marks = {};
+  try { marks = JSON.parse(sessionStorage.getItem(MARKS_KEY) ?? '{}') ?? {}; } catch { marks = {}; }
+  const markOf = (ref) => marks[ref] ?? {};
+  function mark(ref, k, v) {
+    marks[ref] = { ...markOf(ref), [k]: v };
+    try { sessionStorage.setItem(MARKS_KEY, JSON.stringify(marks)); } catch { /* this tab only; fine */ }
+  }
 
   // ── Worker ────────────────────────────────────────────────────────────────
   async function api(method, route, { uuid, body } = {}) {
@@ -95,31 +137,97 @@ const NavyReports = (() => {
   };
   const refusal = (r) => common(r.status) ?? REFUSAL[r.data.error] ?? `The register refused it (${r.data.error ?? r.status}). Nothing was saved.`;
 
-  // ── Look up ───────────────────────────────────────────────────────────────
-  async function lookUp() {
-    const uuid = uuidIn($('rp-link').value);
-    if (!uuid) {
-      $('rp-result').hidden = true;
-      S.look = null;
-      say('rp-lookup-msg', 'That is not a Share link or transfer ID (UUID). Nothing was looked up.');
-      return;
-    }
-    $('rp-link').value = SHARE + uuid;   // the field shows only the transfer ID part, whatever came with it
-    if (S.look?.uuid !== uuid) { say('rp-td-msg', ''); S.tookDown = null; }
-    say('rp-lookup-msg', 'Looking up…');
-    const r = await api('GET', '/admin/reports/lookup', { uuid });
+  // ── Register (step 1's list) ──────────────────────────────────────────────
+  async function loadRegister() {
+    const r = await api('GET', '/admin/reports/register');
     if (r.status !== 200) {
-      say('rp-lookup-msg', common(r.status) ?? `Unexpected answer (${r.status}). Nothing was done.`);
-      return;
+      say('rp-register-msg', common(r.status) ?? `Unexpected answer (${r.status}).`);
+      return false;
     }
-    S.look = { uuid, ...r.data, at: Math.floor(Date.now() / 1000) };
-    say('rp-lookup-msg', '');
-    renderCard();
-    await loadRegister();   // every time: a case opened elsewhere (the scripts, a helper) must show
-    renderTakedown();
-    $('rp-result').hidden = false;
+    S.rows = Array.isArray(r.data.rows) ? r.data.rows : [];
+    if (S.selected && !S.rows.some((c) => c.case_ref === S.selected)) S.selected = null;   // training rows deleted
+    renderRegister();
+    route();
+    return true;
   }
 
+  function renderRegister() {
+    const tb = $('rp-tbody');
+    if (!S.rows.length) { tb.innerHTML = '<tr><td colspan="6" class="dock-empty">The register is empty.</td></tr>'; return; }
+    tb.innerHTML = S.rows.map((r) => {
+      const td = r.takedown_at ? `${esc(t(F_SHORT, r.takedown_at))} · ${esc(r.takedown_by ?? '')}` : '—';
+      return `<tr data-case="${esc(r.case_ref)}" tabindex="0">
+        <td class="dock-uuid">${esc(r.case_ref)}${r.training ? ' <span class="rp-tag">TRAINING</span>' : ''}</td>
+        <td>${esc(t(F_SHORT, r.received_at))}</td>
+        <td>${esc(short(r.category))}</td>
+        <td>${esc(r.uuid8 ?? '—')}</td>
+        <td>${esc(DECISION[r.decision] ?? r.decision)}</td>
+        <td class="rp-col-td">${td}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function pick(ref) {
+    if (S.selected !== ref) {
+      $('rp-close').reset();
+      say('rp-close-msg', ''); say('rp-td-msg', ''); say('rp-lookup-msg', '');
+      $('rp-td-confirm').value = '';
+      S.tplHere = null;
+    }
+    S.selected = ref;
+    const c = S.rows.find((r) => r.case_ref === ref);
+    if (S.look && !(c?.uuid8 && S.look.uuid.startsWith(c.uuid8))) S.look = null;
+    $('rp-link').value = S.links[ref] ? SHARE + S.links[ref] : '';
+    $('rp-new').hidden = true;
+    say('rp-register-msg', '');
+    route();
+  }
+
+  function change() {
+    S.selected = null;
+    S.look = null;
+    S.tplHere = null;
+    route();
+    $('rp-new-btn').focus();
+  }
+
+  // ── New report ────────────────────────────────────────────────────────────
+  function openNew() {
+    const f = $('rp-new');
+    f.reset();
+    say('rp-new-msg', '');
+    f.hidden = false;
+    $('rp-new-training').focus();
+  }
+
+  async function submitNew() {
+    const linkText = $('rp-new-link').value.trim();
+    const uuid = linkText ? uuidIn(linkText) : null;
+    if (linkText && !uuid) {
+      return say('rp-new-msg', UUID8_RE.test(linkText) ? ONLY_8 : 'That is not a Share link or transfer ID (UUID). Nothing was saved.');
+    }
+    const category = $('rp-new-category').value;
+    if (category === 'no_link' && uuid) {
+      return say('rp-new-msg', '“No link given” is for a report without a link. Remove the link, or choose another category. Nothing was saved.');
+    }
+    const reason = $('rp-new-reason').value.trim();
+    if (FORBIDDEN.test(reason)) return say('rp-new-msg', 'No email addresses, # or links in the note. Nothing was saved.');
+    const training = $('rp-new-training').value === 'yes';
+    const body = { training, route: $('rp-new-route').value, category, uuid8: uuid ? uuid.slice(0, 8) : null };
+    if (reason) body.reason = reason;
+    say('rp-new-msg', 'Opening…');
+    const r = await api('POST', '/admin/reports/open', { body });
+    if (r.status !== 200) return say('rp-new-msg', refusal(r));
+    $('rp-new').hidden = true;
+    const ref = r.data.case_ref;
+    if (uuid) S.links[ref] = uuid;
+    await loadRegister();
+    pick(ref);
+    say('rp-register-msg', `Opened ${ref}${training ? ' (TRAINING)' : ''}. Use this reference in every email to the reporter.`);
+  }
+
+  // ── The route: which step is where ────────────────────────────────────────
+  // States: current (open, gold rule) · done ✓ · skipped — · past (not recorded here) · todo.
   const STATE = {
     live:      ['Live', ''],
     expired:   ['Time ran out — parts not yet cleared', 'It can still be taken down.'],
@@ -127,10 +235,135 @@ const NavyReports = (() => {
     removed:   ['Removed after a report', ''],
     not_found: ['No such link', 'It never existed, or its record was cleared after 30 days.'],
   };
+
+  function plan(c) {
+    if (!c) return { 1: ['current', 'Case'] };
+    const m = markOf(c.case_ref);
+    const closed = c.decision !== 'open';
+    const L = S.look && c.uuid8 && S.look.uuid.startsWith(c.uuid8) ? S.look : null;
+    const td = S.tookDown?.case_ref === c.case_ref ? S.tookDown : null;
+    const helperRefused = S.role === 'helper' && !HELPER_CATEGORIES.includes(c.category);
+    const st = {};
+    st[1] = ['done', `${c.case_ref}${c.training ? ' · TRAINING' : ''} · ${short(c.category)} · received ${t(F_SHORT, c.received_at)}`];
+
+    if (m.a) st[2] = ['done', m.a === 'none' ? 'Template A · no way to reply' : `Template A sent ${t(F_CLOCK, m.a)}`];
+    else st[2] = closed ? ['past', 'Template A'] : ['current', 'Template A — acknowledgement'];
+    const after2 = st[2][0] !== 'current';
+
+    if (!c.uuid8) st[3] = ['skipped', 'No link given — nothing to look up'];
+    else if (L) st[3] = ['done', `Looked up ${t(F_CLOCK, L.at)} · ${STATE[L.state]?.[0] ?? L.state}`];
+    else if (c.takedown_at || closed) st[3] = ['past', 'Look up the link'];
+    else st[3] = [after2 ? 'current' : 'todo', 'Look up the link'];
+
+    if (c.takedown_at) st[4] = ['done', `Taken down ${t(F_CLOCK, c.takedown_at)}${c.takedown_by === 'helper' ? ' · by the helper' : ''}`];
+    else if (td && !td.recorded) st[4] = ['done', `Taken down ${t(F_CLOCK, td.at)} · not in the register — write it in when you close`];
+    else if (!c.uuid8) st[4] = ['skipped', 'No link given — nothing to take down'];
+    else if (closed) st[4] = ['skipped', 'Not taken down'];
+    else if (L?.state === 'removed') st[4] = ['skipped', 'Nothing to take down — already removed after a report'];
+    else if (L?.state === 'gone') st[4] = ['skipped', 'Nothing to take down — already gone'];
+    else if (L?.state === 'not_found') st[4] = ['skipped', 'Nothing to take down — no such link'];
+    else if (L && m.skip) st[4] = ['skipped', 'Not taken down'];
+    else st[4] = [L ? 'current' : 'todo', 'Take down'];
+
+    const after4 = ['done', 'skipped'].includes(st[4][0]);
+    if (closed) st[5] = ['done', `Closed ${t(F_CLOCK, c.closed_at)} · ${DECISION[c.decision] ?? c.decision}`];
+    else st[5] = [after2 && after4 ? 'current' : 'todo', 'Close the case'];
+
+    if (m.b) st[6] = ['done', m.b === 'none' ? 'Template B · no way to reply' : `Template B sent ${t(F_CLOCK, m.b)}`];
+    else st[6] = [closed ? 'current' : 'todo', 'Template B — outcome'];
+
+    st.L = L; st.td = td; st.closed = closed; st.helperRefused = helperRefused;
+    return st;
+  }
+
+  function route() {
+    const c = S.rows.find((r) => r.case_ref === S.selected) ?? null;
+    const st = plan(c);
+    let current = null;
+    for (const n of [1, 2, 3, 4, 5, 6]) {
+      const [state, text] = st[n] ?? ['todo', $(`rp-s${n}-text`).dataset.name];
+      const li = $(`rp-s${n}`), txt = $(`rp-s${n}-text`);
+      if (!txt.dataset.name) txt.dataset.name = txt.textContent;
+      li.dataset.state = c || n === 1 ? state : 'todo';
+      txt.textContent = c || n === 1 ? text : txt.dataset.name;
+      $(`rp-s${n}-body`).hidden = li.dataset.state !== 'current';
+      if (li.dataset.state === 'current' && !current) current = n;
+    }
+    $('rp-change-btn').hidden = !c;
+    $('rp-route').classList.toggle('rp-route-idle', !c);
+
+    // After-notes: what to do next once a step has shrunk.
+    const a4 = $('rp-s4-after'), a5 = $('rp-s5-after');
+    a4.hidden = true; a5.hidden = true;
+    if (c && st[4][0] === 'done' && !st.closed) {
+      a4.textContent = 'Open the full link in Safari: it should say “This file is no longer available.”';
+      a4.hidden = false;
+    }
+    if (c && st.closed) {
+      a5.textContent = S.role === 'admin'
+        ? 'Export the register when the case is finished (Register → Export below, or export-register.sh on the Mac).'
+        : 'Rajesh exports the register.';
+      a5.hidden = false;
+    }
+
+    if (c) {
+      if (current === 4) renderTakedown(c, st);
+      if (current === 5) renderClose(c, st);
+      renderTemplates(c, st);
+    }
+    placeTemplates(current);
+
+    // Finish: the case record and the templates, once the case is closed.
+    $('rp-finish').hidden = !(c && st.closed);
+    if (c && st.closed) say('rp-finish-note', st[6][0] === 'done' ? `${c.case_ref} is finished.` : '');
+
+    // The cursor goes to the step that just opened (not on every redraw).
+    // A hidden page takes no focus: the key stays unset until Reports is on screen (shown()).
+    const key = `${c?.case_ref ?? ''}:${current ?? ''}`;
+    if (key !== S.focus && !$('card-reports').hidden) {
+      S.focus = key;
+      if (current) focusStep(current);
+      else if (c && st.closed) $('rp-record-btn').focus({ preventScroll: true });
+    }
+  }
+
+  function focusStep(n) {
+    const body = $(`rp-s${n}-body`);
+    const first = n === 3 && $('rp-link').value ? $('rp-lookup-btn')
+      : n === 2 || n === 6 ? $('rp-tpl-copy')
+      : body.querySelector('input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled])');
+    first?.focus({ preventScroll: true });
+    $(`rp-s${n}`).scrollIntoView({ block: 'nearest' });
+  }
+
+  // Called when the Reports page comes on screen: the cursor goes to the open step.
+  function shown() { S.focus = ''; route(); }
+
+  // ── 3 · Look up ───────────────────────────────────────────────────────────
+  async function lookUp() {
+    const c = S.rows.find((r) => r.case_ref === S.selected);
+    if (!c) return;
+    const text = $('rp-link').value.trim();
+    const uuid = uuidIn(text);
+    if (!uuid) {
+      return say('rp-lookup-msg', UUID8_RE.test(text) ? ONLY_8 : 'That is not a Share link or transfer ID (UUID). Nothing was looked up.');
+    }
+    $('rp-link').value = SHARE + uuid;   // the field shows only the transfer ID part, whatever came with it
+    if (c.uuid8 && !uuid.startsWith(c.uuid8)) {
+      return say('rp-lookup-msg', `That link starts ${uuid.slice(0, 8)}; case ${c.case_ref} is about ${c.uuid8}. Check the link in the report. Nothing was looked up.`);
+    }
+    say('rp-lookup-msg', 'Looking up…');
+    const r = await api('GET', '/admin/reports/lookup', { uuid });
+    if (r.status !== 200) return say('rp-lookup-msg', common(r.status) ?? `Unexpected answer (${r.status}). Nothing was done.`);
+    S.look = { uuid, ...r.data, at: now() };
+    S.links[c.case_ref] = uuid;
+    say('rp-lookup-msg', '');
+    await loadRegister();   // a take-down from the scripts or a helper must show
+  }
+
   const row = (k, v) => `<div class="rp-dl-row"><span class="rp-dl-k">${esc(k)}</span><span class="rp-dl-v">${v}</span></div>`;
 
-  function renderCard() {
-    const L = S.look;
+  function renderCard(L) {
     const [word, sub] = STATE[L.state] ?? [L.state, ''];
     const rows = [
       row('Transfer ID', `<span class="rp-u8">${esc(L.uuid.slice(0, 8))}</span>${esc(L.uuid.slice(8))}`),
@@ -145,61 +378,43 @@ const NavyReports = (() => {
         row('Downloaded and closed', L.consumed ? 'Yes' : 'No'),
       );
     }
-    $('rp-card').innerHTML = `<div class="rp-card-title">Link</div>${rows.join('')}` +
-      `<p class="rp-hint">Read from the live record at ${esc(t(F_CLOCK, L.at))}.</p>`;
+    $('rp-card').innerHTML = rows.join('') + `<p class="rp-hint">Read from the live record at ${esc(t(F_CLOCK, L.at))}.</p>`;
   }
 
-  // ── Take down ─────────────────────────────────────────────────────────────
-  const openCasesFor = (u8) => S.rows.filter((r) => r.uuid8 === u8 && r.decision === 'open');
-
-  function renderTakedown() {
-    const L = S.look;
-    if (!L) return;
-    const u8 = L.uuid.slice(0, 8);
-    const form = $('rp-td-form'), sel = $('rp-td-case');
-    // Nothing to take down → the box folds away; the reason goes on one line under the card.
-    const shut = (note) => { form.hidden = true; $('rp-td').hidden = true; $('rp-result').classList.add('rp-single'); say('rp-td-after', note); };
-    $('rp-td').hidden = false; $('rp-result').classList.remove('rp-single'); say('rp-td-after', '');
-    if (L.state === 'removed' && S.tookDown === L.uuid) return shut('');
-    if (L.state === 'removed')   return shut('Nothing to take down: it was removed after a report. A second report about this link: close that case as Removed and name the first case in the reason.');
-    if (L.state === 'gone')      return shut('Nothing to take down: it is already gone. Close the case as "Already gone".');
-    if (L.state === 'not_found') return shut('Nothing to take down: no such link. Check the link with the reporter.');
-    const cases = openCasesFor(u8);
-    if (!cases.length) return shut(`No open case for this link (${u8}). Open one in the register first — New report fills the link in from here.`);
-    form.hidden = false;
-    const keep = cases.some((c) => c.case_ref === sel.value) ? sel.value
-      : cases.some((c) => c.case_ref === S.selected) ? S.selected : cases[0].case_ref;
-    sel.replaceChildren(...cases.map((c) => new Option(
-      `${c.case_ref} · ${short(c.category)}${c.training ? ' · TRAINING' : ''}`, c.case_ref)));
-    sel.value = keep;
+  // ── 4 · Take down ─────────────────────────────────────────────────────────
+  function renderTakedown(c, st) {
+    renderCard(st.L);
+    const u8 = st.L.uuid.slice(0, 8);
+    // The 8 characters are shown, never offered to copy: typing them is the deliberate pause.
+    $('rp-td-label').innerHTML = `Type the first 8 characters: <span class="rp-td-u8">${esc(u8)}</span>`;
+    $('rp-td-confirm').disabled = st.helperRefused;
+    $('rp-td-skip').hidden = st.helperRefused;
+    say('rp-td-note', st.helperRefused ? ONLY_RAJESH : '');
     updateTakedownButton();
   }
 
   function updateTakedownButton() {
-    const L = S.look;
-    const c = S.rows.find((r) => r.case_ref === $('rp-td-case').value);
-    const refused = S.role === 'helper' && c && !HELPER_CATEGORIES.includes(c.category);
-    $('rp-td-confirm').disabled = refused;
-    say('rp-td-note', refused ? ONLY_RAJESH : '');
-    $('rp-td-btn').disabled = refused || !c || $('rp-td-confirm').value.trim().toLowerCase() !== L.uuid.slice(0, 8);
+    const L = S.look, c = S.rows.find((r) => r.case_ref === S.selected);
+    if (!L || !c) return;
+    const refused = S.role === 'helper' && !HELPER_CATEGORIES.includes(c.category);
+    $('rp-td-btn').disabled = refused || $('rp-td-confirm').value.trim().toLowerCase() !== L.uuid.slice(0, 8);
   }
 
   async function takeDown() {
-    const L = S.look, caseRef = $('rp-td-case').value, confirm = $('rp-td-confirm').value.trim().toLowerCase();
+    const L = S.look, caseRef = S.selected, confirm = $('rp-td-confirm').value.trim().toLowerCase();
     const btn = $('rp-td-btn');
     btn.disabled = true; btn.textContent = 'Taking down…';
     const r = await api('POST', '/admin/reports/takedown', { uuid: L.uuid, body: { case_ref: caseRef, confirm } });
     btn.textContent = 'Take down';
     const d = r.data, at = d.removed_at;
-    let msg, rerun = false;
+    let msg = '', rerun = false;
     if (r.status === 200 && d.already_removed) {
-      msg = `Already removed (at ${t(F_CLOCK, at)} London). Nothing changed. If this is a second report about the same link, close it as Removed and name the first case.`;
-      rerun = true;
-    } else if (r.status === 200 && d.register_updated) {
-      msg = `Taken down at ${t(F_CLOCK, at)} (London). Recorded in the register against ${caseRef}. Open the full link in Safari: it should say “This file is no longer available.”`;
-      rerun = true;
+      rerun = true;   // step 4 then says "already removed"; Close: Removed, naming the first case
     } else if (r.status === 200) {
-      msg = `Taken down at ${t(F_CLOCK, at)} (London) — but the register did NOT record it. Write the time in by hand, in the reason when you close the case:${t(F_CLOCK, at)} (London), ${t(F_DAY, at)}.`;
+      S.tookDown = { case_ref: caseRef, at, recorded: !!d.register_updated };
+      if (!d.register_updated) {
+        $('rp-close-reason').value = `Taken down ${t(F_CLOCK, at)} (London), ${t(F_DAY, at)}. The register did not record it.`;
+      }
       rerun = true;
     } else if (r.status === 202) {
       msg = `Part-way: ${d.remaining ?? 'some'} part(s) are still there. Press Take down again — it carries on where it stopped.`;
@@ -210,133 +425,75 @@ const NavyReports = (() => {
     } else if (r.status === 404) {
       msg = 'No such link. Nothing was taken down.';
     } else if (r.status === 409) {
-      msg = { no_such_case: `There is no case ${caseRef} in the register. Open it first (New report). Nothing was taken down.`,
+      msg = { no_such_case: `There is no case ${caseRef} in the register. Nothing was taken down.`,
               other_link:   `Case ${caseRef} is about a different link. Check the case. Nothing was taken down.`,
               case_closed:  `Case ${caseRef} is already closed. Nothing was taken down.` }[d.why]
         ?? 'The case doesn’t match this link. Nothing was taken down.';
     } else if (r.status === 410) {
-      msg = 'Already gone (deleted after download, or its time ran out). Nothing to take down — close the case as "Already gone".';
+      msg = 'Already gone (deleted after download, or its time ran out). Nothing to take down.';
+      rerun = true;
     } else {
       msg = common(r.status) ?? `Share refused the request (${d.error ?? r.status}). Look it up again before trying again.`;
     }
     $('rp-td-confirm').value = '';
-    if (rerun) { S.tookDown = L.uuid; await loadRegister(); await lookUp(); }
-    else updateTakedownButton();
     say('rp-td-msg', msg);
+    if (rerun) await lookUp();
+    else updateTakedownButton();
   }
 
-  // ── Register ──────────────────────────────────────────────────────────────
-  async function loadRegister() {
-    const r = await api('GET', '/admin/reports/register');
-    if (r.status !== 200) {
-      say('rp-register-msg', common(r.status) ?? `Unexpected answer (${r.status}).`);
-      return;
-    }
-    S.rows = Array.isArray(r.data.rows) ? r.data.rows : [];
-    renderRegister();
-    selectCase(S.selected);   // a case gone from the register (training rows deleted) closes its panel
+  function notTakingDown() {
+    mark(S.selected, 'skip', now());
+    route();
   }
 
-  function renderRegister() {
-    const tb = $('rp-tbody');
-    if (!S.rows.length) { tb.innerHTML = '<tr><td colspan="6" class="dock-empty">The register is empty.</td></tr>'; return; }
-    tb.innerHTML = S.rows.map((r) => {
-      const td = r.takedown_at ? `${esc(t(F_SHORT, r.takedown_at))} · ${esc(r.takedown_by ?? '')}` : '—';
-      return `<tr data-case="${esc(r.case_ref)}" tabindex="0"${r.case_ref === S.selected ? ' class="rp-selected"' : ''}>
-        <td class="dock-uuid">${esc(r.case_ref)}${r.training ? ' <span class="rp-tag">TRAINING</span>' : ''}</td>
-        <td>${esc(t(F_SHORT, r.received_at))}</td>
-        <td>${esc(short(r.category))}</td>
-        <td>${esc(r.uuid8 ?? '—')}</td>
-        <td>${esc(DECISION[r.decision] ?? r.decision)}</td>
-        <td>${td}</td>
-      </tr>`;
-    }).join('');
-  }
-
-  // ── New report ────────────────────────────────────────────────────────────
-  function openNew() {
-    const f = $('rp-new');
-    f.reset();
-    if (S.look) $('rp-new-link').value = S.look.uuid;
-    say('rp-new-msg', '');
-    f.hidden = false;
-    $('rp-new-training').focus();
-  }
-
-  async function submitNew(e) {
-    e.preventDefault();
-    const linkText = $('rp-new-link').value.trim();
-    const uuid = linkText ? uuidIn(linkText) : null;
-    if (linkText && !uuid) return say('rp-new-msg', 'That is not a Share link or transfer ID (UUID). Nothing was saved.');
-    const reason = $('rp-new-reason').value.trim();
-    if (FORBIDDEN.test(reason)) return say('rp-new-msg', 'No email addresses, # or links in the note. Nothing was saved.');
-    const training = $('rp-new-training').value === 'yes';
-    const body = {
-      training, route: $('rp-new-route').value, category: $('rp-new-category').value,
-      uuid8: uuid ? uuid.slice(0, 8) : null, reason: reason || null,
-    };
-    say('rp-new-msg', 'Opening…');
-    const r = await api('POST', '/admin/reports/open', { body });
-    if (r.status !== 200) return say('rp-new-msg', refusal(r));
-    $('rp-new').hidden = true;
-    S.selected = r.data.case_ref;
-    await loadRegister();
-    renderTakedown();
-    say('rp-register-msg', `Opened ${r.data.case_ref}${training ? ' (TRAINING)' : ''}. Use this reference in every email to the reporter (template A onwards).`);
-  }
-
-  // ── A case: close + templates ─────────────────────────────────────────────
-  function selectCase(ref) {
-    const c = S.rows.find((r) => r.case_ref === ref);
-    if (!c) { S.selected = null; $('rp-case').hidden = true; return; }
-    if (S.selected !== ref) { say('rp-close-msg', ''); $('rp-close').reset(); }
-    S.selected = ref;
-    for (const tr of $('rp-tbody').rows) tr.classList.toggle('rp-selected', tr.dataset.case === ref);
-    say('rp-case-title', `${c.case_ref}${c.training ? ' · TRAINING' : ''} · ${CATEGORY[c.category] ?? c.category} · ${DECISION[c.decision] ?? c.decision}`);
-    const bits = [`Received ${t(F_FULL, c.received_at)} by ${ROUTE[c.route] ?? c.route}`,
-                  c.uuid8 ? `link ${c.uuid8}` : 'no link given', `opened by ${c.opened_by}`];
-    if (c.takedown_at) bits.push(`taken down ${t(F_FULL, c.takedown_at)} by ${c.takedown_by}`);
-    if (c.decision !== 'open') {
-      bits.push(`closed ${t(F_FULL, c.closed_at)}`);
-      if (c.reporter_told) bits.push(`reporter told: ${TOLD[c.reporter_told] ?? c.reporter_told}`);
-      if (c.nca_ref) bits.push(`NCA ${c.nca_ref}`);
-      if (c.key_removed) bits.push('key part removed from the mailbox');
-    }
-    say('rp-case-summary', `${bits.join(' · ')}.${c.reason ? ` Note: ${c.reason}` : ''}`);
-    const open = c.decision === 'open';
-    $('rp-close').hidden = !open;
-    const refused = open && S.role === 'helper' && !HELPER_CATEGORIES.includes(c.category);
+  // ── 5 · Close ─────────────────────────────────────────────────────────────
+  // The decision is pre-set once from what the route found (it can be changed); nothing else is.
+  function renderClose(c, st) {
+    const refused = S.role === 'helper' && !HELPER_CATEGORIES.includes(c.category);
     for (const el of $('rp-close').elements) el.disabled = refused;
     say('rp-close-note', refused ? 'Only Rajesh can close this case. It can wait for him.' : '');
-    renderTemplates(c);
-    $('rp-case').hidden = false;
+    if (S.prefilled[c.case_ref]) return;
+    S.prefilled[c.case_ref] = true;
+    const L = st.L, m = markOf(c.case_ref);
+    const decision = c.takedown_at || st.td ? 'removed'
+      : !c.uuid8 ? 'manifestly_unfounded'
+      : L?.state === 'removed' ? 'removed'
+      : L?.state === 'gone' ? 'already_gone'
+      : L?.state === 'not_found' ? 'manifestly_unfounded'
+      : m.skip ? 'not_removed' : '';
+    $('rp-close-decision').value = decision;
+    if (m.a === 'none') $('rp-close-told').value = 'no_contact';
+    if (L?.state === 'removed' && !c.takedown_at && !$('rp-close-reason').value) {
+      const first = S.rows.find((r) => r.uuid8 === c.uuid8 && r.takedown_at && r.case_ref !== c.case_ref);
+      if (first) $('rp-close-reason').value = `Already removed under ${first.case_ref}.`;
+    }
   }
 
-  async function submitClose(e) {
-    e.preventDefault();
+  async function submitClose() {
     const ref = S.selected;
     const reason = $('rp-close-reason').value.trim();
     if (FORBIDDEN.test(reason)) return say('rp-close-msg', 'No email addresses, # or links in the reason. Nothing was saved.');
     const nca = $('rp-close-nca').value.trim();
     if (!/^[A-Za-z0-9-]{0,64}$/.test(nca)) return say('rp-close-msg', REFUSAL.bad_nca_ref);
     const decision = $('rp-close-decision').value;
-    const body = { case_ref: ref, decision, reason: reason || null, reporter_told: $('rp-close-told').value,
-                   nca_ref: nca || null, key_removed: $('rp-close-key').value === 'yes' };
+    // Empty reason or NCA reference: left out, so the opening note (and any NCA reference) stays.
+    const body = { case_ref: ref, decision, reporter_told: $('rp-close-told').value, key_removed: $('rp-close-key').value === 'yes' };
+    if (reason) body.reason = reason;
+    if (nca) body.nca_ref = nca;
     say('rp-close-msg', 'Closing…');
     const r = await api('POST', '/admin/reports/update', { body });
     if (r.status !== 200) return say('rp-close-msg', refusal(r));
+    say('rp-close-msg', '');
     await loadRegister();
-    renderTakedown();
-    say('rp-register-msg', `Closed ${ref} as ${DECISION[decision] ?? decision}.` +
-      (S.role === 'admin' ? ' Then export the register (Export here, or export-register.sh on the Mac).' : ' Rajesh exports the register.'));
   }
 
-  // Templates: route §9 text, the case reference on top, signed "Refueler Share" (drill 1, change 1).
-  // [ ] marks what is still to fill in. The link is the part before the # — known only once the
-  // link has been looked up here (the register keeps the first 8 characters, not the transfer ID).
-  function renderTemplates(c) {
-    const looked = S.look && c.uuid8 && S.look.uuid.startsWith(c.uuid8);
-    const link = looked ? SHARE + S.look.uuid : '[link up to #]';
+  // ── 2 / 6 · Templates ─────────────────────────────────────────────────────
+  // Route §9 text, the case reference on top, signed "Refueler Share" (drill 1, change 1). [ ] marks
+  // what is still to fill in. The link is the part before the # — known once it was pasted in New
+  // report or looked up here (the register keeps the first 8 characters, not the transfer ID).
+  function renderTemplates(c, st) {
+    const uuid = S.links[c.case_ref];
+    const link = uuid ? SHARE + uuid : '[link up to #]';
     const head = `Reference: ${c.case_ref}\n\n`, sign = '\n\nRefueler Share';
     const urgent = HELPER_CATEGORIES.includes(c.category);
     const a = `Thank you. We have your report about ${link} and will look at it ${urgent ? 'today' : 'within two working days'}. ` +
@@ -352,11 +509,26 @@ const NavyReports = (() => {
     const cText = `We have looked again at the link we removed on ${took ? t(F_LONG, took.takedown_at) : '[date]'}. ` +
       '[We stand by the decision because … / We were wrong, and we’re sorry.] ' +
       'Files we remove are deleted and cannot be restored, because we never hold the key.';
-    $('rp-tpl-a').value = head + a + sign;
-    $('rp-tpl-b').value = head + b + sign;
-    $('rp-tpl-c').value = head + cText + sign;
-    say('rp-tpl-hint', looked ? 'Edit the [ ] parts before copying. The link is the part before the #.'
-      : 'Edit the [ ] parts before copying. To fill in the link, look it up above.');
+    for (const [k, v] of [['a', head + a + sign], ['b', head + b + sign], ['c', head + cText + sign]]) {
+      const ta = $(`rp-tpl-${k}`);
+      if (ta.dataset.case !== c.case_ref || ta.dataset.auto === ta.value) { ta.value = v; ta.dataset.auto = v; ta.dataset.case = c.case_ref; }
+    }
+    say('rp-tpl-hint', uuid ? 'Edit the [ ] parts before copying. The link is the part before the #.'
+      : 'Edit the [ ] parts before copying. The link fills in once it is pasted in New report or looked up (step 3).');
+  }
+
+  // One templates block (tabs A/B/C, one Copy), moved into the step that needs it.
+  function placeTemplates(current) {
+    const tpl = $('rp-templates');
+    const slot = current === 2 ? 's2' : current === 6 ? 's6' : S.tplHere === 'finish' && !$('rp-finish').hidden ? 'finish' : null;
+    if (!slot) { tpl.hidden = true; return; }
+    const host = $(`rp-${slot}-slot`);
+    if (tpl.parentElement !== host) {
+      host.append(tpl);
+      if (slot === 's2') showTab('a');
+      if (slot === 's6') showTab('b');
+    }
+    tpl.hidden = false;
   }
 
   function showTab(k) {
@@ -375,16 +547,104 @@ const NavyReports = (() => {
     setTimeout(() => { btn.textContent = 'Copy'; }, 2500);
   }
 
+  function sent(k, v) {
+    mark(S.selected, k, v);
+    route();
+  }
+
+  // ── Case record (print / Save as PDF) ─────────────────────────────────────
+  // The register row and its events — never an email, the full transfer ID or the key part.
+  // Admin: the events come from the export (the only route that returns them). Helper: no export,
+  // so the timeline is built from the row's own times and says so.
+  const FIELD = {
+    training: 'training', received_at: 'time received', route: 'route', uuid8: 'link', category: 'category',
+    decision: 'decision', reason: 'reason', takedown_at: 'take-down time', takedown_by: 'taken down by',
+    nca_ref: 'NCA reference', reporter_told: 'reporter told', key_removed: 'key part removed',
+  };
+  const ACTION = { open: 'Opened', update: 'Updated', takedown: 'Taken down', close: 'Closed', category_change: 'Category changed' };
+  const BY = { admin: 'admin', helper: 'helper' };
+
+  async function caseRecord() {
+    const c = S.rows.find((r) => r.case_ref === S.selected);
+    if (!c) return;
+    const btn = $('rp-record-btn');
+    btn.disabled = true;
+    let events = null;
+    if (S.role === 'admin') {
+      const r = await api('GET', c.training ? '/admin/reports/export-training' : '/admin/reports/export');
+      if (r.status === 200 && Array.isArray(r.data.events)) events = r.data.events.filter((e) => e.case_ref === c.case_ref);
+    }
+    btn.disabled = false;
+    const derived = !events;
+    if (derived) {
+      events = [{ at: c.received_at, by: c.opened_by, action: 'open', fields: [] }];
+      if (c.takedown_at) events.push({ at: c.takedown_at, by: c.takedown_by, action: 'takedown', fields: [] });
+      if (c.closed_at) events.push({ at: c.closed_at, by: null, action: 'close', fields: [] });
+    }
+    events.sort((x, y) => x.at - y.at);
+    const printed = now();
+    const R = (k, v) => `<tr><th>${esc(k)}</th><td>${v}</td></tr>`;
+    const when = (s) => (s ? `${esc(t(F_FULL, s))}` : '—');
+    const ev = events.map((e) => `<tr>
+        <td class="cr-when">${esc(t(F_FULL, e.at))}</td>
+        <td>${esc(ACTION[e.action] ?? e.action)}${e.by ? ` · ${esc(BY[e.by] ?? e.by)}` : ''}</td>
+        <td class="cr-fields">${esc((e.fields ?? []).map((f) => FIELD[f] ?? f).join(', '))}</td>
+      </tr>`).join('');
+    $('case-record').innerHTML = `
+      <header class="cr-head">
+        <div class="cr-eyebrow">Refueler Share · Report register</div>
+        ${c.training ? '<div class="cr-training">TRAINING SIMULATION</div>' : ''}
+      </header>
+      <h1 class="cr-title">Case record</h1>
+      <div class="cr-ref">${esc(c.case_ref)}</div>
+      <table class="cr-table">
+        ${R('Received', `${when(c.received_at)} · by ${esc(ROUTE[c.route] ?? c.route)}`)}
+        ${R('Opened by', esc(BY[c.opened_by] ?? c.opened_by))}
+        ${R('Category', esc(CATEGORY[c.category] ?? c.category))}
+        ${R('Link', c.uuid8 ? `<span class="cr-mono">${esc(c.uuid8)}</span> <span class="cr-quiet">the first 8 characters of the transfer ID</span>` : 'No link given')}
+        ${R('Decision', esc(DECISION[c.decision] ?? c.decision))}
+        ${R('Reason', c.reason ? esc(c.reason) : '—')}
+        ${R('Taken down', c.takedown_at ? `${when(c.takedown_at)} · by ${esc(BY[c.takedown_by] ?? c.takedown_by)}` : 'No')}
+        ${R('Closed', when(c.closed_at))}
+        ${R('Reporter told', esc(c.reporter_told ? (TOLD[c.reporter_told] ?? c.reporter_told) : '—'))}
+        ${R('NCA reference', c.nca_ref ? `<span class="cr-mono">${esc(c.nca_ref)}</span>` : '—')}
+        ${R('Key part removed', c.key_removed ? 'Yes — removed from the mailbox thread' : 'No (or no full link was sent)')}
+      </table>
+      <h2 class="cr-h2">Timeline</h2>
+      <table class="cr-events">${ev}</table>
+      ${derived ? '<p class="cr-quiet">Built from the case’s own times. The full event list is in Rajesh’s export of the register.</p>' : '<p class="cr-quiet">From the register’s event list. Events name the fields changed, never their values.</p>'}
+      <footer class="cr-foot">
+        <p>All times London time. Printed ${esc(t(F_FULL, printed))} from Navy Office.</p>
+        <p>This record holds no email address, no full transfer ID and no key part.</p>
+      </footer>`;
+    // A4 portrait for this one print (navy-office.css makes every print landscape for the growth chart).
+    const page = document.createElement('link');
+    page.rel = 'stylesheet';
+    page.href = 'case-record-page.css';
+    await new Promise((res) => { page.onload = res; page.onerror = res; document.head.append(page); });
+    const title = document.title;
+    document.title = 'Refueler Share case record';   // the case reference stays out of the file name (plan §4)
+    document.body.classList.add('printing-case');
+    const done = () => {
+      document.body.classList.remove('printing-case');
+      document.title = title;
+      page.remove();
+      window.removeEventListener('afterprint', done);
+    };
+    window.addEventListener('afterprint', done);
+    window.print();
+  }
+
   // ── Export (admin) — the same JSON as export-register.sh (jq --sort-keys .) ─
   const sortKeys = (v) => Array.isArray(v) ? v.map(sortKeys)
     : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, sortKeys(v[k])])) : v;
 
   async function exportRegister(training) {
     const name = training ? 'training-export.json' : 'report-register.json';
-    say('rp-register-msg', 'Exporting…');
+    say('rp-export-msg', 'Exporting…');
     const r = await api('GET', training ? '/admin/reports/export-training' : '/admin/reports/export');
     if (r.status !== 200 || !Array.isArray(r.data.rows)) {
-      return say('rp-register-msg', common(r.status) ?? `Unexpected answer (${r.status}). Nothing was saved.`);
+      return say('rp-export-msg', common(r.status) ?? `Unexpected answer (${r.status}). Nothing was saved.`);
     }
     const blob = new Blob([JSON.stringify(sortKeys(r.data), null, 2) + '\n'], { type: 'application/json' });
     const a = document.createElement('a');
@@ -394,7 +654,7 @@ const NavyReports = (() => {
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 10000);
-    say('rp-register-msg', `Downloaded ${name} (${r.data.rows.length} row${r.data.rows.length === 1 ? '' : 's'}). ` +
+    say('rp-export-msg', `Downloaded ${name} (${r.data.rows.length} row${r.data.rows.length === 1 ? '' : 's'}). ` +
       'The copy in the private repo comes from export-register.sh on the Mac.');
   }
 
@@ -408,10 +668,9 @@ const NavyReports = (() => {
   async function deleteTraining() {
     $('rp-delete-confirm').hidden = true;
     const r = await api('POST', '/admin/reports/delete-training');
-    if (r.status !== 200) return say('rp-register-msg', common(r.status) ?? `Unexpected answer (${r.status}). Nothing was deleted.`);
+    if (r.status !== 200) return say('rp-export-msg', common(r.status) ?? `Unexpected answer (${r.status}). Nothing was deleted.`);
     await loadRegister();
-    if (S.look) renderTakedown();
-    say('rp-register-msg', `Deleted ${r.data.deleted ?? 0} training row(s).`);
+    say('rp-export-msg', `Deleted ${r.data.deleted ?? 0} training row(s).`);
   }
 
   // ── Mount ─────────────────────────────────────────────────────────────────
@@ -420,6 +679,21 @@ const NavyReports = (() => {
     const opts = Object.entries(map).map(([v, label]) => new Option(label, v));
     if (placeholder) opts.unshift(new Option(placeholder, ''));
     sel.replaceChildren(...opts);
+  }
+
+  function formButton(formId, buttonId, run) {
+    const form = $(formId), btn = $(buttonId);
+    let busy = false;
+    const go = async () => {
+      if (busy || btn.disabled || !form.reportValidity()) return;
+      busy = true;
+      try { await run(); } finally { busy = false; }
+    };
+    form.addEventListener('submit', (e) => e.preventDefault());
+    btn.addEventListener('click', go);
+    form.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'BUTTON') { e.preventDefault(); go(); }
+    });
   }
 
   let wired = false;
@@ -438,29 +712,39 @@ const NavyReports = (() => {
       guard($('rp-new-link'));
       $('rp-link').addEventListener('keydown', (e) => { if (e.key === 'Enter') lookUp(); });
       $('rp-lookup-btn').addEventListener('click', lookUp);
-      $('rp-td-case').addEventListener('change', updateTakedownButton);
       $('rp-td-confirm').addEventListener('input', updateTakedownButton);
+      $('rp-td-confirm').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !$('rp-td-btn').disabled) takeDown(); });
       $('rp-td-btn').addEventListener('click', takeDown);
+      $('rp-td-skip').addEventListener('click', notTakingDown);
       $('rp-new-btn').addEventListener('click', openNew);
       $('rp-new-cancel').addEventListener('click', () => { $('rp-new').hidden = true; });
-      $('rp-new').addEventListener('submit', submitNew);
-      $('rp-close').addEventListener('submit', submitClose);
-      $('rp-reload-btn').addEventListener('click', async () => { say('rp-register-msg', ''); await loadRegister(); if (S.look) renderTakedown(); });
+      // The forms are never submitted (CSP form-action 'none'; WebKit then fires no submit event):
+      // the buttons and Enter run the same check-then-send.
+      formButton('rp-new', 'rp-new-submit', submitNew);
+      formButton('rp-close', 'rp-close-btn', submitClose);
+      $('rp-change-btn').addEventListener('click', change);
+      $('rp-a-sent').addEventListener('click', () => sent('a', now()));
+      $('rp-a-none').addEventListener('click', () => sent('a', 'none'));
+      $('rp-b-sent').addEventListener('click', () => sent('b', now()));
+      $('rp-b-none').addEventListener('click', () => sent('b', 'none'));
+      $('rp-record-btn').addEventListener('click', caseRecord);
+      $('rp-tpl-show').addEventListener('click', () => { S.tplHere = S.tplHere === 'finish' ? null : 'finish'; route(); });
+      $('rp-reload-btn').addEventListener('click', async () => { say('rp-register-msg', ''); await loadRegister(); });
       $('rp-export-btn').addEventListener('click', () => exportRegister(false));
       $('rp-export-training-btn').addEventListener('click', () => exportRegister(true));
       $('rp-delete-training-btn').addEventListener('click', askDeleteTraining);
       $('rp-delete-yes').addEventListener('click', deleteTraining);
       $('rp-delete-no').addEventListener('click', () => { $('rp-delete-confirm').hidden = true; });
-      $('rp-tbody').addEventListener('click', (e) => { const tr = e.target.closest('tr[data-case]'); if (tr) selectCase(tr.dataset.case); });
+      $('rp-tbody').addEventListener('click', (e) => { const tr = e.target.closest('tr[data-case]'); if (tr) pick(tr.dataset.case); });
       $('rp-tbody').addEventListener('keydown', (e) => {
         const tr = e.target.closest?.('tr[data-case]');
-        if (tr && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); selectCase(tr.dataset.case); }
+        if (tr && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); pick(tr.dataset.case); }
       });
-      $('rp-case').addEventListener('click', (e) => { const b = e.target.closest('[data-tpl]'); if (b) showTab(b.dataset.tpl); });
+      $('rp-templates').addEventListener('click', (e) => { const b = e.target.closest('[data-tpl]'); if (b) showTab(b.dataset.tpl); });
       $('rp-tpl-copy').addEventListener('click', (e) => copy(e.currentTarget));
     }
     loadRegister();
   }
 
-  return { mount };
+  return { mount, shown, guard, uuidIn, ONLY_8 };
 })();
