@@ -421,7 +421,8 @@ function renderErrorCards(ae, kv) {
 // Source: GET /admin/storage — aggregates of what R2 holds now. No UUIDs.
 // R2 Standard: first 10 GB-month free, then $0.015 per GB-month (Oct 2026).
 const R2_FREE_GB = 10, R2_USD_PER_GB_MONTH = 0.015;
-const TIER_LABEL = { free: 'Pro Bono', creative: 'Citizen', max: 'Sovereign', api: 'Chartered' };
+// Wire max = Citizen (B12-4a-2), as in the dock and Cases; 'creative' is a legacy wire tier.
+const TIER_LABEL = { free: 'Pro Bono', creative: 'Citizen', max: 'Citizen', api: 'Chartered' };
 let _storage = null, _storageAt = 0;
 
 async function fetchStorage() {
@@ -456,7 +457,7 @@ function renderStorage(s) {
     const v = s.live?.[t];
     return v ? `${v.transfers} · ${_fmtGib(v.bytes)}` : '0';
   };
-  setText('snap-sovereign', tierLine('max'));
+  setText('snap-citizen', tierLine('max'));
   setText('snap-probono',   tierLine('free'));
 }
 

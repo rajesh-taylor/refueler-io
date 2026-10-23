@@ -73,6 +73,7 @@ readTime: "4 min"
     frontend at 99c871d on 21 Oct). If a copy session changes one in Share, change it here too. -#}
 {% set says = [
   ["This link isn’t complete.", "Part of the link was lost when it was copied or sent.", "Ask the sender to send it again, in full."],
+  ["This file is no longer available.", "The link is closed. Either the sender's time limit ran out, or we took the link down after a report. The page says which.", "If the time ran out, ask the sender for a new link. If we took it down, write to <a href=\"mailto:report@refueler.io\">report@refueler.io</a> and give the reference the page shows."],
   ["The security check couldn’t load.", "A blocker or VPN stopped Cloudflare's check.", "Allow <code>challenges.cloudflare.com</code>, or try once without the blocker or VPN."],
   ["The file couldn’t be decrypted.", "The key in the link doesn't fit the file, usually because the link was changed on the way. Nothing was saved.", "Ask the sender to send it again."],
   ["Refueler couldn’t be reached.", "Your connection dropped, or something between you and Share blocked it.", "Check your connection, then open the link again."],
