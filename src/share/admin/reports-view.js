@@ -577,15 +577,16 @@ const NavyReports = (() => {
   }
 
   // ── Templates ─────────────────────────────────────────────────────
-  // Route §9 text, the case reference on top, signed "Refueler Share" (drill 1, change 1). [ ] marks
+  // Route §9 text, the case reference on top (drill 1, change 1). No sign-off here: the report@
+  // mailbox signature says "Kind regards, / Refueler Share / refueler.io" (drill 1 re-run, 24 Oct). [ ] marks
   // what is still to fill in. The link is the part before the # — known once it was pasted in New
   // report or looked up here (the register keeps the first 8 characters, not the transfer ID).
   function renderTemplates(c, st) {
     const uuid = S.links[c.case_ref];
     const link = uuid ? SHARE + uuid : '[link up to #]';
-    const head = `Reference: ${c.case_ref}\n\n`, sign = '\n\nRefueler Share';
+    const head = `Reference: ${c.case_ref}\n\n`;
     const urgent = HELPER_CATEGORIES.includes(c.category);
-    const a = `Thank you. We have your report about ${link} and will look at it ${urgent ? 'today' : 'within two working days'}. ` +
+    const a = `Thank you. We have your report about ${link} and will look at it ${urgent ? 'today' : 'within two working days'}.\n\n` +
       'We cannot see the contents of files on Share, so anything you can tell us about what you saw helps. ' +
       'Please don’t send us the file itself.';
     let outcome;
@@ -599,7 +600,7 @@ const NavyReports = (() => {
     const cText = `We have looked again at the link we removed on ${took ? t(F_LONG, took.takedown_at) : '[date]'}. ` +
       '[We stand by the decision because … / We were wrong, and we’re sorry.] ' +
       'Files we remove are deleted and cannot be restored, because we never hold the key.';
-    for (const [k, v] of [['a', head + a + sign], ['b', head + b + sign], ['c', head + cText + sign]]) {
+    for (const [k, v] of [['a', head + a], ['b', head + b], ['c', head + cText]]) {
       const ta = $(`rp-tpl-${k}`);
       if (ta.dataset.case !== c.case_ref) { ta.readOnly = true; $('rp-tpl-edit').textContent = 'Edit'; }
       if (ta.dataset.case !== c.case_ref || ta.dataset.auto === ta.value) { ta.value = v; ta.dataset.auto = v; ta.dataset.case = c.case_ref; }
