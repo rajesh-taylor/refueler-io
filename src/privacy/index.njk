@@ -21,10 +21,7 @@ permalink: /privacy/index.html
   <div class="hero">
     <h1>Privacy Policy</h1>
     <p class="hero-sub">Refueler keeps the least it can to run its services. This page covers Refueler Share and the refueler.io website.</p>
-    <dl class="hero-dates">
-      <div><dt>Last changed</dt><dd><time datetime="2026-10-21">21 Oct 2026</time></dd></div>
-      <div><dt>Last checked</dt><dd><time datetime="2026-10-20">20 Oct 2026</time></dd></div>
-    </dl>
+    <p class="hero-updated">Last updated <time datetime="2026-10-26">26 Oct 2026</time></p>
   </div>
 
   <!-- ─── Anchor Navigation ─────────────────────── -->
@@ -67,7 +64,7 @@ permalink: /privacy/index.html
               </tr>
               <tr>
                 <td>Supabase</td>
-                <td>Database for Share Citizen accounts</td>
+                <td>Database for Share Citizen accounts and the report register</td>
                 <td>EU (Ireland)</td>
               </tr>
               <tr>
@@ -122,10 +119,22 @@ permalink: /privacy/index.html
               <td>Three months, a period Cloudflare sets</td>
             </tr>
             <tr>
-              <td>A sample of requests to Share: your IP address, country, the time and the web address asked for, which can include a transfer id. This covers opening a link as well as sending one</td>
+              <td>A sample of requests to Share: your IP address, country, the time and the web address asked for. This covers opening a link as well as sending one. Since 21 Oct 2026, Share's own requests carry no transfer ID. Opening a link page sends the transfer ID (UUID) part of the link, never the key part after the #, and that page load may be in the sample</td>
               <td>Cloudflare's own traffic records for our account; we cannot turn them off</td>
               <td>Cloudflare</td>
-              <td>About a month</td>
+              <td>At least a month. We can't check the records of a link page load, so assume indefinitely</td>
+            </tr>
+            <tr>
+              <td>If you report a link: a case record with the first 8 characters of the transfer ID (UUID) part, what was reported and what we did. No email address, name or IP address</td>
+              <td>Act on the report and keep the record the Online Safety Act asks for</td>
+              <td>Supabase (EU, Ireland)</td>
+              <td>Indefinitely, as the record of what we did</td>
+            </tr>
+            <tr>
+              <td>If you report a link: your email address and what you wrote</td>
+              <td>Reply to you</td>
+              <td>Our mailbox</td>
+              <td>Until the case is closed, then 6 months</td>
             </tr>
             <tr>
               <td>Citizens only: email address, Stripe customer reference, plan and renewal date</td>
@@ -142,6 +151,7 @@ permalink: /privacy/index.html
           </tbody>
         </table>
         <p>Error notes never hold file names, keys, your IP address or your browser. Sign-in records hold no IP address, device or location.</p>
+        <p>If a report shows child sexual abuse, we pass it to the National Crime Agency, as the law requires.</p>
         <p>Two of these periods are set by Cloudflare and can't be shortened: the error counts and the sample of requests.</p>
         <p><strong>Others who play a part:</strong></p>
         <ul>
@@ -218,6 +228,7 @@ permalink: /privacy/index.html
             <tr><td>Citizen sign-in, plan and payment</td><td>Art. 6(1)(b) — performance of contract</td></tr>
             <tr><td>The check that you are a person, and error notes</td><td>Art. 6(1)(f) — legitimate interests: keeping the service safe and working</td></tr>
             <tr><td>Counting visits to refueler.io pages</td><td>Art. 6(1)(f) — legitimate interests: knowing which pages are read</td></tr>
+            <tr><td>Handling reports about a link</td><td>Art. 6(1)(c) — legal obligation: our Online Safety Act duties</td></tr>
           </tbody>
         </table>
       </div>
@@ -247,7 +258,7 @@ permalink: /privacy/index.html
     <section class="policy-section" id="changes" aria-labelledby="label-changes">
       <div class="section-label" id="label-changes">07 · Changes to this policy</div>
       <div class="section-body">
-        <p>We check this page against the live services on a regular schedule. The dates at the top say when it last changed and when it was last checked.</p>
+        <p>We check this page against the live services on a regular schedule. The date at the top says when it last changed.</p>
         <p>Material changes — new kinds of data, new processors, new legal bases, longer retention — are announced on the Share status page before they take effect. Version history is kept in a private Git repository.</p>
       </div>
     </section>

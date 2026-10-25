@@ -163,7 +163,7 @@ readTime: "4 min"
 
     <h2>Cloudflare</h2>
 
-    <p>Cloudflare runs the servers, so it sees your IP address. It also keeps a sample of requests for my account for about a month: the IP address, the time and the web address asked for, which can include the transfer's ID. That applies whether you send a link or open one, and I can't turn it off. A VPN hides your IP address from both of us.</p>
+    <p>Cloudflare runs the servers, so it sees your IP address. It also keeps a sample of requests for my account for at least a month: the IP address, the time and the web address asked for. Since 21 Oct 2026, Share's own requests carry no transfer ID. Opening a link page still sends the transfer ID (UUID) part, never the key part after the #, and that page load may be in the sample. I can't check those records, so assume Cloudflare keeps them indefinitely. I can't turn this off. A VPN hides your IP address from both of us.</p>
 
     <p>Before an upload, Cloudflare runs a short check that you're a real person. It reads signals from your browser inside Cloudflare's own frame and Share receives only the result. The check is there so automated bot traffic can't fill storage.</p>
 

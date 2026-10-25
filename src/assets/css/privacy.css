@@ -437,25 +437,14 @@ main {
   .data-table th, .data-table td { padding: 10px 8px 10px 0; }
 }
 
-/* ── Hero dates — top right (Privacy-Share-1, 16 Oct 2026) ────────────────────
-   "Last changed" = material edits; "Last checked" = the re-check rota. */
-.hero { position: relative; }
-.hero-dates {
-  position: absolute;
-  top: 32px;
-  right: clamp(1.25rem, 4vw, 3rem);
-  margin: 0;
-  text-align: right;
+/* ── Last updated — under the opening sentence (OSA-Copy-1, 25 Oct 2026).
+   The monthly re-check lives in the calendar, not on the page. */
+.hero-updated {
+  margin: 16px 0 0;
   font-family: var(--font-mono);
   font-size: 0.75rem;
+  letter-spacing: 0.04em;
   line-height: 1.6;
   color: var(--fg-muted);
 }
-.hero-dates div { display: flex; gap: 0.75em; justify-content: flex-end; }
-.hero-dates dt { letter-spacing: 0.04em; }
-.hero-dates dd { margin: 0; color: var(--fg); }
 .ico-block { margin-top: 20px; }
-@media (max-width: 640px) {
-  .hero-dates { position: static; text-align: left; margin-top: 20px; }
-  .hero-dates div { justify-content: flex-start; }
-}
