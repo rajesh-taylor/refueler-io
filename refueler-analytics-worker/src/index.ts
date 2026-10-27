@@ -8,8 +8,18 @@
  *   page_view        — all pages, with referrer + country
  *   signup_submit    — homepage magic link form submission
  *   theme_toggle     — Paper ↔ Carbon switch (product signal)
- *   article_read     — editorial scroll depth proxy (25 / 50 / 75 / 100%)
+ *   article_read     — editorial + Notes scroll depth proxy (25 / 50 / 75 / 100%)
+ *   to_share         — a press on a link to share.refueler.io (page path + theme only)
  */
+
+import {
+  cleanReferrer,
+  isValidEvent,
+  notesSlug,
+  sanitisePath,
+  sanitiseString,
+  type EventName,
+} from "./sanitise";
 
 export interface Env {
   ANALYTICS: AnalyticsEngineDataset;
@@ -18,16 +28,10 @@ export interface Env {
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-type EventName =
-  | "page_view"
-  | "signup_submit"
-  | "theme_toggle"
-  | "article_read";
-
 interface BaseEvent {
   event: EventName;
   path: string;        // e.g. "/", "/editorial/the-float.html"
-  referrer?: string;   // document.referrer (empty string if direct)
+  referrer?: string;   // site name only: "direct", "internal" or e.g. "duckduckgo.com"
   theme?: string;      // "paper" | "carbon" — current theme at time of event
 }
 
@@ -62,28 +66,6 @@ function isAllowedOrigin(requestOrigin: string | null, allowed: string): boolean
   return requestOrigin === allowed || requestOrigin.startsWith("http://localhost");
 }
 
-// ── Sanitise & validate ───────────────────────────────────────────────────────
-
-function sanitisePath(raw: unknown): string {
-  if (typeof raw !== "string") return "/unknown";
-  // Strip query strings and fragments — we only want the path
-  try {
-    const u = new URL(raw, "https://refueler.io");
-    return u.pathname.slice(0, 200);
-  } catch {
-    return "/unknown";
-  }
-}
-
-function sanitiseString(raw: unknown, maxLen = 100): string {
-  if (typeof raw !== "string") return "";
-  return raw.slice(0, maxLen).replace(/[^\w\s\-./:#@]/g, "");
-}
-
-function isValidEvent(name: unknown): name is EventName {
-  return ["page_view", "signup_submit", "theme_toggle", "article_read"].includes(name as string);
-}
-
 // ── Analytics Engine writer ───────────────────────────────────────────────────
 
 function writeEvent(
@@ -100,7 +82,7 @@ function writeEvent(
    * Blob layout (positional — fixed, do not reorder):
    *   [0] event name
    *   [1] path
-   *   [2] referrer (cleaned — domain only, not full URL)
+   *   [2] referrer (site name only; empty for to_share)
    *   [3] country (from CF-IPCountry header)
    *   [4] theme at time of event
    *   [5] extra_a (from/article_slug depending on event)
@@ -111,9 +93,9 @@ function writeEvent(
    *   [0] scroll depth (article_read only, else 0)
    */
 
-  const referrerDomain = cleanReferrer(
-    (event as BaseEvent).referrer ?? ""
-  );
+  const path = sanitisePath(event.path);
+  const referrerDomain =
+    event.event === "to_share" ? "" : cleanReferrer((event as BaseEvent).referrer);
 
   let extra_a = "";
   let extra_b = "";
@@ -125,7 +107,8 @@ function writeEvent(
     extra_b = e.to;
   } else if (event.event === "article_read") {
     const e = event as ArticleReadEvent;
-    extra_a = sanitiseString(e.article_slug, 80);
+    // Notes: the slug comes from the path, not the client
+    extra_a = notesSlug(path) || sanitiseString(e.article_slug, 80);
     extra_b = String(e.depth);
     scrollDepth = typeof e.depth === "number" ? e.depth : 0;
   }
@@ -133,7 +116,7 @@ function writeEvent(
   dataset.writeDataPoint({
     blobs: [
       event.event,
-      sanitisePath(event.path),
+      path,
       referrerDomain,
       country,
       sanitiseString(event.theme, 10) || "unknown",
@@ -144,18 +127,6 @@ function writeEvent(
     doubles: [scrollDepth],
     indexes: [event.event], // partition key for AE queries
   });
-}
-
-function cleanReferrer(raw: string): string {
-  if (!raw || raw === "") return "direct";
-  try {
-    const u = new URL(raw);
-    // Drop refueler.io self-referrals
-    if (u.hostname.includes("refueler.io")) return "internal";
-    return u.hostname.replace(/^www\./, "");
-  } catch {
-    return "unknown";
-  }
 }
 
 function uaHint(ua: string | null): string {

@@ -13,7 +13,10 @@
 (function () {
   var search = location.search;
   var hash = location.hash;
-  if (search.indexOf('uuid=') === -1 && hash.length <= 1) return; // plain visit: show the landing page
-  var path = location.pathname.indexOf('/share/signin') === 0 ? '/signin/' : '/';
+  var signin = location.pathname.indexOf('/share/signin') === 0;
+  // Every old Share link carries ?uuid=; sign-in emails carry only #t=…. On /share/ a bare #
+  // (the homepage's /share/#alpha) is an anchor on this page, not a link (Funnel-Count-1).
+  if (search.indexOf('uuid=') === -1 && (!signin || hash.length <= 1)) return; // plain visit: show the landing page
+  var path = signin ? '/signin/' : '/';
   location.replace('https://share.refueler.io' + path + search + hash);
 })();

@@ -10,7 +10,10 @@ writes to Cloudflare Analytics Engine. Zero cookies, zero PII.
 | `page_view` | Every page load | path, referrer domain, country, theme |
 | `signup_submit` | Homepage magic link form | path, theme |
 | `theme_toggle` | Paper ↔ Carbon switch | from, to, path |
-| `article_read` | Scroll milestone on editorial pages | slug, depth (25/50/75/100%) |
+| `article_read` | Scroll milestone on editorial and Notes articles | slug, depth (25/50/75/100%) |
+| `to_share` | A press on a link to share.refueler.io | path of the page, theme |
+
+The referrer arrives as a site name only. On `/share/` and `/share/signin/` the client sends nothing when the address has a query or fragment (an old Share link being forwarded). Tests: `npm test`.
 
 ## Deploy steps
 
