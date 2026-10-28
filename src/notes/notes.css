@@ -483,13 +483,15 @@
 }
 .ref-seg:not(.ref-key) .ref-label { color: var(--ref-gold); }
 
-/* ── Link figure (Notes: report series, 28 Oct 2026). One box: the link up to the #.
-   Made-up transfer ID only; never a key part. ── */
+/* ── Link figure (Notes: report series, 28 Oct 2026). Two boxes: the link up to the #
+   (send), then the key part (leave out). Made-up id and key only. ── */
 .link-fig { margin: 2.25em 0; padding: 1.5rem 1.5rem 1.25rem; border: var(--border-weight) solid var(--border); background: var(--bg); }
 [data-theme="carbon"] .link-fig { border-left: 2px solid var(--accent); }
 .lf-band { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; font-family: var(--font-heading); font-size: 0.6875rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg-muted); }
 .lf-band::before, .lf-band::after { content: ""; flex: 1; border-top: 1px solid var(--fg-subtle); }
 .lf-seg { font-family: var(--font-mono); font-size: 0.875rem; line-height: 1.4; color: var(--fg); padding: 0.625rem 0.75rem; border: var(--border-weight) solid var(--border-mid); background: var(--surface); word-break: break-all; }
+.lf-seg.lf-key { border-left: 2px solid var(--accent); }
+.lf-hash { color: var(--accent); font-weight: 600; }
 .lf-caption { margin-top: 1rem; font-family: var(--font-sans); font-size: 0.8125rem; color: var(--fg-subtle); }
 @media (max-width: 640px) { .link-fig { padding: 1.125rem 1rem; } }
 

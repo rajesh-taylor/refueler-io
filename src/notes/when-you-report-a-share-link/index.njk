@@ -33,7 +33,7 @@ readTime: "4 min"
     Checked against OSA Part B v1.0 and the live support page. Names no tool, screen, role or key.
     The closed-page lines are quoted exactly as shipped (refueler-share frontend/download-sheets.js
     _showLinkRemoved): if a copy session changes them in Share, change them here too.
-    The figure uses a made-up transfer ID, never a real one, and shows no key part. -#}
+    The figures use a made-up transfer ID and key, never real ones. -#}
 
 <div class="article-wrap">
 
@@ -67,12 +67,19 @@ readTime: "4 min"
 
     <h2>What she sends</h2>
 
-    <p>Send us the link up to the #. Leave out everything after it: that's the key to the file, and we never need it.</p>
+    <p>Send us the URL link up to the #.</p>
 
     <figure class="link-fig" aria-label="The part of a Share link to put in a report">
       <div class="lf-band">Put this much in a report</div>
       <div class="lf-seg">https://share.refueler.io/?uuid=3f2a9c1e-7b40-4d2e-9a61-0c8e5f2b7d14</div>
-      <figcaption class="lf-caption">An example. Every real link has its own transfer ID.</figcaption>
+    </figure>
+
+    <p>Leave out everything after it: that's the encryption key.</p>
+
+    <figure class="link-fig" aria-label="The encryption key part of a Share link, to leave out">
+      <div class="lf-band">Leave this out</div>
+      <div class="lf-seg lf-key"><span class="lf-hash">#</span>eyJ2IjoyLCJrIjoiN3pRbXhLc0ZIdl…</div>
+      <figcaption class="lf-caption">An example. Every real link has its own transfer ID and key.</figcaption>
     </figure>
 
     <p>Rachel writes to <a href="mailto:report@refueler.io">report@refueler.io</a>. She includes:</p>
