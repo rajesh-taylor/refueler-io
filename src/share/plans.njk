@@ -23,7 +23,7 @@ stripeThemeRemount: true
 
 <script>
 (function () {
-  const WORKER_URL   = 'https://api.share.refueler.io';
+  const WORKER_URL   = '{{ plansEnv.workerUrl }}';
   const DISMISS_KEY  = 'rs-banner-dismissed';
   const banner       = document.getElementById('status-banner');
   const bannerIcon   = document.getElementById('status-banner-icon');
@@ -127,16 +127,16 @@ stripeThemeRemount: true
       </ul>
     </div>
 
-    <!-- Citizen (wire tier max, Stripe lookup keys share-max-*; card rail) -->
-    <div class="tier-card coming-soon" id="card-max">
-      <div class="coming-soon-tag">Coming Soon</div>
+    <!-- Citizen (wire tier citizen, Stripe lookup keys share-citizen-*; card rail) -->
+    <div class="tier-card{% if not plansEnv.citizenOpen %} coming-soon{% endif %}" id="card-citizen"{% if plansEnv.citizenOpen %} onclick="selectTier('citizen')"{% endif %}>
+      {% if not plansEnv.citizenOpen %}<div class="coming-soon-tag">Coming Soon</div>{% endif %}
       <div class="tier-label gold">Card</div>
       <div class="tier-name">Citizen</div>
       <div class="tier-price">
-        <span class="tier-price-main" id="price-max">£24</span>
-        <span class="tier-price-period" id="period-max">/ month</span>
+        <span class="tier-price-main" id="price-citizen">£24</span>
+        <span class="tier-price-period" id="period-citizen">/ month</span>
       </div>
-      <div class="tier-yearly" id="yearly-max">or £288/yr</div>
+      <div class="tier-yearly" id="yearly-citizen">or £288/yr</div>
       <ul class="tier-features">
         <li>100 GB per transfer</li>
         <li>7 / 30 / 90 days</li>
@@ -230,23 +230,19 @@ stripeThemeRemount: true
 {% include "footer.njk" %}
 
 <script>
-const WORKER_URL = 'https://api.share.refueler.io';
-const STRIPE_PK  = 'pk_live_qTLdmzRXg6KHXtxbgGYQZc7L00Kl4saD2q';
+const WORKER_URL = '{{ plansEnv.workerUrl }}';
+const STRIPE_PK  = '{{ plansEnv.stripePk }}';
 
-// Citizen = wire tier max (Stripe lookup keys share-max-*). Sovereign has no Stripe price: it pays in bitcoin.
-const PRICE_IDS = {
-  max: {
-    monthly: 'price_1Ts7vIGlctwiB9U3kb3NCLue',
-    yearly:  'price_1Ts7xIGlctwiB9U3JyZB8Kwj',
-  },
-};
+// Citizen pays by card: Plans sends plan 'monthly' | 'yearly' and the Worker resolves the price
+// from the exact Stripe lookup key (share-citizen-*) — no price IDs here (Stripe-Account-1).
+// Sovereign has no Stripe price: it pays in bitcoin.
 
 const PRICES_DISPLAY = {
-  max:       { monthly: { price: '£24', period: '/ month' }, yearly: { price: '£288', period: '/ year' } },
+  citizen:   { monthly: { price: '£24', period: '/ month' }, yearly: { price: '£288', period: '/ year' } },
   sovereign: { monthly: { price: '£24', period: '/ month' }, yearly: { price: '£288', period: '/ year' } },
 };
 
-let selectedTier   = 'max';
+let selectedTier   = 'citizen';
 let billingYearly  = false;
 let stripe         = null;
 let elements       = null;
@@ -278,7 +274,7 @@ function toggleBilling() {
 }
 
 function updatePriceDisplay() {
-  ['max', 'sovereign'].forEach(tier => {
+  ['citizen', 'sovereign'].forEach(tier => {
     const d = PRICES_DISPLAY[tier][billingYearly ? 'yearly' : 'monthly'];
     document.getElementById(`price-${tier}`).textContent = d.price;
     document.getElementById(`period-${tier}`).textContent = d.period;
@@ -292,12 +288,13 @@ function selectTier(tier) {
   selectedTier = tier;
   document.querySelectorAll('.tier-card').forEach(c => c.classList.remove('selected'));
   document.getElementById(`card-${tier}`).classList.add('selected');
+  document.getElementById('paymentSection').classList.add('visible');
   updateSummary();
   resetPaymentElement();
 }
 
 function updateSummary() {
-  const names   = { max: 'Citizen' };
+  const names   = { citizen: 'Citizen' };
   const billing = billingYearly ? 'yearly' : 'monthly';
   const d       = PRICES_DISPLAY[selectedTier][billing];
   document.getElementById('paymentSummary').textContent =
@@ -326,7 +323,7 @@ function resetPaymentElement() {
 // __cf_bm on .hcaptcha.com). Nothing from Stripe or Turnstile before the press.
 // Plans has its own Turnstile widget (hostname refueler.io only; pay.refueler.io when Plans moves).
 // The app's widget is share.refueler.io only. Empty = the press says so and loads nothing.
-const TURNSTILE_SITEKEY = '0x4AAAAAAFacLp0bLt3fdOP0';
+const TURNSTILE_SITEKEY = '{{ plansEnv.turnstileSitekey }}';
 let stripeJs     = null;
 let turnstileJs  = null;
 let turnstileId  = null;
@@ -382,7 +379,7 @@ async function handleContinue() {
     showStatus('Card payments are not open yet.', 'error');
     return;
   }
-  const priceId = PRICE_IDS[selectedTier][billingYearly ? 'yearly' : 'monthly'];
+  const plan = billingYearly ? 'yearly' : 'monthly';
   const cont = document.getElementById('continueBtn');
   continuing = true;
   cont.disabled = true;
@@ -394,7 +391,7 @@ async function handleContinue() {
     const res = await fetch(`${WORKER_URL}/subscription/checkout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ price_id: priceId, email, turnstile_token: token }),
+      body: JSON.stringify({ plan, email, turnstile_token: token }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || 'Checkout failed');

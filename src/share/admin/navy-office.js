@@ -338,7 +338,7 @@ function renderMetrics(d) {
 // ── Render: /admin/ae-metrics ──────────────────────────────────────────────
 function renderAeMetrics(d) {
   const iss      = d.credential_issuances_by_tier;
-  const issTotal = iss ? (iss.free ?? 0) + (iss.creative ?? 0) + (iss.max ?? 0) : null;
+  const issTotal = iss ? (iss.free ?? 0) + (iss.citizen ?? 0) : null;
   const issEl    = document.getElementById('snap-issuances');
   issEl.textContent = issTotal !== null ? issTotal : 'n/a';
   issEl.className = 'sm-value';
@@ -421,8 +421,9 @@ function renderErrorCards(ae, kv) {
 // Source: GET /admin/storage — aggregates of what R2 holds now. No UUIDs.
 // R2 Standard: first 10 GB-month free, then $0.015 per GB-month (Oct 2026).
 const R2_FREE_GB = 10, R2_USD_PER_GB_MONTH = 0.015;
-// Wire max = Citizen (B12-4a-2), as in the dock and Cases; 'creative' is a legacy wire tier.
-const TIER_LABEL = { free: 'Pro Bono', creative: 'Citizen', max: 'Citizen', api: 'Chartered' };
+// Wire tier names (Stripe-Account-1): free · citizen · api. The Worker folds older stored names into
+// citizen before they reach here, as it does for the dock and Cases.
+const TIER_LABEL = { free: 'Pro Bono', citizen: 'Citizen', api: 'Chartered' };
 let _storage = null, _storageAt = 0;
 
 async function fetchStorage() {
@@ -457,7 +458,7 @@ function renderStorage(s) {
     const v = s.live?.[t];
     return v ? `${v.transfers} · ${_fmtGib(v.bytes)}` : '0';
   };
-  setText('snap-citizen', tierLine('max'));
+  setText('snap-citizen', tierLine('citizen'));
   setText('snap-probono',   tierLine('free'));
 }
 
@@ -687,7 +688,7 @@ function renderFarming(m, ae) {
   if (!el) return;
 
   const iss    = ae?.credential_issuances_by_tier;
-  const issued = iss ? (iss.free ?? 0) + (iss.creative ?? 0) + (iss.max ?? 0) : null;
+  const issued = iss ? (iss.free ?? 0) + (iss.citizen ?? 0) : null;
 
   if (issued === null || issued === 0) {
     el.textContent = 'n/a'; el.className = 'sm-value'; return;
@@ -811,10 +812,10 @@ function openModal(key, triggerEl) {
     }
     case 'issuances': {
       const iss   = ae.credential_issuances_by_tier;
-      const total = iss ? (iss.free ?? 0) + (iss.creative ?? 0) + (iss.max ?? 0) : null;
+      const total = iss ? (iss.free ?? 0) + (iss.citizen ?? 0) : null;
       if (total !== null) { value = String(total); }
       else { value = 'n/a'; isNA = true; }
-      sub = iss ? `free ${iss.free ?? 0} · creative ${iss.creative ?? 0} · max ${iss.max ?? 0}` : 'No AE data';
+      sub = iss ? `free ${iss.free ?? 0} · citizen ${iss.citizen ?? 0}` : 'No AE data';
       // B10-1: replace the placeholder Trend stub with a real daily line graph.
       const sparkEl = document.getElementById('modal-sparkline');
       if (sparkEl) {
@@ -953,7 +954,7 @@ function openModal(key, triggerEl) {
 
     case 'farming': {
       const farmIss      = ae.credential_issuances_by_tier;
-      const farmIssued   = farmIss ? (farmIss.free ?? 0) + (farmIss.creative ?? 0) + (farmIss.max ?? 0) : null;
+      const farmIssued   = farmIss ? (farmIss.free ?? 0) + (farmIss.citizen ?? 0) : null;
       const farmCompleted = ae.uploads_completed_24h ?? farmIssued;
       const ratio        = farmIssued !== null && farmCompleted > 0 ? farmIssued / farmCompleted : null;
       if (ratio !== null) {
@@ -1456,7 +1457,7 @@ window.smokeTest = async function() {
     fetch(`${WORKER}/admin/ae-metrics`, { headers: { 'X-Admin-Key': adminKey } }).then(r => r.json()),
   ]);
   const iss          = ae.credential_issuances_by_tier;
-  const farmIssued   = iss ? (iss.free ?? 0) + (iss.creative ?? 0) + (iss.max ?? 0) : null;
+  const farmIssued   = iss ? (iss.free ?? 0) + (iss.citizen ?? 0) : null;
   const farmCompleted = ae.uploads_completed_24h ?? farmIssued;
   const farmRatio    = farmIssued !== null && farmCompleted > 0 ? farmIssued / farmCompleted : null;
   const checks = [

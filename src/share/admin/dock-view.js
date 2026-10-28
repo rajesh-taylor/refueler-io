@@ -24,7 +24,7 @@ const DockView = (() => {
   const PAGE = 10;
 
   // One display for every row (wire value → name; B12-4a-2: wire max = Citizen).
-  const TIER   = { free: 'Pro Bono', max: 'Citizen', api: 'Chartered' };
+  const TIER   = { free: 'Pro Bono', citizen: 'Citizen', api: 'Chartered' };
   const STATUS = {
     active:       { cls: 'active',    label: 'active'    },
     active_nudge: { cls: 'active',    label: 'active'    },   // B12-2: nudge retired (spec §2.3 — not outreach)

@@ -47,7 +47,7 @@ const NavyReports = (() => {
   const DECISION = { open: 'Open', removed: 'Removed', not_removed: 'Not removed', already_gone: 'Already gone', manifestly_unfounded: 'Nothing to act on (manifestly unfounded)' };
   const DECISION_SHORT = { manifestly_unfounded: 'Nothing to act on' };
   const TOLD     = { y: 'Yes', n: 'No', no_contact: 'No contact given' };
-  const TIER     = { free: 'Pro Bono', max: 'Citizen', api: 'Chartered (API)' };
+  const TIER     = { free: 'Pro Bono', citizen: 'Citizen', api: 'Chartered (API)' };
   const short = (c) => (CATEGORY[c] ?? c).split(' — ')[0];
   const HELPER_CATEGORIES = ['csea', 'terrorism'];
   const ONLY_RAJESH = 'Only Rajesh can take this down. It can wait for him.';
