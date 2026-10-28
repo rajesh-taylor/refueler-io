@@ -1,0 +1,192 @@
+---
+title: "What happens when you report a Share link · Refueler Notes"
+description: "One report followed from the first email to the last: what you send, what we can and can't see, and what the person who shared the link sees afterwards."
+canonical: "https://refueler.io/notes/when-you-report-a-share-link/"
+activePage: notes
+permalink: /notes/when-you-report-a-share-link/index.html
+# Notes list: drives the /notes/ card and /notes/latest.json
+cardTitle: "What happens when you report a Share link"
+summary: "One report followed from the first email to the last: what you send, what we can and can't see, and what the person who shared the link sees afterwards."
+topics: ["Reports", "Privacy", "File transfer"]
+date: 2026-10-28
+readTime: "4 min"
+---
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+{% include "head.njk" %}
+<meta property="og:type" content="article" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="preload" href="{{ '/notes/notes.css' | cssv }}" as="style">
+<link rel="preload" href="/notes/notes.js" as="script">
+<link rel="stylesheet" href="{{ '/notes/notes.css' | cssv }}">
+<style>
+  .article-body ul { padding-left: 1.25em; margin-bottom: 1.5em; }
+  .article-body li { margin-bottom: 0.6em; }
+  .help-table td { white-space: normal; font-family: var(--font-sans); }
+</style>
+</head>
+<body>
+
+{% include "nav.njk" %}
+
+{#- Report series, piece 1 (draft: private strategy/docs/notes-drafts/2026-10-28-report-a-link-fraud-draft-1.md).
+    Checked against OSA Part B v1.0 and the live support page. Names no tool, screen, role or key.
+    The closed-page lines are quoted exactly as shipped (refueler-share frontend/download-sheets.js
+    _showLinkRemoved): if a copy session changes them in Share, change them here too.
+    Figures use a made-up transfer ID and key, never real ones. -#}
+
+<div class="article-wrap">
+
+  <p class="breadcrumb">
+    <a href="/notes/">Notes</a><span class="breadcrumb-sep">/</span>Reports · Privacy · File transfer
+  </p>
+
+  <header class="article-header">
+    <div class="article-eyebrow">
+      <span>Reports</span>
+      <span class="eyebrow-dot"></span>
+      <span>Privacy</span>
+      <span class="eyebrow-dot"></span>
+      <span>File transfer</span>
+    </div>
+    <h1 class="article-title">What happens when you report a Share link</h1>
+    <div class="article-meta">
+      <span>28 October 2026</span>
+      <span class="meta-dot"></span>
+      <span>4 min read</span>
+    </div>
+  </header>
+
+  <article class="article-body">
+
+    <p>Rachel keeps the books for a small building firm. On a Tuesday morning an email arrives that looks like it's from one of the firm's regular suppliers: a new invoice, and a note that their bank details have changed. The invoice is behind a Share link.</p>
+
+    <p>She opens it. The supplier's logo is right, the amounts look normal, but the sort code is new and the email came from an address one letter off the real one. She rings the supplier on the number she already has. They sent nothing.</p>
+
+    <p>This is fraud, and the link is still out there for the next person on the list. So she reports it.</p>
+
+    <h2>What she sends</h2>
+
+    <p>A Share link has three parts. Only the first two ever reach us.</p>
+
+    <figure class="link-fig" aria-label="The three parts of a Share link">
+      <div class="link-fig-grid">
+        <div class="lf-band lf-top lf-send"><span class="lf-arrow">←</span>Put this much in a report<span class="lf-arrow">→</span></div>
+        <div class="lf-band lf-top lf-keep"><span class="lf-arrow">←</span>Leave this out<span class="lf-arrow">→</span></div>
+
+        <div class="lf-seg lf-p1">https://share.refueler.io/</div>
+        <div class="lf-seg lf-p2">?uuid=3f2a9c1e-7b40-4d2e-9a61-0c8e5f2b7d14</div>
+        <div class="lf-seg lf-key lf-p3"><span class="lf-hash">#</span>eyJ2IjoyLCJrIjoiN3pRbXhLc0ZIdl…</div>
+
+        <div class="lf-label lf-l1"><b><span class="lf-n">1</span>The address</b>Where Share lives. The same on every link.</div>
+        <div class="lf-label lf-l2"><b><span class="lf-n">2</span>The transfer ID (UUID)</b>Which transfer it is. We can see this part, and it's all we need to find the transfer.</div>
+        <div class="lf-label lf-l3"><b><span class="lf-n">3</span>The key part, after the #</b>Unlocks the file. Your browser never sends it to us, so we have never seen it.</div>
+      </div>
+      <figcaption class="lf-caption">An example link. Every real link has its own transfer ID and key.</figcaption>
+    </figure>
+
+    <p>Rachel writes to <a href="mailto:report@refueler.io">report@refueler.io</a>. She includes:</p>
+
+    <ul>
+      <li><strong>The link, up to the #.</strong> The part before the # is the transfer ID (UUID). It's enough for us to find the transfer.</li>
+      <li><strong>A sentence or two on what it is.</strong> "A fake supplier invoice asking us to pay a new account."</li>
+      <li><strong>When she saw it.</strong></li>
+    </ul>
+
+    <p>She doesn't attach the invoice. She could forward the email that carried the link, and that helps, because the email is where most of the evidence sits. We can't see inside the file, so what she tells us is what we work from.</p>
+
+    <p>If she had sent the whole link by mistake, with the key part, we would never open it. We'd remove the key part from our copy of her email and work only from the transfer ID.</p>
+
+    <figure class="link-fig" aria-label="The same link with the key part removed">
+      <div class="link-fig-grid">
+        <div class="lf-seg lf-p1">https://share.refueler.io/</div>
+        <div class="lf-seg lf-p2">?uuid=3f2a9c1e-7b40-4d2e-9a61-0c8e5f2b7d14</div>
+        <div class="lf-seg lf-key lf-p3"><span class="lf-hash">#</span><span class="lf-gone">key part removed</span></div>
+
+        <div class="lf-label lf-l1"></div>
+        <div class="lf-label lf-l2"><b>What we work from</b>The transfer ID, nothing else.</div>
+        <div class="lf-label lf-l3"><b>Deleted from our copy</b>We never open it, and we don't keep it.</div>
+      </div>
+    </figure>
+
+    <h2>What she hears back</h2>
+
+    <p>Within two working days, Rachel gets a reply from Refueler Share. It thanks her, names the link she reported, and asks for anything else she can tell us. Her report has a reference of its own, at the top of every email we send her about it.</p>
+
+    <p>Her email address stays in that mailbox thread and nowhere else. Our record of the report holds the first eight characters of the transfer ID, the kind of report, what we decided and when. It never holds her name or address, or anything about the file.</p>
+
+    <h2>What we check</h2>
+
+    <p>First, whether the link is still live. A Share link can close on its own: the sender's time limit runs out, or the file is deleted after its first download. If it has already closed, there's nothing left to take down, and we tell Rachel that.</p>
+
+    <p>Rachel's link is still live, with five days to run, so we read what she's told us. A fake invoice asking for payment to a new account is fraud under UK law, and fraud is one of the kinds of illegal content we act on. We take the link down.</p>
+
+    <p>Taking a link down deletes the encrypted file from our storage for good. We never held the key, so there was never a readable copy to keep, and there's no way to bring it back.</p>
+
+    <h2>What the next person sees</h2>
+
+    <p>Anyone who opens that link now, including whoever it was aimed at next, sees this:</p>
+
+    <blockquote>
+      <p><strong>This file is no longer available.</strong></p>
+      <p>We took the link down after a report. If you have a question, or think this was a mistake, write to us and give the reference. We read every message.</p>
+    </blockquote>
+
+    <p>Below it are report@refueler.io and a short reference: the first eight characters of the transfer ID. The page doesn't say what the report was about, or who made it.</p>
+
+    <h2>What we can't tell her</h2>
+
+    <p>Rachel would like to know who sent it. We can't tell her, because we don't know: you don't need an account to send a file on Share. What we can say is that the link is closed.</p>
+
+    <p>If money has already gone, the people to tell are your bank, straight away, and the police's fraud reporting service. They can act on payments; we can only close links.</p>
+
+    <h2>The last email</h2>
+
+    <p>Once it's done, Rachel hears from us again: we've looked at her report, and we've removed the link. If she disagrees with anything, she can reply to that email.</p>
+
+    <h2>And the person who shared it</h2>
+
+    <p>They can write to report@refueler.io with the reference from the closed page and ask us to look again. If we got it wrong, we say so and apologise, but the file can't be restored. That's why we only take a link down when what we're told makes it clear.</p>
+
+    <h2>In short</h2>
+
+    <div class="table-wrap">
+      <table class="data-table help-table" aria-label="A report in short">
+        <thead>
+          <tr>
+            <th>You send</th>
+            <th>We do</th>
+            <th>You hear</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>The link up to the #, what it is, when you saw it</td>
+            <td>Check the link, decide, take it down if it's illegal</td>
+            <td>A reply within two working days, then the outcome</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Reports that can't wait, about child abuse or terrorism, are handled the same day, and we take the link down before we reply. That's the next piece in this series.</p>
+
+    <p>How to report, in brief, is on the <a href="/support/#report">support page</a>.</p>
+
+    <div class="article-cta">
+      <p class="cta-label">Refueler Share</p>
+      <p class="cta-text">Encrypted file transfer. No account required. Free for transfers up to 4 GB.</p>
+      <a class="cta-link" href="/share/">Try it →</a>
+    </div>
+
+  </article>
+
+</div><!-- /article-wrap -->
+
+{% include "footer.njk" %}
+
+<script src="/notes/notes.js"></script>
+<script src="/analytics.js" defer></script>
+</body>
+</html>

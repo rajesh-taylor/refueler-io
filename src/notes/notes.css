@@ -483,6 +483,56 @@
 }
 .ref-seg:not(.ref-key) .ref-label { color: var(--ref-gold); }
 
+/* ── Link parts figure (Notes: report series, 28 Oct 2026). Made-up id and key only. ── */
+.link-fig { margin: 2.25em 0; padding: 1.5rem 1.5rem 1.25rem; border: var(--border-weight) solid var(--border); background: var(--bg); }
+[data-theme="carbon"] .link-fig { border-left: 2px solid var(--accent); }
+.link-fig-grid {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1.5fr) minmax(0, 1.2fr);
+  column-gap: 0;
+  font-family: var(--font-mono);
+}
+.lf-band { display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-heading); font-size: 0.6875rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg-muted); padding: 0 0.25rem; }
+.lf-band::before, .lf-band::after { content: ""; flex: 1; border-top: 1px solid var(--fg-subtle); }
+.lf-band .lf-arrow { color: var(--fg-subtle); font-family: var(--font-mono); letter-spacing: 0; }
+.lf-band.lf-send { grid-column: 1 / 3; }
+.lf-band.lf-keep { grid-column: 3; }
+.lf-band.lf-top { margin-bottom: 0.5rem; }
+.lf-seg {
+  font-size: 0.875rem; line-height: 1.4; color: var(--fg);
+  padding: 0.625rem 0.75rem; border: var(--border-weight) solid var(--border-mid);
+  background: var(--surface); word-break: break-all;
+}
+.lf-seg + .lf-seg { border-left: none; }
+.lf-seg.lf-key { border-left: 2px solid var(--accent); }
+.lf-hash { color: var(--accent); font-weight: 600; }
+.lf-label { padding: 0.75rem 0.75rem 0 0.25rem; font-family: var(--font-sans); font-size: 0.8125rem; line-height: 1.45; color: var(--fg-muted); }
+.lf-label b { display: block; font-family: var(--font-heading); font-weight: 600; color: var(--fg); font-size: 0.8125rem; margin-bottom: 0.125rem; }
+.lf-label .lf-n { font-family: var(--font-mono); color: var(--fg-subtle); margin-right: 0.375rem; }
+.lf-bottom { margin-top: 0.875rem; }
+.lf-caption { margin-top: 1.125rem; padding-top: 0.875rem; border-top: var(--border-weight) solid var(--border); font-family: var(--font-sans); font-size: 0.8125rem; color: var(--fg-subtle); }
+.lf-gone { color: var(--fg-subtle); font-family: var(--font-sans); font-style: italic; }
+
+/* The article column is narrow even on desktop, so the parts stack whenever the
+   figure itself is under 720px wide (container query), not by screen width. */
+.link-fig { container: linkfig / inline-size; }
+@media (max-width: 640px) { .link-fig { padding: 1.125rem 1rem; } }
+@container linkfig (max-width: 720px) {
+  .link-fig-grid { grid-template-columns: minmax(0, 1fr); }
+  .lf-band.lf-send, .lf-band.lf-keep { grid-column: 1; }
+  .lf-seg + .lf-seg { border-left: var(--border-weight) solid var(--border-mid); border-top: none; }
+  .lf-seg.lf-key { border-left: 2px solid var(--accent); }
+  .lf-p1 { order: 2; } .lf-l1 { order: 3; }
+  .lf-p2 { order: 4; } .lf-l2 { order: 5; }
+  .lf-send { order: 1; }
+  .lf-keep { order: 6; margin-top: 1rem; }
+  .lf-p3 { order: 7; } .lf-l3 { order: 8; }
+  .lf-label { padding: 0.375rem 0 0.75rem; }
+  .lf-label:empty { display: none; }
+}
+.lf-p1 { white-space: nowrap; }
+@container linkfig (max-width: 720px) { .lf-p1 { white-space: normal; } }
+
 /* ── Article CTA strip ── */
 .article-cta {
   margin-top: 3rem;
