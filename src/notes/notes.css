@@ -511,6 +511,9 @@
 .lf-label .lf-n { font-family: var(--font-mono); color: var(--fg-subtle); margin-right: 0.375rem; }
 .lf-bottom { margin-top: 0.875rem; }
 .lf-caption { margin-top: 1.125rem; padding-top: 0.875rem; border-top: var(--border-weight) solid var(--border); font-family: var(--font-sans); font-size: 0.8125rem; color: var(--fg-subtle); }
+.lf-full { grid-column: 1 / -1; }
+.lf-seg.lf-full { word-break: break-all; }
+.lf-label.lf-l0 { padding-bottom: 1.25rem; }
 .lf-gone { color: var(--fg-subtle); font-family: var(--font-sans); font-style: italic; }
 
 /* The article column is narrow even on desktop, so the parts stack whenever the
@@ -524,6 +527,7 @@
   .lf-seg.lf-key { border-left: 2px solid var(--accent); }
   .lf-p1 { order: 2; } .lf-l1 { order: 3; }
   .lf-p2 { order: 4; } .lf-l2 { order: 5; }
+  .lf-p0 { order: -2; } .lf-l0 { order: -1; }
   .lf-send { order: 1; }
   .lf-keep { order: 6; margin-top: 1rem; }
   .lf-p3 { order: 7; } .lf-l3 { order: 8; }

@@ -23,7 +23,6 @@ readTime: "4 min"
 <style>
   .article-body ul { padding-left: 1.25em; margin-bottom: 1.5em; }
   .article-body li { margin-bottom: 0.6em; }
-  .help-table td { white-space: normal; font-family: var(--font-sans); }
 </style>
 </head>
 <body>
@@ -72,6 +71,9 @@ readTime: "4 min"
 
     <figure class="link-fig" aria-label="The three parts of a Share link">
       <div class="link-fig-grid">
+        <div class="lf-seg lf-full lf-p0">https://share.refueler.io/?uuid=3f2a9c1e-7b40-4d2e-9a61-0c8e5f2b7d14<span class="lf-hash">#</span>eyJ2IjoyLCJrIjoiN3pRbXhLc0ZIdl…</div>
+        <div class="lf-label lf-full lf-l0"><b><span class="lf-n">0</span>The full link</b>What you're sent, all in one line. It splits into three parts.</div>
+
         <div class="lf-band lf-top lf-send"><span class="lf-arrow">←</span>Put this much in a report<span class="lf-arrow">→</span></div>
         <div class="lf-band lf-top lf-keep"><span class="lf-arrow">←</span>Leave this out<span class="lf-arrow">→</span></div>
 
@@ -81,7 +83,7 @@ readTime: "4 min"
 
         <div class="lf-label lf-l1"><b><span class="lf-n">1</span>The address</b>Where Share lives. The same on every link.</div>
         <div class="lf-label lf-l2"><b><span class="lf-n">2</span>The transfer ID (UUID)</b>Which transfer it is. We can see this part, and it's all we need to find the transfer.</div>
-        <div class="lf-label lf-l3"><b><span class="lf-n">3</span>The key part, after the #</b>Unlocks the file. Your browser never sends it to us, so we have never seen it.</div>
+        <div class="lf-label lf-l3"><b><span class="lf-n">3</span>The encryption key part, after the #</b>Unlocks the file. Your browser never sends it to us, so we have never seen it.</div>
       </div>
       <figcaption class="lf-caption">An example link. Every real link has its own transfer ID and key.</figcaption>
     </figure>
@@ -148,27 +150,6 @@ readTime: "4 min"
     <h2>And the person who shared it</h2>
 
     <p>They can write to report@refueler.io with the reference from the closed page and ask us to look again. If we got it wrong, we say so and apologise, but the file can't be restored. That's why we only take a link down when what we're told makes it clear.</p>
-
-    <h2>In short</h2>
-
-    <div class="table-wrap">
-      <table class="data-table help-table" aria-label="A report in short">
-        <thead>
-          <tr>
-            <th>You send</th>
-            <th>We do</th>
-            <th>You hear</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>The link up to the #, what it is, when you saw it</td>
-            <td>Check the link, decide, take it down if it's illegal</td>
-            <td>A reply within two working days, then the outcome</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
 
     <p>Reports that can't wait, about child abuse or terrorism, are handled the same day, and we take the link down before we reply. That's the next piece in this series.</p>
 
