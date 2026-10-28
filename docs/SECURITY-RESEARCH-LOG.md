@@ -391,6 +391,28 @@ AES-GCM per part with a counter nonce and last-part flag detects altered, reorde
 
 ---
 
+## 2026-10-30 — Subscription rules (DMCC Act) / hardware keys / a webhook failure nobody saw
+
+**Session type:** Weekly Boardroom Brief — ad-hoc uncounted. Week 4 (The Beatles lens).
+**Informed by:** BOARDROOM-BRIEF-2026-10-30.md
+**Open findings:** none. One operational issue found and fixed on 28 Oct (below); no customer affected.
+
+**Sources reviewed:**
+- Digital Markets, Competition and Consumers Act 2024, Part 4 Chapter 2 (legislation.gov.uk); draft Consumer Subscription Contracts (Cancellation and Information) Regulations 2026 (laid 19 Oct 2026) and draft guidance (21 Oct 2026), via law-firm summaries (TLT, Lewis Silkin, CMS).
+- Retail listings for the YubiKey 5C NFC (UK); Yubico's September 2024 advisory on the EUCLEAN side-channel (firmware before 5.7).
+
+### Finding 1 — Subscription rules apply to every paid Share plan from the first sale
+The regime is drafted to start on 1 January 2027 for contracts entered from that date. Paid plans open after it, so reminders, online cancellation, end-of-contract and cooling-off notices are built in from the start, sent by email from our own systems.
+
+### Finding 2 — Hardware keys
+Phishing-resistant keys on the accounts that can deploy, bill or delete remain a condition before paid plans open. Keys are checked for current firmware on arrival.
+
+### Finding 3 — Stripe webhook signature mismatch, 21–28 Oct 2026 (fixed 28 Oct)
+The Worker correctly refused webhook events whose signature did not verify, but nothing alerted us, so the mismatch lasted a week. The secret was re-set from the endpoint and a resent event returned 200. Only a test subscription was affected.
+**Actions:** record where each payment secret came from; prove each webhook secret with a signed test event when it is set; a small alerting session — the Worker counts its own failures (numbers only, nothing about users) and emails the operator, plus an outside heartbeat.
+
+---
+
 ## Supplier watch
 
 Advisories for software we depend on, checked against how we use it. Summaries only; anything that affects us and is still open is kept private until fixed.
