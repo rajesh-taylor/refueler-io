@@ -128,7 +128,7 @@ stripeThemeRemount: true
     </div>
 
     <!-- Citizen (wire tier citizen, Stripe lookup keys share-citizen-*; card rail) -->
-    <div class="tier-card{% if not plansEnv.citizenOpen %} coming-soon{% endif %}" id="card-citizen">
+    <div class="tier-card{% if not plansEnv.citizenOpen %} coming-soon{% endif %}" id="card-citizen"{% if plansEnv.citizenOpen %} onclick="selectTier('citizen')"{% endif %}>
       {% if not plansEnv.citizenOpen %}<div class="coming-soon-tag">Coming Soon</div>{% endif %}
       <div class="tier-label gold">Card</div>
       <div class="tier-name">Citizen</div>
@@ -288,6 +288,7 @@ function selectTier(tier) {
   selectedTier = tier;
   document.querySelectorAll('.tier-card').forEach(c => c.classList.remove('selected'));
   document.getElementById(`card-${tier}`).classList.add('selected');
+  document.getElementById('paymentSection').classList.add('visible');
   updateSummary();
   resetPaymentElement();
 }
