@@ -33,7 +33,7 @@ readTime: "4 min"
     Checked against OSA Part B v1.0 and the live support page. Names no tool, screen, role or key.
     The closed-page lines are quoted exactly as shipped (refueler-share frontend/download-sheets.js
     _showLinkRemoved): if a copy session changes them in Share, change them here too.
-    Figures use a made-up transfer ID and key, never real ones. -#}
+    The figure uses a made-up transfer ID, never a real one, and shows no key part. -#}
 
 <div class="article-wrap">
 
@@ -67,31 +67,18 @@ readTime: "4 min"
 
     <h2>What she sends</h2>
 
-    <p>A Share link has three parts. We only need the first two.</p>
+    <p>Send us the link up to the #. Leave out everything after it: that's the key to the file, and we never need it.</p>
 
-    <figure class="link-fig" aria-label="The three parts of a Share link">
-      <div class="link-fig-grid">
-        <div class="lf-seg lf-full lf-p0">https://share.refueler.io/?uuid=3f2a9c1e-7b40-4d2e-9a61-0c8e5f2b7d14<span class="lf-hash">#</span>eyJ2IjoyLCJrIjoiN3pRbXhLc0ZIdl…</div>
-        <div class="lf-label lf-full lf-l0"><b><span class="lf-n">1</span>The full URL link</b>What you're sent, all in one line.</div>
-
-        <div class="lf-band lf-top lf-send"><span class="lf-arrow">←</span>Put this much in a report<span class="lf-arrow">→</span></div>
-        <div class="lf-band lf-top lf-keep"><span class="lf-arrow">←</span>Leave this out<span class="lf-arrow">→</span></div>
-
-        <div class="lf-seg lf-p1">https://share.refueler.io/</div>
-        <div class="lf-seg lf-p2">?uuid=3f2a9c1e-7b40-4d2e-9a61-0c8e5f2b7d14</div>
-        <div class="lf-seg lf-key lf-p3"><span class="lf-hash">#</span>eyJ2IjoyLCJrIjoiN3pRbXhLc0ZIdl…</div>
-
-        <div class="lf-label lf-l1"></div>
-        <div class="lf-label lf-l2"><b><span class="lf-n">2</span>The address + the transfer ID (UUID)</b>Where Share lives, and which transfer it is. We can see this part, and it's all we need to find the transfer.</div>
-        <div class="lf-label lf-l3"><b><span class="lf-n">3</span>The encryption key part, after the #</b>Unlocks the file. Your browser never sends it to us, so we have never seen it.</div>
-      </div>
-      <figcaption class="lf-caption">An example link. Every real link has its own transfer ID and key.</figcaption>
+    <figure class="link-fig" aria-label="The part of a Share link to put in a report">
+      <div class="lf-band">Put this much in a report</div>
+      <div class="lf-seg">https://share.refueler.io/?uuid=3f2a9c1e-7b40-4d2e-9a61-0c8e5f2b7d14</div>
+      <figcaption class="lf-caption">An example. Every real link has its own transfer ID.</figcaption>
     </figure>
 
     <p>Rachel writes to <a href="mailto:report@refueler.io">report@refueler.io</a>. She includes:</p>
 
     <ul>
-      <li><strong>The link, up to the #.</strong> The part before the # is the transfer ID (UUID). It's enough for us to find the transfer.</li>
+      <li><strong>The link, up to the #.</strong></li>
       <li><strong>A sentence or two on what it is.</strong> "A fake supplier invoice asking us to pay a new account."</li>
       <li><strong>When she saw it.</strong></li>
     </ul>
@@ -99,18 +86,6 @@ readTime: "4 min"
     <p>She doesn't attach the invoice. She could forward the email that carried the link, and that helps, because the email is where most of the evidence sits. We can't see inside the file, so what she tells us is what we work from.</p>
 
     <p>If she had sent the whole link by mistake, with the key part, we would never open it. We'd remove the key part from our copy of her email and work only from the transfer ID.</p>
-
-    <figure class="link-fig" aria-label="The same link with the key part removed">
-      <div class="link-fig-grid">
-        <div class="lf-seg lf-p1">https://share.refueler.io/</div>
-        <div class="lf-seg lf-p2">?uuid=3f2a9c1e-7b40-4d2e-9a61-0c8e5f2b7d14</div>
-        <div class="lf-seg lf-key lf-p3"><span class="lf-hash">#</span><span class="lf-gone">key part removed</span></div>
-
-        <div class="lf-label lf-l1"></div>
-        <div class="lf-label lf-l2"><b>What we work from</b>The transfer ID, nothing else.</div>
-        <div class="lf-label lf-l3"><b>Deleted from our copy</b>We never open it, and we don't keep it.</div>
-      </div>
-    </figure>
 
     <h2>What she hears back</h2>
 
