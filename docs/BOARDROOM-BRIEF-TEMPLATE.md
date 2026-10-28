@@ -23,11 +23,12 @@ Rotate through in order, repeat:
 | 1 | **James Bond** | Q Branch. The gadget works. Nobody is impressed. |
 | 2 | **Lord of the Rings / Lord of the Pings** | The hero's journey. Each block a chapter. The ping must be delivered. |
 | 3 | **Harry Potter** | Hogwarts with a Supabase schema. The Dark Arts are someone else's codebase. |
-| 4 | **The Beatles** | Four lads from Liverpool who changed everything. We are not from Liverpool. |
 | 5 | **Yes Minister** | Sir Humphrey would like to note that "proceeding with caution" is not a strategy. |
 | 6 | **Red Dwarf** — *Holly on the wall* | Three million years from Earth, the vending machine is still down. |
 | 7 | **Thomas Sheridan / Defeating Demons** | The psychopathic institution dressed as infrastructure. Name it. Route around it. |
 | 8 | **James Bond** | The cycle restarts. Same gadget, new villain. |
+
+**The Beatles retired after Week 4 (30 Oct 2026, Rajesh).** Week numbers 5–7 stay as above; from Week 8 the cycle is six lenses: Bond → Lord of the Pings → Harry Potter → Yes Minister → Red Dwarf → Thomas Sheridan.
 
 Add new lenses as culture demands. Rule: the reference must be *British*, *dry*, and must not require explanation to anyone who grew up watching BBC2 after 9pm.
 
@@ -104,7 +105,6 @@ Lens rotation:
 - **Week 1 / James Bond:** Q Branch. The table is a briefing room not a boardroom. The gadget works. Nobody is impressed.
 - **Week 2 / Lord of the Pings:** The fellowship has assembled. Each block is a chapter. Frodo did not have a Supabase free tier to worry about.
 - **Week 3 / Harry Potter:** The castle runs on Cloudflare. The Dark Arts are someone else's codebase. Dumbledore never had to explain RLS to a venue manager.
-- **Week 4 / The Beatles:** Four lads who changed everything by being very good at one specific thing and not trying to be anything else. We are not from Liverpool but the principle stands.
 - **Week 5 / Yes Minister:** Sir Humphrey would like to note that "we are monitoring the situation" is not in fact a response. The Permanent Secretary has concerns about the privacy policy.
 - **Week 6 / Red Dwarf:** Three million years from Earth. Holly is on the wall. The vending machine has been down since the Supabase free tier incident. Rimmer has prepared a presentation.
 - **Week 7 / Thomas Sheridan:** The psychopathic institution dressed as infrastructure. Name the pattern. Route around it. The table has read the book.
