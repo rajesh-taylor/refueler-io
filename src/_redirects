@@ -1,3 +1,7 @@
 /share/upgrade/ /share/plans/ 301
 /upgrade.html /share/plans/ 301
 /upgrade /share/plans/ 301
+# Navy Office moved to its own host behind Cloudflare Access (H6a Admin-Access-1b, 31 Oct 2026).
+# Fixed destination; nothing of the old path is carried over.
+/share/admin https://admin.share.refueler.io/ 301
+/share/admin/* https://admin.share.refueler.io/ 301
