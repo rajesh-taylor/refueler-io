@@ -1,0 +1,168 @@
+---
+title: "Why client files don't belong in an inbox · Refueler Notes"
+description: "An inbox keeps every attachment for years, makes it searchable, copies it to every device you own, and is the first place anyone looks once they're in."
+canonical: "https://refueler.io/notes/client-files-email-inbox/"
+activePage: notes
+permalink: /notes/client-files-email-inbox/index.html
+# Notes list: drives the /notes/ card and /notes/latest.json
+cardTitle: "Why client files don't belong in an inbox"
+summary: "An inbox keeps every attachment for years, makes it searchable, copies it to every device you own, and is the first place anyone looks once they're in."
+topics: ["Privacy", "Practice"]
+date: 2026-11-03
+readTime: "4 min"
+---
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+{% include "head.njk" %}
+<meta property="og:type" content="article" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="preload" href="{{ '/notes/notes.css' | cssv }}" as="style">
+<link rel="preload" href="/notes/notes.js" as="script">
+<link rel="stylesheet" href="{{ '/notes/notes.css' | cssv }}">
+<style>
+  .article-body ul { padding-left: 1.25em; margin-bottom: 1.5em; }
+  .article-body li { margin-bottom: 0.75em; }
+  .article-body ul.split-top { margin-bottom: 0; }
+</style>
+</head>
+<body>
+
+{% include "nav.njk" %}
+
+{#- Notes article 2 (draft: private strategy/docs/notes-drafts/2026-11-04-client-files-email-inbox-draft-2.md).
+    The figure quotes Share's upload card as shipped (refueler-share src/_includes/share-body.njk).
+    "Refueler stores only a hash of it" changes when Password-Opus ships: change the figure with it.
+    Facts checked 3 Nov 2026: Proton support (proton-mail-encryption-explained), Gmail help (answer/7401, bin),
+    Outlook help (how-to-search-in-outlook, attachments searched), Microsoft Defender (compromised account, forwarding
+    rules), Microsoft security-101 BEC (stolen passwords, fake login pages, watching for payments), NCSC (recovering a
+    hacked account, password resets). -#}
+
+<div class="article-wrap">
+
+  <p class="breadcrumb">
+    <a href="/notes/">Notes</a><span class="breadcrumb-sep">/</span>Privacy · Practice
+  </p>
+
+  <header class="article-header">
+    <div class="article-eyebrow">
+      <span>Privacy</span>
+      <span class="eyebrow-dot"></span>
+      <span>Practice</span>
+    </div>
+    <h1 class="article-title">Why client files don't belong in an inbox</h1>
+    <p class="article-standfirst">An inbox keeps every attachment for years, makes it searchable, copies it to every device you own, and is the first place anyone looks once they're in.</p>
+    <div class="article-meta">
+      <span>3 November 2026</span>
+      <span class="meta-dot"></span>
+      <span>4 min read</span>
+    </div>
+  </header>
+
+  <article class="article-body">
+
+    <p>Every April, an accountant asks a client for the same things: bank statements, a P60, the letter from the pension provider, a photo of the passport if it's changed. The client scans and attaches them to one email. The accountant replies "Got them, thanks", saves the files and both of them move on.</p>
+
+    <p>The files don't move on. They stay in two inboxes, the client's sent folder and the accountant's, and in both they last a great deal longer than the job they were sent for.</p>
+
+    <p>This is how email works. Four things about it are worth knowing if you look after other people's documents.</p>
+
+    <h2>An inbox keeps everything</h2>
+
+    <p>Email was built to keep messages, and it is very good at it. Nothing in a normal mailbox expires. The statements sent this April sit next to the ones from last April, and the April before that.</p>
+
+    <p>Deleting doesn't settle it either. A deleted email usually waits in a bin for a while first. The copy in the other person's inbox is theirs to delete, not yours. And many mailboxes are backed up or archived by the provider or the practice's IT, often a good thing, but it means one more copy of a client's passport that nobody is thinking about.</p>
+
+    <p>So the honest answer to "how long do we keep client files that came by email?" is, for most practices: assume indefinitely.</p>
+
+    <h2>An inbox is built to be searched</h2>
+
+    <p>Mail search is excellent. Type "passport" or "bank statement" and the right messages come up in a second, often matched on what's inside the attachment as well as its name.</p>
+
+    <p>It is useful to anyone else who can open the mailbox. Years of client documents, sorted by sender and findable by a single word.</p>
+
+    <h2>An inbox goes everywhere you go</h2>
+
+    <p>The same mailbox is on the office computer, the laptop, the phone, and on any old phone that was never properly wiped. Each one keeps its own copy of recent mail and attachments.</p>
+
+    <p>So a client's file isn't in one place. It's on every device that has ever been signed in to that account, and on every device that has ever been signed in to the client's.</p>
+
+    <h2>And it's the first place anyone looks</h2>
+
+    <p>When someone gets into an email account, through a reused password or a convincing sign-in page, the mailbox is what they came for. It's where password reset emails land, and where they can learn who pays whom. Often the next step is to search it for invoices, statements and identity documents and quietly set up rules that forward new mail somewhere else.</p>
+
+    <p>Practices are an obvious target for this. Their inboxes hold clients' documents. One account opened is many people's paperwork exposed.</p>
+
+    <p>Two-step sign-in, a password manager and an email provider that takes security seriously all make this much less likely. Proton Mail, for example, encrypts the messages and attachments it stores so that it can't read them itself. Once someone is signed in as you, they see what you see.</p>
+
+    <h2>What to do instead</h2>
+
+    <p>The aim isn't to stop using email. It's to stop using it as the place client files live.</p>
+
+    <ul class="split-top">
+      <li><strong>Ask clients to send files a different way.</strong> A link that ends after a set time, or once it's been collected, leaves nothing behind in either inbox. Your practice's client portal, if it has one, does a similar job.</li>
+    </ul>
+
+    <figure class="share-fig">
+      <div class="sf-stage">
+        <dl class="sf-slip">
+          <div class="sf-row">
+            <dt>Password</dt>
+            <dd>
+              <span class="sf-switch"><span class="sf-track" aria-hidden="true"></span>Ask for a password</span>
+              <div class="sf-field" role="img" aria-label="Password field, filled">••••••••••••</div>
+              <small>Send it separately from the link. Refueler stores only a hash of it.</small>
+            </dd>
+          </div>
+          <div class="sf-row">
+            <dt>After download</dt>
+            <dd>
+              <span class="sf-switch"><span class="sf-track" aria-hidden="true"></span>Delete the file</span>
+              <small>The link works once, then the file is deleted.</small>
+            </dd>
+          </div>
+        </dl>
+      </div>
+      <figcaption>Two settings on Share's upload screen: a password, sent separately from the link, and a link that works once.</figcaption>
+    </figure>
+
+    <ul>
+      <li><strong>Keep the working copy where you work on it.</strong> The practice management system you already use, with its own access controls, is the place for the file. Not the email it arrived on.</li>
+      <li><strong>Tidy what's already there.</strong> Search your own mailbox for "passport", "statement" and "P60". What comes back is roughly what someone else would find. Saving those files properly and deleting the emails is an afternoon's work that is worth doing once.</li>
+      <li><strong>Tell clients why.</strong> Most of them have never thought about their sent folder. A sentence in your engagement letter goes a long way.</li>
+    </ul>
+
+    <p>Refueler Share is one way to do the first of these: the file is encrypted in the sender's browser, the link ends when they choose, and nothing lands in anyone's inbox but the link.</p>
+
+    <h2>In short</h2>
+
+    <div class="table-wrap">
+      <table class="data-table data-table-wrap">
+        <thead><tr><th>An inbox</th><th>So a client's file</th></tr></thead>
+        <tbody>
+          <tr><td>Keeps everything, with no end date</td><td>Outlives the job it was sent for, in at least two places</td></tr>
+          <tr><td>Makes it searchable by one word</td><td>Is easy to find for anyone signed in</td></tr>
+          <tr><td>Syncs to every device</td><td>Is on every phone and laptop on both sides</td></tr>
+          <tr><td>Is the first place looked at after a break-in</td><td>Is exposed along with every other client's</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Email is still the right way to say "Got them, thanks". It just isn't the right place to keep what you got.</p>
+
+    <div class="article-cta">
+      <p class="cta-label">Refueler Share</p>
+      <p class="cta-text">Encrypted file transfer. No account required. Free for transfers up to 4 GB.</p>
+      <a class="cta-link" href="/share/">Try it →</a>
+    </div>
+
+  </article>
+
+</div><!-- /article-wrap -->
+
+{% include "footer.njk" %}
+
+<script src="/notes/notes.js"></script>
+<script src="/analytics.js" defer></script>
+</body>
+</html>
