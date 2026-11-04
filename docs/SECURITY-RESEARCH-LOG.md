@@ -413,6 +413,13 @@ The Worker correctly refused webhook events whose signature did not verify, but 
 
 ---
 
+## 2026-11-04 — Share: download token checks, 12 Jul–4 Nov 2026 (fixed 4 Nov)
+
+Password-protected transfers issue a download token after unlock. A faulty comparison in the Worker meant roughly one made-up token signature in 10,000 was accepted, for someone who already knew the transfer ID. Such a token could pass the password check to fetch the encrypted file or delete the transfer. It could not decrypt anything: the key is in the link's fragment and never reaches us. We found this in our own review during the alpha. Only our own test transfers existed at the time. Our error log keeps about a day and shows only our own tests, so it says nothing about the earlier months.
+**Actions:** fixed the comparison and added a regression test. Download tokens now have their own key, separate from the mint key, and the storage token used for uploads now reaches the production bucket only. Rate limits on the delete and confirm routes follow in the next session.
+
+---
+
 ## Supplier watch
 
 Advisories for software we depend on, checked against how we use it. Summaries only; anything that affects us and is still open is kept private until fixed.
