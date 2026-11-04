@@ -30,6 +30,7 @@ module.exports = function (eleventyConfig) {
   // Cloudflare Pages headers and redirects
   eleventyConfig.addPassthroughCopy("src/_headers");
   eleventyConfig.addPassthroughCopy("src/_redirects");
+  eleventyConfig.addPassthroughCopy("src/robots.txt");   // Search-Listing-1
 
   eleventyConfig.addWatchTarget("src/_includes/");
 
@@ -42,6 +43,14 @@ module.exports = function (eleventyConfig) {
     d.toLocaleDateString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" })
   );
   eleventyConfig.addFilter("isoDate", (d) => d.toISOString().slice(0, 10));
+  // Search-Listing-1: an allowlist, so an internal page can't reach the sitemap by being added.
+  // New Notes and editorial pieces appear by themselves.
+  eleventyConfig.addFilter("sitemapPages", (pages) => {
+    const exact = new Set(["/", "/share/", "/share/plans/", "/share/status/", "/notes/", "/editorial/"]);
+    return pages
+      .filter((p) => p.url && (exact.has(p.url) || /^\/(notes|editorial)\/[^/]+\/$/.test(p.url)))
+      .sort((a, b) => a.url.localeCompare(b.url));
+  });
 
   return {
     dir: {

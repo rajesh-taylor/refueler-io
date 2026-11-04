@@ -1,0 +1,7 @@
+# refueler.io. share.refueler.io has its own rules: its pages carry noindex.
+User-agent: *
+# Old Share links, forwarded to share.refueler.io until 12 Jan 2027.
+Disallow: /*?uuid=
+Allow: /
+
+Sitemap: https://refueler.io/sitemap.xml
