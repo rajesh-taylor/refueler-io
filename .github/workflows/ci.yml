@@ -1,0 +1,65 @@
+# H4b refueler.io supply chain · 5 Nov 2026 — what Share got at H4 (Supply-Chain-1).
+# Install with no package's install script, check every package's registry signature,
+# build the site, test the analytics Worker. Builds only: Cloudflare Pages deploys from
+# its own Git connection, the analytics Worker by `npm run deploy` from the Mac.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: Install · Signatures · Audit · Build · Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Node 22
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            refueler-analytics-worker/package-lock.json
+
+      # ── Site (Eleventy) ───────────────────────────────────────────────
+      - name: Install site dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Registry signatures (site)
+        run: npm audit signatures
+
+      # Eleventy is build-only, but it reads our Markdown and front matter: high blocks.
+      - name: Audit site dependencies (blocks on high/critical)
+        run: npm audit --audit-level=high
+
+      - name: Eleventy build
+        run: npm run build
+
+      # ── Analytics Worker ──────────────────────────────────────────────
+      - name: Install analytics Worker dependencies
+        working-directory: refueler-analytics-worker
+        run: npm ci --ignore-scripts
+
+      - name: Registry signatures (analytics Worker)
+        working-directory: refueler-analytics-worker
+        run: npm audit signatures
+
+      # Report only until wrangler 4: every finding today is wrangler 3 dev tooling
+      # (miniflare, undici, sharp, esbuild), none of it in the deployed Worker.
+      - name: Audit analytics Worker dev tools (report only)
+        working-directory: refueler-analytics-worker
+        run: npm audit --audit-level=high || echo "::warning::wrangler 3 dev-tool advisories (report only until wrangler 4)"
+
+      - name: Analytics Worker tests
+        working-directory: refueler-analytics-worker
+        run: npm test

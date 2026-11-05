@@ -1,0 +1,43 @@
+# H4b · 5 Nov 2026 — weekly, grouped update PRs, Tuesday 07:00 (same slot as refueler-share).
+# Read before merge: never merge on green CI alone. Read the changelog and the lock-file diff
+# (new packages, install scripts, maintainers), then fold it into a commit that summarises
+# that diff, or close it with one line. Majors (Eleventy, wrangler) are planned sessions.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: tuesday
+      time: "07:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 3
+    ignore:
+      - dependency-name: "@11ty/eleventy"
+        update-types: ["version-update:semver-major"]
+    groups:
+      site-build:
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directory: /refueler-analytics-worker
+    schedule:
+      interval: weekly
+      day: tuesday
+      time: "07:00"
+      timezone: Europe/London
+    open-pull-requests-limit: 3
+    groups:
+      analytics-dev:
+        patterns: ["*"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: tuesday
+      time: "07:00"
+      timezone: Europe/London
+    groups:
+      actions:
+        patterns: ["*"]

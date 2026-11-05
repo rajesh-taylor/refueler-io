@@ -12,6 +12,22 @@ Buffer is untouchable until a block overruns.
 
 ---
 
+## Dependencies — read before merge (H4b · 5 Nov 2026)
+
+Same rule as refueler-share (H4 Supply-Chain-1). This repo has no CLAUDE.md, so it lives here.
+
+- **Exact pins** in every `package.json` (no `^` or `~`); the lock file decides the rest.
+- **Read before merge.** A Dependabot PR is never merged on green CI alone: read its changelog and the
+  lock-file diff (new packages, install scripts, maintainers), then fold it into a commit that summarises
+  that diff, or close it with one line saying why.
+- **Majors are planned sessions** (Eleventy, wrangler), never a weekly merge.
+- **No install scripts:** `npm ci --ignore-scripts` locally and in CI (`.github/workflows/ci.yml`), plus
+  `npm audit signatures` on both lock files. A package that needs one is a decision to record here.
+- **Served scripts are self-hosted or pinned with SRI.** `supabase-js` lives in `src/assets/vendor/`
+  (fetched from the npm tarball, integrity-checked); a CDN script needs an exact version and `integrity`.
+
+---
+
 ## Block map
 
 | Block | Scope | Status |

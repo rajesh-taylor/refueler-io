@@ -25,3 +25,38 @@
   Cache-Control: public, max-age=300
   X-Content-Type-Options: nosniff
   Access-Control-Allow-Origin: https://share.refueler.io
+
+# H4b (5 Nov 2026): internal pages (noindex). Scripts only from this site; supabase-js is
+# self-hosted in /assets/vendor/. 'unsafe-inline' because these pages carry inline scripts and
+# onclick handlers (moving them to files belongs with H8 Trusted-Types); it still stops any
+# script from another origin. /merchant/ also allows Mapbox GL (pinned v3.3.0 + SRI) and its
+# blob: workers. Only script-src is restricted: fonts, styles and fetches are unchanged.
+/investor/
+  Content-Security-Policy: script-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'
+  Referrer-Policy: no-referrer
+  X-Content-Type-Options: nosniff
+
+/command-centre/
+  Content-Security-Policy: script-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'
+  Referrer-Policy: no-referrer
+  X-Content-Type-Options: nosniff
+
+/dev/
+  Content-Security-Policy: script-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'
+  Referrer-Policy: no-referrer
+  X-Content-Type-Options: nosniff
+
+/franchise/
+  Content-Security-Policy: script-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'
+  Referrer-Policy: no-referrer
+  X-Content-Type-Options: nosniff
+
+/merchant/
+  Content-Security-Policy: script-src 'self' 'unsafe-inline' https://api.mapbox.com; worker-src blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'
+  Referrer-Policy: no-referrer
+  X-Content-Type-Options: nosniff
+
+/share/chambers/
+  Content-Security-Policy: script-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'
+  Referrer-Policy: no-referrer
+  X-Content-Type-Options: nosniff
