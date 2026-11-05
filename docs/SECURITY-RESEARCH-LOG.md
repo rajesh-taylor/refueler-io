@@ -420,6 +420,14 @@ Password-protected transfers issue a download token after unlock. A faulty compa
 
 ---
 
+## 2026-11-05 — Share: tidy-up after the token fix, and five small input checks (fixed 5 Nov)
+
+The old download-token format, the one signed with the mint key, has been removed. Only the operator's own test tabs could still hold one. The delete and confirm routes now have a per-address rate limit.
+
+Fuzz testing against a test copy of the Worker found five small input-handling faults. A few routes failed with an error on a JSON body that wasn't an object. The byte-range parser accepted malformed ranges on older transfers. A rare second spelling of an upload session token was accepted, and only the token's own holder could produce it. Expiry fields stored with the wrong type would make a check throw an error. None exposed a file, a key or another person's data, and no token could be forged. All five are fixed, and the tests that found them now run on every push.
+
+---
+
 ## Supplier watch
 
 Advisories for software we depend on, checked against how we use it. Summaries only; anything that affects us and is still open is kept private until fixed.
