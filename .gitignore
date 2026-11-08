@@ -13,6 +13,9 @@ timer/build/
 .env.local
 .env.production
 *.env
+*.key
+# Can hold any command approved with "don't ask again", secrets included.
+.claude/settings.local.json
 
 # Supabase local dev
 supabase/.branches/

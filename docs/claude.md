@@ -97,7 +97,7 @@ Do not deviate. No new palette colours without a formal session decision.
 
 **4l. Over-documentation rule:** Deliver only requested artifacts. Do not produce unrequested reference documents alongside code deliverables.
 
-**4m. Curl rule:** Always single-line, real key inlined — no backslash continuations ever.
+**4m. Curl rule:** Always single-line, no backslash continuations ever. Never a real key in the command: hidden `read -s "KEY?…"` prompt first, then `$KEY`.
 
 **4n. `verify_jwt` rule:** Must be passed explicitly as `false` on every edge function deploy for external-facing endpoints.
 
