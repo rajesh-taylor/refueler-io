@@ -428,6 +428,19 @@ Fuzz testing against a test copy of the Worker found five small input-handling f
 
 ---
 
+## 2026-11-08 — Chainalysis credentials exposure · Claude Code settings file · WebAuthn PRF support
+
+**Sources:** Chainalysis security notice (updated 7 Nov 2026), BleepingComputer, SecurityWeek; reporting on Apiiro's research of 5 Nov (the original post could not be fetched); Corbado's PRF measurements (updated 29 Sep 2026), WebKit bugs 311099 and 314934; 1Password support pages. From BOARDROOM-BRIEF-2026-11-09.md.
+
+**Findings:**
+- **Chainalysis.** A 30 Oct notice found no evidence that credentials or tokens were reached. By 4 Nov the company reported names, usernames, password hashes and live tokens for all users exposed, and a subset of passwords exposed by an on-path attack. Whether the tokens were revoked has not been stated. Lesson for us: store sign-in secrets only as hashes of high-entropy values, keep tokens out of URLs that servers record, and don't say "no evidence" before the checking is done.
+- **Claude Code `.claude/settings.local.json`.** Choosing "don't ask again" saves the full command, including any secret typed into it. Reported: 1,122 public copies held at least one secret, 1,379 distinct secrets. Checked 7–8 Nov: not tracked or in history in our repositories, no literal secrets found by pattern scan. Working rule: never a key in a command, always a hidden prompt.
+- **WebAuthn PRF.** Solid on Apple platform passkeys and Google Password Manager; patchy or absent on several password managers; open WebKit issues with security keys. Treated as an enhancement, never the only holder of a key.
+
+**Actions:** carried into the private session plan. Informed by BOARDROOM-BRIEF-2026-11-09.md.
+
+---
+
 ## Supplier watch
 
 Advisories for software we depend on, checked against how we use it. Summaries only; anything that affects us and is still open is kept private until fixed.
