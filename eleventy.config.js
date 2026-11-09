@@ -46,7 +46,7 @@ module.exports = function (eleventyConfig) {
   // Search-Listing-1: an allowlist, so an internal page can't reach the sitemap by being added.
   // New Notes and editorial pieces appear by themselves.
   eleventyConfig.addFilter("sitemapPages", (pages) => {
-    const exact = new Set(["/", "/share/", "/share/plans/", "/share/status/", "/notes/", "/editorial/"]);
+    const exact = new Set(["/", "/share/", "/share/plans/", "/share/status/", "/notes/", "/editorial/", "/privacy/", "/support/"]);
     return pages
       .filter((p) => p.url && (exact.has(p.url) || /^\/(notes|editorial)\/[^/]+\/$/.test(p.url)))
       .sort((a, b) => a.url.localeCompare(b.url));

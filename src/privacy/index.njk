@@ -9,7 +9,6 @@ permalink: /privacy/index.html
 <html lang="en">
 <head>
   {% include "head.njk" %}
-  <meta name="robots" content="noindex" />
   <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ '/assets/css/privacy.css' | cssv }}" />
 </head>
@@ -21,7 +20,7 @@ permalink: /privacy/index.html
   <div class="hero">
     <h1>Privacy Policy</h1>
     <p class="hero-sub">Refueler keeps the least it can to run its services. This page covers Refueler Share and the refueler.io website.</p>
-    <p class="hero-updated">Last updated <time datetime="2026-10-27">27 Oct 2026</time></p>
+    <p class="hero-updated">Last updated <time datetime="2026-11-09">9 Nov 2026</time></p>
   </div>
 
   <!-- ─── Anchor Navigation ─────────────────────── -->
@@ -125,6 +124,12 @@ permalink: /privacy/index.html
               <td>At least a month. We can't check the records of a link page load, so assume indefinitely</td>
             </tr>
             <tr>
+              <td>A scrambled stand-in for your IP address, made with a secret key, and the times of your recent requests. For password attempts, the same for the transfer ID. For sign-in emails, the same for your account</td>
+              <td>Slow down floods of requests</td>
+              <td>Cloudflare</td>
+              <td>About a minute for most requests. Up to 15 minutes around sign-in and payment. An hour for sign-in emails</td>
+            </tr>
+            <tr>
               <td>If you report a link: a case record with the first 8 characters of the transfer ID (UUID) part, what was reported and what we did. No email address, name or IP address</td>
               <td>Act on the report and keep the record the Online Safety Act asks for</td>
               <td>Supabase (EU, Ireland)</td>
@@ -155,9 +160,9 @@ permalink: /privacy/index.html
         <p>Two of these periods are set by Cloudflare and can't be shortened: the error counts and the sample of requests.</p>
         <p><strong>Others who play a part:</strong></p>
         <ul>
-          <li><strong>Cloudflare</strong> runs the servers, so it sees your IP address as any host does, and keeps the sample of requests listed above. A VPN hides your IP address from Cloudflare and from us. Before an upload it runs a short check that you are a person, which reads signals from your browser inside Cloudflare's own frame. It also sends Citizens' sign-in emails; each link works once, for 15 minutes.</li>
+          <li><strong>Cloudflare</strong> runs the servers, so it sees your IP address as any host does, and keeps the sample of requests listed above. A VPN hides your IP address from Cloudflare and from us. Before an upload, and before a sign-in email is sent, it runs a short check that you are a person, which reads signals from your browser inside Cloudflare's own frame. It also sends Citizens' sign-in emails; each link works once, for 15 minutes.</li>
           <li><strong>Stripe</strong> takes card payments for paying Citizens only. We never see your card.</li>
-          <li><strong>OpenTimestamps</strong> calendar servers receive a one-way fingerprint only if you choose a permanent record (paid plans). It reveals nothing about your file. They see your IP address as any server does.</li>
+          <li><strong>OpenTimestamps</strong> calendar servers receive a one-way fingerprint only if you choose a permanent record (not offered yet). It reveals nothing about your file. They see your IP address as any server does.</li>
         </ul>
         <p>Share itself runs no analytics, advertising or tracking script. Its visit numbers come only from Cloudflare's own traffic totals as our host. Share's front page and Plans, which live on refueler.io, count visits with this site's own counter (see <em>This website</em>).</p>
         <p>The reason for each item, and its limit: <a href="/notes/what-share-keeps/">What Share keeps, and why</a>.</p>

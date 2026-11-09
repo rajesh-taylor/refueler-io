@@ -82,7 +82,7 @@ readTime: "4 min"
           <tr>
             <td><strong>Share app</strong><span class="where-host">share.refueler.io</span></td>
             <td data-label="Cookies">None until you sign in. Then <code>__Host-rfs_session</code>, listed under api.share.refueler.io. Now and then Cloudflare's <code>__cf_bm</code> or <code>cf_clearance</code>.</td>
-            <td data-label="Other storage and requests">Local storage: <code>rs-theme</code>, once you pick Paper or Carbon. IndexedDB: <code>refueler-share-resume</code>, for carrying on an interrupted upload. Session storage: which notices you've seen. Third parties: Cloudflare's check (challenges.cloudflare.com) before an upload; OpenTimestamps only if you ask for a permanent record.</td>
+            <td data-label="Other storage and requests">Local storage: <code>rs-theme</code>, once you pick Paper or Carbon. IndexedDB: <code>refueler-share-resume</code>, for carrying on an interrupted upload. Session storage: which notices you've seen. Third parties: Cloudflare's check, before an upload or a sign-in email: our gate page (gate.share.refueler.io) shows it in Cloudflare's own frame (challenges.cloudflare.com). OpenTimestamps only if you ask for a permanent record, which isn't offered yet. Requests: api.share.refueler.io for every transfer; Cloudflare's storage address (…r2.cloudflarestorage.com) while you send; refueler.io for the latest note on the receiver card.</td>
           </tr>
           <tr>
             <td><strong>refueler.io pages</strong><span class="where-host">this site</span></td>
@@ -165,15 +165,15 @@ readTime: "4 min"
 
     <p>Cloudflare runs the servers, so it sees your IP address. It also keeps a sample of requests for my account for at least a month: the IP address, the time and the web address asked for. Since 21 Oct 2026, Share's own requests carry no transfer ID. Opening a link page still sends the transfer ID (UUID) part, never the key part after the #, and that page load may be in the sample. I can't check those records, so assume Cloudflare keeps them indefinitely. I can't turn this off. A VPN hides your IP address from both of us.</p>
 
-    <p>Before an upload, Cloudflare runs a short check that you're a real person. It reads signals from your browser inside Cloudflare's own frame and Share receives only the result. The check is there so automated bot traffic can't fill storage.</p>
+    <p>Before an upload, and before a sign-in email is sent, Cloudflare runs a short check that you're a real person. It reads signals from your browser inside Cloudflare's own frame and Share receives only the result. The check is there so automated bot traffic can't fill storage.</p>
 
     <p>The limit: those signals go to Cloudflare, under its policy. Now and then it also sets a short-lived cookie of its own, <code>__cf_bm</code> or <code>cf_clearance</code>.</p>
 
-    <h2>A permanent record, if you choose one</h2>
+    <h2>A permanent record, not offered yet</h2>
 
-    <p>On paid plans you can ask for a permanent record of a file: evidence, anchored in Bitcoin through OpenTimestamps, that the file existed by a certain time. Your browser sends a one-way fingerprint of the file straight to OpenTimestamps' calendar servers, not through Share. The fingerprint reveals nothing of what the file says. The calendar servers see your IP address.</p>
+    <p>A permanent record isn't offered yet. When it is, you'll be able to ask for evidence, anchored in Bitcoin through OpenTimestamps, that a file existed by a certain time. Your browser will send a one-way fingerprint of the file straight to OpenTimestamps' calendar servers, not through Share. The fingerprint reveals nothing of what the file says. The calendar servers will see your IP address.</p>
 
-    <p>The limit: anyone who already holds the same file can work out the same fingerprint and see that it matches. The record shows when a file existed, not who made it.</p>
+    <p>The limit: anyone who already holds the same file will be able to work out the same fingerprint and see that it matches. The record will show when a file existed, not who made it.</p>
 
     <h2>What Share doesn't run</h2>
 
